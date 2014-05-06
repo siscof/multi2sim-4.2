@@ -3,13 +3,13 @@ simd-unit.o: simd-unit.c ../../../../src/arch/fermi/emu/thread-block.h \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h ../../../../src/lib/esim/trace.h \
- ../../../../src/lib/util/list.h ../../../../src/arch/fermi/emu/warp.h \
+ ../../../../src/lib/esim/trace.h ../../../../src/lib/util/list.h \
+ ../../../../src/arch/fermi/emu/warp.h \
  ../../../../src/arch/fermi/asm/asm.h \
  ../../../../src/arch/fermi/asm/asm.dat sm.h branch-unit.h lds-unit.h \
  vector-mem-unit.h gpu.h ../../../../src/arch/common/timing.h \
@@ -33,7 +33,7 @@ simd-unit.o: simd-unit.c ../../../../src/arch/fermi/emu/thread-block.h \
 
 /usr/include/gnu/stubs-64.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -45,13 +45,11 @@ simd-unit.o: simd-unit.c ../../../../src/arch/fermi/emu/thread-block.h \
 
 /usr/include/wchar.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
-
-/usr/include/bits/stdio.h:
 
 ../../../../src/lib/esim/trace.h:
 

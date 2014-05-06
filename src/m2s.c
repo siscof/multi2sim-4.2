@@ -618,6 +618,10 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			fran_file_latencia = xmalloc(1000);
 			memcpy(fran_file_latencia,a,strlen(a)+1);
 			
+			fran_file_red = xmalloc(1000);
+			strcpy(fran_file_red,argv[argi]);
+			strcat(fran_file_red, "_red-l1-l2-latencia");
+			
 			strcpy(a,argv[argi]);
 			strcat(a, "_general");
 			fran_file_general = xmalloc(1000);
@@ -2021,8 +2025,10 @@ int main(int argc, char **argv)
 	//fran
 	fran_latencia = debug_new_category(fran_file_latencia);
 	fran_general = debug_new_category(fran_file_general);
-        fran_t1000k = debug_new_category(fran_file_t1000k);
-        fran_hitRatio = debug_new_category(fran_file_hitRatio);
+    fran_t1000k = debug_new_category(fran_file_t1000k);
+    fran_hitRatio = debug_new_category(fran_file_hitRatio);
+	fran_red = debug_new_category(fran_file_red);
+	
 	evg_opencl_debug_category = debug_new_category(evg_opencl_debug_file_name);
 	evg_isa_debug_category = debug_new_category(evg_isa_debug_file_name);
 	evg_stack_debug_category = debug_new_category(evg_stack_debug_file_name);  /* GPU-REL */

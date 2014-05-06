@@ -4,29 +4,30 @@ machine.o: machine.c /usr/include/math.h /usr/include/features.h \
  /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
  /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
  /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
- /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
- ../../../../src/lib/util/debug.h /usr/include/stdio.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/include/bits/mathcalls.h ../../../../src/lib/util/debug.h \
+ /usr/include/stdio.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h /usr/include/stdlib.h /usr/include/sys/types.h \
- /usr/include/time.h /usr/include/endian.h /usr/include/bits/endian.h \
- /usr/include/bits/byteswap.h /usr/include/sys/select.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/types.h /usr/include/time.h /usr/include/sys/select.h \
  /usr/include/bits/select.h /usr/include/bits/sigset.h \
  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
  /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
  ../../../../src/mem-system/memory.h ../../../../src/lib/util/misc.h \
  context.h ../../../../src/arch/mips/asm/asm.h /usr/include/ctype.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h \
+ /usr/include/xlocale.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h /usr/include/string.h \
- /usr/include/bits/string.h /usr/include/bits/string2.h \
  ../../../../src/arch/mips/asm/asm.dat ../../../../src/lib/util/config.h \
  emu.h /usr/include/pthread.h /usr/include/sched.h \
- /usr/include/bits/sched.h /usr/include/signal.h \
- /usr/include/bits/setjmp.h ../../../../src/arch/common/emu.h \
- ../../../../src/lib/util/class.h /usr/include/assert.h isa.h machine.h \
+ /usr/include/bits/sched.h /usr/include/bits/setjmp.h \
+ ../../../../src/arch/common/emu.h ../../../../src/lib/util/class.h \
+ /usr/include/assert.h isa.h machine.h \
  ../../../../src/arch/mips/asm/asm.dat syscall.h regs.h
 
 /usr/include/math.h:
@@ -55,13 +56,11 @@ machine.o: machine.c /usr/include/math.h /usr/include/features.h \
 
 /usr/include/bits/mathcalls.h:
 
-/usr/include/bits/mathinline.h:
-
 ../../../../src/lib/util/debug.h:
 
 /usr/include/stdio.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -73,25 +72,27 @@ machine.o: machine.c /usr/include/math.h /usr/include/features.h \
 
 /usr/include/wchar.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
 
-/usr/include/bits/stdio.h:
-
 /usr/include/stdlib.h:
 
-/usr/include/sys/types.h:
+/usr/include/bits/waitflags.h:
 
-/usr/include/time.h:
+/usr/include/bits/waitstatus.h:
 
 /usr/include/endian.h:
 
 /usr/include/bits/endian.h:
 
 /usr/include/bits/byteswap.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/time.h:
 
 /usr/include/sys/select.h:
 
@@ -117,17 +118,15 @@ context.h:
 
 /usr/include/ctype.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h:
+/usr/include/xlocale.h:
+
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
 
 /usr/include/stdint.h:
 
 /usr/include/bits/wchar.h:
 
 /usr/include/string.h:
-
-/usr/include/bits/string.h:
-
-/usr/include/bits/string2.h:
 
 ../../../../src/arch/mips/asm/asm.dat:
 
@@ -140,8 +139,6 @@ emu.h:
 /usr/include/sched.h:
 
 /usr/include/bits/sched.h:
-
-/usr/include/signal.h:
 
 /usr/include/bits/setjmp.h:
 

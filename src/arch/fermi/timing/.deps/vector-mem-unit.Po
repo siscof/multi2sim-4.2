@@ -4,21 +4,22 @@ vector-mem-unit.o: vector-mem-unit.c \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h ../../../../src/arch/fermi/asm/asm.dat \
- ../../../../src/lib/util/string.h ../../../../src/lib/esim/trace.h \
- ../../../../src/lib/util/debug.h /usr/include/stdlib.h \
- /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h \
+ ../../../../src/arch/fermi/asm/asm.dat ../../../../src/lib/util/string.h \
+ ../../../../src/lib/esim/trace.h ../../../../src/lib/util/debug.h \
+ /usr/include/stdlib.h /usr/include/bits/waitflags.h \
+ /usr/include/bits/waitstatus.h /usr/include/endian.h \
  /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
- /usr/include/sys/select.h /usr/include/bits/select.h \
- /usr/include/bits/sigset.h /usr/include/bits/time.h \
- /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
- /usr/include/alloca.h ../../../../src/lib/util/list.h sm.h branch-unit.h \
- lds-unit.h vector-mem-unit.h gpu.h ../../../../src/arch/common/timing.h \
+ /usr/include/sys/types.h /usr/include/time.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/sigset.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
+ ../../../../src/lib/util/list.h sm.h branch-unit.h lds-unit.h \
+ vector-mem-unit.h gpu.h ../../../../src/arch/common/timing.h \
  ../../../../src/lib/util/class.h /usr/include/assert.h \
  cycle-interval-report.h uop.h ../../../../src/arch/fermi/emu/thread.h \
  ../../../../src/mem-system/module.h warp-inst-queue.h
@@ -39,7 +40,7 @@ vector-mem-unit.o: vector-mem-unit.c \
 
 /usr/include/gnu/stubs-64.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -51,13 +52,11 @@ vector-mem-unit.o: vector-mem-unit.c \
 
 /usr/include/wchar.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
-
-/usr/include/bits/stdio.h:
 
 ../../../../src/arch/fermi/asm/asm.dat:
 
@@ -69,15 +68,19 @@ vector-mem-unit.o: vector-mem-unit.c \
 
 /usr/include/stdlib.h:
 
-/usr/include/sys/types.h:
+/usr/include/bits/waitflags.h:
 
-/usr/include/time.h:
+/usr/include/bits/waitstatus.h:
 
 /usr/include/endian.h:
 
 /usr/include/bits/endian.h:
 
 /usr/include/bits/byteswap.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/time.h:
 
 /usr/include/sys/select.h:
 

@@ -3,16 +3,15 @@ decode.o: decode.c ../../../../src/lib/esim/trace.h \
  /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
- /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h core.h ../../../../src/arch/x86/emu/uinst.h \
- ../../../../src/lib/util/class.h /usr/include/assert.h \
- ../../../../src/mem-system/prefetch-history.h cpu.h \
- ../../../../src/arch/common/timing.h decode.h fetch-queue.h thread.h \
- uop.h uop-queue.h
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h core.h \
+ ../../../../src/arch/x86/emu/uinst.h ../../../../src/lib/util/class.h \
+ /usr/include/assert.h ../../../../src/mem-system/prefetch-history.h \
+ cpu.h ../../../../src/arch/common/timing.h decode.h fetch-queue.h \
+ thread.h uop.h uop-queue.h
 
 ../../../../src/lib/esim/trace.h:
 
@@ -32,7 +31,7 @@ decode.o: decode.c ../../../../src/lib/esim/trace.h \
 
 /usr/include/gnu/stubs-64.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -44,13 +43,11 @@ decode.o: decode.c ../../../../src/lib/esim/trace.h \
 
 /usr/include/wchar.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
-
-/usr/include/bits/stdio.h:
 
 core.h:
 

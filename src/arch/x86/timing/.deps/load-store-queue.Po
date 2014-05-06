@@ -4,14 +4,13 @@ load-store-queue.o: load-store-queue.c \
  /usr/include/assert.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h /usr/include/stdio.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h ../../../../src/mem-system/prefetch-history.h \
- cpu.h ../../../../src/arch/common/timing.h load-store-queue.h uop.h \
- thread.h
+ ../../../../src/mem-system/prefetch-history.h cpu.h \
+ ../../../../src/arch/common/timing.h load-store-queue.h uop.h thread.h
 
 ../../../../src/lib/util/linked-list.h:
 
@@ -35,7 +34,7 @@ core.h:
 
 /usr/include/stdio.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -47,13 +46,11 @@ core.h:
 
 /usr/include/wchar.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
-
-/usr/include/bits/stdio.h:
 
 ../../../../src/mem-system/prefetch-history.h:
 

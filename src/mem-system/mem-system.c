@@ -556,6 +556,8 @@ void ini_estadisticas(){
 		estadis[i].media_latencia = 0;
 		estadis[i].media_latencia = 0; 
 		estadis[i].tiempo_acceso_latencia = 0;
+		estadis[i].latencia_red_acc = 0;
+		estadis[i].latencia_red_cont = 0;
 	}	
 }
 
@@ -633,7 +635,9 @@ fran_debug_general("%lld ",estadis[2].hits);
 fran_debug_general("%lld ",estadis[2].accesses);
 fran_debug_general("%.3f ",hitratio2);
 fran_debug_general("%lld ",estadis[2].busy_cicles_in);
-fran_debug_general("%lld\n",estadis[2].busy_cicles_out); 
+fran_debug_general("%lld ",estadis[2].busy_cicles_out); 
+fran_debug_general("%lld ",estadis[1].latencia_red_cont ? estadis[1].latencia_red_acc/estadis[1].latencia_red_cont : 0);
+fran_debug_general("%lld\n",estadis[2].latencia_red_cont ? estadis[2].latencia_red_acc/estadis[2].latencia_red_cont : 0);
 
 
 estadis[2].coalesce = 0;
@@ -651,4 +655,8 @@ estadis[2].hits = 0;
 estadis[2].busy_cicles_in = 0;
 estadis[2].busy_cicles_out = 0;
 estadis[1].invalidations = 0;
+estadis[1].latencia_red_acc = 0;
+estadis[1].latencia_red_cont = 0;
+estadis[2].latencia_red_acc = 0;
+estadis[2].latencia_red_cont = 0;
 }

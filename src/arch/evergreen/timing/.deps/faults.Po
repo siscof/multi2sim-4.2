@@ -2,18 +2,17 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
  /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/bits/stdio.h ../../../../src/arch/common/emu.h \
- ../../../../src/lib/util/class.h /usr/include/assert.h \
- ../../../../src/arch/evergreen/emu/ndrange.h \
+ ../../../../src/arch/common/emu.h ../../../../src/lib/util/class.h \
+ /usr/include/assert.h ../../../../src/arch/evergreen/emu/ndrange.h \
  ../../../../src/arch/evergreen/emu/wavefront.h \
  ../../../../src/arch/evergreen/asm/asm.h \
  ../../../../src/lib/util/elf-format.h /usr/include/elf.h \
- /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h \
  ../../../../src/arch/evergreen/asm/asm.dat \
  ../../../../src/arch/evergreen/emu/work-group.h \
@@ -21,15 +20,15 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
  ../../../../src/driver/opencl-old/evergreen/kernel.h \
  ../../../../src/lib/util/string.h ../../../../src/lib/esim/esim.h \
  ../../../../src/lib/mhandle/mhandle.h /usr/include/stdlib.h \
- /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h \
- /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
- /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/sys/types.h \
+ /usr/include/time.h /usr/include/sys/select.h /usr/include/bits/select.h \
  /usr/include/bits/sigset.h /usr/include/bits/time.h \
  /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
- /usr/include/alloca.h /usr/include/string.h /usr/include/bits/string.h \
- /usr/include/bits/string2.h ../../../../src/lib/util/bit-map.h \
- ../../../../src/lib/util/debug.h ../../../../src/lib/util/heap.h \
- ../../../../src/lib/util/linked-list.h \
+ /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
+ ../../../../src/lib/util/bit-map.h ../../../../src/lib/util/debug.h \
+ ../../../../src/lib/util/heap.h ../../../../src/lib/util/linked-list.h \
  ../../../../src/mem-system/memory.h compute-unit.h uop.h \
  ../../../../src/arch/evergreen/emu/work-item.h \
  ../../../../src/mem-system/module.h faults.h gpu.h \
@@ -49,7 +48,7 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
 
 /usr/include/gnu/stubs-64.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -61,13 +60,11 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
 
 /usr/include/wchar.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
-
-/usr/include/bits/stdio.h:
 
 ../../../../src/arch/common/emu.h:
 
@@ -85,7 +82,7 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
 
 /usr/include/elf.h:
 
-/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -107,15 +104,19 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
 
 /usr/include/stdlib.h:
 
-/usr/include/sys/types.h:
+/usr/include/bits/waitflags.h:
 
-/usr/include/time.h:
+/usr/include/bits/waitstatus.h:
 
 /usr/include/endian.h:
 
 /usr/include/bits/endian.h:
 
 /usr/include/bits/byteswap.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/time.h:
 
 /usr/include/sys/select.h:
 
@@ -133,9 +134,7 @@ faults.o: faults.c ../../../../src/arch/evergreen/emu/emu.h \
 
 /usr/include/string.h:
 
-/usr/include/bits/string.h:
-
-/usr/include/bits/string2.h:
+/usr/include/xlocale.h:
 
 ../../../../src/lib/util/bit-map.h:
 

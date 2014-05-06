@@ -313,13 +313,13 @@ void net_event_handler(int event, void *data)
 			/* Stats */
 			link->busy_cycles += lat;
 			int level = 0;
-                        if(strstr(link->name,"l2_"))
-                        {
+            if(strstr(link->name,"l2_"))
+            {
 				if(strstr(link->net->name,"net-l1-to-l2"))
 				{	
 					level = 1;
 				}
-				else if(strstr(link->net->name,"net-l2-to-mm"))
+				else if(strstr(link->net->name,"to-mm"))
 				{
 					level = 2;
 				}
@@ -612,6 +612,17 @@ void net_event_handler(int event, void *data)
 		net->transfers++;
 		net->lat_acc += cycle - msg->send_cycle;
 		net->msg_size_acc += msg->size;
+		
+		if(strstr(net->name,"net-l1-to-l2"))
+				{	
+					estadis[1].latencia_red_acc += cycle - msg->send_cycle;
+					estadis[1].latencia_red_cont++;
+				}
+				else if(strstr(net->name,"-to-mm"))
+				{
+					estadis[2].latencia_red_acc += cycle - msg->send_cycle;
+					estadis[2].latencia_red_cont++;
+				}
 
 		/* If not return event was specified, free message here */
 		if (stack->ret_event == ESIM_EV_NONE)
