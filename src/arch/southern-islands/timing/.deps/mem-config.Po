@@ -1,0 +1,115 @@
+mem-config.o: mem-config.c ../../../../src/arch/common/arch.h \
+ /usr/include/stdio.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h ../../../../src/lib/util/class.h \
+ /usr/include/assert.h ../../../../src/lib/util/config.h \
+ ../../../../src/lib/util/debug.h /usr/include/stdlib.h \
+ /usr/include/sys/types.h /usr/include/time.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
+ /usr/include/bits/sigset.h /usr/include/bits/time.h \
+ /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/alloca.h ../../../../src/lib/util/linked-list.h \
+ ../../../../src/lib/util/string.h \
+ ../../../../src/mem-system/mem-system.h \
+ ../../../../src/mem-system/module.h mem-config.h gpu.h \
+ ../../../../src/arch/common/timing.h compute-unit.h branch-unit.h \
+ lds-unit.h scalar-unit.h vector-mem-unit.h
+
+../../../../src/arch/common/arch.h:
+
+/usr/include/stdio.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+../../../../src/lib/util/class.h:
+
+/usr/include/assert.h:
+
+../../../../src/lib/util/config.h:
+
+../../../../src/lib/util/debug.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/time.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/alloca.h:
+
+../../../../src/lib/util/linked-list.h:
+
+../../../../src/lib/util/string.h:
+
+../../../../src/mem-system/mem-system.h:
+
+../../../../src/mem-system/module.h:
+
+mem-config.h:
+
+gpu.h:
+
+../../../../src/arch/common/timing.h:
+
+compute-unit.h:
+
+branch-unit.h:
+
+lds-unit.h:
+
+scalar-unit.h:
+
+vector-mem-unit.h:

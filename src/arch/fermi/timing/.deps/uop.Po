@@ -1,0 +1,70 @@
+uop.o: uop.c ../../../../src/arch/fermi/emu/emu.h /usr/include/stdio.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/include/bits/types.h /usr/include/bits/typesizes.h \
+ /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h ../../../../src/arch/common/emu.h \
+ ../../../../src/lib/util/class.h /usr/include/assert.h \
+ ../../../../src/lib/util/list.h ../../../../src/lib/util/repos.h uop.h \
+ ../../../../src/arch/fermi/emu/thread.h \
+ ../../../../src/arch/fermi/asm/asm.h \
+ ../../../../src/arch/fermi/asm/asm.dat \
+ ../../../../src/mem-system/module.h
+
+../../../../src/arch/fermi/emu/emu.h:
+
+/usr/include/stdio.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+../../../../src/arch/common/emu.h:
+
+../../../../src/lib/util/class.h:
+
+/usr/include/assert.h:
+
+../../../../src/lib/util/list.h:
+
+../../../../src/lib/util/repos.h:
+
+uop.h:
+
+../../../../src/arch/fermi/emu/thread.h:
+
+../../../../src/arch/fermi/asm/asm.h:
+
+../../../../src/arch/fermi/asm/asm.dat:
+
+../../../../src/mem-system/module.h:

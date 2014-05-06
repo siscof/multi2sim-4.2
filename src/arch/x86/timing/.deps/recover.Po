@@ -1,0 +1,133 @@
+recover.o: recover.c ../../../../src/arch/x86/emu/context.h \
+ /usr/include/pthread.h /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sched.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/include/time.h /usr/include/bits/sched.h /usr/include/bits/time.h \
+ /usr/include/signal.h /usr/include/bits/sigset.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/bits/setjmp.h \
+ ../../../../src/arch/x86/asm/asm.h ../../../../src/arch/common/asm.h \
+ /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/wchar.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
+ /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
+ /usr/include/bits/stdio.h ../../../../src/lib/util/class.h \
+ /usr/include/assert.h ../../../../src/arch/x86/asm/inst.h \
+ ../../../../src/arch/x86/asm/asm.dat ../../../../src/arch/x86/emu/regs.h \
+ ../../../../src/lib/esim/trace.h ../../../../src/lib/util/misc.h core.h \
+ ../../../../src/arch/x86/emu/uinst.h \
+ ../../../../src/mem-system/prefetch-history.h cpu.h \
+ ../../../../src/arch/common/timing.h event-queue.h fetch-queue.h \
+ inst-queue.h uop.h load-store-queue.h recover.h reg-file.h rob.h \
+ thread.h trace-cache.h uop-queue.h
+
+../../../../src/arch/x86/emu/context.h:
+
+/usr/include/pthread.h:
+
+/usr/include/features.h:
+
+/usr/include/sys/cdefs.h:
+
+/usr/include/bits/wordsize.h:
+
+/usr/include/gnu/stubs.h:
+
+/usr/include/gnu/stubs-64.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/sched.h:
+
+/usr/include/bits/types.h:
+
+/usr/include/bits/typesizes.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
+
+/usr/include/time.h:
+
+/usr/include/bits/sched.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/signal.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/bits/setjmp.h:
+
+../../../../src/arch/x86/asm/asm.h:
+
+../../../../src/arch/common/asm.h:
+
+/usr/include/stdio.h:
+
+/usr/include/libio.h:
+
+/usr/include/_G_config.h:
+
+/usr/include/wchar.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
+
+/usr/include/bits/stdio_lim.h:
+
+/usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
+
+../../../../src/lib/util/class.h:
+
+/usr/include/assert.h:
+
+../../../../src/arch/x86/asm/inst.h:
+
+../../../../src/arch/x86/asm/asm.dat:
+
+../../../../src/arch/x86/emu/regs.h:
+
+../../../../src/lib/esim/trace.h:
+
+../../../../src/lib/util/misc.h:
+
+core.h:
+
+../../../../src/arch/x86/emu/uinst.h:
+
+../../../../src/mem-system/prefetch-history.h:
+
+cpu.h:
+
+../../../../src/arch/common/timing.h:
+
+event-queue.h:
+
+fetch-queue.h:
+
+inst-queue.h:
+
+uop.h:
+
+load-store-queue.h:
+
+recover.h:
+
+reg-file.h:
+
+rob.h:
+
+thread.h:
+
+trace-cache.h:
+
+uop-queue.h:
