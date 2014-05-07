@@ -3,23 +3,22 @@ instruction-interval-report.o: instruction-interval-report.c \
  /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- ../../../../src/arch/evergreen/emu/wavefront.h \
+ /usr/include/bits/stdio.h ../../../../src/arch/evergreen/emu/wavefront.h \
  ../../../../src/arch/evergreen/asm/asm.h \
  ../../../../src/lib/util/elf-format.h /usr/include/elf.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h \
  ../../../../src/arch/evergreen/asm/asm.dat \
  ../../../../src/arch/evergreen/emu/work-group.h \
  ../../../../src/lib/util/config.h ../../../../src/lib/util/debug.h \
- /usr/include/stdlib.h /usr/include/bits/waitflags.h \
- /usr/include/bits/waitstatus.h /usr/include/endian.h \
- /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
- /usr/include/sys/types.h /usr/include/time.h /usr/include/sys/select.h \
+ /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/sys/select.h \
  /usr/include/bits/select.h /usr/include/bits/sigset.h \
  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
  /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
@@ -43,7 +42,7 @@ instruction-interval-report.o: instruction-interval-report.c \
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
 
 /usr/include/bits/types.h:
 
@@ -55,11 +54,13 @@ instruction-interval-report.o: instruction-interval-report.c \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
 
 ../../../../src/arch/evergreen/emu/wavefront.h:
 
@@ -69,7 +70,7 @@ instruction-interval-report.o: instruction-interval-report.c \
 
 /usr/include/elf.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -85,19 +86,15 @@ instruction-interval-report.o: instruction-interval-report.c \
 
 /usr/include/stdlib.h:
 
-/usr/include/bits/waitflags.h:
+/usr/include/sys/types.h:
 
-/usr/include/bits/waitstatus.h:
+/usr/include/time.h:
 
 /usr/include/endian.h:
 
 /usr/include/bits/endian.h:
 
 /usr/include/bits/byteswap.h:
-
-/usr/include/sys/types.h:
-
-/usr/include/time.h:
 
 /usr/include/sys/select.h:
 

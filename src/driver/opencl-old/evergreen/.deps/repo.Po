@@ -2,24 +2,24 @@ repo.o: repo.c ../../../../src/lib/mhandle/mhandle.h \
  /usr/include/stdlib.h /usr/include/features.h /usr/include/sys/cdefs.h \
  /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
  /usr/include/gnu/stubs-64.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
- /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
- /usr/include/endian.h /usr/include/bits/endian.h \
- /usr/include/bits/byteswap.h /usr/include/sys/types.h \
- /usr/include/bits/types.h /usr/include/bits/typesizes.h \
- /usr/include/time.h /usr/include/sys/select.h /usr/include/bits/select.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/include/sys/types.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/time.h /usr/include/endian.h \
+ /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
+ /usr/include/sys/select.h /usr/include/bits/select.h \
  /usr/include/bits/sigset.h /usr/include/bits/time.h \
  /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
- /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
- ../../../../src/lib/util/debug.h /usr/include/stdio.h \
- /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/alloca.h /usr/include/string.h /usr/include/bits/string.h \
+ /usr/include/bits/string2.h ../../../../src/lib/util/debug.h \
+ /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/wchar.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- ../../../../src/lib/util/linked-list.h command-queue.h \
- ../../../../src/lib/util/class.h /usr/include/assert.h context.h \
- device.h event.h kernel.h ../../../../src/lib/util/string.h \
+ /usr/include/bits/stdio.h ../../../../src/lib/util/linked-list.h \
+ command-queue.h ../../../../src/lib/util/class.h /usr/include/assert.h \
+ context.h device.h event.h kernel.h ../../../../src/lib/util/string.h \
  ../../../../src/lib/util/elf-format.h /usr/include/elf.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h mem.h platform.h \
  program.h repo.h sampler.h
 
@@ -37,17 +37,7 @@ repo.o: repo.c ../../../../src/lib/mhandle/mhandle.h \
 
 /usr/include/gnu/stubs-64.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
-
-/usr/include/bits/waitflags.h:
-
-/usr/include/bits/waitstatus.h:
-
-/usr/include/endian.h:
-
-/usr/include/bits/endian.h:
-
-/usr/include/bits/byteswap.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
 
 /usr/include/sys/types.h:
 
@@ -56,6 +46,12 @@ repo.o: repo.c ../../../../src/lib/mhandle/mhandle.h \
 /usr/include/bits/typesizes.h:
 
 /usr/include/time.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
 
 /usr/include/sys/select.h:
 
@@ -73,7 +69,9 @@ repo.o: repo.c ../../../../src/lib/mhandle/mhandle.h \
 
 /usr/include/string.h:
 
-/usr/include/xlocale.h:
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
 
 ../../../../src/lib/util/debug.h:
 
@@ -85,11 +83,13 @@ repo.o: repo.c ../../../../src/lib/mhandle/mhandle.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
 
 ../../../../src/lib/util/linked-list.h:
 
@@ -113,7 +113,7 @@ kernel.h:
 
 /usr/include/elf.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h:
 
 /usr/include/stdint.h:
 

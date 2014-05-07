@@ -5,18 +5,19 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
  /usr/include/bits/typesizes.h /usr/include/bits/signum.h \
  /usr/include/time.h /usr/include/bits/siginfo.h \
  /usr/include/bits/sigaction.h /usr/include/bits/sigcontext.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
- /usr/include/bits/sigstack.h /usr/include/sys/ucontext.h \
- /usr/include/bits/pthreadtypes.h /usr/include/bits/sigthread.h \
- ../src/arch/arm/emu/context.h ../src/arch/arm/asm/asm.h \
- /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
- /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
+ /usr/include/bits/sigstack.h /usr/include/bits/pthreadtypes.h \
+ /usr/include/bits/sigthread.h ../src/arch/arm/emu/context.h \
+ ../src/arch/arm/asm/asm.h /usr/include/stdio.h /usr/include/libio.h \
+ /usr/include/_G_config.h /usr/include/wchar.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- ../src/arch/arm/asm/asm-thumb.h /usr/include/string.h \
- /usr/include/xlocale.h /usr/include/ctype.h /usr/include/endian.h \
+ /usr/include/bits/stdio.h ../src/arch/arm/asm/asm-thumb.h \
+ /usr/include/string.h /usr/include/bits/string.h \
+ /usr/include/bits/string2.h /usr/include/endian.h \
  /usr/include/bits/endian.h /usr/include/bits/byteswap.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/stdlib.h /usr/include/ctype.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h \
  ../src/arch/arm/asm/asm.h ../src/arch/arm/asm/asm-thumb.dat \
  ../src/arch/arm/asm/asm-thumb32.dat ../src/arch/arm/asm/asm.dat \
@@ -38,14 +39,13 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
  ../src/arch/fermi/emu/isa.h ../src/arch/fermi/timing/gpu.h \
  ../src/arch/kepler/asm/asm.h ../src/arch/kepler/asm/asm.dat \
  ../src/arch/mips/emu/context.h ../src/arch/mips/asm/asm.h \
- /usr/include/stdlib.h /usr/include/bits/waitflags.h \
- /usr/include/bits/waitstatus.h /usr/include/sys/types.h \
- /usr/include/sys/select.h /usr/include/bits/select.h \
- /usr/include/sys/sysmacros.h /usr/include/alloca.h \
- ../src/arch/mips/asm/asm.dat ../src/arch/mips/emu/emu.h \
- ../src/arch/mips/emu/isa.h ../src/arch/mips/emu/machine.h \
- ../src/arch/mips/asm/asm.dat ../src/arch/mips/emu/syscall.h \
- ../src/arch/mips/timing/cpu.h ../src/arch/southern-islands/asm/asm.h \
+ /usr/include/sys/types.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/sys/sysmacros.h \
+ /usr/include/alloca.h ../src/arch/mips/asm/asm.dat \
+ ../src/arch/mips/emu/emu.h ../src/arch/mips/emu/isa.h \
+ ../src/arch/mips/emu/machine.h ../src/arch/mips/asm/asm.dat \
+ ../src/arch/mips/emu/syscall.h ../src/arch/mips/timing/cpu.h \
+ ../src/arch/southern-islands/asm/asm.h \
  ../src/arch/southern-islands/asm/asm.dat \
  ../src/arch/southern-islands/emu/emu.h \
  ../src/arch/southern-islands/emu/isa.h \
@@ -98,11 +98,9 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
 
 /usr/include/bits/sigcontext.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
 
 /usr/include/bits/sigstack.h:
-
-/usr/include/sys/ucontext.h:
 
 /usr/include/bits/pthreadtypes.h:
 
@@ -120,19 +118,21 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
 
+/usr/include/bits/stdio.h:
+
 ../src/arch/arm/asm/asm-thumb.h:
 
 /usr/include/string.h:
 
-/usr/include/xlocale.h:
+/usr/include/bits/string.h:
 
-/usr/include/ctype.h:
+/usr/include/bits/string2.h:
 
 /usr/include/endian.h:
 
@@ -140,7 +140,11 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
 
 /usr/include/bits/byteswap.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
+/usr/include/stdlib.h:
+
+/usr/include/ctype.h:
+
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -229,12 +233,6 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
 ../src/arch/mips/emu/context.h:
 
 ../src/arch/mips/asm/asm.h:
-
-/usr/include/stdlib.h:
-
-/usr/include/bits/waitflags.h:
-
-/usr/include/bits/waitstatus.h:
 
 /usr/include/sys/types.h:
 

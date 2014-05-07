@@ -4,29 +4,28 @@ loader.o: loader.c /usr/include/fcntl.h /usr/include/features.h \
  /usr/include/bits/fcntl.h /usr/include/sys/types.h \
  /usr/include/bits/types.h /usr/include/bits/typesizes.h \
  /usr/include/time.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
  /usr/include/bits/byteswap.h /usr/include/sys/select.h \
  /usr/include/bits/select.h /usr/include/bits/sigset.h \
  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
- /usr/include/bits/pthreadtypes.h /usr/include/bits/stat.h \
- /usr/include/unistd.h /usr/include/bits/posix_opt.h \
- /usr/include/bits/environments.h /usr/include/bits/confname.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/unistd.h \
+ /usr/include/bits/posix_opt.h /usr/include/bits/confname.h \
  /usr/include/getopt.h ../../../../src/lib/mhandle/mhandle.h \
- /usr/include/stdlib.h /usr/include/bits/waitflags.h \
- /usr/include/bits/waitstatus.h /usr/include/alloca.h \
- /usr/include/string.h /usr/include/xlocale.h \
+ /usr/include/stdlib.h /usr/include/alloca.h /usr/include/string.h \
+ /usr/include/bits/string.h /usr/include/bits/string2.h \
  ../../../../src/lib/util/debug.h /usr/include/stdio.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- ../../../../src/lib/util/elf-format.h /usr/include/elf.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h \
+ /usr/include/bits/stdio.h ../../../../src/lib/util/elf-format.h \
+ /usr/include/elf.h \
+ /opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h \
  /usr/include/stdint.h /usr/include/bits/wchar.h \
  ../../../../src/lib/util/linked-list.h ../../../../src/lib/util/list.h \
  ../../../../src/lib/util/misc.h ../../../../src/lib/util/string.h \
  ../../../../src/mem-system/memory.h context.h /usr/include/pthread.h \
- /usr/include/sched.h /usr/include/bits/sched.h \
+ /usr/include/sched.h /usr/include/bits/sched.h /usr/include/signal.h \
  /usr/include/bits/setjmp.h ../../../../src/arch/x86/asm/asm.h \
  ../../../../src/arch/common/asm.h ../../../../src/lib/util/class.h \
  /usr/include/assert.h ../../../../src/arch/x86/asm/inst.h \
@@ -54,7 +53,7 @@ loader.o: loader.c /usr/include/fcntl.h /usr/include/features.h \
 
 /usr/include/time.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stddef.h:
 
 /usr/include/endian.h:
 
@@ -74,13 +73,9 @@ loader.o: loader.c /usr/include/fcntl.h /usr/include/features.h \
 
 /usr/include/bits/pthreadtypes.h:
 
-/usr/include/bits/stat.h:
-
 /usr/include/unistd.h:
 
 /usr/include/bits/posix_opt.h:
-
-/usr/include/bits/environments.h:
 
 /usr/include/bits/confname.h:
 
@@ -90,15 +85,13 @@ loader.o: loader.c /usr/include/fcntl.h /usr/include/features.h \
 
 /usr/include/stdlib.h:
 
-/usr/include/bits/waitflags.h:
-
-/usr/include/bits/waitstatus.h:
-
 /usr/include/alloca.h:
 
 /usr/include/string.h:
 
-/usr/include/xlocale.h:
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
 
 ../../../../src/lib/util/debug.h:
 
@@ -110,17 +103,19 @@ loader.o: loader.c /usr/include/fcntl.h /usr/include/features.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
 
+/usr/include/bits/stdio.h:
+
 ../../../../src/lib/util/elf-format.h:
 
 /usr/include/elf.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdint.h:
+/opt/gcc46/lib/gcc/x86_64-unknown-linux/4.6.2/include/stdint.h:
 
 /usr/include/stdint.h:
 
@@ -143,6 +138,8 @@ context.h:
 /usr/include/sched.h:
 
 /usr/include/bits/sched.h:
+
+/usr/include/signal.h:
 
 /usr/include/bits/setjmp.h:
 
