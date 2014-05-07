@@ -1858,7 +1858,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
             
             		master_stack = mod_can_coalesce(target_mod, mod_access_load, stack->addr, NULL);
 			mod_access_start(target_mod, stack, mod_access_load);
-			/*assert(master_stack != stack);
+			assert(master_stack != stack);
            	   	if (master_stack && target_mod->level == 2)
         	       	{     	
 				estadis[target_mod->level].coalesce++;
@@ -1867,7 +1867,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                 	 	mod_stack_wait_in_stack(new_stack, master_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
              	    		return;
 			}
-			*/
+			
 		}
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
@@ -2124,9 +2124,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		
 		int latency = stack->reply == /*reply_ack_data_sent_to_peer ? 0 : */target_mod->latency;
 		
-		//if(stack->coalesced == -1)
-		//	esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
-		//else
+		if(stack->coalesced == -1)
+			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+		else
 			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, latency);
 		
 		return;
