@@ -42,6 +42,8 @@ struct esta_t
 	long long tiempo_acceso_latencia;
 	long long latencia_red_acc;
 	long long latencia_red_cont;
+	long long blk_compartidos;
+	long long replicas_en_l1;
 } estadis[10];
 
 static long long ciclo = 0;
