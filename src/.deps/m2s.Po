@@ -68,7 +68,8 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
  ../src/mem-system/mem-system.h ../src/mem-system/mmu.h \
  ../src/network/net-system.h ../src/dram/dram-system.h \
  ../src/dram/request.h /usr/include/sys/time.h \
- ../src/visual/common/visual.h ../src/lib/util/fran.h
+ ../src/visual/common/visual.h ../src/lib/util/estadisticas.h \
+ ../src/mem-system/directory.h
 
 /usr/include/signal.h:
 
@@ -340,4 +341,6 @@ m2s.o: m2s.c /usr/include/signal.h /usr/include/features.h \
 
 ../src/visual/common/visual.h:
 
-../src/lib/util/fran.h:
+../src/lib/util/estadisticas.h:
+
+../src/mem-system/directory.h:

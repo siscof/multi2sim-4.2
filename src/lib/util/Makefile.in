@@ -75,13 +75,13 @@ am__v_at_ = $(am__v_at_$(AM_DEFAULT_VERBOSITY))
 am__v_at_0 = @
 libutil_a_AR = $(AR) $(ARFLAGS)
 libutil_a_LIBADD =
-am_libutil_a_OBJECTS = bin-config.$(OBJEXT) bit-map.$(OBJEXT) \
-	buffer.$(OBJEXT) class.$(OBJEXT) config.$(OBJEXT) \
-	debug.$(OBJEXT) elf-encode.$(OBJEXT) elf-format.$(OBJEXT) \
-	file.$(OBJEXT) hash-table.$(OBJEXT) heap.$(OBJEXT) \
-	list.$(OBJEXT) linked-list.$(OBJEXT) misc.$(OBJEXT) \
-	matrix.$(OBJEXT) repos.$(OBJEXT) string.$(OBJEXT) \
-	timer.$(OBJEXT)
+am_libutil_a_OBJECTS = estadisticas.$(OBJEXT) bin-config.$(OBJEXT) \
+	bit-map.$(OBJEXT) buffer.$(OBJEXT) class.$(OBJEXT) \
+	config.$(OBJEXT) debug.$(OBJEXT) elf-encode.$(OBJEXT) \
+	elf-format.$(OBJEXT) file.$(OBJEXT) hash-table.$(OBJEXT) \
+	heap.$(OBJEXT) list.$(OBJEXT) linked-list.$(OBJEXT) \
+	misc.$(OBJEXT) matrix.$(OBJEXT) repos.$(OBJEXT) \
+	string.$(OBJEXT) timer.$(OBJEXT)
 libutil_a_OBJECTS = $(am_libutil_a_OBJECTS)
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -243,6 +243,9 @@ top_srcdir = @top_srcdir@
 lib_LIBRARIES = libutil.a
 libutil_a_SOURCES = \
 	\
+	estadisticas.c\
+	estadisticas.h\
+	\
 	bin-config.c \
 	bin-config.h \
 	\
@@ -386,6 +389,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/debug.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-encode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/elf-format.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/estadisticas.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/file.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/hash-table.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/heap.Po@am__quote@

@@ -73,9 +73,10 @@
 #include <visual/common/visual.h>
 
 //fran
-#include <lib/util/fran.h>
+#include <lib/util/estadisticas.h>
 #include <lib/esim/esim.h>
 long long ciclo_anterior = 0;
+
 static char *visual_file_name = "";
 static char *ctx_config_file_name = "";
 static char *elf_debug_file_name = "";
@@ -1914,11 +1915,14 @@ static void m2s_loop(void)
 		 * simulation cycle if any architecture performed a useful timing simulation.
 		 * The argument 'num_timing_active' is interpreted as a flag TRUE/FALSE. */
 		esim_process_events(num_timing_active);
-		if((asTiming(si_gpu)->cycle%10000) == 0 && asTiming(si_gpu)->cycle != ciclo_anterior)
+		/*if((asTiming(si_gpu)->cycle%10000) == 0 && asTiming(si_gpu)->cycle != ciclo_anterior)
 		{
 			ciclo_anterior = asTiming(si_gpu)->cycle;
 			estadisticas_1000ciclos();
-		}
+		}*/
+
+		estadisticas_por_intervalos(asTiming(si_gpu)->cycle);
+
 		/* If neither functional nor timing simulation was performed for any architecture,
 		 * it means that all guest contexts finished execution - simulation can end. */
 		if (!num_emu_active && !num_timing_active)

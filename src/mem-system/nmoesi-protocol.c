@@ -34,7 +34,7 @@
 #include "prefetcher.h"
 //fran
 #include <lib/util/misc.h>
-#include <lib/util/fran.h>
+#include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/gpu.h>
 #include <lib/util/class.h>
 /* Events */
