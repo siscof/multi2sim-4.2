@@ -1920,8 +1920,8 @@ static void m2s_loop(void)
 			ciclo_anterior = asTiming(si_gpu)->cycle;
 			estadisticas_1000ciclos();
 		}*/
-
-		estadisticas_por_intervalos(asTiming(si_gpu)->cycle);
+		if(si_gpu != NULL)
+			estadisticas_por_intervalos(asTiming(si_gpu)->cycle);
 
 		/* If neither functional nor timing simulation was performed for any architecture,
 		 * it means that all guest contexts finished execution - simulation can end. */

@@ -1,11 +1,24 @@
 #include "./estadisticas.h"
 
 
+long long intervalo_anterior = 0;
+long long ipc_anterior = 0;
 
 void estadisticas_por_intervalos(long long intervalo){
 
 double latencia;
 int z, x, y, k, i;
+long long ipc;
+
+if((intervalo_anterior + 10000) > intervalo )
+	return;
+
+intervalo_anterior = intervalo;
+
+//IPC
+ipc = asEmu(si_emu)->instructions;
+
+
 
 if(estadis[0].media_latencia_contador == 0)
 	latencia = -1.0;
@@ -24,6 +37,7 @@ double hitratio1 = estadis[1].accesses ? estadis[1].hits/(double)estadis[1].acce
 double hitratio2 = estadis[2].accesses ? estadis[2].hits/(double)estadis[2].accesses : -1.0;
 double hitratio2_real = estadis[5].accesses ? estadis[5].hits/(double)estadis[5].accesses : -1.0;
 
+fran_debug_general("%lld ",ipc - ipc_anterior);
 fran_debug_general("%lld ",estadis[2].coalesce);
 fran_debug_general("%.1f ",latencia);
 fran_debug_general("%.3f ",hitratio2_real);
@@ -46,7 +60,6 @@ fran_debug_general("%lld ",estadis[2].busy_cicles_in);
 fran_debug_general("%lld ",estadis[2].busy_cicles_out);
 fran_debug_general("%lld ",estadis[1].latencia_red_cont ? estadis[1].latencia_red_acc/estadis[1].latencia_red_cont : 0);
 fran_debug_general("%lld ",estadis[2].latencia_red_cont ? estadis[2].latencia_red_acc/estadis[2].latencia_red_cont : 0);
-
 
 int tag_ptr;
 int state_ptr;
@@ -119,6 +132,7 @@ estadis[2].latencia_red_acc = 0;
 estadis[2].latencia_red_cont = 0;
 estadis[2].blk_compartidos = 0;
 estadis[2].replicas_en_l1 = 0;
+ipc_anterior = ipc;
 
 }
                        

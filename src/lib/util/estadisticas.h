@@ -3,6 +3,7 @@
 #include <mem-system/directory.h>
 #include <mem-system/module.h>
 #include <lib/util/debug.h>
+#include <arch/southern-islands/emu/emu.h>
 
 #define cache_hit 1
 #define cache_accesses 0

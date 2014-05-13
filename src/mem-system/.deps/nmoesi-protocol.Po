@@ -23,8 +23,9 @@ nmoesi-protocol.o: nmoesi-protocol.c /usr/include/assert.h \
  module.h prefetcher.h ../../src/lib/util/misc.h \
  ../../src/lib/util/estadisticas.h ../../src/mem-system/mem-system.h \
  ../../src/mem-system/directory.h ../../src/mem-system/module.h \
- ../../src/arch/southern-islands/timing/gpu.h \
- ../../src/arch/common/timing.h ../../src/lib/util/class.h
+ ../../src/arch/southern-islands/emu/emu.h ../../src/arch/common/emu.h \
+ ../../src/lib/util/class.h ../../src/arch/southern-islands/timing/gpu.h \
+ ../../src/arch/common/timing.h
 
 /usr/include/assert.h:
 
@@ -132,8 +133,12 @@ prefetcher.h:
 
 ../../src/mem-system/module.h:
 
+../../src/arch/southern-islands/emu/emu.h:
+
+../../src/arch/common/emu.h:
+
+../../src/lib/util/class.h:
+
 ../../src/arch/southern-islands/timing/gpu.h:
 
 ../../src/arch/common/timing.h:
-
-../../src/lib/util/class.h:
