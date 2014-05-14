@@ -8,6 +8,7 @@
 #define cache_hit 1
 #define cache_accesses 0
 
+static long long ventana_muestreo = 10000;
 
 static char *fran_file_latencia = "";
 static char *fran_file_general = "";

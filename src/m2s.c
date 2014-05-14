@@ -1940,6 +1940,10 @@ static void m2s_loop(void)
 			m2s_signal_process();
 	}
 
+
+        if(si_gpu != NULL)
+	        estadisticas_por_intervalos(asTiming(si_gpu)->cycle + ventana_muestreo);
+
 	/* Restore default signal handlers */
 	signal(SIGABRT, SIG_DFL);
 	signal(SIGINT, SIG_DFL);

@@ -4,13 +4,14 @@
 long long intervalo_anterior = 0;
 long long ipc_anterior = 0;
 
+
 void estadisticas_por_intervalos(long long intervalo){
 
 double latencia;
 int z, x, y, k, i;
 long long ipc;
 
-if((intervalo_anterior + 10000) > intervalo )
+if((intervalo_anterior + ventana_muestreo) > intervalo )
 	return;
 
 intervalo_anterior = intervalo;
