@@ -385,7 +385,7 @@ void mem_system_dump_report(void)
         if (!f)
                 return;
 
-        fran_report_general();
+        //fran_report_general();
 
 	/* Intro */
 	fprintf(f, "; Report for caches, TLBs, and main memory\n");
@@ -421,6 +421,7 @@ void mem_system_dump_report(void)
 		}
 		fprintf(f, "BlockSize = %d\n", mod->block_size);
 		fprintf(f, "Latency = %d\n", mod->latency);
+		fprintf(f, "DirectoryLatency = %d\n", mod->dir_latency);
 		fprintf(f, "Ports = %d\n", mod->num_ports);
 		fprintf(f, "\n");
 

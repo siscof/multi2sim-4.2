@@ -585,11 +585,11 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 		fatal("%s: cache %s: block size must be power of two and "
 			"at least 4.\n%s", mem_config_file_name, mod_name, 
 			mem_err_config_note);
-	if (dir_latency < 1)
+	if (dir_latency < 0)
 		fatal("%s: cache %s: invalid value for variable "
 			"'DirectoryLatency'.\n%s", mem_config_file_name, 
 			mod_name, mem_err_config_note);
-	if (latency < 1)
+	if (latency < 0)
 		fatal("%s: cache %s: invalid value for variable 'Latency'.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
 	if (mshr_size < 1)
@@ -692,7 +692,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	if (block_size < 1 || (block_size & (block_size - 1)))
 		fatal("%s: %s: block size must be power of two.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
-	if (latency < 1)
+	if (latency < 0)
 		fatal("%s: %s: invalid value for variable 'Latency'.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
 	if (num_ports < 1)

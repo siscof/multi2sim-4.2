@@ -173,8 +173,7 @@ void ini_estadisticas(){
                 estadis[i].invalidations = 0;
                 estadis[i].delayed_read_hit= 0;
                 estadis[i].esim_cycle_anterior= 0;
-                estadis[i].media_latencia = 0;
-                estadis[i].media_latencia = 0;
+                estadis[i].media_latencia = 0; 
                 estadis[i].tiempo_acceso_latencia = 0;
                 estadis[i].latencia_red_acc = 0;
                 estadis[i].latencia_red_cont = 0;
