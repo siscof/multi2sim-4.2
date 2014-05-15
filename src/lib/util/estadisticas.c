@@ -164,6 +164,10 @@ void estadisticas(int hit, int lvl){
 
 void ini_estadisticas(){
 //estadis = xcalloc(10,sizeof(struct esta_t));/*  
+
+//imprimir columnas
+fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Accesos_L1 X X X X L1->L2_busy_in L1<-L2_busy_out invalidaciones X X X L2<-MM_busy_in L2->MM_busy_out Lat_L1-L2 Lat_L2-MM blk_comp_L2 Replicas_L1");
+
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
                 estadis[i].accesses = 0;
