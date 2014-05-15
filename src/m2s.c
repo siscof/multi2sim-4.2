@@ -599,6 +599,7 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 
 		if (!strcmp(argv[argi], "--saltar_l1"))
 		{
+
 			m2s_need_argument(argc, argv, argi);
 			if(!strcmp(argv[++argi],"enable")){
 				SALTAR_L1 = 1;
