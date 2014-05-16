@@ -429,11 +429,13 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			stack->id);
 			
 		//fran_debug("%lld %lld\n",esim_time, stack->id);
-	 	long long ciclo = asTiming(si_gpu)->cycle;
-		if(esim_time > stack->tiempo_acceso){
+	 	if(mod->level == 1)
+		{
+			long long ciclo = asTiming(si_gpu)->cycle;
+			if(esim_time > stack->tiempo_acceso){
 			
-			estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
-			estadis[0].media_latencia_contador++;
+				estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
+				estadis[0].media_latencia_contador++;
 			/*estadis[mod->level].tiempo_acceso_latencia += stack->tiempo_acceso;
 			acumulado++; 
 			if(acumulado == 1000){
@@ -446,17 +448,20 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				estadis[mod->level].tiempo_acceso_latencia = 0;
 				fran_debug_latencia("%d %lld %.1f\n", mod->level, ciclo_medio, media);
 			}*/
-		}
+			}
 
 		
-		load_finished++;
-		if( (load_finished % 10000) == 0 )
-		{
-			load_finished = 0;
-			fran_debug_t1000k("%lld\n", ciclo);
-			fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
-			ret_ciclo = ciclo;
-		}
+			load_finished++;
+			if( (load_finished % 10000) == 0 )
+			{
+				load_finished = 0;
+				fran_debug_t1000k("%lld\n", ciclo);
+				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
+				fran_debug_latencia("%lld\n",asEmu(si_emu)->instructions - ipc_ant);
+				ipc_ant = asEmu(si_emu)->instructions;
+				ret_ciclo = ciclo;
+			}
+		}		
 
 		/* Increment witness variable */
 		if (stack->witness_ptr)

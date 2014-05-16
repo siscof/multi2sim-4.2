@@ -562,7 +562,8 @@ struct mod_t *mod_get_low_mod(struct mod_t *mod, unsigned int addr)
 
 int mod_get_retry_latency(struct mod_t *mod)
 {
-	return random() % mod->latency + mod->latency;
+//	return random() % mod->latency + mod->latency;
+	return mod->latency+1;
 }
 
 

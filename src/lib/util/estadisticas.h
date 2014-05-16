@@ -17,6 +17,15 @@ static char *fran_file_hitRatio = "";
 static char *fran_file_red = "";
 int SALTAR_L1;
 static int replace; // cache = 0; mod = 1
+
+static long long intervalo_anterior = 0;
+static long long ipc_anterior = 0;
+
+//variable que guarda el ipc anterior mod_handler_nmoesi_load
+static long long ipc_ant = 0;
+
+
+
 #define fran_debug_latencia(...) debug(fran_latencia, __VA_ARGS__)
 int fran_latencia;
 

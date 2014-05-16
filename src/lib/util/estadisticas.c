@@ -1,10 +1,6 @@
 #include "./estadisticas.h"
 
 
-long long intervalo_anterior = 0;
-long long ipc_anterior = 0;
-
-
 void estadisticas_por_intervalos(long long intervalo){
 
 double latencia;
