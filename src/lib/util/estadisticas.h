@@ -58,8 +58,10 @@ struct esta_t
         long long latencia_red_cont;
         long long blk_compartidos;
         long long replicas_en_l1;
-} estadis[10];
+};
 
+static struct esta_t estadis[10];
+static struct esta_t *estadisticas_ipc;
 static long long ciclo = 0;
 static int resolucion = 0;
 void ini_estadisticas();

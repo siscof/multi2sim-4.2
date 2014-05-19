@@ -29,6 +29,7 @@
 #include "uop.h"
 #include "cycle-interval-report.h"
 
+#include <arch/southern-islands/emu/emu.h>
 
 void si_simd_complete(struct si_simd_t *simd)
 {
@@ -36,6 +37,10 @@ void si_simd_complete(struct si_simd_t *simd)
 	int list_entries;
 	int list_index = 0;
 	int i;
+
+        struct si_work_item_t *work_item;
+        int work_item_id;
+
 
 	list_entries = list_count(simd->exec_buffer);
 
@@ -63,8 +68,18 @@ void si_simd_complete(struct si_simd_t *simd)
 
 		/* Statistics */
 		simd->inst_count++;
-		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
-		ipc_instructions(si_gpu->last_complete_cycle);
+	
+		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+                {
+
+                        work_item = uop->wavefront->work_items[work_item_id];
+
+                        if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+                        {
+				si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+				ipc_instructions(si_gpu->last_complete_cycle);
+			}
+		}
 	}
 }
 

@@ -32,10 +32,16 @@
 #include "uop.h"
 #include "wavefront-pool.h"
 //fran
-#include <lib/util/fran.h>
+//#include <lib/util/fran.h>
+
 void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 {
 	struct si_uop_t *uop = NULL;
+
+        struct si_work_item_uop_t *work_item_uop;
+        struct si_work_item_t *work_item;
+        int work_item_id;
+
 	int list_entries;
 	int i;
 	int list_index = 0;
@@ -72,8 +78,20 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 
 		/* Statistics */
 		vector_mem->inst_count++;
-		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
-		ipc_instructions(si_gpu->last_complete_cycle);
+
+                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+                {
+
+                        work_item = uop->wavefront->work_items[work_item_id];
+                        work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
+
+
+                        if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+                        {
+				si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+				ipc_instructions(si_gpu->last_complete_cycle);
+			}
+		}
 	}
 }
 
@@ -245,42 +263,37 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		assert(!uop->global_mem_witness);
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
-			if (uop->vector_mem_write && !uop->glc)
-	                {
-        	                aux->vector_write_nc++;
-                	}
-                	else if (uop->vector_mem_write && uop->glc)
-                	{
-                	        aux->vector_write++;
-                	}
-                	else if (uop->vector_mem_read && uop->glc)
-                	{
-                       		aux->vector_load++;
-			}
-			else if (uop->vector_mem_read && !uop->glc)
-                        {
-			        aux->vector_load_nc++;
-                	}
+		        
+                        work_item = uop->wavefront->work_items[work_item_id];
+			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
-			work_item = uop->wavefront->work_items[work_item_id];
-			work_item_uop = 
-				&uop->work_item_uop[work_item->id_in_wavefront];
-		//	if(fran_mode_enable == 0 ){
+			
+			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+                        {
+				if (uop->vector_mem_write && !uop->glc)
+	                	{
+        	        	        aux->vector_write_nc++;
+                		}
+                		else if (uop->vector_mem_write && uop->glc)
+                		{
+                	        	aux->vector_write++;
+                		}
+                		else if (uop->vector_mem_read && uop->glc)
+                		{
+                       			aux->vector_load++;
+				}
+				else if (uop->vector_mem_read && !uop->glc)
+                        	{
+			        	aux->vector_load_nc++;
+                		}
+                
+
 				mod_access(vector_mem->compute_unit->vector_cache,
   					access_kind,
                                 	work_item_uop->global_mem_access_addr,
                                 	&uop->global_mem_witness, NULL, NULL, NULL);
                         	uop->global_mem_witness--;
- 		/*	}else{
-				mod_access(
-					mod_get_low_mod(
-						vector_mem->compute_unit->vector_cache , 
-						work_item_uop->global_mem_access_addr),
-					access_kind, 
-					work_item_uop->global_mem_access_addr,
-					&uop->global_mem_witness, NULL, NULL, NULL);
-				uop->global_mem_witness--;
-			}*/
+ 			}
 		}
 
 		if(si_spatial_report_active)

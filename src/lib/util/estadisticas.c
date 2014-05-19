@@ -160,7 +160,7 @@ void estadisticas(int hit, int lvl){
 
 void ini_estadisticas(){
 //estadis = xcalloc(10,sizeof(struct esta_t));/*  
-
+estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 //imprimir columnas
 fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Accesos_L1 X X X X L1->L2_busy_in L1<-L2_busy_out invalidaciones X X X L2<-MM_busy_in L2->MM_busy_out Lat_L1-L2 Lat_L2-MM blk_comp_L2 Replicas_L1");
 
@@ -182,14 +182,66 @@ fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Acceso
         }
 }
 
+void add_coalesce(int level)
+{
+	estadisticas_ipc[level].coalesce++;
+}
+
+void add_access(int level)
+{
+	estadisticas_ipc[level].accesses++;
+}
+
+void add_hit(int level)
+{
+	estadisticas_ipc[level].hits++;
+}
+
 void ipc_instructions(long long cycle)
 {
+	long long efectivosL1, efectivosL2;
 	ipc_inst++;
 	if(ipc_inst >= 10000)
 	{
+		efectivosL1 = estadisticas_ipc[1].accesses - estadisticas_ipc[1].coalesce;
+                efectivosL2 = estadisticas_ipc[2].accesses - estadisticas_ipc[2].coalesce;
+		
+		fran_debug_ipc("%d %d ",estadisticas_ipc[1].coalesce, estadisticas_ipc[2].coalesce);
+		fran_debug_ipc("%d %d ",estadisticas_ipc[1].accesses, estadisticas_ipc[2].accesses);
+		fran_debug_ipc("%.2f %.2f ",(double)(efectivosL1 - estadisticas_ipc[1].hits) / 10, (double)(efectivosL2 - estadisticas_ipc[2].hits) / 10);
+		
+		if(efectivosL1 != 0 )
+		{
+			fran_debug_ipc("%.2f ", ((double) estadisticas_ipc[1].hits) / efectivosL1);
+		}
+		else
+		{
+			fran_debug_ipc("nan ");
+		}
+
+                if(efectivosL2 != 0 )
+                {
+                        fran_debug_ipc("%.2f ", ((double) estadisticas_ipc[2].hits) / efectivosL2);
+                }
+		else
+                {
+                        fran_debug_ipc("nan ");
+                }
+
 		fran_debug_ipc("%.2f\n",  ((double) ipc_inst) / (cycle - ipc_last_cycle));
+	
+
+
+
+
 		ipc_inst = 0;
 		ipc_last_cycle = cycle;
+
+		
+		free(estadisticas_ipc);
+		estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
+
+
 	}
 }
 

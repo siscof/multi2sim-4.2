@@ -335,6 +335,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 	{
 		esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
 		estadisticas(1, 0);
+
+		add_hit(mod->level);
                         mod->hits_aux++;
 
 			/* The prefetcher may have prefetched this earlier and hence
@@ -1918,6 +1920,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		
 		if (stack->state)
 		{
+			/*estadisticas*/
+			add_hit(target_mod->level);
+			
 			/* Status = M/O/E/S/N
 			 * Check: address is a multiple of requester's block_size
 			 * Check: no sub-block requested by mod is already owned by mod */

@@ -395,6 +395,9 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 	/* Insert in access hash table */
 	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
 	DOUBLE_LINKED_LIST_INSERT_TAIL(&mod->access_hash_table[index], bucket, stack);
+
+	/* estadisticas */
+	add_access(mod->level);
 }
 
 
@@ -700,6 +703,9 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 
 	/* Record in-flight coalesced access in module */
 	mod->access_list_coalesced_count++;
+	
+	/* estadisticas */
+	add_coalesce(mod->level);
 }
 
 struct mod_client_info_t *mod_client_info_create(struct mod_t *mod)
