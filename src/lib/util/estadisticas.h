@@ -4,13 +4,14 @@
 #include <mem-system/module.h>
 #include <lib/util/debug.h>
 #include <arch/southern-islands/emu/emu.h>
+#include <lib/util/list.h>
 
 #define cache_hit 1
 #define cache_accesses 0
 
 static long long ventana_muestreo = 10000;
 
-static char *fran_file_latencia = "";
+static char *fran_file_ipc = "";
 static char *fran_file_general = "";
 static char *fran_file_t1000k = "";
 static char *fran_file_hitRatio = "";
@@ -20,14 +21,11 @@ static int replace; // cache = 0; mod = 1
 
 static long long intervalo_anterior = 0;
 static long long ipc_anterior = 0;
+static long long ipc_inst = 0;
+static long long ipc_last_cycle = 0;
 
-//variable que guarda el ipc anterior mod_handler_nmoesi_load
-static long long ipc_ant = 0;
-
-
-
-#define fran_debug_latencia(...) debug(fran_latencia, __VA_ARGS__)
-int fran_latencia;
+#define fran_debug_ipc(...) debug(fran_ipc, __VA_ARGS__)
+int fran_ipc;
 
 #define fran_debug_general(...) debug(fran_general, __VA_ARGS__)
 int fran_general;
@@ -68,4 +66,5 @@ void ini_estadisticas();
 void estadisticas(int hit, int lvl);
 void hrl2(int hit , struct mod_t *mod, int from_load);
 void estadisticas_por_intervalos(long long intervalo);
+void ipc_instructions(long long cycle);
 

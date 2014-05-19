@@ -73,6 +73,7 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 		/* Statistics */
 		vector_mem->inst_count++;
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+		ipc_instructions(si_gpu->last_complete_cycle);
 	}
 }
 

@@ -5,7 +5,7 @@ void estadisticas_por_intervalos(long long intervalo){
 
 double latencia;
 int z, x, y, k, i;
-long long ipc;
+//long long ipc;
 
 if((intervalo_anterior + ventana_muestreo) > intervalo )
 	return;
@@ -13,7 +13,7 @@ if((intervalo_anterior + ventana_muestreo) > intervalo )
 intervalo_anterior = intervalo;
 
 //IPC
-ipc = asEmu(si_emu)->instructions;
+//ipc = asEmu(si_emu)->instructions;
 
 
 
@@ -34,7 +34,7 @@ double hitratio1 = estadis[1].accesses ? estadis[1].hits/(double)estadis[1].acce
 double hitratio2 = estadis[2].accesses ? estadis[2].hits/(double)estadis[2].accesses : -1.0;
 double hitratio2_real = estadis[5].accesses ? estadis[5].hits/(double)estadis[5].accesses : -1.0;
 
-fran_debug_general("%lld ",ipc - ipc_anterior);
+//fran_debug_general("%lld ",ipc - ipc_anterior);
 fran_debug_general("%lld ",estadis[2].coalesce);
 fran_debug_general("%.1f ",latencia);
 fran_debug_general("%.3f ",hitratio2_real);
@@ -129,7 +129,7 @@ estadis[2].latencia_red_acc = 0;
 estadis[2].latencia_red_cont = 0;
 estadis[2].blk_compartidos = 0;
 estadis[2].replicas_en_l1 = 0;
-ipc_anterior = ipc;
+//ipc_anterior = ipc;
 
 }
                        
@@ -180,5 +180,16 @@ fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Acceso
                 estadis[i].blk_compartidos = 0;
                 estadis[i].replicas_en_l1 = 0;
         }
+}
+
+void ipc_instructions(long long cycle)
+{
+	ipc_inst++;
+	if(ipc_inst >= 10000)
+	{
+		fran_debug_ipc("%.2f\n",  ((double) ipc_inst) / (cycle - ipc_last_cycle));
+		ipc_inst = 0;
+		ipc_last_cycle = cycle;
+	}
 }
 

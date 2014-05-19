@@ -67,6 +67,7 @@ void si_branch_unit_complete(struct si_branch_unit_t *branch_unit)
 		/* Statistics */
 		branch_unit->inst_count++;
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+		ipc_instructions(si_gpu->last_complete_cycle);
 	}
 }
 

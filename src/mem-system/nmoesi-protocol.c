@@ -457,8 +457,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				load_finished = 0;
 				fran_debug_t1000k("%lld\n", ciclo);
 				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
-				fran_debug_latencia("%lld\n",asEmu(si_emu)->instructions - ipc_ant);
-				ipc_ant = asEmu(si_emu)->instructions;
+				
 				ret_ciclo = ciclo;
 			}
 		}		

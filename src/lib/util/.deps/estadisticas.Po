@@ -18,7 +18,7 @@ estadisticas.o: estadisticas.c estadisticas.h \
  /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
  ../../../src/arch/southern-islands/emu/emu.h \
  ../../../src/arch/common/emu.h ../../../src/lib/util/class.h \
- /usr/include/assert.h
+ /usr/include/assert.h ../../../src/lib/util/list.h
 
 estadisticas.h:
 
@@ -95,3 +95,5 @@ estadisticas.h:
 ../../../src/lib/util/class.h:
 
 /usr/include/assert.h:
+
+../../../src/lib/util/list.h:

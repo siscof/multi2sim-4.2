@@ -616,9 +616,9 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			char a[200]="";
 			
 			strcpy(a,argv[argi]);
-			strcat(a, "_latencia");
-			fran_file_latencia = xmalloc(1000);
-			memcpy(fran_file_latencia,a,strlen(a)+1);
+			strcat(a, "_ipc");
+			fran_file_ipc = xmalloc(1000);
+			memcpy(fran_file_ipc,a,strlen(a)+1);
 			
 			fran_file_red = xmalloc(1000);
 			strcpy(fran_file_red,argv[argi]);
@@ -2032,7 +2032,7 @@ int main(int argc, char **argv)
 	x86_trace_cache_debug_category = debug_new_category(x86_trace_cache_debug_file_name);
 	mem_debug_category = debug_new_category(mem_debug_file_name);
 	//fran
-	fran_latencia = debug_new_category(fran_file_latencia);
+	fran_ipc = debug_new_category(fran_file_ipc);
 	fran_general = debug_new_category(fran_file_general);
     fran_t1000k = debug_new_category(fran_file_t1000k);
     fran_hitRatio = debug_new_category(fran_file_hitRatio);
