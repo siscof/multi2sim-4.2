@@ -201,14 +201,15 @@ void ipc_instructions(long long cycle)
 {
 	long long efectivosL1, efectivosL2;
 	ipc_inst++;
-	if(ipc_inst >= 10000)
+	if(ipc_inst >= 100000)
 	{
 		efectivosL1 = estadisticas_ipc[1].accesses - estadisticas_ipc[1].coalesce;
                 efectivosL2 = estadisticas_ipc[2].accesses - estadisticas_ipc[2].coalesce;
 		
 		fran_debug_ipc("%d %d ",estadisticas_ipc[1].coalesce, estadisticas_ipc[2].coalesce);
 		fran_debug_ipc("%d %d ",estadisticas_ipc[1].accesses, estadisticas_ipc[2].accesses);
-		fran_debug_ipc("%.2f %.2f ",(double)(efectivosL1 - estadisticas_ipc[1].hits) / 10, (double)(efectivosL2 - estadisticas_ipc[2].hits) / 10);
+		// MPKI
+		fran_debug_ipc("%.2f %.2f ",(double)(efectivosL1 - estadisticas_ipc[1].hits) / 100, (double)(efectivosL2 - estadisticas_ipc[2].hits) / 100);
 		
 		if(efectivosL1 != 0 )
 		{

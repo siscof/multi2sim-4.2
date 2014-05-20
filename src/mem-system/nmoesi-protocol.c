@@ -1921,7 +1921,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		if (stack->state)
 		{
 			/*estadisticas*/
-			add_hit(target_mod->level);
+			if(stack->coalesced != -1)
+				add_hit(target_mod->level);
 			
 			/* Status = M/O/E/S/N
 			 * Check: address is a multiple of requester's block_size
