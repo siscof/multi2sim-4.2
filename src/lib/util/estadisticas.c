@@ -201,15 +201,17 @@ void ipc_instructions(long long cycle)
 {
 	long long efectivosL1, efectivosL2;
 	ipc_inst++;
-	if(ipc_inst >= 100000)
+	if(ipc_inst >= 10000)
 	{
 		efectivosL1 = estadisticas_ipc[1].accesses - estadisticas_ipc[1].coalesce;
                 efectivosL2 = estadisticas_ipc[2].accesses - estadisticas_ipc[2].coalesce;
 		
 		fran_debug_ipc("%d %d ",estadisticas_ipc[1].coalesce, estadisticas_ipc[2].coalesce);
 		fran_debug_ipc("%d %d ",estadisticas_ipc[1].accesses, estadisticas_ipc[2].accesses);
+		fran_debug_ipc("%d %d ",efectivosL1, efectivosL2);
+
 		// MPKI
-		fran_debug_ipc("%.2f %.2f ",(double)(efectivosL1 - estadisticas_ipc[1].hits) / 100, (double)(efectivosL2 - estadisticas_ipc[2].hits) / 100);
+		fran_debug_ipc("%.2f %.2f ",(double)(efectivosL1 - estadisticas_ipc[1].hits) / 10, (double)(efectivosL2 - estadisticas_ipc[2].hits) / 10);
 		
 		if(efectivosL1 != 0 )
 		{
@@ -229,6 +231,24 @@ void ipc_instructions(long long cycle)
                         fran_debug_ipc("nan ");
                 }
 
+/*		if( estadisticas_ipc[1].latencia_red_cont != 0 )
+		{	
+     			fran_debug_ipc("%lld ",estadisticas_ipc[1].latencia_red_acc/estadisticas_ipc[1].latencia_red_cont);
+		}
+		else
+		{
+			fran_debug_ipc("nan ");
+		}
+
+                if( estadisticas_ipc[2].latencia_red_cont != 0 )
+                { 
+                        fran_debug_ipc("%lld ",estadisticas_ipc[2].latencia_red_acc/estadisticas_ipc[2].latencia_red_cont);
+                }
+                else
+                {
+                        fran_debug_ipc("nan ");
+                }
+*/
 		fran_debug_ipc("%.2f\n",  ((double) ipc_inst) / (cycle - ipc_last_cycle));
 	
 

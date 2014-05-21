@@ -33,7 +33,7 @@
 #include "node.h"
 #include "routing-table.h"
 
-#include <lib/util/fran.h>
+#include <lib/util/estadisticas.h>
 
 /* 
  * Message
@@ -617,11 +617,16 @@ void net_event_handler(int event, void *data)
 				{	
 					estadis[1].latencia_red_acc += cycle - msg->send_cycle;
 					estadis[1].latencia_red_cont++;
+					//estadisticas_ipc[1].latencia_red_acc += cycle - msg->send_cycle;
+					//estadisticas_ipc[1].latencia_red_cont++;
+				
 				}
 				else if(strstr(net->name,"-to-mm"))
 				{
 					estadis[2].latencia_red_acc += cycle - msg->send_cycle;
 					estadis[2].latencia_red_cont++;
+                                        //estadisticas_ipc[2].latencia_red_acc += cycle - msg->send_cycle;
+                                        //estadisticas_ipc[2].latencia_red_cont++;
 				}
 
 		/* If not return event was specified, free message here */

@@ -30,7 +30,7 @@
 #include "uop.h"
 #include "wavefront-pool.h"
 //fran
-#include <lib/util/fran.h>
+#include <lib/util/estadisticas.h>
 
 void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 {
