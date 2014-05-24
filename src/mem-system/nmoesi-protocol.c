@@ -348,6 +348,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		}
 
 		/* Miss */
+
+		add_miss(mod->level);
 		estadisticas(0, 0);
 
 		new_stack = mod_stack_create(stack->id, mod, stack->tag,
@@ -1993,6 +1995,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 		{
 			/* State = I */
+                        if(stack->coalesced != -1)
+	                        add_miss(target_mod->level);
+
 			assert(!dir_entry_group_shared_or_owned(target_mod->dir,
 				stack->set, stack->way));
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag,

@@ -31,6 +31,8 @@
 #include "wavefront-pool.h"
 #include "cycle-interval-report.h"
 
+#include <lib/util/estadisticas.h>
+
 void si_lds_complete(struct si_lds_t *lds)
 {
 	struct si_uop_t *uop = NULL;
@@ -74,8 +76,11 @@ void si_lds_complete(struct si_lds_t *lds)
 
 		/* Statistics */
 		lds->inst_count++;
+ 		
+		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
-                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+
+/*                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
                 {
 
 			work_item = uop->wavefront->work_items[work_item_id];
@@ -85,7 +90,7 @@ void si_lds_complete(struct si_lds_t *lds)
 				si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 				ipc_instructions(si_gpu->last_complete_cycle);
 			}
-		}
+		}*/
 	}
 }
 
@@ -233,7 +238,10 @@ void si_lds_mem(struct si_lds_t *lds)
 				if(si_wavefront_work_item_active(uop->wavefront,
                                 work_item->id_in_wavefront))
 	                        {
-	
+                                	/*estadisticas fran*/ 
+					si_units unit = lds_u;
+                                	ipc_instructions(asTiming(si_gpu)->cycle, unit);	
+
 					if (work_item->lds_access_type[j] == 1)
 					{
 						access_type = mod_access_load;

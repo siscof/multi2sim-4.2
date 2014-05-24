@@ -31,8 +31,8 @@
 #include "vector-mem-unit.h"
 #include "uop.h"
 #include "wavefront-pool.h"
-//fran
-//#include <lib/util/fran.h>
+
+#include <lib/util/estadisticas.h>
 
 void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 {
@@ -79,7 +79,9 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 		/* Statistics */
 		vector_mem->inst_count++;
 
-                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+                si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+
+                /*SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
                 {
 
                         work_item = uop->wavefront->work_items[work_item_id];
@@ -91,7 +93,7 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 				si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 				ipc_instructions(si_gpu->last_complete_cycle);
 			}
-		}
+		}*/
 	}
 }
 
@@ -153,6 +155,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		uop->write_ready = asTiming(si_gpu)->cycle + 
 			si_gpu_vector_mem_write_latency;
 
+		load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, uop->active_work_items);
+		
 		/* In the above context, access means any of the 
 		 * mod_access calls in si_vector_mem_mem. Means all 
 		 * inflight accesses for uop are done */
@@ -205,7 +209,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	{
 		uop = list_get(vector_mem->read_buffer, list_index);
 		assert(uop);
-		instructions_processed++;
+		//instructions_processed++;
 
 		/* Uop is not ready yet */
 		if (asTiming(si_gpu)->cycle < uop->read_ready)
@@ -214,6 +218,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			continue;
 		}
 
+		instructions_processed++;
 		/* Stall if the width has been reached. */
 		if (instructions_processed > si_gpu_vector_mem_width)
 		{
@@ -260,6 +265,8 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			fatal("%s: invalid access kind", __FUNCTION__);
 
 		/* Access global memory */
+		uop->send_cycle = asTiming(si_gpu)->cycle;
+
 		assert(!uop->global_mem_witness);
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
@@ -286,8 +293,12 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
                         	{
 			        	aux->vector_load_nc++;
                 		}
-                
-
+           
+				/*estadisticas fran*/
+				si_units unit = v_mem_u;
+                                ipc_instructions(asTiming(si_gpu)->cycle, unit);
+				uop->active_work_items++;
+						
 				mod_access(vector_mem->compute_unit->vector_cache,
   					access_kind,
                                 	work_item_uop->global_mem_access_addr,

@@ -16,7 +16,18 @@ branch-unit.o: branch-unit.c \
  gpu.h ../../../../src/arch/common/timing.h \
  ../../../../src/lib/util/class.h /usr/include/assert.h uop.h \
  ../../../../src/arch/southern-islands/emu/work-item.h \
- ../../../../src/mem-system/module.h wavefront-pool.h
+ ../../../../src/mem-system/module.h wavefront-pool.h \
+ ../../../../src/lib/util/estadisticas.h \
+ ../../../../src/mem-system/mem-system.h \
+ ../../../../src/mem-system/directory.h ../../../../src/lib/util/debug.h \
+ /usr/include/stdlib.h /usr/include/sys/types.h /usr/include/time.h \
+ /usr/include/endian.h /usr/include/bits/endian.h \
+ /usr/include/bits/byteswap.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/sigset.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
+ ../../../../src/arch/southern-islands/emu/emu.h \
+ ../../../../src/arch/common/emu.h
 
 ../../../../src/arch/southern-islands/emu/wavefront.h:
 
@@ -85,3 +96,41 @@ uop.h:
 ../../../../src/mem-system/module.h:
 
 wavefront-pool.h:
+
+../../../../src/lib/util/estadisticas.h:
+
+../../../../src/mem-system/mem-system.h:
+
+../../../../src/mem-system/directory.h:
+
+../../../../src/lib/util/debug.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/sys/types.h:
+
+/usr/include/time.h:
+
+/usr/include/endian.h:
+
+/usr/include/bits/endian.h:
+
+/usr/include/bits/byteswap.h:
+
+/usr/include/sys/select.h:
+
+/usr/include/bits/select.h:
+
+/usr/include/bits/sigset.h:
+
+/usr/include/bits/time.h:
+
+/usr/include/sys/sysmacros.h:
+
+/usr/include/bits/pthreadtypes.h:
+
+/usr/include/alloca.h:
+
+../../../../src/arch/southern-islands/emu/emu.h:
+
+../../../../src/arch/common/emu.h:

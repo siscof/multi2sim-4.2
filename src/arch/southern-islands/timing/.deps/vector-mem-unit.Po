@@ -23,7 +23,10 @@ vector-mem-unit.o: vector-mem-unit.c \
  ../../../../src/lib/util/list.h ../../../../src/mem-system/module.h \
  compute-unit.h branch-unit.h lds-unit.h scalar-unit.h vector-mem-unit.h \
  gpu.h ../../../../src/arch/common/timing.h cycle-interval-report.h uop.h \
- ../../../../src/arch/southern-islands/emu/work-item.h wavefront-pool.h
+ ../../../../src/arch/southern-islands/emu/work-item.h wavefront-pool.h \
+ ../../../../src/lib/util/estadisticas.h \
+ ../../../../src/mem-system/mem-system.h \
+ ../../../../src/mem-system/directory.h
 
 ../../../../src/arch/southern-islands/emu/emu.h:
 
@@ -126,3 +129,9 @@ uop.h:
 ../../../../src/arch/southern-islands/emu/work-item.h:
 
 wavefront-pool.h:
+
+../../../../src/lib/util/estadisticas.h:
+
+../../../../src/mem-system/mem-system.h:
+
+../../../../src/mem-system/directory.h:

@@ -24,7 +24,9 @@ lds-unit.o: lds-unit.c ../../../../src/arch/southern-islands/emu/emu.h \
  ../../../../src/arch/common/timing.h uop.h \
  ../../../../src/arch/southern-islands/emu/work-item.h \
  ../../../../src/mem-system/module.h wavefront-pool.h \
- cycle-interval-report.h
+ cycle-interval-report.h ../../../../src/lib/util/estadisticas.h \
+ ../../../../src/mem-system/mem-system.h \
+ ../../../../src/mem-system/directory.h
 
 ../../../../src/arch/southern-islands/emu/emu.h:
 
@@ -127,3 +129,9 @@ uop.h:
 wavefront-pool.h:
 
 cycle-interval-report.h:
+
+../../../../src/lib/util/estadisticas.h:
+
+../../../../src/mem-system/mem-system.h:
+
+../../../../src/mem-system/directory.h:

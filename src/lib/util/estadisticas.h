@@ -9,6 +9,16 @@
 #define cache_hit 1
 #define cache_accesses 0
 
+typedef enum
+{
+	scalar_u = 0,
+	simd_u,
+	s_mem_u,
+	v_mem_u,
+	branch_u,
+	lds_u
+}si_units;
+
 static long long ventana_muestreo = 10000;
 
 static char *fran_file_ipc = "";
@@ -45,6 +55,7 @@ struct esta_t
         long long coalesce;
         long long accesses;
         long long hits;
+	long long misses;
         long long loads;
         long long invalidations;
         long long busy_cicles_in;
@@ -60,13 +71,25 @@ struct esta_t
         long long replicas_en_l1;
 };
 
+struct si_gpu_unit_stats
+{
+	long long unit[6];
+	long long total;
+	long long loads_latency;
+	long long loads_count;
+}; 
+
+struct si_gpu_unit_stats *gpu_inst;
 static struct esta_t estadis[10];
-static struct esta_t *estadisticas_ipc;
+static struct si_gpu_unit_stats gpu_stats, instruciones_gpu_stats_anterior; 
+
+struct esta_t *estadisticas_ipc;
 static long long ciclo = 0;
 static int resolucion = 0;
 void ini_estadisticas();
 void estadisticas(int hit, int lvl);
 void hrl2(int hit , struct mod_t *mod, int from_load);
 void estadisticas_por_intervalos(long long intervalo);
-void ipc_instructions(long long cycle);
+void ipc_instructions(long long cycle, si_units unit);
+void load_finish(long long latencia, long long cantidad);
 

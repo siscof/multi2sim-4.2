@@ -180,7 +180,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 		/* Statistics */
 		scalar_unit->inst_count++;
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
-		ipc_instructions(si_gpu->last_complete_cycle);
+		//ipc_instructions(si_gpu->last_complete_cycle);
 	}
 }
 
@@ -246,6 +246,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 			
 			uop->write_ready = asTiming(si_gpu)->cycle + 
 				si_gpu_scalar_unit_write_latency;
+			load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);			
 
 			list_remove(scalar_unit->exec_buffer, uop);
 			list_enqueue(scalar_unit->write_buffer, uop);
@@ -316,6 +317,7 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 	int list_index = 0;
 	int instructions_processed = 0;
 	int i;
+	si_units unit;
 
 	list_entries = list_count(scalar_unit->read_buffer);
 
@@ -378,15 +380,17 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 			uop->global_mem_access_addr =
 				uop->wavefront->scalar_work_item->
 				global_mem_access_addr;
-//			if(fran_mode_enable == 0){
+
 				mod_access(scalar_unit->compute_unit->scalar_cache,
 				mod_access_load, uop->global_mem_access_addr,
 				&uop->global_mem_witness, NULL, NULL, NULL);
-/*			}else{
-				mod_access(mod_get_low_mod(scalar_unit->compute_unit->scalar_cache , uop->global_mem_access_addr),
- 				mod_access_load, uop->global_mem_access_addr,
-                                &uop->global_mem_witness, NULL, NULL, NULL);
-			}*/
+
+                	/*estadisticas fran*/
+        	        unit = s_mem_u;
+	                ipc_instructions(asTiming(si_gpu)->cycle, unit);
+			uop->active_work_items = 1;
+			uop->send_cycle = asTiming(si_gpu)->cycle;
+
 			/* Transfer the uop to the execution buffer */
 			list_remove(scalar_unit->read_buffer, uop);
 			list_enqueue(scalar_unit->exec_buffer, uop);
@@ -403,6 +407,10 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 		{
 			uop->execute_ready = asTiming(si_gpu)->cycle + 
 				si_gpu_scalar_unit_exec_latency;
+			
+		        /*estadisticas fran*/
+	                unit = scalar_u;
+        	        ipc_instructions(asTiming(si_gpu)->cycle, unit);
 
 			/* Transfer the uop to the execution buffer */
 			list_remove(scalar_unit->read_buffer, uop);
@@ -413,6 +421,7 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 				scalar_unit->compute_unit->id, 
 				uop->wavefront->id, uop->id_in_wavefront);
 			continue;
+
 		}
 	}
 }

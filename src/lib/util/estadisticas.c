@@ -161,14 +161,20 @@ void estadisticas(int hit, int lvl){
 void ini_estadisticas(){
 //estadis = xcalloc(10,sizeof(struct esta_t));/*  
 estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
+
+gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
+
 //imprimir columnas
 fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Accesos_L1 X X X X L1->L2_busy_in L1<-L2_busy_out invalidaciones X X X L2<-MM_busy_in L2->MM_busy_out Lat_L1-L2 Lat_L2-MM blk_comp_L2 Replicas_L1");
+
+fran_debug_ipc("Coalesce_L1 Coalesce_L2 accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 MPKI_L1 MPKI_L2 HR_L1 HR_L2 Lat_L1-L2 Lat_L2-MM campo1 campo2 campo ....3 \n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
                 estadis[i].accesses = 0;
                 estadis[i].hits= 0;
-                estadis[i].busy_cicles_in = 0;
+                estadis[i].misses = 0;
+		estadis[i].busy_cicles_in = 0;
                 estadis[i].busy_cicles_in = 0;
                 estadis[i].invalidations = 0;
                 estadis[i].delayed_read_hit= 0;
@@ -184,38 +190,58 @@ fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Acceso
 
 void add_coalesce(int level)
 {
-	estadisticas_ipc[level].coalesce++;
+	(estadisticas_ipc + level)->coalesce++;
 }
 
 void add_access(int level)
 {
-	estadisticas_ipc[level].accesses++;
+	(estadisticas_ipc + level)->accesses++;
 }
 
 void add_hit(int level)
 {
-	estadisticas_ipc[level].hits++;
+	(estadisticas_ipc + level)->hits++;
 }
 
-void ipc_instructions(long long cycle)
+void add_miss(int level)
+{
+        (estadisticas_ipc + level)->misses++;
+}
+
+long long add_si_inst(si_units unit)
+{
+	gpu_inst->unit[unit]++;
+	gpu_inst->total++;
+	return gpu_inst->total;
+}
+
+void load_finish(long long latencia, long long cantidad)
+{
+	gpu_stats.loads_latency = latencia + cantidad;
+	gpu_stats.loads_count = cantidad;
+}
+
+void ipc_instructions(long long cycle, si_units unit)
 {
 	long long efectivosL1, efectivosL2;
-	ipc_inst++;
-	if(ipc_inst >= 10000)
+	
+	long long intervalo_instrucciones = 100000;
+
+	if(!(add_si_inst(unit) % intervalo_instrucciones))
 	{
-		efectivosL1 = estadisticas_ipc[1].accesses - estadisticas_ipc[1].coalesce;
-                efectivosL2 = estadisticas_ipc[2].accesses - estadisticas_ipc[2].coalesce;
+		efectivosL1 = (estadisticas_ipc + 1)->accesses - (estadisticas_ipc + 1)->coalesce;
+                efectivosL2 = (estadisticas_ipc + 2)->accesses - (estadisticas_ipc + 2)->coalesce;
 		
-		fran_debug_ipc("%d %d ",estadisticas_ipc[1].coalesce, estadisticas_ipc[2].coalesce);
-		fran_debug_ipc("%d %d ",estadisticas_ipc[1].accesses, estadisticas_ipc[2].accesses);
+		fran_debug_ipc("%d %d ",(estadisticas_ipc + 1)->coalesce, (estadisticas_ipc + 2)->coalesce);
+		fran_debug_ipc("%d %d ",(estadisticas_ipc + 1)->accesses, (estadisticas_ipc + 2)->accesses);
 		fran_debug_ipc("%d %d ",efectivosL1, efectivosL2);
 
 		// MPKI
-		fran_debug_ipc("%.2f %.2f ",(double)(efectivosL1 - estadisticas_ipc[1].hits) / 10, (double)(efectivosL2 - estadisticas_ipc[2].hits) / 10);
+		fran_debug_ipc("%.2f %.2f ",(estadisticas_ipc + 1)->misses / (intervalo_instrucciones / 1000.0), (estadisticas_ipc + 2)->misses / (intervalo_instrucciones/1000.0));
 		
 		if(efectivosL1 != 0 )
 		{
-			fran_debug_ipc("%.2f ", ((double) estadisticas_ipc[1].hits) / efectivosL1);
+			fran_debug_ipc("%.2f ", ((double) (estadisticas_ipc + 1)->hits) / efectivosL1);
 		}
 		else
 		{
@@ -224,34 +250,47 @@ void ipc_instructions(long long cycle)
 
                 if(efectivosL2 != 0 )
                 {
-                        fran_debug_ipc("%.2f ", ((double) estadisticas_ipc[2].hits) / efectivosL2);
+                        fran_debug_ipc("%.2f ", ((double) (estadisticas_ipc + 2)->hits) / efectivosL2);
                 }
 		else
                 {
                         fran_debug_ipc("nan ");
                 }
 
-/*		if( estadisticas_ipc[1].latencia_red_cont != 0 )
+		if( (estadisticas_ipc + 1)->latencia_red_cont != 0 )
 		{	
-     			fran_debug_ipc("%lld ",estadisticas_ipc[1].latencia_red_acc/estadisticas_ipc[1].latencia_red_cont);
+     			fran_debug_ipc("%lld ",(estadisticas_ipc + 1)->latencia_red_acc/(estadisticas_ipc + 1)->latencia_red_cont);
 		}
 		else
 		{
 			fran_debug_ipc("nan ");
 		}
 
-                if( estadisticas_ipc[2].latencia_red_cont != 0 )
+                if( (estadisticas_ipc + 2)->latencia_red_cont != 0 )
                 { 
-                        fran_debug_ipc("%lld ",estadisticas_ipc[2].latencia_red_acc/estadisticas_ipc[2].latencia_red_cont);
+                        fran_debug_ipc("%lld ",(estadisticas_ipc + 2)->latencia_red_acc/(estadisticas_ipc + 2)->latencia_red_cont);
                 }
                 else
                 {
                         fran_debug_ipc("nan ");
                 }
-*/
-		fran_debug_ipc("%.2f\n",  ((double) ipc_inst) / (cycle - ipc_last_cycle));
-	
+		cycle -= ipc_last_cycle;
+		//fran_debug_ipc("%.2f ",   ipc_inst / (double)cycle);
 
+		if(gpu_stats.loads_count - instruciones_gpu_stats_anterior.loads_count)
+		{
+			long long load = (gpu_stats.loads_latency - instruciones_gpu_stats_anterior.loads_latency)/(gpu_stats.loads_count - instruciones_gpu_stats_anterior.loads_count);
+			fran_debug_ipc("%lld ",load);
+			
+			instruciones_gpu_stats_anterior.loads_latency = gpu_stats.loads_latency;
+			instruciones_gpu_stats_anterior.loads_count = gpu_stats.loads_count;
+		}
+		else
+		{		
+			fran_debug_ipc("nan ");
+		}
+	
+		fran_debug_ipc("%.2f %.2f %.2f %.2f %.2f %.2f %.2f\n", gpu_inst->unit[scalar_u] / (double)cycle, gpu_inst->unit[simd_u] / (double)cycle, gpu_inst->unit[s_mem_u] / (double)cycle, gpu_inst->unit[v_mem_u] / (double)cycle, gpu_inst->unit[branch_u] / (double)cycle, gpu_inst->unit[lds_u] / (double)cycle, gpu_inst->total / (double)cycle);
 
 
 
@@ -260,8 +299,10 @@ void ipc_instructions(long long cycle)
 
 		
 		free(estadisticas_ipc);
-		estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
+		free(gpu_inst);
 
+		estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
+		gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
 
 	}
 }
