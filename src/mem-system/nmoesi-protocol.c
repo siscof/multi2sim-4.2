@@ -437,7 +437,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		{
 			long long ciclo = asTiming(si_gpu)->cycle;
 			if(esim_time > stack->tiempo_acceso){
-			
+				
+				mem_load_finish(ciclo - stack->tiempo_acceso);			
 				estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
 				estadis[0].media_latencia_contador++;
 			/*estadis[mod->level].tiempo_acceso_latencia += stack->tiempo_acceso;
@@ -1870,7 +1871,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                 	 	mod_stack_wait_in_stack(new_stack, master_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
              	    		return;
 			}
-			
+		
 		}
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
@@ -1923,7 +1924,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		if (stack->state)
 		{
 			/*estadisticas*/
-			if(stack->coalesced != -1)
+			if(stack->coalesced == 0)
 				add_hit(target_mod->level);
 			
 			/* Status = M/O/E/S/N
@@ -1995,7 +1996,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 		{
 			/* State = I */
-                        if(stack->coalesced != -1)
+                        if(stack->coalesced == 0)
 	                        add_miss(target_mod->level);
 
 			assert(!dir_entry_group_shared_or_owned(target_mod->dir,

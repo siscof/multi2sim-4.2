@@ -73,17 +73,19 @@ void si_simd_complete(struct si_simd_t *simd)
 	
                 si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
-		/*SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+		add_si_macroinst(simd_u);
+
+		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
                 {
 
                         work_item = uop->wavefront->work_items[work_item_id];
 
                         if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
                         {
-				si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
-				ipc_instructions(si_gpu->last_complete_cycle);
+                                si_units unit = simd_u;
+                                ipc_instructions(asTiming(si_gpu)->cycle, unit);
 			}
-		}*/
+		}
 	}
 }
 
@@ -145,7 +147,7 @@ void si_simd_execute(struct si_simd_t *simd)
 		}
 
 		/*estadsitcas fran*/
-		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+		/*SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
                 {
 
                         work_item = uop->wavefront->work_items[work_item_id];
@@ -155,7 +157,7 @@ void si_simd_execute(struct si_simd_t *simd)
 				si_units unit = simd_u;
                                 ipc_instructions(asTiming(si_gpu)->cycle, unit);
                         }
-                }
+                }*/
 
 
 

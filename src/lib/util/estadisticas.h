@@ -74,10 +74,20 @@ struct esta_t
 struct si_gpu_unit_stats
 {
 	long long unit[6];
+	//sustituir cuando se puede "unit[6]" por "inst[6]" para que tenga mas sentido junto con macroinst[6]
+	long long macroinst[6];
 	long long total;
 	long long loads_latency;
 	long long loads_count;
 }; 
+
+struct mem_system_stats
+{
+	long long load_latency;
+	long long load_latency_count;
+};
+
+static struct mem_system_stats mem_stats, instruciones_mem_stats_anterior;
 
 struct si_gpu_unit_stats *gpu_inst;
 static struct esta_t estadis[10];
