@@ -200,6 +200,15 @@ int mod_can_access(struct mod_t *mod, unsigned int addr)
 		mod->access_list_coalesced_count;
 	return non_coalesced_accesses < mod->mshr_size;
 }
+/*este metodo nos dice si tenemos espacio en el mshr para emitir un acceso hacia un modulo superior*/
+int mod_can_access_si(struct mod_t *mod)
+{
+        /* If no MSHR is given, module can be accessed */
+        if (!mod->mshr_size)
+                return 1;
+
+        return mod->mshr_count < mod->mshr_size;
+}
 
 
 /* Return {set, way, tag, state} for an address.
@@ -397,6 +406,7 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 	DOUBLE_LINKED_LIST_INSERT_TAIL(&mod->access_hash_table[index], bucket, stack);
 
 	/* estadisticas */
+	stack->tiempo_acceso = asTiming(si_gpu)->cycle;
 	add_access(mod->level);
 }
 

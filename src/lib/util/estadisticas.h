@@ -69,12 +69,13 @@ struct esta_t
         long long latencia_red_cont;
         long long blk_compartidos;
         long long replicas_en_l1;
+	long long entradas_bloqueadas
 };
 
 struct si_gpu_unit_stats
 {
 	long long unit[6];
-	//sustituir cuando se puede "unit[6]" por "inst[6]" para que tenga mas sentido junto con macroinst[6]
+	//sustituir cuando se pueda "unit[6]" por "inst[6]" para que tenga mas sentido junto con macroinst[6]
 	long long macroinst[6];
 	long long total;
 	long long loads_latency;
@@ -83,15 +84,16 @@ struct si_gpu_unit_stats
 
 struct mem_system_stats
 {
+	struct esta_t mod_level[5];
 	long long load_latency;
 	long long load_latency_count;
 };
 
-static struct mem_system_stats mem_stats, instruciones_mem_stats_anterior;
+struct mem_system_stats mem_stats, instruciones_mem_stats_anterior, ciclos_mem_stats_anterior;
 
 struct si_gpu_unit_stats *gpu_inst;
 static struct esta_t estadis[10];
-static struct si_gpu_unit_stats gpu_stats, instruciones_gpu_stats_anterior; 
+struct si_gpu_unit_stats gpu_stats, instruciones_gpu_stats_anterior; 
 
 struct esta_t *estadisticas_ipc;
 static long long ciclo = 0;
@@ -102,4 +104,4 @@ void hrl2(int hit , struct mod_t *mod, int from_load);
 void estadisticas_por_intervalos(long long intervalo);
 void ipc_instructions(long long cycle, si_units unit);
 void load_finish(long long latencia, long long cantidad);
-
+void obtener_stats_cache(long long *ret_loacked, long long *ret_compartidos, long long  *ret_replicas);

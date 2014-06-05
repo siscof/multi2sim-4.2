@@ -161,6 +161,10 @@ void mem_system_init(void)
 
 	EV_MOD_NMOESI_STORE = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store");
+        EV_MOD_NMOESI_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_store,
+                        mem_domain_index, "mod_nmoesi_store_send");
+        EV_MOD_NMOESI_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_store,
+                        mem_domain_index, "mod_nmoesi_store_receive");
 	EV_MOD_NMOESI_STORE_LOCK = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store_lock");
 	EV_MOD_NMOESI_STORE_ACTION = esim_register_event_with_name(mod_handler_nmoesi_store,
@@ -172,6 +176,10 @@ void mem_system_init(void)
 	
 	EV_MOD_NMOESI_NC_STORE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store");
+        EV_MOD_NMOESI_NC_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
+                        mem_domain_index, "mod_nmoesi_nc_store_send");
+        EV_MOD_NMOESI_NC_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
+                        mem_domain_index, "mod_nmoesi_nc_store_receive");
 	EV_MOD_NMOESI_NC_STORE_LOCK = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store_lock");
 	EV_MOD_NMOESI_NC_STORE_WRITEBACK = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
@@ -204,6 +212,8 @@ void mem_system_init(void)
 			mem_domain_index, "mod_nmoesi_find_and_lock_port");
 	EV_MOD_NMOESI_FIND_AND_LOCK_ACTION = esim_register_event_with_name(mod_handler_nmoesi_find_and_lock,
 			mem_domain_index, "mod_nmoesi_find_and_lock_action");
+	EV_MOD_NMOESI_FIND_AND_LOCK_WAIT_MSHR = esim_register_event_with_name(mod_handler_nmoesi_find_and_lock,
+                        mem_domain_index, "mod_nmoesi_find_and_lock_wait_mshr");
 	EV_MOD_NMOESI_FIND_AND_LOCK_FINISH = esim_register_event_with_name(mod_handler_nmoesi_find_and_lock,
 			mem_domain_index, "mod_nmoesi_find_and_lock_finish");
 

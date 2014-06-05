@@ -10,66 +10,48 @@ int z, x, y, k, i;
 if((intervalo_anterior + ventana_muestreo) > intervalo )
 	return;
 
-intervalo_anterior = intervalo;
 
-//IPC
-//ipc = asEmu(si_emu)->instructions;
+long long latency = mem_stats.load_latency - ciclos_mem_stats_anterior.load_latency;
+long long contador = mem_stats.load_latency_count - ciclos_mem_stats_anterior.load_latency_count;
+
+fran_debug_general("%lld %lld ",mem_stats.mod_level[1].entradas_bloqueadas,mem_stats.mod_level[2].entradas_bloqueadas);
+fran_debug_general("%lld %lld ",latency, contador);
+
+fran_debug_general("%lld ",mem_stats.mod_level[1].coalesce - ciclos_mem_stats_anterior.mod_level[1].coalesce);
+fran_debug_general("%lld ",mem_stats.mod_level[1].accesses - ciclos_mem_stats_anterior.mod_level[1].accesses);
+fran_debug_general("%lld ",mem_stats.mod_level[1].hits - ciclos_mem_stats_anterior.mod_level[1].hits);
+fran_debug_general("%lld ",mem_stats.mod_level[1].invalidations - ciclos_mem_stats_anterior.mod_level[1].invalidations);
+fran_debug_general("%lld ",mem_stats.mod_level[2].coalesce - ciclos_mem_stats_anterior.mod_level[2].coalesce);
+fran_debug_general("%lld ",mem_stats.mod_level[2].accesses - ciclos_mem_stats_anterior.mod_level[2].accesses);
+fran_debug_general("%lld ",mem_stats.mod_level[2].hits - ciclos_mem_stats_anterior.mod_level[2].hits);
+fran_debug_general("%lld ",mem_stats.mod_level[2].invalidations - ciclos_mem_stats_anterior.mod_level[2].invalidations);
 
 
+fran_debug_general("%lld ",mem_stats.mod_level[1].busy_cicles_in - ciclos_mem_stats_anterior.mod_level[1].busy_cicles_in);
+fran_debug_general("%lld ",mem_stats.mod_level[1].busy_cicles_out - ciclos_mem_stats_anterior.mod_level[1].busy_cicles_out);
+fran_debug_general("%lld ",mem_stats.mod_level[2].busy_cicles_in - ciclos_mem_stats_anterior.mod_level[2].busy_cicles_in);
+fran_debug_general("%lld ",mem_stats.mod_level[2].busy_cicles_out - ciclos_mem_stats_anterior.mod_level[2].busy_cicles_out);
+fran_debug_general("%lld ",mem_stats.mod_level[1].latencia_red_acc - ciclos_mem_stats_anterior.mod_level[1].latencia_red_acc);
+fran_debug_general("%lld ",mem_stats.mod_level[1].latencia_red_cont - ciclos_mem_stats_anterior.mod_level[1].latencia_red_cont);
+fran_debug_general("%lld ",mem_stats.mod_level[2].latencia_red_acc - ciclos_mem_stats_anterior.mod_level[2].latencia_red_acc);
+fran_debug_general("%lld ",mem_stats.mod_level[2].latencia_red_cont - ciclos_mem_stats_anterior.mod_level[2].latencia_red_cont);
 
-if(estadis[0].media_latencia_contador == 0)
-	latencia = -1.0;
-        //fran_debug_latencia("%.1f\n",-1.0);
-else
-{
-      	latencia = (double) estadis[0].media_latencia/estadis[0].media_latencia_contador;
-      	//fran_debug_latencia("%.1f\n",latencia);
-        estadis[0].media_latencia=0;
-	estadis[0].media_latencia_contador=0;
-}
+memcpy(&ciclos_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
 
-   // calculo de hit ratio
-double hitratio0 = estadis[0].accesses ? estadis[0].hits/(double)estadis[0].accesses : -1.0;
-double hitratio1 = estadis[1].accesses ? estadis[1].hits/(double)estadis[1].accesses : -1.0;
-double hitratio2 = estadis[2].accesses ? estadis[2].hits/(double)estadis[2].accesses : -1.0;
-double hitratio2_real = estadis[5].accesses ? estadis[5].hits/(double)estadis[5].accesses : -1.0;
-
-//fran_debug_general("%lld ",ipc - ipc_anterior);
-fran_debug_general("%lld ",estadis[2].coalesce);
-fran_debug_general("%.1f ",latencia);
-fran_debug_general("%.3f ",hitratio2_real);
-fran_debug_general("%lld ",estadis[5].hits);
-fran_debug_general("%lld ",estadis[5].accesses);
-fran_debug_general("%.3f ",hitratio0);
-fran_debug_general("%lld ",estadis[0].hits);
-fran_debug_general("%lld ",estadis[0].accesses);
-fran_debug_general("%lld ",estadis[1].hits);
-fran_debug_general("%lld ",estadis[1].loads);
-fran_debug_general("%lld ",estadis[1].accesses);
-fran_debug_general("%.3f ",hitratio1);
-fran_debug_general("%lld ",estadis[1].busy_cicles_in);
-fran_debug_general("%lld ",estadis[1].busy_cicles_out);
-fran_debug_general("%lld ",estadis[1].invalidations);
-fran_debug_general("%lld ",estadis[2].hits);
-fran_debug_general("%lld ",estadis[2].accesses);
-fran_debug_general("%.3f ",hitratio2);
-fran_debug_general("%lld ",estadis[2].busy_cicles_in);
-fran_debug_general("%lld ",estadis[2].busy_cicles_out);
-fran_debug_general("%lld ",estadis[1].latencia_red_cont ? estadis[1].latencia_red_acc/estadis[1].latencia_red_cont : 0);
-fran_debug_general("%lld ",estadis[2].latencia_red_cont ? estadis[2].latencia_red_acc/estadis[2].latencia_red_cont : 0);
 
 int tag_ptr;
 int state_ptr;
-int contador = 0;
+contador = 0;
+long long locked[5] = {0,0,0,0,0};
 struct mod_t *mod;
 struct cache_t *cache;
 struct dir_t *dir;
+long long replica = 0;
+long long compartido = 0;
 
 for (k = 0; k < list_count(mem_system->mod_list); k++)
 {
 	mod = list_get(mem_system->mod_list, k);
-        if(mod->level != 2)
-        	continue;
 
         dir = mod->dir;
         cache = mod->cache;
@@ -78,6 +60,15 @@ for (k = 0; k < list_count(mem_system->mod_list); k++)
         {
 	        for (y = 0; y < dir->ysize; y++)
         	{
+			 struct dir_lock_t *dir_lock = dir_lock_get(dir, x, y);
+
+                        if(dir_lock->lock)
+                                locked[mod->level]++;
+
+		        if(mod->level != 2)
+                		continue;
+
+
                 	cache_get_block(cache, x, y, &tag_ptr, &state_ptr);
                         if(state_ptr)
                         {
@@ -91,11 +82,11 @@ for (k = 0; k < list_count(mem_system->mod_list); k++)
                                                 	contador++;
                                                         if(contador == 1)
                                                         {
-                                                        	estadis[mod->level].blk_compartidos++;
+                                                        	compartido++;
                                                         }
 							else
                                                         {
-                                                        	estadis[mod->level].replicas_en_l1++;
+                                                        	replica++;
 							}
                                                 }
                                         }
@@ -105,31 +96,80 @@ for (k = 0; k < list_count(mem_system->mod_list); k++)
         }
 }
 
-fran_debug_general("%lld ",estadis[2].blk_compartidos);
-fran_debug_general("%lld\n",estadis[2].replicas_en_l1);
+fran_debug_general("%lld ",compartido);
+fran_debug_general("%lld ",replica);
+fran_debug_general("%lld ",locked[1]);
+fran_debug_general("%lld ",locked[2]);
 
-estadis[2].coalesce = 0;
-estadis[0].accesses = 0;
-estadis[0].hits = 0;
-estadis[5].accesses = 0;
-estadis[5].hits = 0;
-estadis[1].loads = 0;
-estadis[1].accesses = 0;
-estadis[1].hits = 0;
-estadis[1].busy_cicles_in = 0;
-estadis[1].busy_cicles_out = 0;
-estadis[2].accesses = 0;
-estadis[2].hits = 0;
-estadis[2].busy_cicles_in = 0;
-estadis[2].busy_cicles_out = 0;
-estadis[1].invalidations = 0;
-estadis[1].latencia_red_acc = 0;
-estadis[1].latencia_red_cont = 0;
-estadis[2].latencia_red_acc = 0;
-estadis[2].latencia_red_cont = 0;
-estadis[2].blk_compartidos = 0;
-estadis[2].replicas_en_l1 = 0;
-//ipc_anterior = ipc;
+/*
+long long *compartidos = calloc(5, sizeof(long long)), *replicas = calloc(5, sizeof(long long)), *locked = calloc(5, sizeof(long long));
+obtener_stats_cache(compartidos, replicas, locked);
+
+fran_debug_general("%lld ",*(compartidos+2));
+fran_debug_general("%lld ",*(replicas+2));
+fran_debug_general("%lld ",*(locked+1));
+fran_debug_general("%lld ",*(locked+2));
+*/
+fran_debug_general("%lld %lld\n",intervalo - intervalo_anterior , intervalo);
+
+intervalo_anterior = intervalo;
+
+}
+
+
+void obtener_stats_cache(long long *ret_locked, long long *ret_compartidos, long long  *ret_replicas){
+int z, x, y, k, i;
+int tag_ptr;
+int state_ptr;
+int comp = 0;
+struct mod_t *mod;
+struct cache_t *cache;
+struct dir_t *dir;
+long long replicas[5] = {0,0,0,0,0};
+long long compartidos[5] = {0,0,0,0,0};
+long long locked[5] = {0,0,0,0,0};
+for (k = 0; k < list_count(mem_system->mod_list); k++)
+{
+        mod = list_get(mem_system->mod_list, k);
+
+        dir = mod->dir;
+        cache = mod->cache;
+
+        for (x = 0; x < dir->xsize; x++)
+        {
+                for (y = 0; y < dir->ysize; y++)
+                {
+			struct dir_lock_t *dir_lock = dir_lock_get(dir, x, y);
+			
+			if(dir_lock->lock)
+				ret_locked[mod->level]++;
+
+                        cache_get_block(cache, x, y, &tag_ptr, &state_ptr);
+                        if(state_ptr)
+                        {
+                                for (z = 0; z < dir->zsize; z++)
+                                {
+                                        comp = 0;
+                                        for (i = 0; i < dir->num_nodes; i++)
+                                        {
+                                                if (dir_entry_is_sharer(dir, x, y, z, i))
+                                                {
+                                                        comp++;
+                                                        if(comp == 1)
+                                                        {
+                                                                ret_compartidos[mod->level]++;
+                                                        }
+                                                        else
+                                                        {
+                                                                ret_replicas[mod->level]++;
+                                                        }
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
+}
 
 }
                        
@@ -170,7 +210,7 @@ estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
 
 //imprimir columnas
-fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Accesos_L1 X X X X L1->L2_busy_in L1<-L2_busy_out invalidaciones X X X L2<-MM_busy_in L2->MM_busy_out Lat_L1-L2 Lat_L2-MM blk_comp_L2 Replicas_L1");
+fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Accesos_L1 X X X X L1->L2_busy_in L1<-L2_busy_out invalidaciones X X X L2<-MM_busy_in L2->MM_busy_out Lat_L1-L2 Lat_L2-MM blk_comp_L2 Replicas_L1 \n");
 
 fran_debug_ipc("Coalesce_L1 Coalesce_L2 accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 MPKI_L1 MPKI_L2 HR_L1 HR_L2 Lat_L1-L2 Lat_L2-MM campo1 campo2 campo ....3 \n");
 
@@ -196,21 +236,25 @@ fran_debug_ipc("Coalesce_L1 Coalesce_L2 accesos_L1 accesos_L2 efectivos_L1 efect
 void add_coalesce(int level)
 {
 	(estadisticas_ipc + level)->coalesce++;
+        mem_stats.mod_level[level].coalesce++;
 }
 
 void add_access(int level)
 {
 	(estadisticas_ipc + level)->accesses++;
+        mem_stats.mod_level[level].accesses++;
 }
 
 void add_hit(int level)
 {
 	(estadisticas_ipc + level)->hits++;
+        mem_stats.mod_level[level].hits++;
 }
 
 void add_miss(int level)
 {
         (estadisticas_ipc + level)->misses++;
+        mem_stats.mod_level[level].misses++;
 }
 
 long long add_si_inst(si_units unit)
@@ -239,13 +283,24 @@ void ipc_instructions(long long cycle, si_units unit)
 {
 	long long efectivosL1, efectivosL2;
 	
-	long long intervalo_instrucciones = 10000;
+	long long intervalo_instrucciones = 100000;
 
 	if(!(add_si_inst(unit) % intervalo_instrucciones))
 	{
+/*
+long long *compartidos, *replicas, *locked;
+obtener_stats_cache(compartidos, replicas, locked);
+
+fran_debug_ipc("%lld ",*(compartidos+2));
+fran_debug_ipc("%lld ",*(replicas+2));
+fran_debug_ipc("%lld ",*(locked+1));
+fran_debug_ipc("%lld ",*(locked+2));
+
+*/
+
 		efectivosL1 = (estadisticas_ipc + 1)->accesses - (estadisticas_ipc + 1)->coalesce;
                 efectivosL2 = (estadisticas_ipc + 2)->accesses - (estadisticas_ipc + 2)->coalesce;
-		
+		fran_debug_ipc("%lld %lld ",mem_stats.mod_level[1].entradas_bloqueadas,mem_stats.mod_level[2].entradas_bloqueadas);		
 		fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->coalesce, (estadisticas_ipc + 2)->coalesce);
 		fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->accesses, (estadisticas_ipc + 2)->accesses);
 		fran_debug_ipc("%lld %lld ",efectivosL1, efectivosL2);
@@ -275,7 +330,10 @@ void ipc_instructions(long long cycle, si_units unit)
 		latency = mem_stats.load_latency - instruciones_mem_stats_anterior.load_latency;
 		contador = mem_stats.load_latency_count - instruciones_mem_stats_anterior.load_latency_count;
                 fran_debug_ipc("%lld %lld ",latency, contador);
-	
+
+
+		instruciones_mem_stats_anterior.load_latency = mem_stats.load_latency;
+		instruciones_mem_stats_anterior.load_latency_count = mem_stats.load_latency_count;	
 		instruciones_gpu_stats_anterior.loads_latency = gpu_stats.loads_latency;
 		instruciones_gpu_stats_anterior.loads_count = gpu_stats.loads_count;
 		instruciones_gpu_stats_anterior.macroinst[v_mem_u] = gpu_stats.macroinst[v_mem_u];
