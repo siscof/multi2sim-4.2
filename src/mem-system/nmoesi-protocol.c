@@ -164,7 +164,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->id, mod->name, stack->addr);
 		
 		/* Record access */
-		mod_access_start(mod, stack, mod_access_load);
+		//mod_access_start(mod, stack, mod_access_load);
 		//FRAN
 		mod->loads++;
 		
@@ -187,7 +187,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Coalesce access */
 		
 
-		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
+		//master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
+		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
+                mod_access_start(mod, stack, mod_access_load);
+
 		if (master_stack)
 		{
 
@@ -284,7 +287,7 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 		stack->id, mod->name);
 
 	/* If there is any older write, wait for it */
-	older_stack = mod_in_flight_write(mod, stack);
+/*	older_stack = mod_in_flight_write(mod, stack);
 	if (older_stack)
 	{
 		mem_debug("    %lld wait for write %lld\n",
@@ -292,10 +295,10 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
 		return;
 	}
-
+*/
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
-	older_stack = mod_in_flight_address(mod, stack->addr, stack);
+/*	older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -303,7 +306,7 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
 		return;
 	}
-
+*/
 	/* Call find and lock */
 	new_stack = mod_stack_create(stack->id, mod, stack->addr,
 		EV_MOD_NMOESI_LOAD_ACTION, stack);
@@ -367,7 +370,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
                         esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
                         return;
                 }
-		//mod->mshr_count++;
+		mod->mshr_count++;
 
 		add_miss(mod->level);
 		estadisticas(0, 0);
@@ -396,7 +399,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			stack->id, mod->name);
 
 		//Fran
-		//stack->mod->mshr_count--;
+		stack->mod->mshr_count--;
 
 		/* Error on read request. Unlock block and retry load. */
 		if (stack->err)
@@ -425,8 +428,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_unlock\"\n",
 			stack->id, mod->name);
-
-		mem_stats.mod_level[mod->level].entradas_bloqueadas--;
+		//estadsiticas
+		//mem_stats.mod_level[mod->level].entradas_bloqueadas--;
 
 		/* Unlock directory entry */
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
@@ -482,15 +485,18 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 
 		
 			load_finished++;
-			if( (load_finished % 10000) == 0 )
+		/*	if( (load_finished % 10000) == 0 )
 			{
 				load_finished = 0;
 				fran_debug_t1000k("%lld\n", ciclo);
 				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
 				
 				ret_ciclo = ciclo;
-			}
-		}		
+			}*/
+		}
+
+		if(stack->coalesced && stack->state)
+			add_CoalesceHit(mod->level);		
 
 		/* Increment witness variable */
 		if (stack->witness_ptr)
@@ -540,10 +546,12 @@ void mod_handler_nmoesi_store(int event, void *data)
 			stack->id, mod->name, stack->addr);
 
 		/* Record access */
-		mod_access_start(mod, stack, mod_access_store);
+		//mod_access_start(mod, stack, mod_access_store);
 
 		/* Coalesce access */
-		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, stack);
+		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, NULL);
+		mod_access_start(mod, stack, mod_access_store);
+
 		if (master_stack)
 		{
 			mod->writes++;
@@ -552,8 +560,10 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 			/* Increment witness variable */
 			if (stack->witness_ptr)
+			{
 				(*stack->witness_ptr)++;
-
+				stack->witness_ptr = NULL;
+			}
 			return;
 		}
 
@@ -563,7 +573,9 @@ void mod_handler_nmoesi_store(int event, void *data)
                         new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_NMOESI_STORE_SEND, stack);
 			esim_schedule_event(EV_MOD_NMOESI_STORE_SEND, new_stack, 0);
 			new_stack->request_dir= mod_request_up_down;
-                        return;
+                        new_stack->witness_ptr = stack->witness_ptr;
+			stack->witness_ptr = NULL;
+			return;
                 }
 
 		/* Continue */
@@ -631,14 +643,14 @@ void mod_handler_nmoesi_store(int event, void *data)
 			stack->id, mod->name);
 
 		/* If there is any older access, wait for it */
-		older_stack = stack->access_list_prev;
+		/*older_stack = stack->access_list_prev;
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for access %lld\n",
 				stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_STORE_LOCK);
 			return;
-		}
+		}*/
 
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
@@ -745,6 +757,10 @@ void mod_handler_nmoesi_store(int event, void *data)
 		mem_trace("mem.end_access name=\"A-%lld\"\n",
 			stack->id);
 
+		/* Increment witness variable */
+		if (stack->witness_ptr)
+			(*stack->witness_ptr)++;			
+
 		/* Return event queue element into event queue */
 		if (stack->event_queue && stack->event_queue_item)
 			linked_list_add(stack->event_queue, stack->event_queue_item);
@@ -786,15 +802,17 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			"state=\"%s:nc store\" addr=0x%x\n", stack->id, mod->name, stack->addr);
 
 		/* Record access */
-		mod_access_start(mod, stack, mod_access_nc_store);
+		//mod_access_start(mod, stack, mod_access_nc_store);
 
 		/* Coalesce access */
-		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
+		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, NULL);
+		mod_access_start(mod, stack, mod_access_nc_store);
 		if (master_stack)
 		{
 			mod->nc_writes++;
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_NC_STORE_FINISH);
+			
 			return;
 		}
 
@@ -874,23 +892,23 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			stack->id, mod->name);
 
 		/* If there is any older write, wait for it */
-		older_stack = mod_in_flight_write(mod, stack);
+		/*older_stack = mod_in_flight_write(mod, stack);
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
-		}
+		}*/
 
 		/* If there is any older access to the same address that this access could not
 		 * be coalesced with, wait for it. */
-		older_stack = mod_in_flight_address(mod, stack->addr, stack);
+		/*older_stack = mod_in_flight_address(mod, stack->addr, stack);
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
-		}
+		}*/
 
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
@@ -1379,11 +1397,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->blocking ? mod->blocking_writes++ : mod->non_blocking_writes++;
 
 			/* Increment witness variable when port is locked */
-			if (stack->witness_ptr)
+			/*if (stack->witness_ptr)
 			{
 				(*stack->witness_ptr)++;
 				stack->witness_ptr = NULL;
-			}
+			}*/
 
 			if (stack->hit)
 				mod->write_hits++;
@@ -2013,27 +2031,26 @@ void mod_handler_nmoesi_read_request(int event, void *data)
         	new_stack->blocking = stack->request_dir == mod_request_down_up;
 		new_stack->read = 1;
 		new_stack->retry = 0;
-		
+		new_stack->access_kind = stack->access_kind;
 //
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
 		{
-//			if(stack->access_kind == mod_access_load)
-  //              	{
-			new_stack->access_kind = mod_access_load;
-                        	
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
-                
-            		master_stack = mod_can_coalesce(target_mod, mod_access_load, stack->addr, NULL);
-			mod_access_start(target_mod, stack, mod_access_load);
-			assert(master_stack != stack);
-           	   	if (master_stack && target_mod->level == 2)
-        	       	{     	
-				estadis[target_mod->level].coalesce++;
-				stack->coalesced = 1;
-				mod_coalesce(target_mod, master_stack, new_stack);
-                	 	mod_stack_wait_in_stack(new_stack, master_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
-             	    		return;
+
+			if(stack->access_kind == mod_access_load)
+                	{                        	
+            			master_stack = mod_can_coalesce(target_mod, mod_access_load, stack->addr, NULL);
+				mod_access_start(target_mod, stack, mod_access_load);
+				assert(master_stack != stack);
+           	   		if (master_stack && target_mod->level >= 2)
+        	       		{     	
+					estadis[target_mod->level].coalesce++;
+					stack->coalesced = 1;
+					mod_coalesce(target_mod, master_stack, new_stack);
+                	 		mod_stack_wait_in_stack(new_stack, master_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
+             	    			return;
+				}
 			}
 		
 		}
@@ -2585,11 +2602,13 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			src_node = target_mod->high_net_node;
 			dst_node = mod->low_net_node;
 			
-			if(stack->finished == 0)
+			if(stack->access_kind == mod_access_load && stack->finished == 0)
 			{
                         
-					mod_stack_wakeup_stack(stack);
-					mod_access_finish(target_mod, stack);
+				mod_stack_wakeup_stack(stack);
+				mod_access_finish(target_mod, stack);
+		                if(stack->coalesced && stack->state)
+                		        add_CoalesceHit(target_mod->level);
 
                 	}
 		}

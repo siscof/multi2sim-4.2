@@ -69,7 +69,8 @@ struct esta_t
         long long latencia_red_cont;
         long long blk_compartidos;
         long long replicas_en_l1;
-	long long entradas_bloqueadas
+	long long entradas_bloqueadas;
+	long long coalesceHits;
 };
 
 struct si_gpu_unit_stats
@@ -89,11 +90,11 @@ struct mem_system_stats
 	long long load_latency_count;
 };
 
-struct mem_system_stats mem_stats, instruciones_mem_stats_anterior, ciclos_mem_stats_anterior;
+struct mem_system_stats mem_stats, instrucciones_mem_stats_anterior, ciclos_mem_stats_anterior;
 
 struct si_gpu_unit_stats *gpu_inst;
 static struct esta_t estadis[10];
-struct si_gpu_unit_stats gpu_stats, instruciones_gpu_stats_anterior; 
+struct si_gpu_unit_stats gpu_stats, instrucciones_gpu_stats_anterior; 
 
 struct esta_t *estadisticas_ipc;
 static long long ciclo = 0;
