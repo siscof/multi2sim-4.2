@@ -91,8 +91,6 @@ struct mod_t
 	int latency;
 	int dir_latency;
 	int mshr_size;
-	//FRAN
-	int mshr_count;
 
 	/* Module level starting from entry points */
 	int level;

@@ -154,7 +154,6 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 		stack = master_stack->waiting_list_head;
 		event = stack->waiting_list_event;
 		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
-              	stack->state = master_stack->state;
 		esim_schedule_event(event, stack, 0);
 		mem_debug(" %lld", stack->id);
 	}

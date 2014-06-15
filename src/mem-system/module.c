@@ -200,15 +200,6 @@ int mod_can_access(struct mod_t *mod, unsigned int addr)
 		mod->access_list_coalesced_count;
 	return non_coalesced_accesses < mod->mshr_size;
 }
-/*este metodo nos dice si tenemos espacio en el mshr para emitir un acceso hacia un modulo superior*/
-int mod_can_access_si(struct mod_t *mod)
-{
-        /* If no MSHR is given, module can be accessed */
-        if (!mod->mshr_size)
-                return 1;
-
-        return mod->mshr_count < mod->mshr_size;
-}
 
 
 /* Return {set, way, tag, state} for an address.
@@ -480,7 +471,7 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 			continue;
 
 		/* Address matches */
-		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+		if ((stack->coalesced == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
 			return stack;
 	}
 
@@ -504,7 +495,7 @@ struct mod_stack_t *mod_in_flight_write(struct mod_t *mod,
 	/* Search */
 	for (stack = older_than_stack->access_list_prev; stack;
 		stack = stack->access_list_prev)
-		if (stack->access_kind == mod_access_store)
+		if ((stack->coalesced == 0) && (stack->access_kind == mod_access_store))
 			return stack;
 
 	/* Not found */
