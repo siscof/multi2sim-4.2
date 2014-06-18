@@ -46,6 +46,7 @@ enum mod_access_kind_t
 {
 	mod_access_invalid = 0,
 	mod_access_load,
+	mod_access_nc_load,
 	mod_access_store,
 	mod_access_nc_store,
 	mod_access_prefetch
@@ -91,6 +92,8 @@ struct mod_t
 	int latency;
 	int dir_latency;
 	int mshr_size;
+	//FRAN
+	int mshr_count;
 
 	/* Module level starting from entry points */
 	int level;

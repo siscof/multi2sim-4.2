@@ -39,7 +39,8 @@ enum cache_block_state_t
 	cache_block_modified,
 	cache_block_owned,
 	cache_block_exclusive,
-	cache_block_shared
+	cache_block_shared,
+	cache_block_valid
 };
 
 struct cache_block_t

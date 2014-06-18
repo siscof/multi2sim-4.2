@@ -23,7 +23,7 @@ mem-system.o: mem-system.c ../../src/arch/common/arch.h \
  ../../src/lib/util/file.h ../../src/lib/util/list.h \
  ../../src/lib/util/string.h ../../src/network/network.h \
  ../../src/lib/util/config.h cache.h config.h local-mem-protocol.h \
- mem-system.h module.h nmoesi-protocol.h
+ mem-system.h module.h nmoesi-protocol.h vi-protocol.h directory.h
 
 ../../src/arch/common/arch.h:
 
@@ -130,3 +130,7 @@ mem-system.h:
 module.h:
 
 nmoesi-protocol.h:
+
+vi-protocol.h:
+
+directory.h:

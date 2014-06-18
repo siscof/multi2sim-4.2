@@ -38,7 +38,7 @@
 #include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/gpu.h>
 #include <lib/util/class.h>
-
+#include "vi-protocol.h"
 /* String map for access type */
 struct str_map_t mod_access_kind_map =
 {
@@ -129,49 +129,96 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	stack->client_info = client_info;
 
 	/* Select initial CPU/GPU event */
-	if (mod->kind == mod_kind_cache || mod->kind == mod_kind_main_memory)
+	if(directory_type == dir_type_nmoesi)
 	{
-		if (access_kind == mod_access_load)
+		if (mod->kind == mod_kind_cache || mod->kind == mod_kind_main_memory)
 		{
-			event = EV_MOD_NMOESI_LOAD;
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_NMOESI_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_NMOESI_STORE;
+			}
+			else if (access_kind == mod_access_nc_store)
+			{
+				event = EV_MOD_NMOESI_NC_STORE;
+			}
+			else if (access_kind == mod_access_prefetch)
+			{
+				event = EV_MOD_NMOESI_PREFETCH;
+			}
+			else 
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
 		}
-		else if (access_kind == mod_access_store)
+		else if (mod->kind == mod_kind_local_memory)
 		{
-			event = EV_MOD_NMOESI_STORE;
-		}
-		else if (access_kind == mod_access_nc_store)
-		{
-			event = EV_MOD_NMOESI_NC_STORE;
-		}
-		else if (access_kind == mod_access_prefetch)
-		{
-			event = EV_MOD_NMOESI_PREFETCH;
-		}
-		else 
-		{
-			panic("%s: invalid access kind", __FUNCTION__);
-		}
-	}
-	else if (mod->kind == mod_kind_local_memory)
-	{
-		if (access_kind == mod_access_load)
-		{
-			event = EV_MOD_LOCAL_MEM_LOAD;
-		}
-		else if (access_kind == mod_access_store)
-		{
-			event = EV_MOD_LOCAL_MEM_STORE;
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_LOCAL_MEM_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_LOCAL_MEM_STORE;
+			}
+			else
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
 		}
 		else
 		{
-			panic("%s: invalid access kind", __FUNCTION__);
+			panic("%s: invalid mod kind", __FUNCTION__);
+		}
+	}
+	else if(directory_type == dir_type_vi)
+	{
+		if (mod->kind == mod_kind_cache || mod->kind == mod_kind_main_memory)
+		{
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_VI_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_VI_STORE;
+			}
+			else if (access_kind == mod_access_nc_store)
+			{
+				event = EV_MOD_VI_STORE;
+			}
+			else 
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
+		}
+		else if (mod->kind == mod_kind_local_memory)
+		{
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_LOCAL_MEM_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_LOCAL_MEM_STORE;
+			}
+			else
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
+		}
+		else
+		{
+			panic("%s: invalid mod kind", __FUNCTION__);
 		}
 	}
 	else
 	{
 		panic("%s: invalid mod kind", __FUNCTION__);
-	}
-
+	}	
 	/* Schedule */
 	esim_execute_event(event, stack);
 

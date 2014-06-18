@@ -35,6 +35,9 @@ libmemsystem_a_SOURCES = \
 	nmoesi-protocol.c \
 	nmoesi-protocol.h \
 	\
+	vi-protocol.c \
+	vi-protocol.h \
+	\
 	spec-mem.c \
 	spec-mem.h \
 	\

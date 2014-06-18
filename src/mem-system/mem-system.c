@@ -32,6 +32,8 @@
 #include "mem-system.h"
 #include "module.h"
 #include "nmoesi-protocol.h"
+#include "vi-protocol.h"
+#include "directory.h"
 //fran
 //#include <lib/util/fran.h>
 //#include "directory.h"
@@ -47,6 +49,7 @@ int fran_category;
 
 /* Frequency domain, as returned by function 'esim_new_domain'. */
 int mem_frequency = 1000;
+enum dir_type_t directory_type = dir_type_nmoesi;
 int mem_domain_index;
 
 struct mem_system_t *mem_system;
@@ -139,6 +142,49 @@ void mem_system_init(void)
 	if (*mem_report_file_name && !file_can_open_for_write(mem_report_file_name))
 		fatal("%s: cannot open GPU cache report file",
 			mem_report_file_name);
+			
+	/* VI memory event-driven simulation*/
+	
+	EV_MOD_VI_LOAD = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load");
+	EV_MOD_VI_LOAD_SEND = esim_register_event_with_name(mod_handler_vi_load,
+                        mem_domain_index, "mod_vi_load_send");
+	EV_MOD_VI_LOAD_RECEIVE = esim_register_event_with_name(mod_handler_vi_load,
+                        mem_domain_index, "mod_vi_load_receive");
+	EV_MOD_VI_LOAD_LOCK = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_lock");
+	EV_MOD_VI_LOAD_ACTION = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_action");
+	EV_MOD_VI_LOAD_MISS = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_miss");
+	EV_MOD_VI_LOAD_UNLOCK = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_unlock");
+	EV_MOD_VI_LOAD_FINISH = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_finish");
+
+	EV_MOD_VI_STORE = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store");
+    EV_MOD_VI_STORE_SEND = esim_register_event_with_name(mod_handler_vi_store,
+                        mem_domain_index, "mod_vi_store_send");
+    EV_MOD_VI_STORE_RECEIVE = esim_register_event_with_name(mod_handler_vi_store,
+                        mem_domain_index, "mod_vi_store_receive");
+	EV_MOD_VI_STORE_LOCK = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_lock");
+	EV_MOD_VI_STORE_ACTION = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_action");
+	EV_MOD_VI_STORE_UNLOCK = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_unlock");
+	EV_MOD_VI_STORE_FINISH = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_finish");
+			
+	EV_MOD_VI_FIND_AND_LOCK = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock");
+	EV_MOD_VI_FIND_AND_LOCK_PORT = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock_port");
+	EV_MOD_VI_FIND_AND_LOCK_ACTION = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock_action");
+	EV_MOD_VI_FIND_AND_LOCK_FINISH = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock_finish");
 
 	/* NMOESI memory event-driven simulation */
 
@@ -163,7 +209,7 @@ void mem_system_init(void)
 			mem_domain_index, "mod_nmoesi_store");
 	EV_MOD_NMOESI_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_store,
                         mem_domain_index, "mod_nmoesi_store_send");
-    	EV_MOD_NMOESI_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_store,
+    EV_MOD_NMOESI_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_store,
                         mem_domain_index, "mod_nmoesi_store_receive");
 	EV_MOD_NMOESI_STORE_LOCK = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store_lock");
@@ -178,7 +224,7 @@ void mem_system_init(void)
 			mem_domain_index, "mod_nmoesi_nc_store");
 	EV_MOD_NMOESI_NC_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
                         mem_domain_index, "mod_nmoesi_nc_store_send");
-    	EV_MOD_NMOESI_NC_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
+    EV_MOD_NMOESI_NC_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
                         mem_domain_index, "mod_nmoesi_nc_store_receive");
 	EV_MOD_NMOESI_NC_STORE_LOCK = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store_lock");

@@ -117,6 +117,10 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 	work_item_gidy_start = work_group->id_3d[1] * ndrange->local_size3[1];
 	work_item_gidz_start = work_group->id_3d[2] * ndrange->local_size3[2];
 
+	printf("work_items_per_group = %d",work_items_per_group);
+        printf("wavefronts_per_group = %d",wavefronts_per_group);
+        printf("si_emu_wavefront_size = %d",si_emu_wavefront_size);
+
 	/* Initialize work-item metadata */
 	lid = 0;
 	tid = work_group->id * work_items_per_group;

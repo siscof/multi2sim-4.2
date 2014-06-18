@@ -315,6 +315,7 @@ static void mem_config_check(struct arch_t *arch, void *user_data)
 static void mem_config_read_general(struct config_t *config)
 {
 	char *section;
+	char *dir_type;
 
 	/* Section with general parameters */
 	section = "General";
@@ -337,6 +338,23 @@ static void mem_config_read_general(struct config_t *config)
 	/* Peer transfers */
 	mem_peer_transfers = config_read_bool(config, section, 
 		"PeerTransfers", 1);
+		
+	/* Directory type*/
+	dir_type = config_read_string(config, section, "DirectoryType", "");
+	
+	if(!strncasecmp(dir_type,"nmoesi", 7))
+	{
+		directory_type = dir_type_nmoesi;
+	}
+	else if(!strncasecmp(dir_type,"vi", 3))
+	{
+		directory_type = dir_type_vi;		
+	}
+	else
+	{
+		fatal("%s: directory type: %s : isn't a valid directory type (nmoesi, vi)\n",
+				mem_config_file_name, dir_type);	
+	}
 }
 
 

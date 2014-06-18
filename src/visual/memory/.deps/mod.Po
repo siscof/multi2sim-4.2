@@ -1,23 +1,28 @@
-mod.o: mod.c /usr/include/assert.h /usr/include/features.h \
- /usr/include/sys/cdefs.h /usr/include/bits/wordsize.h \
- /usr/include/gnu/stubs.h /usr/include/gnu/stubs-64.h \
- ../../../src/lib/mhandle/mhandle.h /usr/include/stdlib.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
+mod.o: mod.c /usr/include/stdc-predef.h /usr/include/assert.h \
+ /usr/include/features.h /usr/include/sys/cdefs.h \
+ /usr/include/bits/wordsize.h /usr/include/gnu/stubs.h \
+ /usr/include/gnu/stubs-64.h ../../../src/lib/mhandle/mhandle.h \
+ /usr/include/stdlib.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include/stddef.h \
  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
- /usr/include/bits/byteswap.h /usr/include/sys/types.h \
- /usr/include/bits/types.h /usr/include/bits/typesizes.h \
- /usr/include/time.h /usr/include/sys/select.h /usr/include/bits/select.h \
- /usr/include/bits/sigset.h /usr/include/bits/time.h \
- /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
- /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
- ../../../src/lib/util/debug.h /usr/include/stdio.h /usr/include/libio.h \
- /usr/include/_G_config.h /usr/include/wchar.h \
- /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
+ /usr/include/bits/byteswap.h /usr/include/bits/types.h \
+ /usr/include/bits/typesizes.h /usr/include/bits/byteswap-16.h \
+ /usr/include/sys/types.h /usr/include/time.h /usr/include/sys/select.h \
+ /usr/include/bits/select.h /usr/include/bits/sigset.h \
+ /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
+ /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
+ /usr/include/bits/stdlib-float.h /usr/include/string.h \
+ /usr/include/xlocale.h ../../../src/lib/util/debug.h \
+ /usr/include/stdio.h /usr/include/libio.h /usr/include/_G_config.h \
+ /usr/include/wchar.h \
+ /usr/lib/gcc/x86_64-redhat-linux/4.8.2/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
  ../../../src/lib/util/hash-table.h ../../../src/lib/util/linked-list.h \
  ../../../src/lib/util/misc.h ../../../src/lib/util/string.h \
  ../../../src/visual/common/trace.h mem-system.h mod.h mod-access.h net.h
+
+/usr/include/stdc-predef.h:
 
 /usr/include/assert.h:
 
@@ -35,7 +40,7 @@ mod.o: mod.c /usr/include/assert.h /usr/include/features.h \
 
 /usr/include/stdlib.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.8.2/include/stddef.h:
 
 /usr/include/bits/waitflags.h:
 
@@ -47,11 +52,13 @@ mod.o: mod.c /usr/include/assert.h /usr/include/features.h \
 
 /usr/include/bits/byteswap.h:
 
-/usr/include/sys/types.h:
-
 /usr/include/bits/types.h:
 
 /usr/include/bits/typesizes.h:
+
+/usr/include/bits/byteswap-16.h:
+
+/usr/include/sys/types.h:
 
 /usr/include/time.h:
 
@@ -69,6 +76,8 @@ mod.o: mod.c /usr/include/assert.h /usr/include/features.h \
 
 /usr/include/alloca.h:
 
+/usr/include/bits/stdlib-float.h:
+
 /usr/include/string.h:
 
 /usr/include/xlocale.h:
@@ -83,7 +92,7 @@ mod.o: mod.c /usr/include/assert.h /usr/include/features.h \
 
 /usr/include/wchar.h:
 
-/usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h:
+/usr/lib/gcc/x86_64-redhat-linux/4.8.2/include/stdarg.h:
 
 /usr/include/bits/stdio_lim.h:
 

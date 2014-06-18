@@ -24,6 +24,8 @@
 #include <lib/util/debug.h>
 #include <lib/util/list.h>
 #include <mem-system/module.h>
+#include <mem-system/mem-system.h>
+//#include <mem-system/directory.h>
 
 #include "compute-unit.h"
 #include "gpu.h"
@@ -251,17 +253,19 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		struct mod_t *aux =vector_mem->compute_unit->vector_cache;
 		
 		/* Set the access type */
-		if (uop->vector_mem_write && !uop->glc)
+		if (uop->vector_mem_write)
 		{
-			access_kind = mod_access_nc_store;
-		}
-		else if (uop->vector_mem_write && uop->glc)
-		{
-			access_kind = mod_access_store;
+			if (uop->glc)
+				access_kind = mod_access_store;
+			else
+				access_kind = mod_access_nc_store;
 		}
 		else if (uop->vector_mem_read)
 		{
-			access_kind = mod_access_load;
+                        if ((directory_type == dir_type_nmoesi) || uop->glc)
+                                access_kind = mod_access_load;
+                        else
+                                access_kind = mod_access_nc_load;
 		}
 		else 
 			fatal("%s: invalid access kind", __FUNCTION__);
