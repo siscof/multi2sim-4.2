@@ -162,6 +162,23 @@ void mem_system_init(void)
 	EV_MOD_VI_LOAD_FINISH = esim_register_event_with_name(mod_handler_vi_load,
 			mem_domain_index, "mod_vi_load_finish");
 
+	EV_MOD_VI_NC_LOAD = esim_register_event_with_name(mod_handler_vi_nc_load,
+			mem_domain_index, "mod_vi_nc_load");
+	EV_MOD_VI_NC_LOAD_SEND = esim_register_event_with_name(mod_handler_vi_nc_load,
+                        mem_domain_index, "mod_vi_nc_load_send");
+	EV_MOD_VI_NC_LOAD_RECEIVE = esim_register_event_with_name(mod_handler_vi_nc_load,
+                        mem_domain_index, "mod_vi_nc_load_receive");
+	EV_MOD_VI_NC_LOAD_LOCK = esim_register_event_with_name(mod_handler_vi_nc_load,
+			mem_domain_index, "mod_vi_nc_load_lock");
+	EV_MOD_VI_NC_LOAD_ACTION = esim_register_event_with_name(mod_handler_vi_nc_load,
+			mem_domain_index, "mod_vi_nc_load_action");
+	EV_MOD_VI_NC_LOAD_MISS = esim_register_event_with_name(mod_handler_vi_nc_load,
+			mem_domain_index, "mod_vi_nc_load_miss");
+	EV_MOD_VI_NC_LOAD_UNLOCK = esim_register_event_with_name(mod_handler_vi_nc_load,
+			mem_domain_index, "mod_vi_nc_load_unlock");
+	EV_MOD_VI_NC_LOAD_FINISH = esim_register_event_with_name(mod_handler_vi_nc_load,
+			mem_domain_index, "mod_vi_nc_load_finish");
+
 	EV_MOD_VI_STORE = esim_register_event_with_name(mod_handler_vi_store,
 			mem_domain_index, "mod_vi_store");
     EV_MOD_VI_STORE_SEND = esim_register_event_with_name(mod_handler_vi_store,

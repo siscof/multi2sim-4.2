@@ -142,9 +142,9 @@ estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
 
 //imprimir columnas
-fran_debug_general("IPC Coa_L2 Lat HR_L2 Hits_L2 accesos_L2 HR_L1 Hits_L1 Accesos_L1 X X X X L1->L2_busy_in L1<-L2_busy_out invalidaciones X X X L2<-MM_busy_in L2->MM_busy_out Lat_L1-L2 Lat_L2-MM blk_comp_L2 Replicas_L1 \n");
+fran_debug_general("lat_loads num_loads Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
-fran_debug_ipc("mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_L1 Coalesces_L2 accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales\n");
+fran_debug_ipc("mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_L1 Coalesces_L2 accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
