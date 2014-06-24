@@ -445,7 +445,7 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 
 	/* estadisticas */
 	stack->tiempo_acceso = asTiming(si_gpu)->cycle;
-	add_access(mod->level);
+//	add_access(mod->level);
 }
 
 
@@ -652,9 +652,17 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 			    stack->access_kind != mod_access_prefetch)
 				return NULL;
 
-			if (stack->addr >> mod->log_block_size ==
-				addr >> mod->log_block_size)
-				return stack->master_stack ? stack->master_stack : stack;
+			if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+			{ 
+				if (stack->master_stack && stack->master_stack->coalesced_count < 16)
+				{
+					return stack->master_stack;
+				}
+				if(!stack->master_stack && stack->coalesced_count < 16)
+				{
+					return stack; 
+				}
+			}
 		}
 		break;
 	}
@@ -679,7 +687,15 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 			return NULL;
 
 		/* Coalesce */
-		return stack->master_stack ? stack->master_stack : stack;
+		//return stack->master_stack ? stack->master_stack : stack;
+		if (stack->master_stack && stack->master_stack->coalesced_count < 16)
+                {
+                	return stack->master_stack;
+                }
+                if(!stack->master_stack && stack->coalesced_count < 16)
+                {
+                	return stack;           
+                }
 	}
 
 	case mod_access_nc_store:
@@ -702,7 +718,15 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 			return NULL;
 
 		/* Coalesce */
-		return stack->master_stack ? stack->master_stack : stack;
+		//return stack->master_stack ? stack->master_stack : stack;
+		if (stack->master_stack && stack->master_stack->coalesced_count < 16)
+                {
+                	return stack->master_stack;
+                }
+                if(!stack->master_stack && stack->coalesced_count < 16)
+                {
+                	return stack;           
+                }
 	}
 	case mod_access_prefetch:
 		/* At this point, we know that there is another access (load/store)
@@ -751,7 +775,8 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 
 	/* Record in-flight coalesced access in module */
 	mod->access_list_coalesced_count++;
-	
+	//fran
+	master_stack->coalesced_count++;
 	/* estadisticas */
 	add_coalesce(mod->level);
 }

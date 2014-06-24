@@ -1,9 +1,18 @@
 #include "./estadisticas.h"
+#include <string.h>
+#include <mem-system/cache.h>
 
+
+static long long intervalo_anterior = 0;
+//static long long ipc_anterior = 0;
+static long long ipc_inst = 0;
+static long long ipc_last_cycle = 0;
+long long ciclo = 0;
+int resolucion = 0;
 
 void estadisticas_por_intervalos(long long intervalo){
 
-double latencia;
+//double latencia;
 int z, x, y, k, i;
 //long long ipc;
 
@@ -144,7 +153,7 @@ gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stat
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
-fran_debug_ipc("mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_L1 Coalesces_L2 accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales\n");
+fran_debug_ipc("mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_L1 Coalesces_L2 accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -238,7 +247,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
         struct mod_t *mod = list_get(mem_system->mod_list, k);
 
         struct dir_t *dir = mod->dir;
-        struct cache_t *cache = mod->cache;
+//        struct cache_t *cache = mod->cache;
 	
 	if(mod->level == 1)
 		mshr[1] += mod->mshr_count;
@@ -283,7 +292,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 		fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->latencia_red_acc,(estadisticas_ipc + 1)->latencia_red_cont);
                 fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 2)->latencia_red_acc,(estadisticas_ipc + 2)->latencia_red_cont);
 
-		double tiempo = (double) cycle - ipc_last_cycle;
+	//	double tiempo = (double) cycle - ipc_last_cycle;
 		//fran_debug_ipc("%.2f ",   ipc_inst / (double)cycle);
 
 

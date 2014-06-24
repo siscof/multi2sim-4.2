@@ -61,6 +61,9 @@ struct mod_stack_t
 	//FRAN
 	long long tiempo_acceso;
 	int from_CU;
+	long long coalesced_count;
+
+	
 	struct linked_list_t *event_queue;
 	void *event_queue_item;
 	struct mod_client_info_t *client_info;

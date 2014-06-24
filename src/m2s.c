@@ -138,6 +138,13 @@ static char *mem_debug_file_name = "";
 //FRAN
 //static char *fran_file_latencia = "";
 //static char *fran_file_accesos = "";
+char *fran_file_ipc;
+char *fran_file_general;
+char *fran_file_t1000k;
+char *fran_file_hitRatio;
+char *fran_file_red;
+int SALTAR_L1;
+long long ventana_muestreo = 10000;
 //int fran_latencia;
 //int fran_accesos;
 static char *net_debug_file_name = "";
@@ -603,12 +610,11 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			m2s_need_argument(argc, argv, argi);
 			if(!strcmp(argv[++argi],"enable")){
 				SALTAR_L1 = 1;
-				//replace = 1;
 			}else{
 				SALTAR_L1 = 0;
-				//replace = 0;
+				
 			}
-			replace = 0;			
+						
 			m2s_need_argument(argc, argv, argi);
 	
                         argi++;

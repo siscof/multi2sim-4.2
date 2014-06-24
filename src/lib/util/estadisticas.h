@@ -19,20 +19,16 @@ typedef enum
 	lds_u
 }si_units;
 
-static long long ventana_muestreo = 10000;
+extern long long ventana_muestreo;
 
-static char *fran_file_ipc = "";
-static char *fran_file_general = "";
-static char *fran_file_t1000k = "";
-static char *fran_file_hitRatio = "";
-static char *fran_file_red = "";
-int SALTAR_L1;
-static int replace; // cache = 0; mod = 1
+extern char *fran_file_ipc;
+extern char *fran_file_general;
+extern char *fran_file_t1000k;
+extern char *fran_file_hitRatio;
+extern char *fran_file_red;
+extern int SALTAR_L1;
+extern int replace; // cache = 0; mod = 1
 
-static long long intervalo_anterior = 0;
-static long long ipc_anterior = 0;
-static long long ipc_inst = 0;
-static long long ipc_last_cycle = 0;
 
 #define fran_debug_ipc(...) debug(fran_ipc, __VA_ARGS__)
 int fran_ipc;
@@ -94,16 +90,24 @@ struct mem_system_stats
 struct mem_system_stats mem_stats, instrucciones_mem_stats_anterior, ciclos_mem_stats_anterior;
 
 struct si_gpu_unit_stats *gpu_inst;
-static struct esta_t estadis[10];
+struct esta_t estadis[10];
 struct si_gpu_unit_stats gpu_stats, instrucciones_gpu_stats_anterior; 
 
 struct esta_t *estadisticas_ipc;
-static long long ciclo = 0;
-static int resolucion = 0;
-void ini_estadisticas();
-void estadisticas(int hit, int lvl);
-void hrl2(int hit , struct mod_t *mod, int from_load);
+
 void estadisticas_por_intervalos(long long intervalo);
 void ipc_instructions(long long cycle, si_units unit);
-void load_finish(long long latencia, long long cantidad);
 
+void mem_load_finish(long long lat);
+void hrl2(int hit , struct mod_t *mod, int from_load);
+void estadisticas(int hit, int lvl);
+void ini_estadisticas();
+void add_coalesce(int level);
+void add_access(int level);
+void add_hit(int level);
+void add_miss(int level);
+long long add_si_inst(si_units unit);
+long long add_si_macroinst(si_units unit);
+void add_CoalesceHit(int level);
+void add_CoalesceMiss(int level);
+void load_finish(long long latencia, long long cantidad);

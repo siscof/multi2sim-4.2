@@ -148,6 +148,9 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 	mem_debug("  %lld %lld 0x%x wake up accesses:", esim_time,
 		master_stack->id, master_stack->addr);
 
+	//fran
+	master_stack->coalesced_count = 0;
+
 	/* Wake up all coalesced accesses */
 	while (master_stack->waiting_list_head)
 	{

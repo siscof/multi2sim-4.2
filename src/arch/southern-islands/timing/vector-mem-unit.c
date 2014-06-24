@@ -40,7 +40,7 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 {
 	struct si_uop_t *uop = NULL;
 
-        struct si_work_item_uop_t *work_item_uop;
+        //struct si_work_item_uop_t *work_item_uop;
         struct si_work_item_t *work_item;
         int work_item_id;
 
@@ -89,7 +89,7 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
                 {
 
                         work_item = uop->wavefront->work_items[work_item_id];
-                        work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
+       //                 work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
 
                         if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
