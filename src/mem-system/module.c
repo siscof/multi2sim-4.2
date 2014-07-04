@@ -182,6 +182,10 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 			{
 				event = EV_MOD_VI_LOAD;
 			}
+	                else if (access_kind == mod_access_nc_load)
+                        {
+                                event = EV_MOD_VI_LOAD;
+                        }
 			else if (access_kind == mod_access_store)
 			{
 				event = EV_MOD_VI_STORE;
@@ -778,7 +782,7 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	//fran
 	master_stack->coalesced_count++;
 	/* estadisticas */
-	add_coalesce(mod->level);
+//	add_coalesce(mod->level);
 }
 
 struct mod_client_info_t *mod_client_info_create(struct mod_t *mod)

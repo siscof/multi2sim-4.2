@@ -246,7 +246,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 			
 			uop->write_ready = asTiming(si_gpu)->cycle + 
 				si_gpu_scalar_unit_write_latency;
-			load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);			
+			gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);			
 
 			list_remove(scalar_unit->exec_buffer, uop);
 			list_enqueue(scalar_unit->write_buffer, uop);

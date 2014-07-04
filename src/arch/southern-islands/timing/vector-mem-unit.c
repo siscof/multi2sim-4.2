@@ -159,7 +159,7 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		uop->write_ready = asTiming(si_gpu)->cycle + 
 			si_gpu_vector_mem_write_latency;
 
-		load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, uop->active_work_items);
+		gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, uop->active_work_items);
 		
 		/* In the above context, access means any of the 
 		 * mod_access calls in si_vector_mem_mem. Means all 

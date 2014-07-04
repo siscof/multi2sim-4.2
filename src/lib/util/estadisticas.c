@@ -177,32 +177,32 @@ fran_debug_ipc("mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Co
 
 void add_coalesce(int level)
 {
-	(estadisticas_ipc + level)->coalesce++;
+	//(estadisticas_ipc + level)->coalesce++;
         mem_stats.mod_level[level].coalesce++;
 }
 
 void add_access(int level)
 {
-	(estadisticas_ipc + level)->accesses++;
+	//(estadisticas_ipc + level)->accesses++;
         mem_stats.mod_level[level].accesses++;
 }
 
 void add_hit(int level)
 {
-	(estadisticas_ipc + level)->hits++;
+	//(estadisticas_ipc + level)->hits++;
         mem_stats.mod_level[level].hits++;
 }
 
 void add_miss(int level)
 {
-        (estadisticas_ipc + level)->misses++;
+        //(estadisticas_ipc + level)->misses++;
         mem_stats.mod_level[level].misses++;
 }
 
 long long add_si_inst(si_units unit)
 {
-	gpu_inst->unit[unit]++;
-	gpu_inst->total++;
+	//gpu_inst->unit[unit]++;
+	//gpu_inst->total++;
 	gpu_stats.unit[unit]++;
 	gpu_stats.total++;
 	return gpu_stats.total;
@@ -225,7 +225,7 @@ void add_CoalesceMiss(int level)
 }
 
 
-void load_finish(long long latencia, long long cantidad)
+void gpu_load_finish(long long latencia, long long cantidad)
 {
 	gpu_stats.loads_latency += latencia * cantidad;
 	gpu_stats.loads_count += cantidad;
@@ -233,7 +233,6 @@ void load_finish(long long latencia, long long cantidad)
 
 void ipc_instructions(long long cycle, si_units unit)
 {
-	long long efectivosL1, efectivosL2;
 	
 	long long intervalo_instrucciones = 100000;
 
@@ -267,72 +266,74 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 }
 
 
-		efectivosL1 = (estadisticas_ipc + 1)->accesses - (estadisticas_ipc + 1)->coalesce;
-                efectivosL2 = (estadisticas_ipc + 2)->accesses - (estadisticas_ipc + 2)->coalesce;
-                fran_debug_ipc("%lld %lld ",mshr[1],mshr[2]);
-		fran_debug_ipc("%lld %lld ",locked[1],locked[2]);		
-		fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->coalesce, (estadisticas_ipc + 2)->coalesce);
-		fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->accesses, (estadisticas_ipc + 2)->accesses);
-		fran_debug_ipc("%lld %lld ",efectivosL1, efectivosL2);
+	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
+        long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+        fran_debug_ipc("%lld %lld ",mshr[1],mshr[2]);
+	fran_debug_ipc("%lld %lld ",locked[1],locked[2]);		
+	fran_debug_ipc("%lld ",mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses);
+	fran_debug_ipc("%lld %lld ",efectivosL1, efectivosL2);
 
 		// MPKI
 		//fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->misses, (estadisticas_ipc + 2)->misses);
-		fran_debug_ipc("%lld ", mem_stats.mod_level[1].misses - instrucciones_mem_stats_anterior.mod_level[1].misses);
-		fran_debug_ipc("%lld ", mem_stats.mod_level[2].misses - instrucciones_mem_stats_anterior.mod_level[2].misses);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[1].misses - instrucciones_mem_stats_anterior.mod_level[1].misses);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[2].misses - instrucciones_mem_stats_anterior.mod_level[2].misses);
 
 
-		fran_debug_ipc("%lld ", (estadisticas_ipc + 1)->hits);
-                fran_debug_ipc("%lld ", (estadisticas_ipc + 2)->hits);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[1].hits - instrucciones_mem_stats_anterior.mod_level[1].hits);
+        fran_debug_ipc("%lld ", mem_stats.mod_level[2].hits - instrucciones_mem_stats_anterior.mod_level[2].hits);
                 
-                fran_debug_ipc("%lld ", mem_stats.mod_level[1].coalesceMisses - instrucciones_mem_stats_anterior.mod_level[1].coalesceMisses);
-                fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesceMisses - instrucciones_mem_stats_anterior.mod_level[2].coalesceMisses);
-		fran_debug_ipc("%lld ", mem_stats.mod_level[1].coalesceHits - instrucciones_mem_stats_anterior.mod_level[1].coalesceHits);
-                fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesceHits - instrucciones_mem_stats_anterior.mod_level[2].coalesceHits);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[1].coalesceMisses - instrucciones_mem_stats_anterior.mod_level[1].coalesceMisses);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesceMisses - instrucciones_mem_stats_anterior.mod_level[2].coalesceMisses);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[1].coalesceHits - instrucciones_mem_stats_anterior.mod_level[1].coalesceHits);
+	fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesceHits - instrucciones_mem_stats_anterior.mod_level[2].coalesceHits);
 
 		fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->latencia_red_acc,(estadisticas_ipc + 1)->latencia_red_cont);
                 fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 2)->latencia_red_acc,(estadisticas_ipc + 2)->latencia_red_cont);
 
-	//	double tiempo = (double) cycle - ipc_last_cycle;
-		//fran_debug_ipc("%.2f ",   ipc_inst / (double)cycle);
-
-
-           	gpu_inst->macroinst[v_mem_u] = gpu_stats.macroinst[v_mem_u] - instrucciones_gpu_stats_anterior.macroinst[v_mem_u];
-                gpu_inst->macroinst[simd_u] = gpu_stats.macroinst[simd_u] - instrucciones_gpu_stats_anterior.macroinst[simd_u];
-                gpu_inst->macroinst[lds_u] = gpu_stats.macroinst[lds_u] - instrucciones_gpu_stats_anterior.macroinst[lds_u];
+	gpu_inst->macroinst[v_mem_u] = gpu_stats.macroinst[v_mem_u] - instrucciones_gpu_stats_anterior.macroinst[v_mem_u];
+	gpu_inst->macroinst[simd_u] = gpu_stats.macroinst[simd_u] - instrucciones_gpu_stats_anterior.macroinst[simd_u];
+	gpu_inst->macroinst[lds_u] = gpu_stats.macroinst[lds_u] - instrucciones_gpu_stats_anterior.macroinst[lds_u];
 		// latencia en gpu
-                long long latency = gpu_stats.loads_latency - instrucciones_gpu_stats_anterior.loads_latency;
-                long long contador = gpu_stats.loads_count - instrucciones_gpu_stats_anterior.loads_count;
-		fran_debug_ipc("%lld %lld ",latency, contador);
+	long long latency = gpu_stats.loads_latency - instrucciones_gpu_stats_anterior.loads_latency;
+	long long contador = gpu_stats.loads_count - instrucciones_gpu_stats_anterior.loads_count;
+	fran_debug_ipc("%lld %lld ",latency, contador);
 		
-		// Latencia mem system
-		latency = mem_stats.load_latency - instrucciones_mem_stats_anterior.load_latency;
-		contador = mem_stats.load_latency_count - instrucciones_mem_stats_anterior.load_latency_count;
-                fran_debug_ipc("%lld %lld ",latency, contador);
-
-memcpy(&instrucciones_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
-memcpy(&instrucciones_gpu_stats_anterior,&gpu_stats,sizeof(struct si_gpu_unit_stats));
+	// Latencia mem system
+	latency = mem_stats.load_latency - instrucciones_mem_stats_anterior.load_latency;
+	contador = mem_stats.load_latency_count - instrucciones_mem_stats_anterior.load_latency_count;
+	fran_debug_ipc("%lld %lld ",latency, contador);
 /*
-		instruciones_mem_stats_anterior.load_latency = mem_stats.load_latency;
-		instruciones_mem_stats_anterior.load_latency_count = mem_stats.load_latency_count;	
-		instruciones_gpu_stats_anterior.loads_latency = gpu_stats.loads_latency;
-		instruciones_gpu_stats_anterior.loads_count = gpu_stats.loads_count;
-		instruciones_gpu_stats_anterior.macroinst[v_mem_u] = gpu_stats.macroinst[v_mem_u];
-                instruciones_gpu_stats_anterior.macroinst[simd_u] = gpu_stats.macroinst[simd_u];
-                instruciones_gpu_stats_anterior.macroinst[lds_u] = gpu_stats.macroinst[lds_u];
-*/
 		fran_debug_ipc("%lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld ", gpu_inst->unit[scalar_u] , gpu_inst->unit[simd_u] , gpu_inst->macroinst[simd_u], gpu_inst->unit[s_mem_u] , gpu_inst->unit[v_mem_u] , gpu_inst->macroinst[v_mem_u], gpu_inst->unit[branch_u] , gpu_inst->unit[lds_u] , gpu_inst->macroinst[lds_u], gpu_inst->total , gpu_stats.total );
+*/
+	fran_debug_ipc("%lld ",gpu_stats.unit[scalar_u] - instrucciones_gpu_stats_anterior.unit[scalar_u]);
+        fran_debug_ipc("%lld ",gpu_stats.unit[simd_u] - instrucciones_gpu_stats_anterior.unit[simd_u]);
+        fran_debug_ipc("%lld ",gpu_stats.macroinst[simd_u] - instrucciones_gpu_stats_anterior.macroinst[simd_u]);
+        fran_debug_ipc("%lld ",gpu_stats.unit[s_mem_u] - instrucciones_gpu_stats_anterior.unit[s_mem_u]);
+        fran_debug_ipc("%lld ",gpu_stats.unit[v_mem_u] - instrucciones_gpu_stats_anterior.unit[v_mem_u]);
+        fran_debug_ipc("%lld ",gpu_stats.macroinst[v_mem_u] - instrucciones_gpu_stats_anterior.macroinst[v_mem_u]);
+	fran_debug_ipc("%lld ",gpu_stats.unit[branch_u] - instrucciones_gpu_stats_anterior.unit[branch_u]);
+        fran_debug_ipc("%lld ",gpu_stats.unit[lds_u] - instrucciones_gpu_stats_anterior.unit[lds_u]);
+        fran_debug_ipc("%lld ",gpu_stats.macroinst[lds_u] - instrucciones_gpu_stats_anterior.macroinst[lds_u]);
+	fran_debug_ipc("%lld ",gpu_stats.total - instrucciones_gpu_stats_anterior.total);
+	fran_debug_ipc("%lld ",gpu_stats.total);
 
-		fran_debug_ipc("%lld %lld\n",cycle - ipc_last_cycle, cycle);
 
-		ipc_inst = 0;
-		ipc_last_cycle = cycle;
+	fran_debug_ipc("%lld %lld\n",cycle - ipc_last_cycle, cycle);
+
+	ipc_inst = 0;
+	ipc_last_cycle = cycle;
 
 		
-		free(estadisticas_ipc);
-		free(gpu_inst);
+	//	free(estadisticas_ipc);
+	//	free(gpu_inst);
+	memcpy(&instrucciones_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
+	memcpy(&instrucciones_gpu_stats_anterior,&gpu_stats,sizeof(struct si_gpu_unit_stats));
 
-		estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
-		gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
+	//	estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
+	//	gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
 
 	}
 }

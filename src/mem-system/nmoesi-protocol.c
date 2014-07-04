@@ -199,6 +199,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			//estadisticas(1,mod->level);
 			mod->delayed_read_hit++;
 			add_access(mod->level);
+			add_coalesce(mod->level);
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_LOAD_FINISH);
 			return;
@@ -673,23 +674,23 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 		/* If there is any older access, wait for it */
 		older_stack = stack->access_list_prev;
-		if (older_stack)
+/*		if (older_stack)
 		{
 			mem_debug("    %lld wait for access %lld\n",
 				stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_STORE_LOCK);
 			return;
 		}
-
+*/
              /* If there is any older write, wait for it */
-  /*              older_stack = mod_in_flight_write(mod, stack);
+                older_stack = mod_in_flight_write(mod, stack);
                 if (older_stack)
                 {
                         mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
                         mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_STORE_LOCK);
                         return;
                 }
-*/
+
                 /* If there is any older access to the same address that this access could not
  *                  * be coalesced with, wait for it. */
                 /*older_stack = mod_in_flight_address(mod, stack->addr, stack);
@@ -2151,6 +2152,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				new_stack->blocking = stack->request_dir == mod_request_down_up;
 				new_stack->read = 1;
 				new_stack->retry = 0;
+			        add_access(mod->level);
+                        	add_coalesce(mod->level);
 				mod_coalesce(target_mod, master_stack, new_stack);
              			mod_stack_wait_in_stack(new_stack, master_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
             			return;
@@ -2159,19 +2162,19 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                                 target_mod->mshr_count++;
                                 if ( target_mod->mshr_count > target_mod->mshr_size)
                                 {
-                                        target_mod->read_retries++;
-                                        stack->err = 1;
-                                        //if(!stack->coalesced)
-                                        //      target_mod->mshr_count--;  
-                                        target_mod->mshr_count--;
-                                        ret->err = 1;
-                                        mem_debug("mshr full, aborting read request\n");
-                                        stack->retry = 1;
-					stack->reply_size = 8;
-					esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
-                                        return;
-                                 }
-
+                                target_mod->read_retries++;
+                                stack->err = 1;
+                                //if(!stack->coalesced)
+                                //      target_mod->mshr_count--;  
+                                target_mod->mshr_count--;
+                                ret->err = 1;
+                                mem_debug("mshr full, aborting read request\n");
+                                stack->retry = 1;
+				stack->reply_size = 8;
+				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+                        	return;
+                        }
+			add_access(mod->level);
 		}
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
