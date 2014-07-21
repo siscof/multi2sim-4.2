@@ -340,7 +340,7 @@ static void mem_config_read_general(struct config_t *config)
 		"PeerTransfers", 1);
 		
 	/* Directory type*/
-	dir_type = config_read_string(config, section, "DirectoryType", "");
+	dir_type = config_read_string(config, section, "DirectoryType", "nmoesi");
 	
 	if(!strncasecmp(dir_type,"nmoesi", 7))
 	{

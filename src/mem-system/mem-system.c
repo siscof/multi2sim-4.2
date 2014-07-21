@@ -162,7 +162,7 @@ void mem_system_init(void)
 	EV_MOD_VI_LOAD_FINISH = esim_register_event_with_name(mod_handler_vi_load,
 			mem_domain_index, "mod_vi_load_finish");
 
-	EV_MOD_VI_NC_LOAD = esim_register_event_with_name(mod_handler_vi_nc_load,
+	EV_MOD_VI_NC_LOAD = esim_register_event_with_name(mod_handler_vi_load,
 			mem_domain_index, "mod_vi_nc_load");
 	EV_MOD_VI_NC_LOAD_SEND = esim_register_event_with_name(mod_handler_vi_nc_load,
                         mem_domain_index, "mod_vi_nc_load_send");
@@ -478,6 +478,8 @@ void mem_system_dump_report(void)
 	fprintf(f, ";    BlockingReads, BlockingWrites, BlockingNCWrites - Reads/writes coming from lower-level cache\n");
 	fprintf(f, ";    NonBlockingReads, NonBlockingWrites, NonBlockingNCWrites - Coming from upper-level cache\n");
 	fprintf(f, "\n\n");
+	
+	fprintf(f, "Directory type = %d\n\n",directory_type);
 	
 	/* Report for each cache */
 	for (i = 0; i < list_count(mem_system->mod_list); i++)

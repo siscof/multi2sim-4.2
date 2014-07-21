@@ -89,6 +89,7 @@ void mod_stack_wakeup_mod(struct mod_t *mod)
 	{
 		stack = mod->waiting_list_head;
 		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(mod, waiting, stack);
 		esim_schedule_event(event, stack, 0);
 	}
@@ -116,6 +117,7 @@ void mod_stack_wakeup_port(struct mod_port_t *port)
 	{
 		stack = port->waiting_list_head;
 		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(port, waiting, stack);
 		esim_schedule_event(event, stack, 0);
 	}
@@ -156,6 +158,7 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 	{
 		stack = master_stack->waiting_list_head;
 		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
         stack->state = master_stack->state;
 		esim_schedule_event(event, stack, 0);

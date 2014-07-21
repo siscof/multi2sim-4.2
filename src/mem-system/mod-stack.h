@@ -60,8 +60,11 @@ struct mod_stack_t
 
 	//FRAN
 	long long tiempo_acceso;
+	int glc;
 	int from_CU;
 	long long coalesced_count;
+	long long invalided_address;
+	
 
 	
 	struct linked_list_t *event_queue;
@@ -107,6 +110,7 @@ struct mod_stack_t
 	/* Flags */
 	//Fran
 	int finished : 1;
+	int invalided : 1;
 	
 	int hit : 1;
 	int err : 1;
@@ -120,6 +124,7 @@ struct mod_stack_t
 	int eviction : 1;
 	int retry : 1;
 	int coalesced : 1;
+	int waiting : 1;
 	int port_locked : 1;
 
 	/* Message sent through interconnect */

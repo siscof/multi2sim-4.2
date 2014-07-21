@@ -314,4 +314,66 @@ void cache_set_transient_tag(struct cache_t *cache, int set, int way, int tag)
 	block = &cache->sets[set].blocks[way];
 	block->transient_tag = tag;
 }
+unsigned int cache_clean_block_dirty(struct cache_t *cache, int set, int way)
+{
+	unsigned int mask = cache->sets[set].blocks[way].dirty_mask;
+	unsigned int addr = -1;
+	
+	assert(cache->sets[set].blocks[way].state);
+	
+	if(mask)
+	{	
+		addr = cache->sets[set].blocks[way].tag;
+		cache->sets[set].blocks[way].dirty_mask = 0;
+		
+	} 
+	return addr;
+}
+
+unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
+{
+	unsigned int mask = cache->sets[set].blocks[way].dirty_mask;
+	unsigned int dirty = 0;
+	unsigned int addr = -1;
+	int words = 0;
+	
+	assert(cache->sets[set].blocks[way].state);
+
+	if(mask)
+	{
+		do
+		{
+			dirty = mask & (1 << words);
+			words++;
+		}
+		while(!dirty);
+		
+		addr = cache->sets[set].blocks[way].tag + ((words - 1) * 4);
+		cache->sets[set].blocks[way].dirty_mask &= (~dirty);
+		
+	} 
+	return addr;
+}
+
+int cache_get_block_dirty_mask(struct cache_t *cache, int set, int way)
+{
+	return cache->sets[set].blocks[way].dirty_mask;
+}
+
+void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsigned int addr, int words)
+{
+	unsigned int tag = addr & ~cache->block_mask;
+	unsigned int shift = (addr - tag) >> 2;
+	unsigned int mask = 0;
+	if(words == 0)
+		words = 1;
+		
+	assert((tag + cache->block_size) >= (addr + words * 4));
+	for(;words > 0 ; words--)
+	{
+		mask |= 1 << (shift + words - 1);
+	}
+	
+	cache->sets[set].blocks[way].dirty_mask |= mask;
+}
 

@@ -278,6 +278,8 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack);
 int mod_in_flight_access(struct mod_t *mod, long long id, unsigned int addr);
 struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	struct mod_stack_t *older_than_stack);
+struct mod_stack_t *mod_in_flight_write_fran(struct mod_t *mod,
+	struct mod_stack_t *older_than_stack);
 struct mod_stack_t *mod_in_flight_write(struct mod_t *mod,
 	struct mod_stack_t *older_than_stack);
 

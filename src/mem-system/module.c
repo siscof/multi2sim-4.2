@@ -182,10 +182,10 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 			{
 				event = EV_MOD_VI_LOAD;
 			}
-	                else if (access_kind == mod_access_nc_load)
-                        {
-                                event = EV_MOD_VI_LOAD;
-                        }
+	        else if (access_kind == mod_access_nc_load)
+            {
+				event = EV_MOD_VI_NC_LOAD;
+            }
 			else if (access_kind == mod_access_store)
 			{
 				event = EV_MOD_VI_STORE;
@@ -448,8 +448,8 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 	DOUBLE_LINKED_LIST_INSERT_TAIL(&mod->access_hash_table[index], bucket, stack);
 
 	/* estadisticas */
+	//add_access(mod->level);
 	stack->tiempo_acceso = asTiming(si_gpu)->cycle;
-//	add_access(mod->level);
 }
 
 
@@ -518,17 +518,18 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 		stack = stack->bucket_list_next)
 	{
 		/* This stack is not older than 'older_than_stack' */
-		if (older_than_stack && stack->id >= older_than_stack->id)
+		if (older_than_stack && stack->id == older_than_stack->id)
 			continue;
 
 		/* Address matches */
-		if ((stack->coalesced == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
+		if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
 			return stack;
 	}
 
 	/* Not found */
 	return NULL;
 }
+
 
 
 /* Return the youngest in-flight write older than 'older_than_stack'. If 'older_than_stack'
@@ -546,13 +547,39 @@ struct mod_stack_t *mod_in_flight_write(struct mod_t *mod,
 	/* Search */
 	for (stack = older_than_stack->access_list_prev; stack;
 		stack = stack->access_list_prev)
-		if ((stack->coalesced == 0) && (stack->access_kind == mod_access_store))
+		if (stack->access_kind == mod_access_store)
 			return stack;
 
 	/* Not found */
 	return NULL;
 }
 
+struct mod_stack_t *mod_in_flight_write_fran(struct mod_t *mod,
+	struct mod_stack_t *older_than_stack)
+{
+	struct mod_stack_t *stack;
+
+	/* No 'older_than_stack' given, return youngest write */
+	if (!older_than_stack)
+		return mod->write_access_list_tail;
+
+	/* Look for address */
+	int index = (older_than_stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+	for (stack = mod->access_hash_table[index].bucket_list_head; stack;
+		stack = stack->bucket_list_next)
+	{
+		/* This stack is not older than 'older_than_stack' */
+		if (stack->id == older_than_stack->id)
+			continue;
+
+		/* Address matches */
+		if ((stack->waiting_list_event == 0) && (stack->access_kind == mod_access_store) && (stack->addr >> mod->log_block_size == older_than_stack->addr >> mod->log_block_size))
+			return stack;
+	}
+
+	/* Not found */
+	return NULL;
+}
 
 int mod_serves_address(struct mod_t *mod, unsigned int addr)
 {
@@ -658,11 +685,11 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
 			if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			{ 
-				if (stack->master_stack && stack->master_stack->coalesced_count < 16)
+				if (stack->master_stack  /*&& stack->master_stack->coalesced_count < 16*/)
 				{
 					return stack->master_stack;
 				}
-				if(!stack->master_stack && stack->coalesced_count < 16)
+				if((!stack->master_stack) /*&& stack->coalesced_count < 16*/)
 				{
 					return stack; 
 				}
@@ -692,11 +719,11 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
 		/* Coalesce */
 		//return stack->master_stack ? stack->master_stack : stack;
-		if (stack->master_stack && stack->master_stack->coalesced_count < 16)
+		if (stack->master_stack /*&& stack->master_stack->coalesced_count < 16*/)
                 {
                 	return stack->master_stack;
                 }
-                if(!stack->master_stack && stack->coalesced_count < 16)
+                if((!stack->master_stack) /*&& stack->coalesced_count < 16*/)
                 {
                 	return stack;           
                 }
@@ -723,11 +750,11 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
 		/* Coalesce */
 		//return stack->master_stack ? stack->master_stack : stack;
-		if (stack->master_stack && stack->master_stack->coalesced_count < 16)
+		if (stack->master_stack /*&& stack->master_stack->coalesced_count < 16*/)
                 {
                 	return stack->master_stack;
                 }
-                if(!stack->master_stack && stack->coalesced_count < 16)
+                if((!stack->master_stack) /*&& stack->coalesced_count < 16*/)
                 {
                 	return stack;           
                 }
@@ -770,7 +797,7 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 
 	/* Access must have been recorded already, which sets the access
 	 * kind to a valid value. */
-	assert(stack->access_kind);
+	//assert(stack->access_kind);
 
 	/* Set slave stack as a coalesced access */
 	stack->coalesced = 1;
@@ -782,7 +809,7 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	//fran
 	master_stack->coalesced_count++;
 	/* estadisticas */
-//	add_coalesce(mod->level);
+	//add_coalesce(mod->level);
 }
 
 struct mod_client_info_t *mod_client_info_create(struct mod_t *mod)
