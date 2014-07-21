@@ -181,18 +181,22 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 			if (access_kind == mod_access_load)
 			{
 				event = EV_MOD_VI_LOAD;
+				mod_stack_add_word(stack, addr, 0);
 			}
 	        else if (access_kind == mod_access_nc_load)
             {
 				event = EV_MOD_VI_NC_LOAD;
+				mod_stack_add_word(stack, addr, 0);
             }
 			else if (access_kind == mod_access_store)
 			{
 				event = EV_MOD_VI_STORE;
+				mod_stack_add_word_dirty(stack, addr, 0);
 			}
 			else if (access_kind == mod_access_nc_store)
 			{
-				event = EV_MOD_VI_STORE;
+				event = EV_MOD_VI_NC_STORE;
+				mod_stack_add_word_dirty(stack, addr, 0);
 			}
 			else 
 			{
@@ -301,6 +305,69 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 
 	/* Miss */
 	if (way == cache->assoc)
+	{
+	/*
+		PTR_ASSIGN(way_ptr, 0);
+		PTR_ASSIGN(state_ptr, 0);
+	*/
+		return 0;
+	}
+
+	/* Hit */
+	PTR_ASSIGN(way_ptr, way);
+	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
+	return 1;
+}
+
+int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int valid_mask, int *set_ptr,
+	int *way_ptr, int *tag_ptr, int *state_ptr)
+{
+	struct cache_t *cache = mod->cache;
+	struct cache_block_t *blk;
+	struct dir_lock_t *dir_lock;
+
+	int set;
+	int way;
+	int tag;
+
+	/* A transient tag is considered a hit if the block is
+	 * locked in the corresponding directory. */
+	tag = addr & ~cache->block_mask;
+	if (mod->range_kind == mod_range_interleaved)
+	{
+		unsigned int num_mods = mod->range.interleaved.mod;
+		set = ((tag >> cache->log_block_size) / num_mods) % cache->num_sets;
+	}
+	else if (mod->range_kind == mod_range_bounds)
+	{
+		set = (tag >> cache->log_block_size) % cache->num_sets;
+	}
+	else 
+	{
+		panic("%s: invalid range kind (%d)", __FUNCTION__, mod->range_kind);
+	}
+
+	for (way = 0; way < cache->assoc; way++)
+	{
+		blk = &cache->sets[set].blocks[way];
+		if (blk->tag == tag && blk->state)
+			break;
+
+
+
+/*		if (blk->transient_tag == tag)
+		{
+			dir_lock = dir_lock_get(mod->dir, set, way);
+			if (dir_lock->lock)
+				break;
+		}*/
+	}
+
+	PTR_ASSIGN(set_ptr, set);
+	PTR_ASSIGN(tag_ptr, tag);
+
+	/* Miss */
+	if (way == cache->assoc || (valid_mask & cache->sets[set].blocks[way].valid_mask))
 	{
 	/*
 		PTR_ASSIGN(way_ptr, 0);
@@ -547,7 +614,7 @@ struct mod_stack_t *mod_in_flight_write(struct mod_t *mod,
 	/* Search */
 	for (stack = older_than_stack->access_list_prev; stack;
 		stack = stack->access_list_prev)
-		if (stack->access_kind == mod_access_store)
+		if (stack != older_than_stack && stack->access_kind == mod_access_store)
 			return stack;
 
 	/* Not found */
@@ -573,7 +640,7 @@ struct mod_stack_t *mod_in_flight_write_fran(struct mod_t *mod,
 			continue;
 
 		/* Address matches */
-		if ((stack->waiting_list_event == 0) && (stack->access_kind == mod_access_store) && (stack->addr >> mod->log_block_size == older_than_stack->addr >> mod->log_block_size))
+		if ((stack->waiting_list_event == 0) && (stack->access_kind == mod_access_store) /*&& (stack->addr >> mod->log_block_size == older_than_stack->addr >> mod->log_block_size)*/)
 			return stack;
 	}
 
@@ -783,6 +850,72 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 	return NULL;
 }
 
+struct mod_stack_t *mod_can_coalesce_fran(struct mod_t *mod,
+	enum mod_access_kind_t access_kind, unsigned int addr,
+	int *global_mem_witness)
+{
+	struct mod_stack_t *stack;
+	struct mod_stack_t *tail;
+	//For efficiency
+	int limit = 64;
+
+	/* For efficiency, first check in the hash table of accesses
+	 * whether there is an access in flight to the same block. */
+	assert(access_kind);
+	//if (!mod_in_flight_address(mod, addr, NULL))
+	//	return NULL;
+
+	/* Get youngest access older than 'older_than_stack' */
+	tail = mod->access_list_tail;
+
+	/* Coalesce depending on access kind */
+	if(access_kind == mod_access_load || access_kind == mod_access_nc_load)
+	{
+		for (stack = tail; stack; stack = stack->access_list_prev)
+		{
+			/* Only coalesce with groups of reads or prefetches at the tail */
+			if (stack->access_kind != mod_access_load)
+				continue;
+
+			if (global_mem_witness == stack->witness_ptr && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+			{ 
+				return stack; 
+			}
+		
+			limit--;
+			if(limit <= 0)
+				break;
+		}
+	}
+
+	if(access_kind == mod_access_store || access_kind == mod_access_nc_store)
+	{
+		for (stack = tail; stack; stack = stack->access_list_prev)
+		{
+			/* Only coalesce with groups of reads or prefetches at the tail */
+			if (stack->access_kind != mod_access_store && stack->access_kind != mod_access_nc_store)
+				continue;
+				
+			/* Only if previous write has not started yet */
+			if (stack->port_locked)
+				return NULL;
+
+			if (global_mem_witness == stack->witness_ptr && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+			{ 
+				return stack; 
+			}
+		
+			limit--;
+			if(limit <= 0)
+				break;
+		}
+	}
+	
+
+	/* No access found */
+	return NULL;
+}
+
 
 void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	struct mod_stack_t *stack)
@@ -794,7 +927,6 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	/* Master stack must not have a parent. We only want one level of
 	 * coalesced accesses. */
 	assert(!master_stack->master_stack);
-
 	/* Access must have been recorded already, which sets the access
 	 * kind to a valid value. */
 	//assert(stack->access_kind);
@@ -802,6 +934,13 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	/* Set slave stack as a coalesced access */
 	stack->coalesced = 1;
 	stack->master_stack = master_stack;
+	
+	//fran
+	//assert(master_stack->addr == stack->addr);
+	//master_stack->valid_mask |= stack->valid_mask;
+	//assert((master_stack->access_kind != mod_access_store) || !(~master_stack->dirty_mask & stack->dirty_mask));
+	//master_stack->dirty_mask |= stack->dirty_mask;
+	
 	assert(mod->access_list_coalesced_count <= mod->access_list_count);
 
 	/* Record in-flight coalesced access in module */
@@ -882,3 +1021,12 @@ int mod_replace_block(struct mod_t *mod, int set)
 	assert(mod->cache->policy == cache_policy_random);
 	return random() % mod->cache->assoc;
 }
+
+unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way)
+{
+	if(mod->kind == mod_kind_main_memory)
+		return mod->block_size-1;
+	else
+		return mod->cache->sets[set].blocks[way].valid_mask;
+}
+

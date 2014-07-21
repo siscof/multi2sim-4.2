@@ -111,3 +111,4 @@ long long add_si_macroinst(si_units unit);
 void add_CoalesceHit(int level);
 void add_CoalesceMiss(int level);
 void load_finish(long long latencia, long long cantidad);
+void gpu_load_finish(long long latencia, long long cantidad);

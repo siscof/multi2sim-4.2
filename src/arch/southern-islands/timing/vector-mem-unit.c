@@ -26,6 +26,8 @@
 #include <mem-system/module.h>
 #include <mem-system/mem-system.h>
 //#include <mem-system/directory.h>
+#include <mem-system/module.h>
+#include <mem-system/mod-stack.h>
 
 #include "compute-unit.h"
 #include "gpu.h"
@@ -277,39 +279,65 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
 		        
-                        work_item = uop->wavefront->work_items[work_item_id];
+            work_item = uop->wavefront->work_items[work_item_id];
 			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
 			
 			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-                        {
+            {
 				if (uop->vector_mem_write && !uop->glc)
-	                	{
-        	        	        aux->vector_write_nc++;
-                		}
-                		else if (uop->vector_mem_write && uop->glc)
-                		{
-                	        	aux->vector_write++;
-                		}
-                		else if (uop->vector_mem_read && uop->glc)
-                		{
-                       			aux->vector_load++;
+	            {
+					aux->vector_write_nc++;
+                }
+                else if (uop->vector_mem_write && uop->glc)
+                {
+					aux->vector_write++;
+                }
+                else if (uop->vector_mem_read && uop->glc)
+                {
+                    aux->vector_load++;
 				}
 				else if (uop->vector_mem_read && !uop->glc)
-                        	{
-			        	aux->vector_load_nc++;
-                		}
+                {
+					aux->vector_load_nc++;
+				}
            
-				/*estadisticas fran*/
-				/*si_units unit = v_mem_u;
-                                ipc_instructions(asTiming(si_gpu)->cycle, unit);*/
 				uop->active_work_items++;
+				
+				struct mod_t *mod = vector_mem->compute_unit->vector_cache;
+				//hacer coalesce
+				unsigned int addr = work_item_uop->global_mem_access_addr;
+				int bytes = work_item->global_mem_access_size;
+				struct mod_stack_t *master_stack = mod_can_coalesce_fran(mod, access_kind, addr, &uop->global_mem_witness);		
+				
+				add_access(0);
+				
+				//instruccion coalesce
+				if (master_stack)
+				{		
+					unsigned int shift = (addr & (mod->sub_block_size - 1));
+					int tag = addr & ~(mod->sub_block_size - 1);
+					long long mask = 0;
+					if(bytes == 0)
+						bytes = 64;
+					
+					master_stack->stack_size += bytes;
 						
-				mod_access(vector_mem->compute_unit->vector_cache,
-  					access_kind,
-                                	work_item_uop->global_mem_access_addr,
-                                	&uop->global_mem_witness, NULL, NULL, NULL);
-                        	uop->global_mem_witness--;
+					assert((tag + mod->sub_block_size) >= (addr + bytes));
+					for(;bytes > 0 ; bytes--)
+					{
+						mask |= 1 << (shift + bytes - 1);
+					}
+				
+					mod_stack_merge_dirty_mask(master_stack, mask);
+					mod_stack_merge_valid_mask(master_stack, mask);
+					add_coalesce(0);
+				}
+				else
+				{	
+					mod_access( mod, access_kind, addr, &uop->global_mem_witness, NULL, NULL, NULL);
+					uop->global_mem_witness--;
+				}
  			}
 		}
 

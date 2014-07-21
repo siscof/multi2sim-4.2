@@ -64,7 +64,11 @@ struct mod_stack_t
 	int from_CU;
 	long long coalesced_count;
 	long long invalided_address;
-	
+	struct mod_stack_t *stack_superior;	
+	int stack_size;
+	unsigned int dirty_mask;
+	unsigned int valid_mask;
+	struct mod_t *origin;
 
 	
 	struct linked_list_t *event_queue;
@@ -176,7 +180,10 @@ void mod_stack_wakeup_port(struct mod_port_t *port);
 void mod_stack_wait_in_stack(struct mod_stack_t *stack,
 	struct mod_stack_t *master_stack, int event);
 void mod_stack_wakeup_stack(struct mod_stack_t *master_stack);
-
+void mod_stack_merge_dirty_mask(struct mod_stack_t *stack, unsigned int mask);
+void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int words);
+void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words);
+void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask);
 
 #endif
 

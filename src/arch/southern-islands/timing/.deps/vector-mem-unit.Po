@@ -21,7 +21,9 @@ vector-mem-unit.o: vector-mem-unit.c \
  /usr/include/bits/time.h /usr/include/sys/sysmacros.h \
  /usr/include/bits/pthreadtypes.h /usr/include/alloca.h \
  ../../../../src/lib/util/list.h ../../../../src/mem-system/module.h \
- ../../../../src/mem-system/mem-system.h compute-unit.h branch-unit.h \
+ ../../../../src/mem-system/mem-system.h \
+ ../../../../src/mem-system/mod-stack.h \
+ ../../../../src/mem-system/module.h compute-unit.h branch-unit.h \
  lds-unit.h scalar-unit.h vector-mem-unit.h gpu.h \
  ../../../../src/arch/common/timing.h cycle-interval-report.h uop.h \
  ../../../../src/arch/southern-islands/emu/work-item.h wavefront-pool.h \
@@ -109,6 +111,10 @@ vector-mem-unit.o: vector-mem-unit.c \
 ../../../../src/mem-system/module.h:
 
 ../../../../src/mem-system/mem-system.h:
+
+../../../../src/mem-system/mod-stack.h:
+
+../../../../src/mem-system/module.h:
 
 compute-unit.h:
 

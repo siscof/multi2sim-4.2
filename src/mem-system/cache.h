@@ -53,6 +53,7 @@ struct cache_block_t
 	int way;
 	int prefetched;
 	unsigned int dirty_mask;
+	unsigned int valid_mask;
 
 	enum cache_block_state_t state;
 };
@@ -102,10 +103,12 @@ int cache_replace_block(struct cache_t *cache, int set);
 void cache_set_transient_tag(struct cache_t *cache, int set, int way, int tag);
 void cache_update_waylist(struct cache_set_t *set, struct cache_block_t *blk, enum cache_waylist_enum where);
 //fran 
-void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsigned int addr, int words);
-int cache_get_block_dirty_mask(struct cache_t *cache, int set, int way);
-unsigned int cache_clean_block_dirty(struct cache_t *cache, int set, int way);
+void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsigned int dirty_mask);
+void cache_write_valid_mask(struct cache_t *cache, int set, int way, unsigned int mask);
+unsigned int cache_get_block_dirty_mask(struct cache_t *cache, int set, int way);
+void cache_clean_block_dirty(struct cache_t *cache, int set, int way);
 unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way);
+
 
 
 #endif

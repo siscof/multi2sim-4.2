@@ -207,15 +207,15 @@ void mod_handler_nmoesi_load(int event, void *data)
 		else
 		{
 			if (mod->mshr_count >= mod->mshr_size)
-	                {
-        	                mod->read_retries++;
-                	        retry_lat = mod_get_retry_latency(mod);
-                        	mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
-                        	stack->retry = 1;
-                        	esim_schedule_event(EV_MOD_NMOESI_LOAD, stack, retry_lat);
-                        	return;
-                	}
-                	mod->mshr_count++;
+	        {
+        	    mod->read_retries++;
+                retry_lat = mod_get_retry_latency(mod);
+               	mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+               	stack->retry = 1;
+               	esim_schedule_event(EV_MOD_NMOESI_LOAD, stack, retry_lat);
+               	return;
+            }
+            mod->mshr_count++;
 
 		}
 		add_access(mod->level);
@@ -260,10 +260,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		{
 			msg_size = 72;
 			net = mod->low_net;
-                        src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
-                        dst_node = mod->low_net_node;
+            src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
+            dst_node = mod->low_net_node;
 			return_event = EV_MOD_NMOESI_LOAD_RECEIVE;
-					stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
+			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
 			return_event, stack, event, stack);
 		
 		}
