@@ -63,47 +63,47 @@ for (k = 0; k < list_count(mem_system->mod_list); k++)
 {
 	mod = list_get(mem_system->mod_list, k);
 
-        dir = mod->dir;
-        cache = mod->cache;
+	dir = mod->dir;
+	cache = mod->cache;
 
-        for (x = 0; x < dir->xsize; x++)
-        {
-	        for (y = 0; y < dir->ysize; y++)
-        	{
-			 struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
+	for (x = 0; x < dir->xsize; x++)
+	{
+		for (y = 0; y < dir->ysize; y++)
+		{
+			struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
 
-                        if(dir_lock->lock)
-                                locked[mod->level]++;
+			if(dir_lock->lock)
+				locked[mod->level]++;
 
-		        if(mod->level != 2)
-                		continue;
+			if(mod->level != 2)
+					continue;
 
 
-                	cache_get_block(cache, x, y, &tag_ptr, &state_ptr);
-                        if(state_ptr)
-                        {
-                        	for (z = 0; z < dir->zsize; z++)
-                                {
-                                	contador = 0;
-                                        for (i = 0; i < dir->num_nodes; i++)
-                                        {
-                                        	if (dir_entry_is_sharer(dir, x, y, z, i))
-                                                {
-                                                	contador++;
-                                                        if(contador == 1)
-                                                        {
-                                                        	compartido++;
-                                                        }
-							else
-                                                        {
-                                                        	replica++;
+			cache_get_block(cache, x, y, &tag_ptr, &state_ptr);
+			if(state_ptr)
+			{
+				for (z = 0; z < dir->zsize; z++)
+				{
+					contador = 0;
+					for (i = 0; i < dir->num_nodes; i++)
+					{
+						if (dir_entry_is_sharer(dir, x, y, z, i))
+						{
+							contador++;
+							if(contador == 1)
+							{
+								compartido++;
 							}
-                                                }
-                                        }
-                                }
-                        }
-                }
-        }
+							else
+							{
+								replica++;
+							}
+						}
+					}
+				}
+			}
+		}
+	}
 }
 
 fran_debug_general("%lld ",compartido);
@@ -128,23 +128,10 @@ void hrl2(int hit , struct mod_t *mod, int from_load){
         if((mod->level == 2) && from_load)
         {
                 mod->loads++;
-                if(hit)
-                {
-                        estadisticas(1, 5);
-                }
-                else
-                {
-                        estadisticas(0, 5);
-                }
+
         }
 }
 
-void estadisticas(int hit, int lvl){
-
-        estadis[lvl].accesses++;
-
-        estadis[lvl].hits += hit;
-}
 
 
 void ini_estadisticas(){
@@ -156,26 +143,8 @@ gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stat
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
-fran_debug_ipc("mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales\n");
+fran_debug_ipc("nc_write_access_list_count write_access_list_count access_list_count mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 writesL1 loadsL1 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales\n");
 
-        for(int i = 0; i < 10; i++){
-                estadis[i].coalesce = 0;
-                estadis[i].accesses = 0;
-                estadis[i].hits= 0;
-                estadis[i].misses = 0;
-		estadis[i].busy_cicles_in = 0;
-                estadis[i].busy_cicles_in = 0;
-                estadis[i].invalidations = 0;
-                estadis[i].delayed_read_hit= 0;
-                estadis[i].esim_cycle_anterior= 0;
-                estadis[i].media_latencia = 0; 
-                estadis[i].tiempo_acceso_latencia = 0;
-                estadis[i].latencia_red_acc = 0;
-                estadis[i].latencia_red_cont = 0;
-                estadis[i].blk_compartidos = 0;
-                estadis[i].replicas_en_l1 = 0;
-		estadis[i].coalesceHits = 0;
-        }
 }
 
 void add_coalesce(int level)
@@ -188,6 +157,22 @@ void add_access(int level)
 {
 	//(estadisticas_ipc + level)->accesses++;
         mem_stats.mod_level[level].accesses++;
+}
+
+void add_load(int level, int coalesced)
+{
+	//(estadisticas_ipc + level)->accesses++;
+        mem_stats.mod_level[level].accesses_load++;
+        if(coalesced)
+			mem_stats.mod_level[level].coalesce_load++;
+}
+
+void add_write(int level, int coalesced)
+{
+	//(estadisticas_ipc + level)->accesses++;
+        mem_stats.mod_level[level].accesses_write++;
+        if(coalesced)
+			mem_stats.mod_level[level].coalesce_write++;
 }
 
 void add_hit(int level)
@@ -237,12 +222,13 @@ void gpu_load_finish(long long latencia, long long cantidad)
 void ipc_instructions(long long cycle, si_units unit)
 {
 	
-	long long intervalo_instrucciones = 100000;
+	long long intervalo_instrucciones = 10000;
 
 	if(!(add_si_inst(unit) % intervalo_instrucciones))
 	{
 
 long long locked[5] = {0,0,0,0,0}, mshr[3] = {0,0,0};
+long long nc_write_access_list_count = 0 ,write_access_list_count = 0 , access_list_count = 0;
 
 for (int k = 0; k < list_count(mem_system->mod_list); k++)
 {
@@ -254,25 +240,38 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	if(mod->level == 1)
 		mshr[1] += mod->mshr_count;
 	if(mod->level == 2)
+	{
 		mshr[2] += mod->mshr_count;
-
-        for (int x = 0; x < dir->xsize; x++)
+		nc_write_access_list_count += mod->nc_write_access_list_count;
+		write_access_list_count += mod->write_access_list_count;
+		access_list_count += mod->access_list_count;
+	}
+    for (int x = 0; x < dir->xsize; x++)
+    {
+		for (int y = 0; y < dir->ysize; y++)
         {
-                for (int y = 0; y < dir->ysize; y++)
-                {
-                        struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
+			struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
 
-                        if(dir_lock->lock)
-                                locked[mod->level]++;
-                }
-        }
+            if(dir_lock->lock)
+				locked[mod->level]++;
+		}
+	}
 }
 
 
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
-        long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
-        fran_debug_ipc("%lld %lld ",mshr[1],mshr[2]);
+    long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+    
+    fran_debug_ipc("%lld %lld %lld ",nc_write_access_list_count, write_access_list_count, access_list_count);
+    fran_debug_ipc("%lld %lld ",mshr[1],mshr[2]);
 	fran_debug_ipc("%lld %lld ",locked[1],locked[2]);	
+	
+	long long efectivosreadwrite = (mem_stats.mod_level[1].accesses_write - instrucciones_mem_stats_anterior.mod_level[1].accesses_write) - (mem_stats.mod_level[1].coalesce_write - instrucciones_mem_stats_anterior.mod_level[1].coalesce_write);
+	fran_debug_ipc("%lld ",efectivosreadwrite);	
+	
+	efectivosreadwrite = (mem_stats.mod_level[1].accesses_load - instrucciones_mem_stats_anterior.mod_level[1].accesses_load) - (mem_stats.mod_level[1].coalesce_load - instrucciones_mem_stats_anterior.mod_level[1].coalesce_load);
+	fran_debug_ipc("%lld ",efectivosreadwrite);
+	
 	fran_debug_ipc("%lld ",mem_stats.mod_level[0].coalesce - instrucciones_mem_stats_anterior.mod_level[0].coalesce);	
 	fran_debug_ipc("%lld ",mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
 	fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);

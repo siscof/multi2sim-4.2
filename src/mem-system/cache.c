@@ -326,6 +326,11 @@ void cache_clean_block_dirty(struct cache_t *cache, int set, int way)
 	cache->sets[set].blocks[way].dirty_mask = 0;
 }
 
+void cache_clean_block_valid(struct cache_t *cache, int set, int way)
+{
+	cache->sets[set].blocks[way].valid_mask = 0;
+}
+
 unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
 {
 	unsigned int mask = cache->sets[set].blocks[way].dirty_mask;
@@ -374,7 +379,7 @@ void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsig
 	cache->sets[set].blocks[way].dirty_mask |= dirty_mask;
 }
 
-void cache_write_valid_mask(struct cache_t *cache, int set, int way, unsigned int mask)
+void cache_write_block_valid_mask(struct cache_t *cache, int set, int way, unsigned int mask)
 {
-	cache->sets[set].blocks[way].valid_mask = mask;
+	cache->sets[set].blocks[way].valid_mask |= mask;
 }

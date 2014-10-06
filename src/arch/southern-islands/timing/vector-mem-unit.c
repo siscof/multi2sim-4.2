@@ -28,6 +28,7 @@
 //#include <mem-system/directory.h>
 #include <mem-system/module.h>
 #include <mem-system/mod-stack.h>
+#include <lib/util/misc.h>
 
 #include "compute-unit.h"
 #include "gpu.h"
@@ -35,6 +36,8 @@
 #include "vector-mem-unit.h"
 #include "uop.h"
 #include "wavefront-pool.h"
+
+#include <arch/southern-islands/emu/work-group.h>
 
 #include <lib/util/estadisticas.h>
 
@@ -83,21 +86,19 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 		/* Statistics */
 		vector_mem->inst_count++;
 
-                si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
 		add_si_macroinst(v_mem_u);
 
-                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
-                {
+		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+        {
+			work_item = uop->wavefront->work_items[work_item_id];
+			//work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
-                        work_item = uop->wavefront->work_items[work_item_id];
-       //                 work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
-
-
-                        if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-                        {
+            if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+            {
 				si_units unit = v_mem_u;
-                                ipc_instructions(asTiming(si_gpu)->cycle, unit);
+                ipc_instructions(asTiming(si_gpu)->cycle, unit);
 			}
 		}
 	}
@@ -274,7 +275,9 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 
 		/* Access global memory */
 		uop->send_cycle = asTiming(si_gpu)->cycle;
-
+		
+		struct mod_t *mod;
+		
 		assert(!uop->global_mem_witness);
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
@@ -304,7 +307,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
            
 				uop->active_work_items++;
 				
-				struct mod_t *mod = vector_mem->compute_unit->vector_cache;
+				mod = vector_mem->compute_unit->vector_cache;
 				//hacer coalesce
 				unsigned int addr = work_item_uop->global_mem_access_addr;
 				int bytes = work_item->global_mem_access_size;
@@ -335,11 +338,18 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				}
 				else
 				{	
-					mod_access( mod, access_kind, addr, &uop->global_mem_witness, NULL, NULL, NULL);
+					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, uop->work_group->id_in_compute_unit, NULL, NULL, NULL);
 					uop->global_mem_witness--;
 				}
+			
  			}
 		}
+		
+		/*struct mod_stack_t *stack;
+		DOUBLE_LINKED_LIST_FOR_EACH(mod, coalesce, stack){
+			DOUBLE_LINKED_LIST_REMOVE(mod, coalesce, stack)
+		
+		}*/
 
 		if(si_spatial_report_active)
 		{

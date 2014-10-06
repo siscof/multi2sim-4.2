@@ -22,7 +22,6 @@
 
 #include "module.h"
 
-
 /* Current identifier for stack */
 extern long long mod_stack_id;
 
@@ -69,6 +68,8 @@ struct mod_stack_t
 	unsigned int dirty_mask;
 	unsigned int valid_mask;
 	struct mod_t *origin;
+	int work_group_id_in_cu;
+	struct dir_lock_t *dir_lock;
 
 	
 	struct linked_list_t *event_queue;
@@ -103,6 +104,10 @@ struct mod_stack_t
 	struct mod_stack_t *access_list_prev;
 	struct mod_stack_t *access_list_next;
 
+        /* Linked list of nc write accesses in 'mod' */
+        struct mod_stack_t *nc_write_access_list_prev;
+        struct mod_stack_t *nc_write_access_list_next;
+
 	/* Linked list of write accesses in 'mod' */
 	struct mod_stack_t *write_access_list_prev;
 	struct mod_stack_t *write_access_list_next;
@@ -133,6 +138,10 @@ struct mod_stack_t
 
 	/* Message sent through interconnect */
 	struct net_msg_t *msg;
+	
+		/* Linked list for waiting events */
+	struct mod_stack_t *coalesce_list_prev;
+	struct mod_stack_t *coalesce_list_next;
 
 	/* Linked list for waiting events */
 	int waiting_list_event;  /* Event to schedule when stack is waken up */
@@ -184,6 +193,7 @@ void mod_stack_merge_dirty_mask(struct mod_stack_t *stack, unsigned int mask);
 void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int words);
 void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words);
 void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask);
+void mod_stack_wakeup_mod_head(struct mod_t *mod);
 
 #endif
 

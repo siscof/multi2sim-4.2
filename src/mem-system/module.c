@@ -39,6 +39,7 @@
 #include <arch/southern-islands/timing/gpu.h>
 #include <lib/util/class.h>
 #include "vi-protocol.h"
+
 /* String map for access type */
 struct str_map_t mod_access_kind_map =
 {
@@ -105,11 +106,138 @@ void mod_dump(struct mod_t *mod, FILE *f)
 {
 }
 
+long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
+	unsigned int addr, int *witness_ptr, int wg_id, struct linked_list_t *event_queue,
+	void *event_queue_item, struct mod_client_info_t *client_info)
+{
+	struct mod_stack_t *stack;
+	int event;
+
+	/* Create module stack with new ID */
+	mod_stack_id++;
+	stack = mod_stack_create(mod_stack_id,
+		mod, addr, ESIM_EV_NONE, NULL);
+	
+	//fran
+	//DOUBLE_LINKED_LIST_INSERT_TAIL(mod, coalesce, stack);
+	stack->work_group_id_in_cu = wg_id;
+	
+	/* Initialize */
+	stack->witness_ptr = witness_ptr;
+	stack->event_queue = event_queue;
+	stack->event_queue_item = event_queue_item;
+	stack->client_info = client_info;
+
+	/* Select initial CPU/GPU event */
+	if(directory_type == dir_type_nmoesi)
+	{
+		if (mod->kind == mod_kind_cache || mod->kind == mod_kind_main_memory)
+		{
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_NMOESI_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_NMOESI_STORE;
+			}
+			else if (access_kind == mod_access_nc_store)
+			{
+				event = EV_MOD_NMOESI_NC_STORE;
+			}
+			else if (access_kind == mod_access_prefetch)
+			{
+				event = EV_MOD_NMOESI_PREFETCH;
+			}
+			else 
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
+		}
+		else if (mod->kind == mod_kind_local_memory)
+		{
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_LOCAL_MEM_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_LOCAL_MEM_STORE;
+			}
+			else
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
+		}
+		else
+		{
+			panic("%s: invalid mod kind", __FUNCTION__);
+		}
+	}
+	else if(directory_type == dir_type_vi)
+	{
+		if (mod->kind == mod_kind_cache || mod->kind == mod_kind_main_memory)
+		{
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_VI_LOAD;
+				mod_stack_add_word(stack, addr, 0);
+			}
+	        else if (access_kind == mod_access_nc_load)
+            {
+				event = EV_MOD_VI_NC_LOAD;
+				mod_stack_add_word(stack, addr, 0);
+            }
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_VI_STORE;
+				mod_stack_add_word_dirty(stack, addr, 0);
+			}
+			else if (access_kind == mod_access_nc_store)
+			{
+				event = EV_MOD_VI_NC_STORE;
+				mod_stack_add_word_dirty(stack, addr, 0);
+			}
+			else 
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
+		}
+		else if (mod->kind == mod_kind_local_memory)
+		{
+			if (access_kind == mod_access_load)
+			{
+				event = EV_MOD_LOCAL_MEM_LOAD;
+			}
+			else if (access_kind == mod_access_store)
+			{
+				event = EV_MOD_LOCAL_MEM_STORE;
+			}
+			else
+			{
+				panic("%s: invalid access kind", __FUNCTION__);
+			}
+		}
+		else
+		{
+			panic("%s: invalid mod kind", __FUNCTION__);
+		}
+	}
+	else
+	{
+		panic("%s: invalid mod kind", __FUNCTION__);
+	}	
+	/* Schedule */
+	esim_execute_event(event, stack);
+
+	/* Return access ID */
+	return stack->id;
+}
 
 /* Access a memory module.
  * Variable 'witness', if specified, will be increased when the access completes.
  * The function returns a unique access ID.
- */
+*/
 long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind, 
 	unsigned int addr, int *witness_ptr, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info)
@@ -121,7 +249,10 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	mod_stack_id++;
 	stack = mod_stack_create(mod_stack_id,
 		mod, addr, ESIM_EV_NONE, NULL);
-
+	
+	//fran
+	//DOUBLE_LINKED_LIST_INSERT_TAIL(mod, coalesce, stack);
+	
 	/* Initialize */
 	stack->witness_ptr = witness_ptr;
 	stack->event_queue = event_queue;
@@ -510,6 +641,10 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 	if (access_kind == mod_access_store)
 		DOUBLE_LINKED_LIST_INSERT_TAIL(mod, write_access, stack);
 
+        /* Insert in nc-write access list */
+        if (access_kind == mod_access_nc_store)
+                DOUBLE_LINKED_LIST_INSERT_TAIL(mod, nc_write_access, stack);
+
 	/* Insert in access hash table */
 	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
 	DOUBLE_LINKED_LIST_INSERT_TAIL(&mod->access_hash_table[index], bucket, stack);
@@ -531,6 +666,9 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
 	assert(stack->access_kind);
 	if (stack->access_kind == mod_access_store)
 		DOUBLE_LINKED_LIST_REMOVE(mod, write_access, stack);
+
+	if (stack->access_kind == mod_access_nc_store)
+                DOUBLE_LINKED_LIST_REMOVE(mod, nc_write_access, stack);
 
 	/* Remove from hash table */
 	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
@@ -585,11 +723,11 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 		stack = stack->bucket_list_next)
 	{
 		/* This stack is not older than 'older_than_stack' */
-		if (older_than_stack && stack->id == older_than_stack->id)
+		if (older_than_stack && stack->id >= older_than_stack->id)
 			continue;
 
 		/* Address matches */
-		if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
+		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			return stack;
 	}
 
@@ -597,6 +735,29 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	return NULL;
 }
 
+struct mod_stack_t *mod_in_flight_address_fran(struct mod_t *mod, unsigned int addr,
+        struct mod_stack_t *older_than_stack)
+{
+        struct mod_stack_t *stack;
+        int index;
+
+        /* Look for address */
+        index = (addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+        for (stack = mod->access_hash_table[index].bucket_list_head; stack;
+                stack = stack->bucket_list_next)
+        {
+                /* This stack is not older than 'older_than_stack' */
+                if (older_than_stack && stack->id == older_than_stack->id)
+                        continue;
+
+                /* Address matches */
+                if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
+                        return stack;
+        }
+
+        /* Not found */ 
+        return NULL;
+}
 
 
 /* Return the youngest in-flight write older than 'older_than_stack'. If 'older_than_stack'
@@ -640,7 +801,8 @@ struct mod_stack_t *mod_in_flight_write_fran(struct mod_t *mod,
 			continue;
 
 		/* Address matches */
-		if ((stack->waiting_list_event == 0) && (stack->access_kind == mod_access_store) /*&& (stack->addr >> mod->log_block_size == older_than_stack->addr >> mod->log_block_size)*/)
+		if ((stack->waiting_list_event == 0) && (stack->access_kind == mod_access_store) 
+			&& stack->work_group_id_in_cu == older_than_stack->work_group_id_in_cu /*&& (stack->addr >> mod->log_block_size == older_than_stack->addr >> mod->log_block_size)*/)
 			return stack;
 	}
 
@@ -934,12 +1096,6 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	/* Set slave stack as a coalesced access */
 	stack->coalesced = 1;
 	stack->master_stack = master_stack;
-	
-	//fran
-	//assert(master_stack->addr == stack->addr);
-	//master_stack->valid_mask |= stack->valid_mask;
-	//assert((master_stack->access_kind != mod_access_store) || !(~master_stack->dirty_mask & stack->dirty_mask));
-	//master_stack->dirty_mask |= stack->dirty_mask;
 	
 	assert(mod->access_list_coalesced_count <= mod->access_list_count);
 

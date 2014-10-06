@@ -224,8 +224,11 @@ void mem_system_init(void)
 	EV_MOD_NMOESI_STORE_FINISH = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store_finish");
 	
+	
+//	EV_MOD_NMOESI_NC_STORE = EV_MOD_NMOESI_STORE;
 	EV_MOD_NMOESI_NC_STORE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store");
+	
 	EV_MOD_NMOESI_NC_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
                         mem_domain_index, "mod_nmoesi_nc_store_send");
     EV_MOD_NMOESI_NC_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
@@ -490,6 +493,10 @@ void mem_system_dump_report(void)
 		fprintf(f, "\n");
 
 		/* Statistics */
+                fprintf(f, "nc_write_access_list_max = %lld\n", mod->nc_write_access_list_max);
+	
+		fprintf(f, "write_access_list_max = %lld\n", mod->write_access_list_max);
+		fprintf(f, "access_list_max = %lld\n", mod->access_list_max);		
 		fprintf(f, "Accesses = %lld\n", mod->accesses);
                 fprintf(f, "Loads = %lld\n", mod->loads);
 		fprintf(f, "Hits = %lld\n", mod->hits);

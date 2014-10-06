@@ -7,7 +7,7 @@ visual.o: visual.c ../../../src/lib/util/misc.h /usr/include/stdio.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stdarg.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- ../../../src/visual/evergreen/gpu.h \
+ /usr/include/bits/stdio.h ../../../src/visual/evergreen/gpu.h \
  ../../../src/visual/evergreen/panel.h /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/gtk-3.0/gdk/gdk.h /usr/include/gtk-3.0/gdk/gdkconfig.h \
  /usr/include/glib-2.0/glib.h /usr/include/glib-2.0/glib/galloca.h \
@@ -527,6 +527,8 @@ visual.o: visual.c ../../../src/lib/util/misc.h /usr/include/stdio.h \
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
 
 ../../../src/visual/evergreen/gpu.h:
 

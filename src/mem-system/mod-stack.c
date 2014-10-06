@@ -98,6 +98,21 @@ void mod_stack_wakeup_mod(struct mod_t *mod)
 	}
 }
 
+void mod_stack_wakeup_mod_head(struct mod_t *mod)
+{
+	struct mod_stack_t *stack;
+	int event;
+
+	if (mod->waiting_list_head)
+	{
+		stack = mod->waiting_list_head;
+		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
+		DOUBLE_LINKED_LIST_REMOVE(mod, waiting, stack);
+		esim_schedule_event(event, stack, 0);
+	}
+}
+
 
 /* Enqueue access in port wait list. */
 void mod_stack_wait_in_port(struct mod_stack_t *stack,

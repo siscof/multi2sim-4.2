@@ -50,6 +50,10 @@ struct esta_t
         /* Statistics */
         long long coalesce;
         long long accesses;
+        long long coalesce_load;
+        long long accesses_load;
+        long long coalesce_write;
+        long long accesses_write;
         long long hits;
 	long long misses;
         long long loads;
@@ -100,10 +104,11 @@ void ipc_instructions(long long cycle, si_units unit);
 
 void mem_load_finish(long long lat);
 void hrl2(int hit , struct mod_t *mod, int from_load);
-void estadisticas(int hit, int lvl);
 void ini_estadisticas();
 void add_coalesce(int level);
 void add_access(int level);
+void add_load(int level, int coalesced);
+void add_write(int level, int coalesced);
 void add_hit(int level);
 void add_miss(int level);
 long long add_si_inst(si_units unit);

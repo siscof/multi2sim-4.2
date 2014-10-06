@@ -39,6 +39,7 @@
 #include "mmu.h"
 #include "module.h"
 #include "prefetcher.h"
+#include "mshr.h"
 
 
 /*
@@ -638,6 +639,8 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	
 	/* Initialize */
 	mod->mshr_size = mshr_size;
+	mod->mshr = xcalloc(1, sizeof(struct mshr_t));
+	mshr_init(mod->mshr, mshr_size);
 	mod->dir_assoc = assoc;
 	mod->dir_num_sets = num_sets;
 	mod->dir_size = num_sets * assoc;

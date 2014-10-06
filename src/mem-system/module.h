@@ -22,7 +22,6 @@
 
 #include <stdio.h>
 
-
 /* Port */
 struct mod_port_t
 {
@@ -93,8 +92,8 @@ struct mod_t
 	int dir_latency;
 	int mshr_size;
 	//FRAN
-	int mshr_count;
-
+	long long mshr_count;
+	struct mshr_t *mshr;
 	/* Module level starting from entry points */
 	int level;
 
@@ -122,6 +121,12 @@ struct mod_t
 	struct mod_port_t *ports;
 	int num_ports;
 	int num_locked_ports;
+	
+	/* acceses coalesce list */
+	struct mod_stack_t *coalesce_list_head;
+	struct mod_stack_t *coalesce_list_tail;
+	int coalesce_list_count;
+	int coalesce_list_max;
 
 	/* Accesses waiting to get a port */
 	struct mod_stack_t *port_waiting_list_head;
@@ -171,12 +176,18 @@ struct mod_t
 	int write_access_list_count;
 	int write_access_list_max;
 
+        /* NC-Write access list */
+        struct mod_stack_t *nc_write_access_list_head;
+        struct mod_stack_t *nc_write_access_list_tail;
+        int nc_write_access_list_count;
+        int nc_write_access_list_max;
+
 	/* Number of in-flight coalesced accesses. This is a number
 	 * between 0 and 'access_list_count' at all times. */
 	int access_list_coalesced_count;
 
 	/* Clients (CPU/GPU) that use this module can fill in some
-	 * optional information in the mod_client_info_t structure.
+	  optional information in the mod_client_info_t structure.
 	 * Using a repos_t memory allocator for these structures. */
 	struct repos_t *client_info_repos;
 
@@ -259,6 +270,11 @@ struct mod_t *mod_stack_set_peer(struct mod_t *peer, int state);
 long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind, 
 	unsigned int addr, int *witness_ptr, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info);
+	
+long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
+	unsigned int addr, int *witness_ptr, int wg_id, struct linked_list_t *event_queue,
+	void *event_queue_item, struct mod_client_info_t *client_info);
+
 int mod_can_access(struct mod_t *mod, unsigned int addr);
 
 int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr, int *way_ptr, 
@@ -280,6 +296,9 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack);
 int mod_in_flight_access(struct mod_t *mod, long long id, unsigned int addr);
 struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	struct mod_stack_t *older_than_stack);
+struct mod_stack_t *mod_in_flight_address_fran(struct mod_t *mod, unsigned int addr,
+        struct mod_stack_t *older_than_stack);
+
 struct mod_stack_t *mod_in_flight_write_fran(struct mod_t *mod,
 	struct mod_stack_t *older_than_stack);
 struct mod_stack_t *mod_in_flight_write(struct mod_t *mod,
