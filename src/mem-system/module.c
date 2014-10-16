@@ -723,7 +723,8 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 		stack = stack->bucket_list_next)
 	{
 		/* This stack is not older than 'older_than_stack' */
-		if (older_than_stack && stack->id >= older_than_stack->id)
+		//if (older_than_stack && stack->id >= older_than_stack->id)
+		if (older_than_stack && stack->id == older_than_stack->id)
 			continue;
 
 		/* Address matches */

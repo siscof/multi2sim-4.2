@@ -238,10 +238,10 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 //        struct cache_t *cache = mod->cache;
 	
 	if(mod->level == 1)
-		mshr[1] += mod->mshr_count;
+		mshr[1] += mshrGetEntradasOcupadas(mod->mshr);
 	if(mod->level == 2)
 	{
-		mshr[2] += mod->mshr_count;
+		mshr[2] += mshrGetEntradasOcupadas(mod->mshr);
 		nc_write_access_list_count += mod->nc_write_access_list_count;
 		write_access_list_count += mod->write_access_list_count;
 		access_list_count += mod->access_list_count;

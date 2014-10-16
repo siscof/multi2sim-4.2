@@ -518,7 +518,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		if(!stack->coalesced)
 		{
 			mshr_unlock(mod->mshr);
-		        mod->mshr_count--;
+		//        mod->mshr_count--;
 			//mod_stack_wakeup_mod_head(mod);
 		}
 
