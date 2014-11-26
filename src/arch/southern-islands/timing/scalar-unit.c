@@ -30,7 +30,7 @@
 #include "uop.h"
 #include "wavefront-pool.h"
 //fran
-#include <lib/util/fran.h>
+#include <lib/util/estadisticas.h>
 
 void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 {
@@ -40,6 +40,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 	int list_index = 0;
 	unsigned int barrier_complete;
 	int wavefront_id;
+	si_units unit;
 
 	/* Process completed instructions */
 	list_entries = list_count(scalar_unit->write_buffer);
@@ -80,6 +81,8 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 		{
 			assert(uop->wavefront_pool_entry->lgkm_cnt > 0);
 			uop->wavefront_pool_entry->lgkm_cnt--;
+			gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);
+			unit = s_mem_u;
 		}
 
 		/* Access complete, remove the uop from the queue */
@@ -90,6 +93,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 		if (!uop->scalar_mem_read)
 		{
 			uop->wavefront_pool_entry->ready = 1;
+			unit = scalar_u;
 		}
 
 		/* Check for "wait" instruction */
@@ -180,6 +184,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 		/* Statistics */
 		scalar_unit->inst_count++;
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+		ipc_instructions(asTiming(si_gpu)->cycle, unit);
 	}
 }
 
@@ -245,6 +250,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 			
 			uop->write_ready = asTiming(si_gpu)->cycle + 
 				si_gpu_scalar_unit_write_latency;
+			//gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);			
 
 			list_remove(scalar_unit->exec_buffer, uop);
 			list_enqueue(scalar_unit->write_buffer, uop);
@@ -315,6 +321,7 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 	int list_index = 0;
 	int instructions_processed = 0;
 	int i;
+	enum mod_access_kind_t access_kind;
 
 	list_entries = list_count(scalar_unit->read_buffer);
 
@@ -366,9 +373,9 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 		{
 			
 			//FRAN
-			scalar_unit->compute_unit->scalar_cache->scalar_load++;
-			if(!uop->glc)
-				scalar_unit->compute_unit->scalar_cache->scalar_load_nc++;
+			//scalar_unit->compute_unit->scalar_cache->scalar_load++;
+			//if(!uop->glc)
+			scalar_unit->compute_unit->scalar_cache->scalar_load_nc++;
 
 
 			/* Access global memory */
@@ -377,15 +384,22 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 			uop->global_mem_access_addr =
 				uop->wavefront->scalar_work_item->
 				global_mem_access_addr;
-//			if(fran_mode_enable == 0){
-				mod_access(scalar_unit->compute_unit->scalar_cache,
-				mod_access_load, uop->global_mem_access_addr,
+             
+             if ((directory_type == dir_type_nmoesi))
+                access_kind = mod_access_load;
+             else
+                access_kind = mod_access_nc_load;
+                
+			mod_access(scalar_unit->compute_unit->scalar_cache,
+				access_kind, uop->global_mem_access_addr,
 				&uop->global_mem_witness, NULL, NULL, NULL);
-/*			}else{
-				mod_access(mod_get_low_mod(scalar_unit->compute_unit->scalar_cache , uop->global_mem_access_addr),
- 				mod_access_load, uop->global_mem_access_addr,
-                                &uop->global_mem_witness, NULL, NULL, NULL);
-			}*/
+			
+			add_access(0);
+
+                	/*estadisticas fran*/
+			uop->active_work_items = 1;
+			uop->send_cycle = asTiming(si_gpu)->cycle;
+
 			/* Transfer the uop to the execution buffer */
 			list_remove(scalar_unit->read_buffer, uop);
 			list_enqueue(scalar_unit->exec_buffer, uop);
@@ -403,6 +417,7 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 			uop->execute_ready = asTiming(si_gpu)->cycle + 
 				si_gpu_scalar_unit_exec_latency;
 
+
 			/* Transfer the uop to the execution buffer */
 			list_remove(scalar_unit->read_buffer, uop);
 			list_enqueue(scalar_unit->exec_buffer, uop);
@@ -412,6 +427,7 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 				scalar_unit->compute_unit->id, 
 				uop->wavefront->id, uop->id_in_wavefront);
 			continue;
+
 		}
 	}
 }

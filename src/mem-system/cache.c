@@ -240,6 +240,8 @@ void cache_set_block(struct cache_t *cache, int set, int way, int tag, int state
 			cache_waylist_head);
 	cache->sets[set].blocks[way].tag = tag;
 	cache->sets[set].blocks[way].state = state;
+	cache->sets[set].blocks[way].dirty_mask = 0;
+	cache->sets[set].blocks[way].valid_mask = 0;
 }
 
 
@@ -277,16 +279,21 @@ void cache_access_block(struct cache_t *cache, int set, int way)
  * depending on the replacement policy */
 int cache_replace_block(struct cache_t *cache, int set)
 {
-	//struct cache_block_t *block;
+	struct cache_block_t *block;
 
 	/* Try to find an invalid block. Do this in the LRU order, to avoid picking the
 	 * MRU while its state has not changed to valid yet. */
 	assert(set >= 0 && set < cache->num_sets);
-	/*
+	
 	for (block = cache->sets[set].way_tail; block; block = block->way_prev)
+	{
 		if (!block->state)
+		{
+			cache_update_waylist(&cache->sets[set], block, 
+				cache_waylist_head);
 			return block->way;
-	*/
+		}
+	}
 
 	/* LRU and FIFO replacement: return block at the
 	 * tail of the linked list */
@@ -314,4 +321,65 @@ void cache_set_transient_tag(struct cache_t *cache, int set, int way, int tag)
 	block = &cache->sets[set].blocks[way];
 	block->transient_tag = tag;
 }
+void cache_clean_block_dirty(struct cache_t *cache, int set, int way)
+{
+	cache->sets[set].blocks[way].dirty_mask = 0;
+}
 
+void cache_clean_block_valid(struct cache_t *cache, int set, int way)
+{
+	cache->sets[set].blocks[way].valid_mask = 0;
+}
+
+unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
+{
+	unsigned int mask = cache->sets[set].blocks[way].dirty_mask;
+	unsigned int dirty = 0;
+	unsigned int addr = -1;
+	int words = 0;
+	
+	assert(cache->sets[set].blocks[way].state);
+
+	if(mask)
+	{
+		do
+		{
+			dirty = mask & (1 << words);
+			words++;
+		}
+		while(!dirty);
+		
+		addr = cache->sets[set].blocks[way].tag + ((words - 1) * 4);
+		cache->sets[set].blocks[way].dirty_mask &= (~dirty);
+		
+	} 
+	return addr;
+}
+
+unsigned int cache_get_block_dirty_mask(struct cache_t *cache, int set, int way)
+{
+	return cache->sets[set].blocks[way].dirty_mask;
+}
+
+void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsigned int dirty_mask)
+{
+	/*unsigned int tag = stack->addr & ~cache->block_mask;
+	unsigned int shift = (stack->addr - tag) >> 2;
+	unsigned int mask = 0;
+	if(words == 0)
+		words = 1;
+		
+	assert((tag + cache->block_size) >= (addr + words * 4));
+		
+	for(;words > 0 ; words--)
+	{
+		mask |= 1 << (shift + words - 1);
+	}*/
+	//assert(!(cache->sets[set].blocks[way].dirty_mask & dirty_mask));
+	cache->sets[set].blocks[way].dirty_mask |= dirty_mask;
+}
+
+void cache_write_block_valid_mask(struct cache_t *cache, int set, int way, unsigned int mask)
+{
+	cache->sets[set].blocks[way].valid_mask |= mask;
+}

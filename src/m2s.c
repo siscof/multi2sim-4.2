@@ -75,6 +75,8 @@
 //fran
 #include <lib/util/estadisticas.h>
 #include <lib/esim/esim.h>
+#include <mem-system/mshr.h>
+
 long long ciclo_anterior = 0;
 
 static char *visual_file_name = "";
@@ -138,6 +140,14 @@ static char *mem_debug_file_name = "";
 //FRAN
 //static char *fran_file_latencia = "";
 //static char *fran_file_accesos = "";
+char *fran_file_ipc;
+char *fran_file_general;
+char *fran_file_t1000k;
+char *fran_file_hitRatio;
+char *fran_file_red;
+int SALTAR_L1;
+int mhsr_control_enabled = 0;
+long long ventana_muestreo = 10000;
 //int fran_latencia;
 //int fran_accesos;
 static char *net_debug_file_name = "";
@@ -599,15 +609,15 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 
 		if (!strcmp(argv[argi], "--saltar_l1"))
 		{
+
 			m2s_need_argument(argc, argv, argi);
 			if(!strcmp(argv[++argi],"enable")){
 				SALTAR_L1 = 1;
-				//replace = 1;
 			}else{
 				SALTAR_L1 = 0;
-				//replace = 0;
+				
 			}
-			replace = 0;			
+						
 			m2s_need_argument(argc, argv, argi);
 	
                         argi++;
@@ -615,9 +625,9 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			char a[200]="";
 			
 			strcpy(a,argv[argi]);
-			strcat(a, "_latencia");
-			fran_file_latencia = xmalloc(1000);
-			memcpy(fran_file_latencia,a,strlen(a)+1);
+			strcat(a, "_ipc");
+			fran_file_ipc = xmalloc(1000);
+			memcpy(fran_file_ipc,a,strlen(a)+1);
 			
 			fran_file_red = xmalloc(1000);
 			strcpy(fran_file_red,argv[argi]);
@@ -640,6 +650,13 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 
 			continue;
 		}
+
+                /* mshr size control */
+                if (!strcmp(argv[argi], "--mshr-control"))
+                {
+                       	mhsr_control_enabled = 1;
+                        continue;
+                }
 
 		/* Context configuration file */
 		if (!strcmp(argv[argi], "--ctx-config"))
@@ -1928,6 +1945,15 @@ static void m2s_loop(void)
 		if (!num_emu_active && !num_timing_active)
 			esim_finish = esim_finish_ctx;
 
+		/*if(!(estadisticas_get_instruccionesGpu() % 500000))
+        	{
+                	mshr_control(mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador);
+                	mem_stats.superintervalo_latencia = 0;
+        	        mem_stats.superintervalo_contador = 0;
+
+	        }*/
+
+
 		/* Count loop iterations, and check for limit in simulation time only every
 		 * 128k iterations. This avoids a constant overhead of system calls. */
 		m2s_loop_iter++;
@@ -2031,7 +2057,7 @@ int main(int argc, char **argv)
 	x86_trace_cache_debug_category = debug_new_category(x86_trace_cache_debug_file_name);
 	mem_debug_category = debug_new_category(mem_debug_file_name);
 	//fran
-	fran_latencia = debug_new_category(fran_file_latencia);
+	fran_ipc = debug_new_category(fran_file_ipc);
 	fran_general = debug_new_category(fran_file_general);
     fran_t1000k = debug_new_category(fran_file_t1000k);
     fran_hitRatio = debug_new_category(fran_file_hitRatio);

@@ -29,6 +29,9 @@
 #include "uop.h"
 #include "cycle-interval-report.h"
 
+#include <arch/southern-islands/emu/emu.h>
+
+#include <lib/util/estadisticas.h>
 
 void si_simd_complete(struct si_simd_t *simd)
 {
@@ -36,6 +39,10 @@ void si_simd_complete(struct si_simd_t *simd)
 	int list_entries;
 	int list_index = 0;
 	int i;
+
+        struct si_work_item_t *work_item;
+        int work_item_id;
+
 
 	list_entries = list_count(simd->exec_buffer);
 
@@ -63,13 +70,31 @@ void si_simd_complete(struct si_simd_t *simd)
 
 		/* Statistics */
 		simd->inst_count++;
-		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+	
+                si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+
+		add_si_macroinst(simd_u);
+
+		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+                {
+
+                        work_item = uop->wavefront->work_items[work_item_id];
+
+                        if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+                        {
+                                si_units unit = simd_u;
+                                ipc_instructions(asTiming(si_gpu)->cycle, unit);
+			}
+		}
 	}
 }
 
 void si_simd_execute(struct si_simd_t *simd)
 {
 	struct si_uop_t *uop;
+//	struct si_work_item_uop_t *work_item_uop;
+//	struct si_work_item_t *work_item;
+//	int work_item_id;
 	int list_entries;
 	int list_index = 0;
 	int instructions_processed = 0;
@@ -120,6 +145,21 @@ void si_simd_execute(struct si_simd_t *simd)
 			list_index++;
 			continue;
 		}
+
+		/*estadsitcas fran*/
+		/*SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+                {
+
+                        work_item = uop->wavefront->work_items[work_item_id];
+
+                        if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+                        {
+				si_units unit = simd_u;
+                                ipc_instructions(asTiming(si_gpu)->cycle, unit);
+                        }
+                }*/
+
+
 
 		/* Includes time for pipelined read-exec-write of 
 		 * all subwavefronts */

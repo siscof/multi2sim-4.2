@@ -39,7 +39,7 @@
 #include "mmu.h"
 #include "module.h"
 #include "prefetcher.h"
-
+#include "mshr.h"
 
 /*
  * Global Variables
@@ -315,6 +315,7 @@ static void mem_config_check(struct arch_t *arch, void *user_data)
 static void mem_config_read_general(struct config_t *config)
 {
 	char *section;
+	char *dir_type;
 
 	/* Section with general parameters */
 	section = "General";
@@ -337,6 +338,23 @@ static void mem_config_read_general(struct config_t *config)
 	/* Peer transfers */
 	mem_peer_transfers = config_read_bool(config, section, 
 		"PeerTransfers", 1);
+		
+	/* Directory type*/
+	dir_type = config_read_string(config, section, "DirectoryType", "nmoesi");
+	
+	if(!strncasecmp(dir_type,"nmoesi", 7))
+	{
+		directory_type = dir_type_nmoesi;
+	}
+	else if(!strncasecmp(dir_type,"vi", 3))
+	{
+		directory_type = dir_type_vi;		
+	}
+	else
+	{
+		fatal("%s: directory type: %s : isn't a valid directory type (nmoesi, vi)\n",
+				mem_config_file_name, dir_type);	
+	}
 }
 
 
@@ -620,6 +638,8 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	
 	/* Initialize */
 	mod->mshr_size = mshr_size;
+	mshr_init(mod->mshr, mshr_size);
+	//mod->mshr->size = mshr_size;
 	mod->dir_assoc = assoc;
 	mod->dir_num_sets = num_sets;
 	mod->dir_size = num_sets * assoc;
@@ -692,7 +712,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	if (block_size < 1 || (block_size & (block_size - 1)))
 		fatal("%s: %s: block size must be power of two.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
-	if (latency < 1)
+	if (latency < 0)
 		fatal("%s: %s: invalid value for variable 'Latency'.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
 	if (num_ports < 1)

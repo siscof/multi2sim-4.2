@@ -54,6 +54,7 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->lds_module = mod_create(buf, mod_kind_local_memory,
 		si_gpu_lds_num_ports, si_gpu_lds_block_size, 
 		si_gpu_lds_latency);
+		compute_unit->lds_module->mshr_size = 32000;
 
 	/* Hardware structures */
 	compute_unit->num_wavefront_pools = si_gpu_num_wavefront_pools;

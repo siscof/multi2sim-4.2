@@ -33,7 +33,7 @@
 #include "node.h"
 #include "routing-table.h"
 
-#include <lib/util/fran.h>
+#include <lib/util/estadisticas.h>
 
 /* 
  * Message
@@ -326,11 +326,11 @@ void net_event_handler(int event, void *data)
 							
 				if(strstr(link->name,"switch.in"))
 				{
-					estadis[level].busy_cicles_out += lat;                        
+					mem_stats.mod_level[level].busy_cicles_out += lat;                        
 				}
 				else if(strstr(link->name,"switch.out")) 
 	                	{
-			        	estadis[level].busy_cicles_in += lat;
+			        	mem_stats.mod_level[level].busy_cicles_in += lat;
 				}
 			}
 
@@ -614,15 +614,21 @@ void net_event_handler(int event, void *data)
 		net->msg_size_acc += msg->size;
 		
 		if(strstr(net->name,"net-l1-to-l2"))
-				{	
-					estadis[1].latencia_red_acc += cycle - msg->send_cycle;
-					estadis[1].latencia_red_cont++;
-				}
-				else if(strstr(net->name,"-to-mm"))
-				{
-					estadis[2].latencia_red_acc += cycle - msg->send_cycle;
-					estadis[2].latencia_red_cont++;
-				}
+		{	
+			mem_stats.mod_level[1].latencia_red_acc += cycle - msg->send_cycle;
+			mem_stats.mod_level[1].latencia_red_cont++;
+				
+			(estadisticas_ipc + 1)->latencia_red_acc += cycle - msg->send_cycle;
+			(estadisticas_ipc + 1)->latencia_red_cont++;
+		}
+		else if(strstr(net->name,"-to-mm"))
+		{
+			mem_stats.mod_level[2].latencia_red_acc += cycle - msg->send_cycle;
+			mem_stats.mod_level[2].latencia_red_cont++;
+		
+                        (estadisticas_ipc + 2)->latencia_red_acc += cycle - msg->send_cycle;
+                        (estadisticas_ipc + 2)->latencia_red_cont++;
+		}
 
 		/* If not return event was specified, free message here */
 		if (stack->ret_event == ESIM_EV_NONE)

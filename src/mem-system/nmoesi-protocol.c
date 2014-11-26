@@ -32,6 +32,7 @@
 #include "mem-system.h"
 #include "mod-stack.h"
 #include "prefetcher.h"
+#include "mshr.h"
 //fran
 #include <lib/util/misc.h>
 #include <lib/util/estadisticas.h>
@@ -49,6 +50,8 @@ int EV_MOD_NMOESI_LOAD_UNLOCK;
 int EV_MOD_NMOESI_LOAD_FINISH;
 
 int EV_MOD_NMOESI_STORE;
+int EV_MOD_NMOESI_STORE_SEND;
+int EV_MOD_NMOESI_STORE_RECEIVE;
 int EV_MOD_NMOESI_STORE_LOCK;
 int EV_MOD_NMOESI_STORE_ACTION;
 int EV_MOD_NMOESI_STORE_UNLOCK;
@@ -62,6 +65,8 @@ int EV_MOD_NMOESI_PREFETCH_UNLOCK;
 int EV_MOD_NMOESI_PREFETCH_FINISH;
 
 int EV_MOD_NMOESI_NC_STORE;
+int EV_MOD_NMOESI_NC_STORE_SEND;
+int EV_MOD_NMOESI_NC_STORE_RECEIVE;
 int EV_MOD_NMOESI_NC_STORE_LOCK;
 int EV_MOD_NMOESI_NC_STORE_WRITEBACK;
 int EV_MOD_NMOESI_NC_STORE_ACTION;
@@ -146,7 +151,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 	struct net_node_t *src_node;
 	struct net_node_t *dst_node;
 	int return_event;
-
+	int retry_lat;
 
 	if (event == EV_MOD_NMOESI_LOAD)
 	{
@@ -159,11 +164,11 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->id, mod->name, stack->addr);
 		
 		/* Record access */
-		mod_access_start(mod, stack, mod_access_load);
+//		mod_access_start(mod, stack, mod_access_load);
 		//FRAN
-		mod->loads++;
-		//fran_debug("%lld %lld\n",esim_time, stack->id);
-                stack->tiempo_acceso = asTiming(si_gpu)->cycle;
+	//	mod->loads++;
+		
+                //stack->tiempo_acceso = asTiming(si_gpu)->cycle;
                 
 		
 /*
@@ -171,7 +176,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			t1000k_primer_acceso = esim_cycle();
 		t1000k_ciclo += esim_cycle();
 		t1000k++;
-		if( t1000k  >= 640){
+		if( t1000k  >= 640){1
                 long long esim_c = esim_cycle();
 		fran_debug_t1000k("%lld %lld\n",t1000k_ciclo/640, esim_c - t1000k_primer_acceso); //tiempo
 		t1000k = 0;
@@ -182,21 +187,42 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Coalesce access */
 		
 
-		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
+		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
+                
+
 		if (master_stack)
 		{
 
+	               mod_access_start(mod, stack, mod_access_load);
 			
 			mod->hits_aux++;
 			//mod->hits++
-		//estadisticas(1,mod->level);
-		mod->delayed_read_hit++;
-		
-		mod_coalesce(mod, master_stack, stack);
-		mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_LOAD_FINISH);
-		return;
+			//estadisticas(1,mod->level);
+			mod->delayed_read_hit++;
+			add_access(mod->level);
+			add_coalesce(mod->level);
+			mod_coalesce(mod, master_stack, stack);
+			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_LOAD_FINISH);
+			return;
 		}
-		
+/*		else
+		{
+			if (mod->mshr_count >= mod->mshr_size)
+	        {
+        	    mod->read_retries++;
+                retry_lat = mod_get_retry_latency(mod);
+               	mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+               	stack->retry = 1;
+               	esim_schedule_event(EV_MOD_NMOESI_LOAD, stack, retry_lat);
+            //   	mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD);
+               	return;
+            }
+            mod->mshr_count++;
+
+		}*/
+		add_access(mod->level);
+	 	mod->loads++;
+		mod_access_start(mod, stack, mod_access_load);
 		if(SALTAR_L1 && mod->level == 1)
 		{
 //			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,	EV_MOD_NMOESI_LOAD_FINISH, stack);
@@ -211,7 +237,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 
 	/* Next event */
-	esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, 0);
+	//if(mshr_lock(mod->mshr,stack))
+	//{
+		esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, 0);
+	/*}else{
+		mshr_enqueue(mod->mshr, stack, EV_MOD_NMOESI_LOAD_LOCK);
+	}*/	
 	return;
 	}
 	
@@ -234,12 +265,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 		else if(stack->request_dir == mod_request_down_up)
 		{
-			msg_size = 64;
+			msg_size = 72;
 			net = mod->low_net;
-                        src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
-                        dst_node = mod->low_net_node;
+            src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
+            dst_node = mod->low_net_node;
 			return_event = EV_MOD_NMOESI_LOAD_RECEIVE;
-					stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
+			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
 			return_event, stack, event, stack);
 		
 		}
@@ -298,6 +329,19 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
 		return;
 	}
+	
+	/*		if (mod->mshr_count >= mod->mshr_size)
+	        {
+        	    mod->read_retries++;
+                retry_lat = mod_get_retry_latency(mod);
+               	mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+               	stack->retry = 1;
+               	esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
+            //   	mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD);
+               	return;
+            }
+            mod->mshr_count++;
+*/
 
 	/* Call find and lock */
 	new_stack = mod_stack_create(stack->id, mod, stack->addr,
@@ -312,7 +356,6 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 
 if (event == EV_MOD_NMOESI_LOAD_ACTION)
 {
-	int retry_lat;
 
 	mem_debug("  %lld %lld 0x%x %s load action\n", esim_time, stack->id,
 		stack->addr, mod->name);
@@ -330,12 +373,16 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		return;
 	}
 
+	mem_stats.mod_level[mod->level].entradas_bloqueadas++;
+
 	/* Hit */
 	if (stack->state)
 	{
 		esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
 		estadisticas(1, 0);
-                        mod->hits_aux++;
+
+		add_hit(mod->level);
+                mod->hits_aux++;
 
 			/* The prefetcher may have prefetched this earlier and hence
 			 * this is a hit now. Let the prefetcher know of this hit
@@ -346,6 +393,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		}
 
 		/* Miss */
+
+		add_miss(mod->level);
 		estadisticas(0, 0);
 
 		new_stack = mod_stack_create(stack->id, mod, stack->tag,
@@ -354,7 +403,15 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 		new_stack->request_dir = mod_request_up_down;
 		new_stack->from_CU = 1;
-		esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+
+		//(mshr_lock(mod->mshr,stack))
+		//
+			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+		/*lse{
+			mshr_enqueue(mod->mshr, stack, EV_MOD_NMOESI_READ_REQUEST);
+		}	*/
+
+		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
 
 		/* The prefetcher may be interested in this miss */
 		//prefetcher_access_miss(stack, mod);
@@ -370,6 +427,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_miss\"\n",
 			stack->id, mod->name);
+
+		mshr_unlock2(mod->mshr);
 
 		/* Error on read request. Unlock block and retry load. */
 		if (stack->err)
@@ -402,10 +461,10 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		/* Unlock directory entry */
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 		stack->request_dir = mod_request_down_up;
+
 		/* Impose the access latency before continuing */
 
-			esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack,
-				mod->latency);
+		esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack, mod->latency);
 
 		return;
 	}
@@ -429,11 +488,14 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			stack->id);
 			
 		//fran_debug("%lld %lld\n",esim_time, stack->id);
-	 	long long ciclo = asTiming(si_gpu)->cycle;
-		if(esim_time > stack->tiempo_acceso){
-			
-			estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
-			estadis[0].media_latencia_contador++;
+	 	if(mod->level == 1)
+		{
+			long long ciclo = asTiming(si_gpu)->cycle;
+			if(esim_time > stack->tiempo_acceso){
+				
+				mem_load_finish(ciclo - stack->tiempo_acceso);			
+				estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
+				estadis[0].media_latencia_contador++;
 			/*estadis[mod->level].tiempo_acceso_latencia += stack->tiempo_acceso;
 			acumulado++; 
 			if(acumulado == 1000){
@@ -446,17 +508,38 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				estadis[mod->level].tiempo_acceso_latencia = 0;
 				fran_debug_latencia("%d %lld %.1f\n", mod->level, ciclo_medio, media);
 			}*/
-		}
+			}
 
 		
-		load_finished++;
-		if( (load_finished % 10000) == 0 )
-		{
-			load_finished = 0;
-			fran_debug_t1000k("%lld\n", ciclo);
-			fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
-			ret_ciclo = ciclo;
+			load_finished++;
+			if( (load_finished % 10000) == 0 )
+			{
+				load_finished = 0;
+				fran_debug_t1000k("%lld\n", ciclo);
+				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
+				
+				ret_ciclo = ciclo;
+			}
 		}
+
+	/*	if(!stack->coalesced)
+		{
+	        
+			//mod->mshr_count--;
+			mshr_unlock(mod->mshr);
+		}*/
+
+		if(stack->state)
+		{
+			add_CoalesceHit(mod->level);		
+		}		
+		else
+		{
+			add_CoalesceMiss(mod->level);
+		}
+
+		if(stack->ret_stack)
+			stack->ret_stack->state = stack->state;		
 
 		/* Increment witness variable */
 		if (stack->witness_ptr)
@@ -489,6 +572,12 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 	struct mod_t *mod = stack->mod;
 
+        struct net_t *net;
+        struct net_node_t *src_node;
+        struct net_node_t *dst_node;
+        int return_event;
+	int retry_lat;
+	
 
 	if (event == EV_MOD_NMOESI_STORE)
 	{
@@ -502,11 +591,19 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_store);
+                
+		printf("STORE con id: %lld \n", stack->id);
 
+		/* Increment witness variable */
+                //if (stack->witness_ptr)
+                //	(*stack->witness_ptr)++;
+                //stack->witness_ptr = NULL;
+                   
 		/* Coalesce access */
 		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, stack);
 		if (master_stack)
 		{
+			
 			mod->writes++;
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_STORE_FINISH);
@@ -514,15 +611,89 @@ void mod_handler_nmoesi_store(int event, void *data)
 			/* Increment witness variable */
 			if (stack->witness_ptr)
 				(*stack->witness_ptr)++;
-
+			stack->witness_ptr = NULL;
 			return;
 		}
+/*
+            if (mod->mshr_count >= mod->mshr_size)
+                {
+                        mod_access_finish(mod,stack);
+			mod->write_retries++;
+                        retry_lat = mod_get_retry_latency(mod);
+                        mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+                        stack->retry = 1;
+                        esim_schedule_event(EV_MOD_NMOESI_STORE, stack, retry_lat);
+                        //mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_STORE);
+                        return;
+                }
+                mod->mshr_count++;*/
+                
+                if(SALTAR_L1 && mod->level == 1)
+                {
+                        stack->request_dir = mod_request_down_up;
+                        new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_NMOESI_STORE_SEND, stack);
+			esim_schedule_event(EV_MOD_NMOESI_STORE_SEND, new_stack, 0);
+			new_stack->request_dir= mod_request_up_down;
+                        new_stack->witness_ptr = stack->witness_ptr;
+			stack->witness_ptr = NULL;
+			return;
+                }
 
 		/* Continue */
 		esim_schedule_event(EV_MOD_NMOESI_STORE_LOCK, stack, 0);
 		return;
 	}
 
+        if(event == EV_MOD_NMOESI_STORE_SEND)
+        {
+                int msg_size;
+                if(stack->request_dir == mod_request_up_down)
+                {
+                        stack->request_dir = mod_request_up_down;
+                        msg_size = 72;
+                        net = mod->high_net;
+                        src_node = stack->ret_stack->mod->low_net_node;
+                        dst_node = mod->high_net_node;
+                        return_event = EV_MOD_NMOESI_STORE_RECEIVE;
+                        stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size, return_event, stack, event, stack);
+
+                }
+                else if(stack->request_dir == mod_request_down_up)
+                {
+                        msg_size = 8;
+                        net = mod->low_net;
+                        src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
+                        dst_node = mod->low_net_node;
+                        return_event = EV_MOD_NMOESI_STORE_RECEIVE;
+                        stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size, return_event, stack, event, stack);
+
+                }
+                else
+                {
+                        fatal("Invalid request_dir in EV_MOD_NMOESI_STORE_SEND");
+                }
+                return;
+        }
+        if(event == EV_MOD_NMOESI_STORE_RECEIVE)
+        {
+                  if(stack->request_dir == mod_request_up_down)
+                {
+                        net_receive(mod->high_net, mod->high_net_node, stack->msg);
+                        esim_schedule_event(EV_MOD_NMOESI_STORE, stack, 0);
+                }
+                else if(stack->request_dir == mod_request_down_up)
+                {
+                net_receive(mod->low_net, mod->low_net_node, stack->msg);
+                        esim_schedule_event(EV_MOD_NMOESI_STORE_FINISH, stack, 0);
+                }
+                else
+                {
+                        fatal("Invalid request_dir in EV_MOD_NMOESI_STORE_RECEIVE");
+                }
+
+                return;
+
+        }
 
 	if (event == EV_MOD_NMOESI_STORE_LOCK)
 	{
@@ -543,6 +714,39 @@ void mod_handler_nmoesi_store(int event, void *data)
 			return;
 		}
 
+             /* If there is any older write, wait for it */
+       /*         older_stack = mod_in_flight_write(mod, stack);
+                if (older_stack)
+                {
+                        mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
+                        mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_STORE_LOCK);
+                        return;
+                }
+*/
+                /* If there is any older access to the same address that this access could not
+ *                  * be coalesced with, wait for it. */
+                /*older_stack = mod_in_flight_address(mod, stack->addr, stack);
+                if (older_stack)
+                {
+                        mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
+                        mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_STORE_LOCK);
+                        return;
+                }
+*/
+
+   /* if (mod->mshr_count >= mod->mshr_size)
+                {
+                        //mod_access_finish(mod,stack);
+			mod->write_retries++;
+                        retry_lat = mod_get_retry_latency(mod);
+                        mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+                        stack->retry = 1;
+                        esim_schedule_event(EV_MOD_NMOESI_STORE_LOCK, stack, retry_lat);
+                        //mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_STORE);
+                        return;
+                }
+                mod->mshr_count++;
+*/
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_STORE_ACTION, stack);
@@ -561,8 +765,7 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 	if (event == EV_MOD_NMOESI_STORE_ACTION)
 	{
-		int retry_lat;
-
+	
 		mem_debug("  %lld %lld 0x%x %s store action\n", esim_time, stack->id,
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:store_action\"\n",
@@ -594,6 +797,20 @@ void mod_handler_nmoesi_store(int event, void *data)
 		}
 
 		/* Miss - state=O/S/I/N */
+/*		
+	        if (mod->mshr_count >= mod->mshr_size)
+                {
+                        mod->write_retries++;
+                        retry_lat = mod_get_retry_latency(mod);
+                        dir_entry_unlock(mod->dir, stack->set, stack->way);
+                        mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+                        stack->retry = 1;
+                        esim_schedule_event(EV_MOD_NMOESI_STORE_LOCK, stack, retry_lat);
+                        return;
+                }
+                mod->mshr_count++;
+*/
+
 		new_stack = mod_stack_create(stack->id, mod, stack->tag,
 			EV_MOD_NMOESI_STORE_UNLOCK, stack);
 		//new_stack->peer = mod_stack_set_peer(mod, stack->state);
@@ -615,6 +832,9 @@ void mod_handler_nmoesi_store(int event, void *data)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:store_unlock\"\n",
 			stack->id, mod->name);
+
+  //             	if (stack->state != cache_block_modified && stack->state != cache_block_exclusive)
+//			mod->mshr_count--;
 
 		/* Error in write request, unlock block and retry store. */
 		if (stack->err)
@@ -648,6 +868,11 @@ void mod_handler_nmoesi_store(int event, void *data)
 		mem_trace("mem.end_access name=\"A-%lld\"\n",
 			stack->id);
 
+		if (!stack->coalesced)
+		{
+			mod->mshr_count--;
+			//mod_stack_wakeup_mod_head(mod);
+		}
 		/* Return event queue element into event queue */
 		if (stack->event_queue && stack->event_queue_item)
 			linked_list_add(stack->event_queue, stack->event_queue_item);
@@ -674,6 +899,11 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 	struct mod_t *mod = stack->mod;
 
+        struct net_t *net;
+        struct net_node_t *src_node;
+        struct net_node_t *dst_node;
+        int return_event;
+	int retry_lat;
 
 	if (event == EV_MOD_NMOESI_NC_STORE)
 	{
@@ -687,6 +917,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_nc_store);
 
+
 		/* Coalesce access */
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
 		if (master_stack)
@@ -696,11 +927,91 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_NC_STORE_FINISH);
 			return;
 		}
+/*
+		if (mod->mshr_count >= mod->mshr_size)
+		{
+			mod_access_finish(mod, stack);
+			mod->nc_write_retries++;
+			retry_lat = mod_get_retry_latency(mod);
+			mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+			stack->retry = 1;
+			esim_schedule_event(EV_MOD_NMOESI_NC_STORE, stack, retry_lat);
+			//mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_NC_STORE);
+			return;
+		}
+		mod->mshr_count++;
+*/
+		add_access(mod->level);
+		if(SALTAR_L1 && mod->level == 1)
+                {
+                        stack->request_dir = mod_request_down_up;
+                        new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_NMOESI_NC_STORE_SEND, stack);
+			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_SEND, new_stack, 0);
+			new_stack->request_dir= mod_request_up_down;
+                	//new_stack->witness_ptr = stack->witness_ptr;
+			return;
+                }
 
 		/* Next event */
-		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, 0);
+		//if(mshr_lock(mod->mshr, stack))
+		//{
+			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, 0);
+		/*}else{
+			mshr_enqueue(mod->mshr, stack, EV_MOD_NMOESI_NC_STORE_LOCK);
+		}*/
 		return;
 	}
+
+ if(event == EV_MOD_NMOESI_NC_STORE_SEND)
+        {
+                int msg_size;
+                if(stack->request_dir == mod_request_up_down)
+                {
+                        stack->request_dir = mod_request_up_down;
+                        msg_size = 72;
+                        net = mod->high_net;
+                        src_node = stack->ret_stack->mod->low_net_node;
+                        dst_node = mod->high_net_node;
+                        return_event = EV_MOD_NMOESI_NC_STORE_RECEIVE;
+                        stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size, return_event, stack, event, stack);
+
+                }
+                else if(stack->request_dir == mod_request_down_up)
+                {
+                        msg_size = 8;
+                        net = mod->low_net;
+                        src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
+                        dst_node = mod->low_net_node;
+                        return_event = EV_MOD_NMOESI_NC_STORE_RECEIVE;
+                        stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size, return_event, stack, event, stack);
+
+                }
+                else
+                {
+                        fatal("Invalid request_dir in EV_MOD_NMOESI_NC_STORE_SEND");
+                }
+                return;
+        }
+        if(event == EV_MOD_NMOESI_NC_STORE_RECEIVE)
+        {
+                  if(stack->request_dir == mod_request_up_down)
+                {
+                        net_receive(mod->high_net, mod->high_net_node, stack->msg);
+                        esim_schedule_event(EV_MOD_NMOESI_NC_STORE, stack, 0);
+                }
+                else if(stack->request_dir == mod_request_down_up)
+                {
+                net_receive(mod->low_net, mod->low_net_node, stack->msg);
+                        esim_schedule_event(EV_MOD_NMOESI_NC_STORE_FINISH, stack, 0);
+                }
+                else
+                {
+                        fatal("Invalid request_dir in EV_MOD_NMOESI_NC_STORE_RECEIVE");
+                }
+
+                return;
+
+        }
 
 	if (event == EV_MOD_NMOESI_NC_STORE_LOCK)
 	{
@@ -729,6 +1040,19 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
 		}
+		
+	/*	if (mod->mshr_count >= mod->mshr_size)
+		{
+			//mod_access_finish(mod, stack);
+			mod->nc_write_retries++;
+			retry_lat = mod_get_retry_latency(mod);
+			mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+			stack->retry = 1;
+			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
+			//mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_NC_STORE);
+			return;
+		}
+		mod->mshr_count++;*/
 
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
@@ -764,11 +1088,20 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		 * have the latest copy */
 		if (stack->state == cache_block_modified || stack->state == cache_block_owned)
 		{
+			printf("se ha detectado un bloque modificado o owned en una escritura no-coherente\n");
 			stack->eviction = 1;
 			new_stack = mod_stack_create(stack->id, mod, 0,
 				EV_MOD_NMOESI_NC_STORE_ACTION, stack);
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
+			
+			/*if(mshr_lock(mod->mshr, stack))
+			{
+				esim_schedule_event(EV_MOD_NMOESI_EVICT, stack, 0);
+			}else{
+				mshr_enqueue(mod->mshr, stack, EV_MOD_NMOESI_EVICT);
+			}*/
+
 			esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
 			return;
 		}
@@ -779,7 +1112,6 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 	if (event == EV_MOD_NMOESI_NC_STORE_ACTION)
 	{
-		int retry_lat;
 
 		mem_debug("  %lld %lld 0x%x %s nc store action\n", esim_time, stack->id,
 			stack->addr, mod->name);
@@ -819,6 +1151,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		{
 			new_stack = mod_stack_create(stack->id, mod, stack->tag,
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
+			stack->from_CU = 1;
 			new_stack->message = message_clear_owner;
 			new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 			esim_schedule_event(EV_MOD_NMOESI_MESSAGE, new_stack, 0);
@@ -828,6 +1161,19 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		 * before it becomes non-coherent */
 		else
 		{
+/*
+	                if (mod->mshr_count >= mod->mshr_size)
+        	        {
+                	        mod->nc_write_retries++;
+                        	retry_lat = mod_get_retry_latency(mod);
+                        	dir_entry_unlock(mod->dir, stack->set, stack->way);
+                        	mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
+                        	stack->retry = 1;
+                       		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
+                        	return;
+                	}
+                	mod->mshr_count++;
+*/
 			new_stack = mod_stack_create(stack->id, mod, stack->tag,
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
 			//new_stack->peer = mod_stack_set_peer(mod, stack->state);
@@ -848,6 +1194,11 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_miss\"\n",
 			stack->id, mod->name);
+
+		if(stack->from_CU == 0)
+			mshr_unlock2(mod->mshr);
+
+//		mod->mshr_count--;
 
 		/* Error on read request. Unlock block and retry nc store. */
 		if (stack->err)
@@ -896,6 +1247,12 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.end_access name=\"A-%lld\"\n",
 			stack->id);
 
+	/*    if (!stack->coalesced)
+		{
+			//mod->mshr_count--;
+			mshr_unlock(mod->mshr);
+		}
+	*/	
 		/* Increment witness variable */
 		if (stack->witness_ptr)
 			(*stack->witness_ptr)++;
@@ -1175,9 +1532,22 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* Debug */
 		if (stack->hit)
+		{
 			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
 				stack->tag, mod->name, stack->set, stack->way,
 				str_map_value(&cache_block_state_map, stack->state));
+		}else{
+			/*if(mod->level == 1)
+			{
+			       	if(!mshr_lock(mod->mshr))
+				{
+					mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK); 
+					mod_unlock_port(mod, port, stack);
+					ret->port_locked = 0;
+					return;
+				}
+			}*/
+		}
 
 		/* Statistics */
 		mod->accesses++;
@@ -1279,6 +1649,21 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 					stack->way = cache_replace_block(mod->cache, stack->set);
 			}
+
+			if(mod->level == 1)
+			{
+				if(!mshr_lock(mod->mshr, stack))
+				{	
+					if(!stack->blocking)
+						mod_stack_return(stack);
+					else
+						mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK); 
+					
+					mod_unlock_port(mod, port, stack);
+					ret->port_locked = 0;
+					return;
+				}
+			}
 		}
 		assert(stack->way >= 0);
 
@@ -1290,6 +1675,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
 			ret->err = 1;
+			
+			if (!stack->hit && mod->level == 1)
+				mshr_unlock2(mod->mshr);
+			
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
 			mod_stack_return(stack);
@@ -1386,6 +1775,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			assert(stack->eviction);
 			ret->err = 1;
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
+			mshr_unlock2(mod->mshr);
 			mod_stack_return(stack);
 			return;
 		}
@@ -1554,16 +1944,18 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		{
 			new_stack = mod_stack_create(stack->id, target_mod, stack->src_tag,
 				EV_MOD_NMOESI_EVICT_PROCESS_NONCOHERENT, stack);
+			new_stack->nc_write = 1;
 		}
 		else 
 		{
 			new_stack = mod_stack_create(stack->id, target_mod, stack->src_tag,
 				EV_MOD_NMOESI_EVICT_PROCESS, stack);
+			new_stack->write = 1;
 		}
 
 		/* FIXME It's not guaranteed to be a write */
 		new_stack->blocking = 0;
-		new_stack->write = 1;
+		//new_stack->write = 1;
 		new_stack->retry = 0;
 		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
@@ -1761,7 +2153,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_finish\"\n",
 			stack->id, mod->name);
-
+	
 		mod_stack_return(stack);
 		return;
 	}
@@ -1835,40 +2227,41 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:read_request_receive\"\n",
 			stack->id, target_mod->name);
 		
-		
-		new_stack = mod_stack_create(stack->id, target_mod, stack->addr, EV_MOD_NMOESI_READ_REQUEST_ACTION, stack);
-        	new_stack->blocking = stack->request_dir == mod_request_down_up;
-		new_stack->read = 1;
-		new_stack->retry = 0;
-		
 //
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
 		{
-//			if(stack->access_kind == mod_access_load)
-  //              	{
-			new_stack->access_kind = mod_access_load;
-                        	
+                       	
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
-                
-            		master_stack = mod_can_coalesce(target_mod, mod_access_load, stack->addr, NULL);
-			mod_access_start(target_mod, stack, mod_access_load);
-			assert(master_stack != stack);
-           	   	if (master_stack && target_mod->level == 2)
-        	       	{     	
-				estadis[target_mod->level].coalesce++;
-				stack->coalesced = 1;
-				mod_coalesce(target_mod, master_stack, new_stack);
-                	 	mod_stack_wait_in_stack(new_stack, master_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
-             	    		return;
-			}
 			
+			/*mod_access_start(target_mod, stack, mod_access_load);
+
+			target_mod->mshr_count++;
+                        if ( target_mod->mshr_count > target_mod->mshr_size)
+                        {
+                               	target_mod->read_retries++;
+                               	stack->err = 1;
+                              	target_mod->mshr_count--;
+                        //modificacion 1
+                        //mod_access_finish(target_mod, stack);
+
+			       	ret->err = 1;
+                               	mem_debug("mshr full, aborting read request\n");
+                               	stack->retry = 1;
+				stack->reply_size = 8;
+				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+                        	return;
+                        }*/
+			add_access(mod->level);
 		}
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 		
 		/* Find and lock */
-
+		new_stack = mod_stack_create(stack->id, target_mod, stack->addr, EV_MOD_NMOESI_READ_REQUEST_ACTION, stack);
+        new_stack->blocking = stack->request_dir == mod_request_down_up;
+		new_stack->read = 1;
+		new_stack->retry = 0;
 		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -1914,6 +2307,14 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		
 		if (stack->state)
 		{
+			/*estadisticas*/
+                        if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
+                        {
+			        add_CoalesceHit(target_mod->level);
+
+				if(stack->coalesced == 0)
+					add_hit(target_mod->level);
+			}
 			/* Status = M/O/E/S/N
 			 * Check: address is a multiple of requester's block_size
 			 * Check: no sub-block requested by mod is already owned by mod */
@@ -1983,6 +2384,16 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 		{
 			/* State = I */
+
+
+                        if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
+                        {
+                                add_CoalesceMiss(target_mod->level);
+
+                                if(stack->coalesced == 0)
+	 	                       add_miss(target_mod->level);
+			}
+
 			assert(!dir_entry_group_shared_or_owned(target_mod->dir,
 				stack->set, stack->way));
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag,
@@ -2405,13 +2816,18 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			src_node = target_mod->high_net_node;
 			dst_node = mod->low_net_node;
 			
-			if(stack->finished == 0)
+			
+			/*if(stack->finished == 0)
 			{
-                        
-					mod_stack_wakeup_stack(stack);
-					mod_access_finish(target_mod, stack);
+			//	if(!stack->coalesced)
+				target_mod->mshr_count--;  
+				
+				mod_stack_wakeup_stack(stack);
+				mod_access_finish(target_mod, stack);
+		         //       if((stack->ret_event == EV_MOD_NMOESI_LOAD_MISS) && stack->coalesced && stack->state)
+                	//	        add_CoalesceHit(target_mod->level);
 
-                	}
+             		}*/
 		}
 		else
 		{
@@ -2958,7 +3374,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 					dir_entry_set_owner(dir, stack->set, stack->way, z, DIR_ENTRY_OWNER_NONE);
 
 				/* Send write request upwards if beginning of block */
-				if ((FRAN == 1) || dir_entry_tag % sharer->block_size)
+				if (dir_entry_tag % sharer->block_size)
 					continue;
 
 				if(aux)

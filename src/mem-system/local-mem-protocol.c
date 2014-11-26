@@ -201,7 +201,7 @@ void mod_handler_local_mem_store(int event, void *data)
 			stack->id, mod->name);
 
 		/* If there is any older access, wait for it */
-		older_stack = stack->access_list_prev;
+		older_stack = mod_in_flight_write(mod, stack);
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for access %lld\n",

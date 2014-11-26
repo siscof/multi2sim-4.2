@@ -215,7 +215,7 @@ struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y)
 
 	assert(x < dir->xsize && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
-	mem_debug("  dir_lock retrieve\n");
+	//mem_debug("  dir_lock retrieve\n");
 	return dir_lock;
 }
 
@@ -231,7 +231,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 
 	/* If the entry is already locked, enqueue a new waiter and
 	 * return failure to lock. */
-	if (dir_lock->lock)
+	if (dir_lock->lock /*&& dir_lock->stack_id != stack->id*/)
 	{
 		/* Enqueue the stack to the end of the lock queue */
 		stack->dir_lock_next = NULL;
@@ -250,7 +250,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 			/* FIXME - Code below is the queue insertion algorithm based on stack id.
 			 * This causes a deadlock when, for example, A-10 keeps retrying an up-down access and
 			 * gets always priority over A-20, which is waiting to finish a down-up access. */
-#if 0
+/*
 			while (stack->id > lock_queue_iter->id)
 			{
 				if (!lock_queue_iter->dir_lock_next)
@@ -258,7 +258,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 
 				lock_queue_iter = lock_queue_iter->dir_lock_next;
 			}
-#endif
+*/
 			/* ------------------------------------------------------------------------ */
 			/* FIXME - Replaced with code below, just inserting at the end of the queue.
 			 * But this seems to be what this function was doing before, isn't it? Why
