@@ -728,7 +728,7 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 			continue;
 
 		/* Address matches */
-		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+		if ((stack->waiting_list_event == 0) && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			return stack;
 	}
 
