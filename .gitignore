@@ -4,3 +4,15 @@ Makefile.in
 *.Plo
 *.o
 *.lo
+*.la
+*.1
+*.0
+aclocal.m4
+config.status
+configure
+libtool
+*.swo
+*.swp
+autom4te.cache
+bin
+lib/.libs
