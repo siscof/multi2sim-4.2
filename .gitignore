@@ -4,10 +4,13 @@ Makefile.in
 *.Plo
 *.o
 *.lo
+*.a
 *.la
 *.1
 *.0
+m4
 aclocal.m4
+config.log
 config.status
 configure
 libtool
