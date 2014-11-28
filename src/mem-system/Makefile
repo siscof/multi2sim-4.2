@@ -79,8 +79,9 @@ am_libmemsystem_a_OBJECTS = cache.$(OBJEXT) command.$(OBJEXT) \
 	config.$(OBJEXT) directory.$(OBJEXT) \
 	local-mem-protocol.$(OBJEXT) mem-system.$(OBJEXT) \
 	memory.$(OBJEXT) mmu.$(OBJEXT) mod-stack.$(OBJEXT) \
-	module.$(OBJEXT) nmoesi-protocol.$(OBJEXT) spec-mem.$(OBJEXT) \
-	prefetch-history.$(OBJEXT) prefetcher.$(OBJEXT)
+	module.$(OBJEXT) nmoesi-protocol.$(OBJEXT) \
+	vi-protocol.$(OBJEXT) spec-mem.$(OBJEXT) \
+	prefetch-history.$(OBJEXT) prefetcher.$(OBJEXT) mshr.$(OBJEXT)
 libmemsystem_a_OBJECTS = $(am_libmemsystem_a_OBJECTS)
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -113,13 +114,13 @@ DIST_SOURCES = $(libmemsystem_a_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
-ACLOCAL = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/missing --run aclocal-1.11
-AMTAR = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/missing --run tar
+ACLOCAL = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/missing --run aclocal-1.11
+AMTAR = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/missing --run tar
 AM_DEFAULT_VERBOSITY = 0
 AR = ar
-AUTOCONF = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/missing --run autoconf
-AUTOHEADER = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/missing --run autoheader
-AUTOMAKE = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/missing --run automake-1.11
+AUTOCONF = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/missing --run autoconf
+AUTOHEADER = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/missing --run autoheader
+AUTOMAKE = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/missing --run automake-1.11
 AWK = gawk
 CC = gcc
 CCAS = gcc
@@ -166,7 +167,7 @@ LLVM_LIBS =
 LN_S = ln -s
 LTLIBOBJS = 
 M2S_INCLUDES =  -I$(top_srcdir) -I$(top_srcdir)/src 
-MAKEINFO = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/missing --run makeinfo
+MAKEINFO = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/missing --run makeinfo
 MKDIR_P = /bin/mkdir -p
 NMEDIT = 
 OBJEXT = o
@@ -187,10 +188,10 @@ STRIP = strip
 VERSION = 4.2
 YACC = bison -y
 YFLAGS = 
-abs_builddir = /nfs/gap/fracanma/multi2sim-4.2/src/mem-system
-abs_srcdir = /nfs/gap/fracanma/multi2sim-4.2/src/mem-system
-abs_top_builddir = /nfs/gap/fracanma/multi2sim-4.2
-abs_top_srcdir = /nfs/gap/fracanma/multi2sim-4.2
+abs_builddir = /nfs/gap/fracanma/multi2sim-devel/src/mem-system
+abs_srcdir = /nfs/gap/fracanma/multi2sim-devel/src/mem-system
+abs_top_builddir = /nfs/gap/fracanma/multi2sim-devel
+abs_top_srcdir = /nfs/gap/fracanma/multi2sim-devel
 ac_ct_CC = gcc
 ac_ct_CXX = g++
 ac_ct_F77 = gfortran
@@ -219,7 +220,7 @@ host_vendor = unknown
 htmldir = ${docdir}
 includedir = ${prefix}/include
 infodir = ${datarootdir}/info
-install_sh = ${SHELL} /nfs/gap/fracanma/multi2sim-4.2/install-sh
+install_sh = ${SHELL} /nfs/gap/fracanma/multi2sim-devel/install-sh
 libdir = ${exec_prefix}/lib
 libexecdir = ${exec_prefix}/libexec
 localedir = ${datarootdir}/locale
@@ -275,6 +276,9 @@ libmemsystem_a_SOURCES = \
 	nmoesi-protocol.c \
 	nmoesi-protocol.h \
 	\
+	vi-protocol.c \
+	vi-protocol.h \
+	\
 	spec-mem.c \
 	spec-mem.h \
 	\
@@ -282,7 +286,10 @@ libmemsystem_a_SOURCES = \
 	prefetch-history.h \
 	\
 	prefetcher.c \
-	prefetcher.h
+	prefetcher.h \
+	\
+	mshr.c \
+	mshr.h 
 
 INCLUDES =  -I$(top_srcdir) -I$(top_srcdir)/src 
 all: all-am
@@ -372,10 +379,12 @@ include ./$(DEPDIR)/memory.Po
 include ./$(DEPDIR)/mmu.Po
 include ./$(DEPDIR)/mod-stack.Po
 include ./$(DEPDIR)/module.Po
+include ./$(DEPDIR)/mshr.Po
 include ./$(DEPDIR)/nmoesi-protocol.Po
 include ./$(DEPDIR)/prefetch-history.Po
 include ./$(DEPDIR)/prefetcher.Po
 include ./$(DEPDIR)/spec-mem.Po
+include ./$(DEPDIR)/vi-protocol.Po
 
 .c.o:
 	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

@@ -79,8 +79,9 @@ am_libmemsystem_a_OBJECTS = cache.$(OBJEXT) command.$(OBJEXT) \
 	config.$(OBJEXT) directory.$(OBJEXT) \
 	local-mem-protocol.$(OBJEXT) mem-system.$(OBJEXT) \
 	memory.$(OBJEXT) mmu.$(OBJEXT) mod-stack.$(OBJEXT) \
-	module.$(OBJEXT) nmoesi-protocol.$(OBJEXT) spec-mem.$(OBJEXT) \
-	prefetch-history.$(OBJEXT) prefetcher.$(OBJEXT)
+	module.$(OBJEXT) nmoesi-protocol.$(OBJEXT) \
+	vi-protocol.$(OBJEXT) spec-mem.$(OBJEXT) \
+	prefetch-history.$(OBJEXT) prefetcher.$(OBJEXT) mshr.$(OBJEXT)
 libmemsystem_a_OBJECTS = $(am_libmemsystem_a_OBJECTS)
 DEFAULT_INCLUDES = 
 depcomp = $(SHELL) $(top_srcdir)/depcomp
@@ -275,6 +276,9 @@ libmemsystem_a_SOURCES = \
 	nmoesi-protocol.c \
 	nmoesi-protocol.h \
 	\
+	vi-protocol.c \
+	vi-protocol.h \
+	\
 	spec-mem.c \
 	spec-mem.h \
 	\
@@ -282,7 +286,10 @@ libmemsystem_a_SOURCES = \
 	prefetch-history.h \
 	\
 	prefetcher.c \
-	prefetcher.h
+	prefetcher.h \
+	\
+	mshr.c \
+	mshr.h 
 
 INCLUDES = @M2S_INCLUDES@
 all: all-am
@@ -372,10 +379,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mmu.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mod-stack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/module.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mshr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nmoesi-protocol.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prefetch-history.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/prefetcher.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/spec-mem.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/vi-protocol.Po@am__quote@
 
 .c.o:
 @am__fastdepCC_TRUE@	$(AM_V_CC)$(COMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

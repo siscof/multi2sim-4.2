@@ -228,8 +228,8 @@ popup.o: popup.c /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/pango-1.0/pango/pango-utils.h /usr/include/stdio.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/cairo/cairo.h /usr/include/cairo/cairo-version.h \
- /usr/include/cairo/cairo-features.h \
+ /usr/include/bits/stdio.h /usr/include/cairo/cairo.h \
+ /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
  /usr/include/cairo/cairo-deprecated.h \
  /usr/include/gtk-3.0/gdk/gdkscreen.h \
  /usr/include/gtk-3.0/gdk/gdkdisplay.h \
@@ -489,7 +489,8 @@ popup.o: popup.c /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/gtk-3.0/gtk/gtkvseparator.h \
  ../../../src/lib/mhandle/mhandle.h /usr/include/stdlib.h \
  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
- /usr/include/alloca.h /usr/include/string.h popup.h
+ /usr/include/alloca.h /usr/include/string.h /usr/include/bits/string.h \
+ /usr/include/bits/string2.h popup.h
 
 /usr/include/gtk-3.0/gtk/gtk.h:
 
@@ -1048,6 +1049,8 @@ popup.o: popup.c /usr/include/gtk-3.0/gtk/gtk.h \
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
 
 /usr/include/cairo/cairo.h:
 
@@ -1620,5 +1623,9 @@ popup.o: popup.c /usr/include/gtk-3.0/gtk/gtk.h \
 /usr/include/alloca.h:
 
 /usr/include/string.h:
+
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
 
 popup.h:

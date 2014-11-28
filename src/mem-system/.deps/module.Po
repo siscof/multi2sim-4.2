@@ -25,9 +25,12 @@ module.o: module.c /usr/include/assert.h /usr/include/features.h \
  ../../src/lib/util/linked-list.h ../../src/lib/util/misc.h \
  ../../src/lib/util/string.h ../../src/lib/util/repos.h cache.h \
  directory.h local-mem-protocol.h mem-system.h mod-stack.h module.h \
- nmoesi-protocol.h ../../src/lib/util/fran.h \
- ../../src/arch/southern-islands/timing/gpu.h \
- ../../src/arch/common/timing.h ../../src/lib/util/class.h
+ nmoesi-protocol.h ../../src/lib/util/estadisticas.h \
+ ../../src/mem-system/mem-system.h ../../src/mem-system/directory.h \
+ ../../src/mem-system/module.h ../../src/arch/southern-islands/emu/emu.h \
+ ../../src/arch/common/emu.h ../../src/lib/util/class.h \
+ ../../src/lib/util/list.h ../../src/arch/southern-islands/timing/gpu.h \
+ ../../src/arch/common/timing.h vi-protocol.h
 
 /usr/include/assert.h:
 
@@ -147,10 +150,24 @@ module.h:
 
 nmoesi-protocol.h:
 
-../../src/lib/util/fran.h:
+../../src/lib/util/estadisticas.h:
+
+../../src/mem-system/mem-system.h:
+
+../../src/mem-system/directory.h:
+
+../../src/mem-system/module.h:
+
+../../src/arch/southern-islands/emu/emu.h:
+
+../../src/arch/common/emu.h:
+
+../../src/lib/util/class.h:
+
+../../src/lib/util/list.h:
 
 ../../src/arch/southern-islands/timing/gpu.h:
 
 ../../src/arch/common/timing.h:
 
-../../src/lib/util/class.h:
+vi-protocol.h:

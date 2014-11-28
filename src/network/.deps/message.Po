@@ -20,7 +20,10 @@ message.o: message.c /usr/include/assert.h /usr/include/features.h \
  /usr/include/bits/string2.h ../../src/lib/util/debug.h \
  ../../src/lib/util/list.h buffer.h message.h bus.h link.h net-system.h \
  network.h ../../src/lib/util/config.h node.h routing-table.h \
- ../../src/lib/util/fran.h
+ ../../src/lib/util/estadisticas.h ../../src/mem-system/mem-system.h \
+ ../../src/mem-system/directory.h ../../src/mem-system/module.h \
+ ../../src/arch/southern-islands/emu/emu.h ../../src/arch/common/emu.h \
+ ../../src/lib/util/class.h
 
 /usr/include/assert.h:
 
@@ -120,4 +123,16 @@ node.h:
 
 routing-table.h:
 
-../../src/lib/util/fran.h:
+../../src/lib/util/estadisticas.h:
+
+../../src/mem-system/mem-system.h:
+
+../../src/mem-system/directory.h:
+
+../../src/mem-system/module.h:
+
+../../src/arch/southern-islands/emu/emu.h:
+
+../../src/arch/common/emu.h:
+
+../../src/lib/util/class.h:

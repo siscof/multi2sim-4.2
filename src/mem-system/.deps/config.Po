@@ -26,7 +26,7 @@ config.o: config.c ../../src/arch/common/arch.h /usr/include/stdio.h \
  ../../src/network/net-system.h ../../src/network/network.h \
  ../../src/lib/util/config.h ../../src/network/node.h \
  ../../src/network/routing-table.h cache.h command.h directory.h \
- mem-system.h mmu.h module.h prefetcher.h
+ mem-system.h mmu.h module.h prefetcher.h mshr.h mod-stack.h
 
 ../../src/arch/common/arch.h:
 
@@ -147,3 +147,7 @@ mmu.h:
 module.h:
 
 prefetcher.h:
+
+mshr.h:
+
+mod-stack.h:

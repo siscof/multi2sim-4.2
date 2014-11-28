@@ -228,8 +228,8 @@ state.o: state.c /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/pango-1.0/pango/pango-utils.h /usr/include/stdio.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/cairo/cairo.h /usr/include/cairo/cairo-version.h \
- /usr/include/cairo/cairo-features.h \
+ /usr/include/bits/stdio.h /usr/include/cairo/cairo.h \
+ /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
  /usr/include/cairo/cairo-deprecated.h \
  /usr/include/gtk-3.0/gdk/gdkscreen.h \
  /usr/include/gtk-3.0/gdk/gdkdisplay.h \
@@ -489,10 +489,11 @@ state.o: state.c /usr/include/gtk-3.0/gtk/gtk.h \
  /usr/include/gtk-3.0/gtk/gtkvseparator.h \
  ../../../src/lib/mhandle/mhandle.h /usr/include/stdlib.h \
  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
- /usr/include/alloca.h /usr/include/string.h \
- ../../../src/lib/util/debug.h ../../../src/lib/util/file.h \
- ../../../src/lib/util/hash-table.h ../../../src/lib/util/list.h \
- ../../../src/lib/util/string.h state.h trace.h
+ /usr/include/alloca.h /usr/include/string.h /usr/include/bits/string.h \
+ /usr/include/bits/string2.h ../../../src/lib/util/debug.h \
+ ../../../src/lib/util/file.h ../../../src/lib/util/hash-table.h \
+ ../../../src/lib/util/list.h ../../../src/lib/util/string.h state.h \
+ trace.h
 
 /usr/include/gtk-3.0/gtk/gtk.h:
 
@@ -1051,6 +1052,8 @@ state.o: state.c /usr/include/gtk-3.0/gtk/gtk.h \
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
 
 /usr/include/cairo/cairo.h:
 
@@ -1623,6 +1626,10 @@ state.o: state.c /usr/include/gtk-3.0/gtk/gtk.h \
 /usr/include/alloca.h:
 
 /usr/include/string.h:
+
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
 
 ../../../src/lib/util/debug.h:
 

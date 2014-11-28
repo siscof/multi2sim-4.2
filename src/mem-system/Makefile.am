@@ -48,7 +48,10 @@ libmemsystem_a_SOURCES = \
 	prefetch-history.h \
 	\
 	prefetcher.c \
-	prefetcher.h
+	prefetcher.h \
+	\
+	mshr.c \
+	mshr.h 
 
 INCLUDES = @M2S_INCLUDES@
 

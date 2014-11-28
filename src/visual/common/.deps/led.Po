@@ -4,8 +4,8 @@ led.o: led.c /usr/include/math.h /usr/include/features.h \
  /usr/include/bits/huge_val.h /usr/include/bits/huge_valf.h \
  /usr/include/bits/huge_vall.h /usr/include/bits/inf.h \
  /usr/include/bits/nan.h /usr/include/bits/mathdef.h \
- /usr/include/bits/mathcalls.h ../../../src/lib/mhandle/mhandle.h \
- /usr/include/stdlib.h \
+ /usr/include/bits/mathcalls.h /usr/include/bits/mathinline.h \
+ ../../../src/lib/mhandle/mhandle.h /usr/include/stdlib.h \
  /usr/lib/gcc/x86_64-redhat-linux/4.6.3/include/stddef.h \
  /usr/include/bits/waitflags.h /usr/include/bits/waitstatus.h \
  /usr/include/endian.h /usr/include/bits/endian.h \
@@ -14,7 +14,8 @@ led.o: led.c /usr/include/math.h /usr/include/features.h \
  /usr/include/time.h /usr/include/sys/select.h /usr/include/bits/select.h \
  /usr/include/bits/sigset.h /usr/include/bits/time.h \
  /usr/include/sys/sysmacros.h /usr/include/bits/pthreadtypes.h \
- /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h led.h \
+ /usr/include/alloca.h /usr/include/string.h /usr/include/xlocale.h \
+ /usr/include/bits/string.h /usr/include/bits/string2.h led.h \
  /usr/include/gtk-3.0/gtk/gtk.h /usr/include/gtk-3.0/gdk/gdk.h \
  /usr/include/gtk-3.0/gdk/gdkconfig.h /usr/include/glib-2.0/glib.h \
  /usr/include/glib-2.0/glib/galloca.h /usr/include/glib-2.0/glib/gtypes.h \
@@ -234,8 +235,8 @@ led.o: led.c /usr/include/math.h /usr/include/features.h \
  /usr/include/pango-1.0/pango/pango-utils.h /usr/include/stdio.h \
  /usr/include/libio.h /usr/include/_G_config.h /usr/include/wchar.h \
  /usr/include/bits/stdio_lim.h /usr/include/bits/sys_errlist.h \
- /usr/include/cairo/cairo.h /usr/include/cairo/cairo-version.h \
- /usr/include/cairo/cairo-features.h \
+ /usr/include/bits/stdio.h /usr/include/cairo/cairo.h \
+ /usr/include/cairo/cairo-version.h /usr/include/cairo/cairo-features.h \
  /usr/include/cairo/cairo-deprecated.h \
  /usr/include/gtk-3.0/gdk/gdkscreen.h \
  /usr/include/gtk-3.0/gdk/gdkdisplay.h \
@@ -520,6 +521,8 @@ led.o: led.c /usr/include/math.h /usr/include/features.h \
 
 /usr/include/bits/mathcalls.h:
 
+/usr/include/bits/mathinline.h:
+
 ../../../src/lib/mhandle/mhandle.h:
 
 /usr/include/stdlib.h:
@@ -561,6 +564,10 @@ led.o: led.c /usr/include/math.h /usr/include/features.h \
 /usr/include/string.h:
 
 /usr/include/xlocale.h:
+
+/usr/include/bits/string.h:
+
+/usr/include/bits/string2.h:
 
 led.h:
 
@@ -1081,6 +1088,8 @@ led.h:
 /usr/include/bits/stdio_lim.h:
 
 /usr/include/bits/sys_errlist.h:
+
+/usr/include/bits/stdio.h:
 
 /usr/include/cairo/cairo.h:
 

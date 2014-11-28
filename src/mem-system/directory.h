@@ -62,6 +62,12 @@ struct dir_t
 	unsigned char data[0];
 };
 
+enum dir_type_t
+{
+	dir_type_nmoesi = 0,
+	dir_type_vi
+};
+
 struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes);
 void dir_free(struct dir_t *dir);
 
