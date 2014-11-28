@@ -16,3 +16,6 @@ libtool
 autom4te.cache
 bin
 lib/.libs
+config.guess
+config.sub
+ltmain.sh
