@@ -1,6 +1,7 @@
 #include "./estadisticas.h"
 #include <string.h>
 #include <mem-system/cache.h>
+#include <mem-system/mshr.h>
 
 
 static long long intervalo_anterior = 0;
