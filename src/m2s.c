@@ -19,7 +19,6 @@
 
 #include <signal.h>
 
-
 #include <arch/arm/emu/context.h>
 #include <arch/arm/emu/isa.h>
 #include <arch/arm/emu/syscall.h>
@@ -76,6 +75,8 @@
 //fran
 #include <lib/util/estadisticas.h>
 #include <lib/esim/esim.h>
+#include <mem-system/mshr.h>
+
 long long ciclo_anterior = 0;
 
 static char *visual_file_name = "";
@@ -145,6 +146,7 @@ char *fran_file_t1000k;
 char *fran_file_hitRatio;
 char *fran_file_red;
 int SALTAR_L1;
+int mhsr_control_enabled = 0;
 long long ventana_muestreo = 10000;
 //int fran_latencia;
 //int fran_accesos;
@@ -648,6 +650,13 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 
 			continue;
 		}
+
+                /* mshr size control */
+                if (!strcmp(argv[argi], "--mshr-control"))
+                {
+                       	mhsr_control_enabled = 1;
+                        continue;
+                }
 
 		/* Context configuration file */
 		if (!strcmp(argv[argi], "--ctx-config"))
@@ -1935,6 +1944,15 @@ static void m2s_loop(void)
 		 * it means that all guest contexts finished execution - simulation can end. */
 		if (!num_emu_active && !num_timing_active)
 			esim_finish = esim_finish_ctx;
+
+		/*if(!(estadisticas_get_instruccionesGpu() % 500000))
+        	{
+                	mshr_control(mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador);
+                	mem_stats.superintervalo_latencia = 0;
+        	        mem_stats.superintervalo_contador = 0;
+
+	        }*/
+
 
 		/* Count loop iterations, and check for limit in simulation time only every
 		 * 128k iterations. This avoids a constant overhead of system calls. */

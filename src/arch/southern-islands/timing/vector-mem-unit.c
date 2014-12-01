@@ -259,16 +259,19 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		if (uop->vector_mem_write)
 		{
 			if (uop->glc)
+			{
 				access_kind = mod_access_store;
+				printf("GLC = 1 en el ciclo %lld \n",asTiming(si_gpu)->cycle);
+			}
 			else
 				access_kind = mod_access_nc_store;
 		}
 		else if (uop->vector_mem_read)
 		{
-             if ((directory_type == dir_type_nmoesi) || uop->glc)
-                access_kind = mod_access_load;
-             else
-                access_kind = mod_access_nc_load;
+             		if ((directory_type == dir_type_nmoesi) || uop->glc)
+                		access_kind = mod_access_load;
+             		else
+                		access_kind = mod_access_nc_load;
 		}
 		else 
 			fatal("%s: invalid access kind", __FUNCTION__);
@@ -282,26 +285,25 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
 		        
-            work_item = uop->wavefront->work_items[work_item_id];
+            		work_item = uop->wavefront->work_items[work_item_id];
 			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
-			
 			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-            {
+		        {
 				if (uop->vector_mem_write && !uop->glc)
-	            {
+	            		{
 					aux->vector_write_nc++;
-                }
-                else if (uop->vector_mem_write && uop->glc)
-                {
+                		}
+                		else if (uop->vector_mem_write && uop->glc)
+                		{
 					aux->vector_write++;
-                }
-                else if (uop->vector_mem_read && uop->glc)
-                {
-                    aux->vector_load++;
+                		}
+                		else if (uop->vector_mem_read && uop->glc)
+                		{
+                    			aux->vector_load++;
 				}
 				else if (uop->vector_mem_read && !uop->glc)
-                {
+                		{
 					aux->vector_load_nc++;
 				}
            
@@ -326,7 +328,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 					
 					master_stack->stack_size += bytes;
 						
-					assert((tag + mod->sub_block_size) >= (addr + bytes));
+					//assert((tag + mod->sub_block_size) >= (addr + bytes));
 					for(;bytes > 0 ; bytes--)
 					{
 						mask |= 1 << (shift + bytes - 1);

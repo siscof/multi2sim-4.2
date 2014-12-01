@@ -2,8 +2,8 @@ lib_LIBRARIES = libutil.a
 
 libutil_a_SOURCES = \
 	\
-	estadisticas.c\
-	estadisticas.h\
+	estadisticas.c \
+	estadisticas.h \
 	\
 	bin-config.c \
 	bin-config.h \

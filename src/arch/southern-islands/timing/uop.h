@@ -94,9 +94,6 @@ struct si_uop_t
 	int num_global_mem_read ;
 	int num_global_mem_write ;
 
-	/* estadisticas fran*/
-	long long active_work_items ;
-	long long send_cycle;
 
 	/* Last scalar memory accesses */
 	unsigned int global_mem_access_addr;

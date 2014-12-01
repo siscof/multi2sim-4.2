@@ -39,6 +39,7 @@
 #include <arch/southern-islands/timing/gpu.h>
 #include <lib/util/class.h>
 #include "vi-protocol.h"
+#include <mem-system/mshr.h>
 
 /* String map for access type */
 struct str_map_t mod_access_kind_map =
@@ -69,6 +70,10 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	mod->kind = kind;
 	mod->latency = latency;
 
+	/* MSHR */
+	mod->mshr = mshr_create();
+	//xcalloc(1,sizeof(struct mshr_t));
+	
 	/* Ports */
 	mod->num_ports = num_ports;
 	mod->ports = xcalloc(num_ports, sizeof(struct mod_port_t));
@@ -95,6 +100,9 @@ void mod_free(struct mod_t *mod)
 		cache_free(mod->cache);
 	if (mod->dir)
 		dir_free(mod->dir);
+	if (mod->mshr)
+		mshr_free(mod->mshr);
+	
 	free(mod->ports);
 	repos_free(mod->client_info_repos);
 	free(mod->name);
@@ -641,10 +649,6 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 	if (access_kind == mod_access_store)
 		DOUBLE_LINKED_LIST_INSERT_TAIL(mod, write_access, stack);
 
-        /* Insert in nc-write access list */
-        if (access_kind == mod_access_nc_store)
-                DOUBLE_LINKED_LIST_INSERT_TAIL(mod, nc_write_access, stack);
-
 	/* Insert in access hash table */
 	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
 	DOUBLE_LINKED_LIST_INSERT_TAIL(&mod->access_hash_table[index], bucket, stack);
@@ -666,9 +670,6 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
 	assert(stack->access_kind);
 	if (stack->access_kind == mod_access_store)
 		DOUBLE_LINKED_LIST_REMOVE(mod, write_access, stack);
-
-	if (stack->access_kind == mod_access_nc_store)
-                DOUBLE_LINKED_LIST_REMOVE(mod, nc_write_access, stack);
 
 	/* Remove from hash table */
 	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
@@ -723,12 +724,11 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 		stack = stack->bucket_list_next)
 	{
 		/* This stack is not older than 'older_than_stack' */
-		//if (older_than_stack && stack->id >= older_than_stack->id)
 		if (older_than_stack && stack->id == older_than_stack->id)
 			continue;
 
 		/* Address matches */
-		if ((stack->waiting_list_event == 0) && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+		if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
 			return stack;
 	}
 
@@ -736,29 +736,6 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	return NULL;
 }
 
-struct mod_stack_t *mod_in_flight_address_fran(struct mod_t *mod, unsigned int addr,
-        struct mod_stack_t *older_than_stack)
-{
-        struct mod_stack_t *stack;
-        int index;
-
-        /* Look for address */
-        index = (addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
-        for (stack = mod->access_hash_table[index].bucket_list_head; stack;
-                stack = stack->bucket_list_next)
-        {
-                /* This stack is not older than 'older_than_stack' */
-                if (older_than_stack && stack->id == older_than_stack->id)
-                        continue;
-
-                /* Address matches */
-                if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
-                        return stack;
-        }
-
-        /* Not found */ 
-        return NULL;
-}
 
 
 /* Return the youngest in-flight write older than 'older_than_stack'. If 'older_than_stack'
@@ -1097,6 +1074,12 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	/* Set slave stack as a coalesced access */
 	stack->coalesced = 1;
 	stack->master_stack = master_stack;
+	
+	//fran
+	//assert(master_stack->addr == stack->addr);
+	//master_stack->valid_mask |= stack->valid_mask;
+	//assert((master_stack->access_kind != mod_access_store) || !(~master_stack->dirty_mask & stack->dirty_mask));
+	//master_stack->dirty_mask |= stack->dirty_mask;
 	
 	assert(mod->access_list_coalesced_count <= mod->access_list_count);
 

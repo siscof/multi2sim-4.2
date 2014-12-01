@@ -114,7 +114,8 @@ struct list_t *list_create(void)
 
 void list_free(struct list_t *list)
 {
-	free(list->elem);
+	if(list->elem)
+		free(list->elem);
 	free(list);
 }
 

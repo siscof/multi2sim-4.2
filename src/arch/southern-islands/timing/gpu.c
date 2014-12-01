@@ -42,7 +42,7 @@
 int fran_l1_off;
 static char *si_err_stall =
 	"\tThe Southern Islands GPU has not completed execution of any in-flight\n"
-	"\tinstruction for 10000000 cycles. Most likely, this means that a\n"
+	"\tinstruction for 1000 cycles. Most likely, this means that a\n"
 	"\tdeadlock condition occurred in the management of some modeled\n"
 	"\tstructure (network, memory system, pipeline queues, etc.).\n";
 
@@ -1368,7 +1368,7 @@ int SIGpuRun(Timing *self)
 
 	/* Stop if there was a simulation stall */
 	if ((asTiming(si_gpu)->cycle-gpu->last_complete_cycle) > 
-		10000000)
+		100000)
 	{
 		warning("Southern Islands GPU simulation stalled.\n%s", 
 			si_err_stall);

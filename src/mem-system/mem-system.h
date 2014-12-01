@@ -58,7 +58,6 @@ extern int mem_trace_category;
 /* Configuration */
 extern int mem_frequency;
 extern int mem_peer_transfers;
-extern enum dir_type_t directory_type;
 
 /* Frequency and frequency domain */
 extern int mem_domain_index;
