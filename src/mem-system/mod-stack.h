@@ -59,6 +59,7 @@ struct mod_stack_t
 	int *witness_ptr;
 
 	//FRAN
+	int mshr_locked;
 	long long tiempo_acceso;
 	int glc;
 	int from_CU;

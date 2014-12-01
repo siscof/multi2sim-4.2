@@ -28,6 +28,7 @@
 #include "directory.h"
 #include "mem-system.h"
 #include "mod-stack.h"
+#include "mshr.h"
 
 
 #define DIR_ENTRY_SHARERS_SIZE ((dir->num_nodes + 7) / 8)
@@ -333,6 +334,7 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 		dir->name, dir_lock->stack_id, x, y);
 
 	/* Unlock entry */
+	mshr_unlock2(mod->mshr);
 	dir_lock->lock = 0;
 }
 

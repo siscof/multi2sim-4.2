@@ -428,7 +428,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_miss\"\n",
 			stack->id, mod->name);
 
-		mshr_unlock2(mod->mshr);
+		//mshr_unlock2(mod->mshr);
 
 		/* Error on read request. Unlock block and retry load. */
 		if (stack->err)
@@ -1195,7 +1195,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_miss\"\n",
 			stack->id, mod->name);
 
-		mshr_unlock2(mod->mshr);
+		//mshr_unlock2(mod->mshr);
 
 //		mod->mshr_count--;
 
@@ -1649,7 +1649,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					stack->way = cache_replace_block(mod->cache, stack->set);
 			}
 
-			if(mod->level == 1)
+			if(mod->level == 1 && stack->mshr_locked == 0)
 			{
 				if(!mshr_lock(mod->mshr, stack))
 				{	
@@ -1662,6 +1662,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					ret->port_locked = 0;
 					return;
 				}
+				stack->mshr_locked = 1;
 			}
 		}
 		assert(stack->way >= 0);
@@ -1675,7 +1676,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
 			ret->err = 1;
 			
-			if (!stack->hit && mod->level == 1)
+			if (stack->mshr_locked == 1;)
 				mshr_unlock2(mod->mshr);
 			
 			mod_unlock_port(mod, port, stack);
@@ -1692,8 +1693,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
-			if (!stack->hit && mod->level == 1)
-				mshr_unlock2(mod->mshr);
+			//if (!stack->hit && mod->level == 1)
+				//mshr_unlock2(mod->mshr);
 			
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
@@ -1777,7 +1778,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			assert(stack->eviction);
 			ret->err = 1;
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
-			mshr_unlock2(mod->mshr);
+			//mshr_unlock2(mod->mshr);
 			mod_stack_return(stack);
 			return;
 		}
@@ -2170,7 +2171,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 	struct mod_stack_t *ret = stack->ret_stack;
 	struct mod_stack_t *new_stack;
 	//fran
-	struct mod_stack_t *master_stack;
+	//struct mod_stack_t *master_stack;
 
 	struct mod_t *mod = stack->mod;
 	struct mod_t *target_mod = stack->target_mod;
