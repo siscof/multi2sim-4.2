@@ -1368,7 +1368,7 @@ int SIGpuRun(Timing *self)
 
 	/* Stop if there was a simulation stall */
 	if ((asTiming(si_gpu)->cycle-gpu->last_complete_cycle) > 
-		100000)
+		1000)
 	{
 		warning("Southern Islands GPU simulation stalled.\n%s", 
 			si_err_stall);

@@ -8,6 +8,7 @@ Makefile.in
 *.la
 *.1
 *.0
+*.Tpo
 m4
 aclocal.m4
 config.log

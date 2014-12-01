@@ -1195,8 +1195,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_miss\"\n",
 			stack->id, mod->name);
 
-		if(stack->from_CU == 0)
-			mshr_unlock2(mod->mshr);
+		mshr_unlock2(mod->mshr);
 
 //		mod->mshr_count--;
 
@@ -1693,6 +1692,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
+			if (!stack->hit && mod->level == 1)
+				mshr_unlock2(mod->mshr);
+			
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
 			return;
