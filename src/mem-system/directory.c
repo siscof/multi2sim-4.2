@@ -334,7 +334,48 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 		dir->name, dir_lock->stack_id, x, y);
 
 	/* Unlock entry */
-	mshr_unlock2(mod->mshr);
 	dir_lock->lock = 0;
 }
 
+void dir_entry_unlock_mod(struct dir_t *dir, int x, int y, struct mod_t *mod)
+{
+	struct dir_lock_t *dir_lock;
+	struct mod_stack_t *stack;
+	FILE *f;
+
+	/* Get lock */
+	assert(x < dir->xsize && y < dir->ysize);
+	dir_lock = &dir->dir_lock[x * dir->ysize + y];
+
+	/* Wake up first waiter */
+	if (dir_lock->lock_queue)
+	{
+		/* Debug */
+		f = debug_file(mem_debug_category);
+		if (f)
+		{
+			mem_debug("    A-%lld resumed", dir_lock->lock_queue->id);
+			if (dir_lock->lock_queue->dir_lock_next)
+			{
+				mem_debug(" - {");
+				for (stack = dir_lock->lock_queue->dir_lock_next; stack;
+						stack = stack->dir_lock_next)
+					mem_debug(" A-%lld", stack->id);
+				mem_debug(" } still waiting");
+			}
+			mem_debug("\n");
+		}
+
+		/* Wake up access */
+		esim_schedule_event(dir_lock->lock_queue->dir_lock_event, dir_lock->lock_queue, 1);
+		dir_lock->lock_queue = dir_lock->lock_queue->dir_lock_next;
+	}
+
+	/* Trace */
+	mem_trace("mem.end_access_block cache=\"%s\" access=\"A-%lld\" set=%d way=%d\n",
+		dir->name, dir_lock->stack_id, x, y);
+
+	/* Unlock entry */
+	mshr_unlock2(mod->mshr);
+	dir_lock->lock = 0;
+}

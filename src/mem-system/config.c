@@ -690,6 +690,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	int num_ports;
 	int dir_size;
 	int dir_assoc;
+	int mshr_size;
 
 	char *net_name;
 	char *net_node_name;
@@ -707,6 +708,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	num_ports = config_read_int(config, section, "Ports", 2);
 	dir_size = config_read_int(config, section, "DirectorySize", 1024);
 	dir_assoc = config_read_int(config, section, "DirectoryAssoc", 8);
+	mshr_size = config_read_int(config, section, "MSHR", 16384);
 
 	/* Check parameters */
 	if (block_size < 1 || (block_size & (block_size - 1)))
@@ -732,6 +734,10 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	/* Create module */
 	mod = mod_create(mod_name, mod_kind_main_memory, num_ports,
 			block_size, latency);
+			
+	/* Initialize MSHR */
+	mod->mshr_size = mshr_size;
+	mshr_init(mod->mshr, mshr_size);
 
 	/* Store directory size */
 	mod->dir_size = dir_size;
