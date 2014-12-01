@@ -23,6 +23,7 @@
 #include <stdio.h>
 
 
+
 /* Port */
 struct mod_port_t
 {
@@ -46,6 +47,7 @@ enum mod_access_kind_t
 {
 	mod_access_invalid = 0,
 	mod_access_load,
+	mod_access_nc_load,
 	mod_access_store,
 	mod_access_nc_store,
 	mod_access_prefetch
@@ -91,6 +93,9 @@ struct mod_t
 	int latency;
 	int dir_latency;
 	int mshr_size;
+	//FRAN
+	int mshr_count;
+	struct mshr_t *mshr;
 
 	/* Module level starting from entry points */
 	int level;
@@ -119,6 +124,12 @@ struct mod_t
 	struct mod_port_t *ports;
 	int num_ports;
 	int num_locked_ports;
+	
+	/* acceses coalesce list */
+	struct mod_stack_t *coalesce_list_head;
+	struct mod_stack_t *coalesce_list_tail;
+	int coalesce_list_count;
+	int coalesce_list_max;
 
 	/* Accesses waiting to get a port */
 	struct mod_stack_t *port_waiting_list_head;
@@ -256,9 +267,16 @@ struct mod_t *mod_stack_set_peer(struct mod_t *peer, int state);
 long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind, 
 	unsigned int addr, int *witness_ptr, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info);
+	
+long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
+	unsigned int addr, int *witness_ptr, int wg_id, struct linked_list_t *event_queue,
+	void *event_queue_item, struct mod_client_info_t *client_info);
+
 int mod_can_access(struct mod_t *mod, unsigned int addr);
 
 int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr, int *way_ptr, 
+	int *tag_ptr, int *state_ptr);
+int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int dirty_mask, int *set_ptr, int *way_ptr, 
 	int *tag_ptr, int *state_ptr);
 
 void mod_block_set_prefetched(struct mod_t *mod, unsigned int addr, int val);
@@ -275,6 +293,8 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack);
 int mod_in_flight_access(struct mod_t *mod, long long id, unsigned int addr);
 struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	struct mod_stack_t *older_than_stack);
+struct mod_stack_t *mod_in_flight_write_fran(struct mod_t *mod,
+	struct mod_stack_t *older_than_stack);
 struct mod_stack_t *mod_in_flight_write(struct mod_t *mod,
 	struct mod_stack_t *older_than_stack);
 
@@ -286,12 +306,16 @@ int mod_get_retry_latency(struct mod_t *mod);
 struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 	enum mod_access_kind_t access_kind, unsigned int addr,
 	struct mod_stack_t *older_than_stack);
+struct mod_stack_t *mod_can_coalesce_fran(struct mod_t *mod,
+	enum mod_access_kind_t access_kind, unsigned int addr,
+	int *global_mem_witness);
 void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 	struct mod_stack_t *stack);
 
 struct mod_client_info_t *mod_client_info_create(struct mod_t *mod);
 void mod_client_info_free(struct mod_t *mod, struct mod_client_info_t *client_info);
 int mod_replace_block(struct mod_t *mod, int set);
+unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way);
 
 #endif
 

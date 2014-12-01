@@ -58,6 +58,7 @@ extern int mem_trace_category;
 /* Configuration */
 extern int mem_frequency;
 extern int mem_peer_transfers;
+extern enum dir_type_t directory_type;
 
 /* Frequency and frequency domain */
 extern int mem_domain_index;
@@ -81,6 +82,7 @@ void mem_system_dump_report(void);
 struct mod_t *mem_system_get_mod(char *mod_name);
 struct net_t *mem_system_get_net(char *net_name);
 
+void mshr_control(int latencia, int opc);
 
 #endif
 

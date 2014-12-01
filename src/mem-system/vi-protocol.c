@@ -108,26 +108,28 @@ int retry_lat;
 		/* Coalesce access */
 		
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
-		mod_access_start(mod, stack, mod_access_load);
 		if (master_stack)
 		{
-			//mod_access_start(mod, stack, mod_access_load);
+			mod_access_start(mod, stack, mod_access_load);
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
 			add_access(mod->level);
 			add_coalesce(mod->level);
-			add_load(mod->level, 1);
 
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_VI_LOAD_FINISH);
 			return;
 		}
 		
-
+	/*	if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
+		{
+			mod_stack_wait_in_mod(stack, mod, EV_MOD_VI_LOAD);
+			return;
+		}
+		mod->mshr_count++;*/
 		
-		//mod_access_start(mod, stack, mod_access_load);
+		mod_access_start(mod, stack, mod_access_load);
 		add_access(mod->level);
-		add_load(mod->level, 0);
 
 		/* Next event */
 		esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, 0);
@@ -208,7 +210,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
-	/*older_stack = mod_in_flight_write_fran(mod, stack);
+	older_stack = mod_in_flight_write_fran(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -216,8 +218,8 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
 	}
-	*/		
-	older_stack = mod_in_flight_address_fran(mod, stack->addr, stack);
+	
+		older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -227,7 +229,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		return;
 	}
 	
-	if (mod->mshr_size && mod->level == 1 && mod->mshr_count >= mod->mshr_size)
+	if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
     {
         mod->read_retries++;
         retry_lat = mod_get_retry_latency(mod);
@@ -527,13 +529,12 @@ int retry_lat;
 		/* Record access */
 
 		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, stack);		
-		mod_access_start(mod, stack, mod_access_store);
+		//mod_access_start(mod, stack, mod_access_store);
 		if (master_stack)
 		{
-			//mod_access_start(mod, stack, mod_access_nc_store);
+			mod_access_start(mod, stack, mod_access_store);
 			assert(master_stack->addr == stack->addr);
 			mod->writes++;
-			add_write(mod->level, 1);
 			mod_stack_merge_dirty_mask(master_stack, stack->dirty_mask);
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_VI_STORE_FINISH);
@@ -552,9 +553,8 @@ int retry_lat;
 		}
 		mod->mshr_count++;*/
 		
-		//mod_access_start(mod, stack, mod_access_nc_store);
+		mod_access_start(mod, stack, mod_access_store);
 		/* Continue */
-		add_write(mod->level, 0);
 		esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, 0);
 		return;
 	}
@@ -615,9 +615,8 @@ int retry_lat;
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:store_lock\"\n",
 			stack->id, mod->name);
-/*
+
 		older_stack = mod_in_flight_write_fran(mod, stack);
-		//older_stack = stack->access_list_prev;
                 
         if (mod->level == 1 && older_stack)
         {
@@ -626,20 +625,8 @@ int retry_lat;
             mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
 			return;
         }
-  */            
-		older_stack = mod_in_flight_address_fran(mod, stack->addr, stack);
-       		if (mod->level == 1 && older_stack)
-        	{
-                	mem_debug("    %lld wait for access %lld\n",
-                        stack->id, older_stack->id);
-                        assert(!older_stack->waiting_list_event);
-                	mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
-        	        return;
-	        }
-
-
-		  
-        	if (mod->mshr_size && mod->level == 1 && mod->mshr_count >= mod->mshr_size)
+                
+        if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
 		{
 			mod->read_retries++;
 			retry_lat = mod_get_retry_latency(mod);
@@ -647,7 +634,7 @@ int retry_lat;
 			stack->retry = 1;
 			esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, retry_lat);
 			return;
-		}	
+		}
 		mod->mshr_count++;
 	
 		if(SALTAR_L1 && mod->level == 1)
@@ -707,7 +694,7 @@ int retry_lat;
 			//da igual si es un hit o un miss
 			
 			//cache_clean_block_dirty(mod->cache, stack->set, stack->way);
-			if(stack->glc == 0 && (~stack->dirty_mask) == 0)
+/*			if(stack->glc == 0 && (~stack->dirty_mask) == 0)
 			{
 				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
 				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
@@ -715,7 +702,7 @@ int retry_lat;
 			else if(stack->hit)
 			{
 				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
-			}
+			}*/
 		
 			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 		}
@@ -848,7 +835,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		ret->err = 0;
 
 		/* If this stack has already been assigned a way, keep using it */
-		stack->way = ret->way;
+		//stack->way = ret->way;
 
 		/* Get a port */
 		mod_lock_port(mod, stack, EV_MOD_VI_FIND_AND_LOCK_PORT);
@@ -892,9 +879,14 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		/* Statistics */
 		mod->accesses++;
 		hrl2(stack->hit, mod, stack->ret_stack->from_CU);
-		if (stack->hit)
+		if (stack->hit){
 			mod->hits++;
-	
+			//sumamos acceso y hit
+			estadisticas(1, mod->level);
+		}else{
+			//sumamos acceso
+			estadisticas(0, mod->level);
+		}		
 		if (stack->read)
 		{
 			mod->reads++;

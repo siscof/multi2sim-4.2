@@ -14,8 +14,10 @@ config.log
 config.status
 configure
 libtool
+*.swn
 *.swo
 *.swp
+*~
 autom4te.cache
 bin
 lib/.libs
