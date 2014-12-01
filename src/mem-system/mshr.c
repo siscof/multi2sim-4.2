@@ -61,14 +61,13 @@ void mshr_unlock(struct mshr_t *mshr)
 	}
 }
 
-void mshr_unlock2(struct mod_stack_t *stack)
+void mshr_unlock2(struct mod_t *mod)
 {
-	struct mshr_t *mshr = stack->mod->mshr;
+	struct mshr_t *mshr = mod->mshr;
 	
-	assert(mshr->entradasOcupadas > 0);
+	//assert(mshr->entradasOcupadas > 0);
 	
 	mshr->entradasOcupadas--;
-	stack->mshr_locked = 0;
 
 	if(list_count(mshr->waiting_list))
 	{
