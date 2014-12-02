@@ -1747,7 +1747,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
-			stack->mshr_locked = 0;
+			//stack->mshr_locked = 0;
 			return;
 		}
 
