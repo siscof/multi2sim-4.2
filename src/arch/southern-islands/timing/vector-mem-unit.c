@@ -340,7 +340,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				}
 				else
 				{	
-					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, uop->work_group->id_in_compute_unit, NULL, NULL, NULL);
+					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, NULL, NULL, NULL);
 					uop->global_mem_witness--;
 				}
 			
