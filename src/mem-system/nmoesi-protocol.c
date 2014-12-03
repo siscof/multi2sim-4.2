@@ -1694,7 +1694,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					stack->way = cache_replace_block(mod->cache, stack->set);
 			}
 
-			if(/*mod->level == 1 &&*/ stack->mshr_locked == 0)
+			if(stack->read && stack->mshr_locked == 0)
 			{
 				if(!mshr_lock(mod->mshr, stack))
 				{	
@@ -1833,7 +1833,6 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			assert(stack->state);
 			assert(stack->eviction);
 			ret->err = 1;
-			stack->mshr_locked = 0;
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			if(stack->mshr_locked)
 			{

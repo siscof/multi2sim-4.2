@@ -30,6 +30,7 @@ struct mshr_t *mshr_create()
 
 int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
+	
 	if(mshr->size > mshr->entradasOcupadas)
 	{
 		mshr->entradasOcupadas++;
@@ -65,7 +66,8 @@ void mshr_unlock2(struct mod_t *mod)
 {
 	struct mshr_t *mshr = mod->mshr;
 	
-	//assert(mshr->entradasOcupadas > 0);
+	assert(mshr->entradasOcupadas > 0);
+	
 	
 	mshr->entradasOcupadas--;
 
