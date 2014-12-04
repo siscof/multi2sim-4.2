@@ -173,11 +173,13 @@ void ini_estadisticas(){
 estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 
 gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
+mem_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
-fran_debug_ipc("mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
+fran_debug_ipc("lock_mshr_load evicted_dir_load finish_load access_load lock_mshr_nc_write evicted_dir_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -255,6 +257,22 @@ void gpu_load_finish(long long latencia, long long cantidad)
 	gpu_stats.loads_count += cantidad;
 }
 
+void add_latencias_load(struct latenciometro *latencias)
+{
+	mem_stats.latencias_load->lock_mshr += latencias->lock_mshr - latencias->start;
+	mem_stats.latencias_load->evicted_dir += latencias->evicted_dir - latencias->lock_mshr;
+	mem_stats.latencias_load->finish += latencias->finish - latencias->evicted_dir;
+	mem_stats.latencias_load->access++;
+}
+
+void add_latencias_nc_write(struct latenciometro *latencias)
+{
+	mem_stats.latencias_nc_write->lock_mshr += latencias->lock_mshr - latencias->start;
+	mem_stats.latencias_nc_write->evicted_dir += latencias->evicted_dir - latencias->lock_mshr;
+	mem_stats.latencias_nc_write->finish += latencias->finish - latencias->evicted_dir;
+	mem_stats.latencias_nc_write->access++;
+}
+
 int ciclo_ultimaI;
 
 void ipc_instructions(long long cycle, si_units unit)
@@ -297,6 +315,18 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
         long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+
+	fran_debug_ipc("%lld ",mem_stats.latencias_load->lock_mshr);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load->evicted_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load->finish);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load->access);
+
+	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->lock_mshr);
+	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->evicted_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->finish);
+	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->access);
+
+
 	fran_debug_ipc("%lld ",mshr_size[1]);
         fran_debug_ipc("%lld %lld ",mshr[1],mshr[2]);
 	fran_debug_ipc("%lld %lld ",locked[1],locked[2]);	
@@ -368,7 +398,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
-        if(mhsr_control_enabled && !(gpu_stats.total % 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
+        if(mhsr_control_enabled && !(gpu_stats.total % 500000) /*&& (ciclo_ultimaI + lat_umbral) < cycle */)
         {
 		ciclo_ultimaI = cycle;
                 mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);
@@ -385,6 +415,12 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	//	free(estadisticas_ipc);
 	//	free(gpu_inst);
 	memcpy(&instrucciones_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
+	free(mem_stats.latencias_load);
+	free(mem_stats.latencias_nc_write);
+
+	mem_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+	mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+
 	memcpy(&instrucciones_gpu_stats_anterior,&gpu_stats,sizeof(struct si_gpu_unit_stats));
 
 	//	estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));

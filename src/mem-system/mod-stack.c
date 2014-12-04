@@ -28,7 +28,6 @@
 #include "mem-system.h"
 #include "mod-stack.h"
 
-
 long long mod_stack_id;
 
 struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
@@ -43,6 +42,10 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 	stack->addr = addr;
 	stack->ret_event = ret_event;
 	stack->ret_stack = ret_stack;
+	stack->latencias.start = 0;
+        stack->latencias.lock_mshr = 0;
+	stack->latencias.evicted_dir = 0;
+	stack->latencias.finish = 0;	
 	if (ret_stack != NULL)
 	{
 		stack->client_info = ret_stack->client_info;
@@ -66,6 +69,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 	mod_stack_wakeup_stack(stack);
 
 	/* Free */
+
 	free(stack);
 	esim_schedule_event(ret_event, ret_stack, 0);
 }
