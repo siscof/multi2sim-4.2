@@ -71,7 +71,8 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	mod->latency = latency;
 
 	/* MSHR */
-	mod->mshr = xcalloc(1,sizeof(struct mshr_t));
+	mod->mshr = mshr_create();
+	//xcalloc(1,sizeof(struct mshr_t));
 	
 	/* Ports */
 	mod->num_ports = num_ports;
@@ -101,6 +102,7 @@ void mod_free(struct mod_t *mod)
 		dir_free(mod->dir);
 	if (mod->mshr)
 		mshr_free(mod->mshr);
+	
 	free(mod->ports);
 	repos_free(mod->client_info_repos);
 	free(mod->name);
@@ -113,7 +115,7 @@ void mod_dump(struct mod_t *mod, FILE *f)
 }
 
 long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
-	unsigned int addr, int *witness_ptr, int wg_id, struct linked_list_t *event_queue,
+	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info)
 {
 	struct mod_stack_t *stack;
@@ -123,6 +125,8 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	mod_stack_id++;
 	stack = mod_stack_create(mod_stack_id,
 		mod, addr, ESIM_EV_NONE, NULL);
+		
+	stack->stack_size = bytes;
 	
 	//fran
 	//DOUBLE_LINKED_LIST_INSERT_TAIL(mod, coalesce, stack);

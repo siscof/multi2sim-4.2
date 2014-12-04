@@ -269,7 +269,7 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	void *event_queue_item, struct mod_client_info_t *client_info);
 	
 long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
-	unsigned int addr, int *witness_ptr, int wg_id, struct linked_list_t *event_queue,
+	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info);
 
 int mod_can_access(struct mod_t *mod, unsigned int addr);

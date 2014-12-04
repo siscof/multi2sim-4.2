@@ -20,6 +20,8 @@
 #ifndef MEM_SYSTEM_DIRECTORY_H
 #define MEM_SYSTEM_DIRECTORY_H
 
+#include "module.h"
+
 
 struct dir_lock_t
 {
