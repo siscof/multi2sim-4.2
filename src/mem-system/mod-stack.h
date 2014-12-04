@@ -21,7 +21,7 @@
 #define MEM_SYSTEM_MOD_STACK_H
 
 #include "module.h"
-
+#include <lib/util/estadisticas.h>
 
 /* Current identifier for stack */
 extern long long mod_stack_id;
@@ -61,6 +61,7 @@ struct mod_stack_t
 	//FRAN
 	int mshr_locked;
 	long long tiempo_acceso;
+	struct latenciometro latencias;
 	int glc;
 	int from_CU;
 	long long coalesced_count;

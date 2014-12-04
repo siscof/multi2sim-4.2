@@ -1,4 +1,7 @@
 
+#ifndef LIB_UTIL_ESTADISTICAS_H
+#define LIB_UTIL_ESTADISTICAS_H
+
 #include <mem-system/mem-system.h>
 #include <mem-system/directory.h>
 #include <mem-system/module.h>
@@ -91,12 +94,23 @@ struct mem_system_stats
 	struct esta_t mod_level[5];
 	long long load_latency;
 	long long load_latency_count;
-	
+	struct latenciometro *latencias_load;
+	struct latenciometro *latencias_nc_write;
+
 	// MSHR
 	long long superintervalo_latencia;
 	long long superintervalo_contador;
 	long long superintervalo_operacion;
 	long long superintervalo_ciclos;
+};
+
+struct latenciometro
+{
+	long long start;
+	long long lock_mshr;
+	long long evicted_dir;
+	long long finish;
+	long long access;
 };
 
 struct mem_system_stats mem_stats, instrucciones_mem_stats_anterior, ciclos_mem_stats_anterior;
@@ -124,3 +138,7 @@ void add_CoalesceHit(int level);
 void add_CoalesceMiss(int level);
 void load_finish(long long latencia, long long cantidad);
 void gpu_load_finish(long long latencia, long long cantidad);
+void add_latencias(struct latenciometro *latencias);
+
+#endif
+
