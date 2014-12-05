@@ -220,6 +220,10 @@ void mod_handler_nmoesi_load(int event, void *data)
             mod->mshr_count++;
 
 		}*/
+		
+		if(!stack->latencias.start) 	
+			stack->latencias.start = asTiming(si_gpu)->cycle; 
+		
 		add_access(mod->level);
 	 	mod->loads++;
 		mod_access_start(mod, stack, mod_access_load);
@@ -308,6 +312,9 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 		stack->addr, mod->name);
 	mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_lock\"\n",
 		stack->id, mod->name);
+		
+	if(!stack->latencias.lock_mshr) 	
+		stack->latencias.lock_mshr = asTiming(si_gpu)->cycle;
 
 	/* If there is any older write, wait for it */
 	older_stack = mod_in_flight_write(mod, stack);
@@ -372,6 +379,9 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
 		return;
 	}
+
+	if(!stack->latencias.evicted_dir) 	
+		stack->latencias.evicted_dir = asTiming(si_gpu)->cycle; 
 
 	mem_stats.mod_level[mod->level].entradas_bloqueadas++;
 
@@ -534,12 +544,14 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			}
 		}
 
-	/*	if(!stack->coalesced)
+		if(!stack->coalesced)
 		{
 	        
 			//mod->mshr_count--;
-			mshr_unlock(mod->mshr);
-		}*/
+			//mshr_unlock(mod->mshr);
+			stack->latencias.finish = asTiming(si_gpu)->cycle; 	
+			add_latencias_load(&(stack->latencias));
+		}
 
 		if(stack->state)
 		{
@@ -940,6 +952,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_nc_store);
 
+		if(!stack->latencias.start) 	
+			stack->latencias.start = asTiming(si_gpu)->cycle; 
 
 		/* Coalesce access */
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
@@ -1044,6 +1058,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_lock\"\n",
 			stack->id, mod->name);
+			
+		if(!stack->latencias.lock_mshr) 	
+			stack->latencias.lock_mshr = asTiming(si_gpu)->cycle; 
 
 		/* If there is any older write, wait for it */
 		older_stack = mod_in_flight_write(mod, stack);
@@ -1151,6 +1168,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
 			return;
 		}
+
+		if(!stack->latencias.evicted_dir) 	
+			stack->latencias.evicted_dir = asTiming(si_gpu)->cycle; 
 
 		/* Main memory modules are a special case */
 		if (mod->kind == mod_kind_main_memory)
@@ -1280,12 +1300,14 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.end_access name=\"A-%lld\"\n",
 			stack->id);
 
-	/*    if (!stack->coalesced)
+		if (!stack->coalesced)
 		{
 			//mod->mshr_count--;
-			mshr_unlock(mod->mshr);
+			//mshr_unlock(mod->mshr);
+			stack->latencias.finish = asTiming(si_gpu)->cycle; 	
+			add_latencias_nc_write(&(stack->latencias));
 		}
-	*/	
+
 		/* Increment witness variable */
 		if (stack->witness_ptr)
 			(*stack->witness_ptr)++;
