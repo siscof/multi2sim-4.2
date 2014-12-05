@@ -275,6 +275,11 @@ void add_latencias_nc_write(struct latenciometro *latencias)
 
 int ciclo_ultimaI;
 
+void add_simd_idle_cycle(int simd_id)
+{
+	gpu_stats.simd_idle[simd_id]++;
+}
+
 void ipc_instructions(long long cycle, si_units unit)
 {
 	
@@ -315,6 +320,11 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
         long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+
+	fran_debug_ipc("%lld ",mem_stats.simd_idle[0] - instrucciones_mem_stats_anterior.simd_idle[0]);
+	fran_debug_ipc("%lld ",mem_stats.simd_idle[1] - instrucciones_mem_stats_anterior.simd_idle[1]);
+	fran_debug_ipc("%lld ",mem_stats.simd_idle[2] - instrucciones_mem_stats_anterior.simd_idle[2]);
+	fran_debug_ipc("%lld ",mem_stats.simd_idle[3] - instrucciones_mem_stats_anterior.simd_idle[3]);
 
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->lock_mshr);
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->evicted_dir);

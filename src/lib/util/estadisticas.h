@@ -81,6 +81,7 @@ struct si_gpu_unit_stats
 	long long total;
 	long long loads_latency;
 	long long loads_count;
+	long long simd_idle[4];
 
         // MSHR
         long long superintervalo_latencia;

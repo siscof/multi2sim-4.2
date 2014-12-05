@@ -39,12 +39,16 @@ void si_simd_complete(struct si_simd_t *simd)
 	int list_entries;
 	int list_index = 0;
 	int i;
-
-        struct si_work_item_t *work_item;
-        int work_item_id;
+        
+    struct si_work_item_t *work_item;
+    int work_item_id;
 
 
 	list_entries = list_count(simd->exec_buffer);
+	
+	if(list_entries == 0)
+		add_simd_idle_cycle(simd->id_in_compute_unit);
+		
 
 	assert(list_entries <= si_gpu_simd_exec_buffer_size);
 
