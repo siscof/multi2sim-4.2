@@ -113,6 +113,7 @@ struct latenciometro
 	long long evicted_dir;
 	long long finish;
 	long long access;
+	long long invalidar;
 };
 
 struct mem_system_stats mem_stats, instrucciones_mem_stats_anterior, ciclos_mem_stats_anterior;
