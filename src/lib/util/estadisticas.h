@@ -82,6 +82,7 @@ struct si_gpu_unit_stats
 	long long loads_latency;
 	long long loads_count;
 	long long simd_idle[4];
+	long long v_mem_full;
 
         // MSHR
         long long superintervalo_latencia;
@@ -140,6 +141,8 @@ void add_CoalesceMiss(int level);
 void load_finish(long long latencia, long long cantidad);
 void gpu_load_finish(long long latencia, long long cantidad);
 void add_latencias(struct latenciometro *latencias);
+void add_simd_idle_cycle(int simd_id);
+void add_cu_mem_full();
 
 #endif
 

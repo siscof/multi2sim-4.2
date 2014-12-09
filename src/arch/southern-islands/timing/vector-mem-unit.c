@@ -206,7 +206,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	int i;
 	enum mod_access_kind_t access_kind;
 	int list_index = 0;
-
+	
 	list_entries = list_count(vector_mem->read_buffer);
 	
 	/* Sanity check the read buffer */
@@ -250,6 +250,12 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				vector_mem->compute_unit->id, 
 				uop->wavefront->id, uop->id_in_wavefront);
 			list_index++;
+			
+			/* stall cycles by vector mem queue full*/
+
+			add_cu_mem_full();
+			
+			
 			continue;
 		}
 		//FRAN

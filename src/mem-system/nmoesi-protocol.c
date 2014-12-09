@@ -313,8 +313,8 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 	mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_lock\"\n",
 		stack->id, mod->name);
 		
-	if(!stack->latencias.lock_mshr) 	
-		stack->latencias.lock_mshr = asTiming(si_gpu)->cycle;
+	//if(!stack->latencias.lock_mshr) 	
+	//	stack->latencias.lock_mshr = asTiming(si_gpu)->cycle;
 
 	/* If there is any older write, wait for it */
 	older_stack = mod_in_flight_write(mod, stack);
@@ -549,8 +549,11 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 	        
 			//mod->mshr_count--;
 			//mshr_unlock(mod->mshr);
-			stack->latencias.finish = asTiming(si_gpu)->cycle; 	
-			add_latencias_load(&(stack->latencias));
+			if(!stack->latencias.invalidar)
+			{
+				stack->latencias.finish = asTiming(si_gpu)->cycle; 	
+				add_latencias_load(&(stack->latencias));
+			}
 		}
 
 		if(stack->state)
@@ -1059,8 +1062,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_lock\"\n",
 			stack->id, mod->name);
 			
-		if(!stack->latencias.lock_mshr) 	
-			stack->latencias.lock_mshr = asTiming(si_gpu)->cycle; 
+		//if(!stack->latencias.lock_mshr) 	
+		//	stack->latencias.lock_mshr = asTiming(si_gpu)->cycle; 
 
 		/* If there is any older write, wait for it */
 		older_stack = mod_in_flight_write(mod, stack);
@@ -1304,8 +1307,11 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		{
 			//mod->mshr_count--;
 			//mshr_unlock(mod->mshr);
-			stack->latencias.finish = asTiming(si_gpu)->cycle; 	
-			add_latencias_nc_write(&(stack->latencias));
+			if(!stack->latencias.invalidar)
+			{
+				stack->latencias.finish = asTiming(si_gpu)->cycle; 	
+				add_latencias_nc_write(&(stack->latencias));
+			}
 		}
 
 		/* Increment witness variable */
@@ -1599,6 +1605,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		/* Debug */
 		if (stack->hit)
 		{
+			//fran
+			ret->latencias.invalidar = 1;
+			
 			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
 				stack->tag, mod->name, stack->set, stack->way,
 				str_map_value(&cache_block_state_map, stack->state));
@@ -1640,6 +1649,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		}
 		else if (stack->nc_write)  /* Must go after read */
 		{
+			//fran
+			ret->latencias.invalidar = 1;
+			
 			mod->nc_writes++;
 			mod->effective_nc_writes++;
 			stack->blocking ? mod->blocking_nc_writes++ : mod->non_blocking_nc_writes++;
@@ -1648,6 +1660,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		}
 		else if (stack->write)
 		{
+			//fran
+			ret->latencias.invalidar = 1;
+			
 			mod->writes++;
 			mod->effective_writes++;
 			stack->blocking ? mod->blocking_writes++ : mod->non_blocking_writes++;
@@ -1736,6 +1751,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					return;
 				}
 				stack->mshr_locked = 1;
+				if(!ret->latencias.lock_mshr) 	
+					ret->latencias.lock_mshr = asTiming(si_gpu)->cycle;
 			}
 		}
 		assert(stack->way >= 0);
