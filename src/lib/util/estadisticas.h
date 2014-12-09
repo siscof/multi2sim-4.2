@@ -144,6 +144,8 @@ void gpu_load_finish(long long latencia, long long cantidad);
 void add_latencias(struct latenciometro *latencias);
 void add_simd_idle_cycle(int simd_id);
 void add_cu_mem_full();
+void add_latencias_load(struct latenciometro *latencias);
+void add_latencias_nc_write(struct latenciometro *latencias);
 
 #endif
 
