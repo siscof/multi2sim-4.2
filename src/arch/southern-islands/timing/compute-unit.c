@@ -373,13 +373,13 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		wavefront = compute_unit->wavefront_pools[active_fb]->
 			entries[i]->wavefront;
 			
-		if(!wavefront->instruction_ready)
-			wavefront->instruction_ready = asTiming(si_gpu)->cycle;
-
 		/* No wavefront */
 		if (!wavefront) 
 			continue;
-
+			
+		if(!wavefront->instruction_ready)
+			wavefront->instruction_ready = asTiming(si_gpu)->cycle;
+			
 		/* Sanity check wavefront */
 		assert(wavefront->wavefront_pool_entry);
 		assert(wavefront->wavefront_pool_entry ==
