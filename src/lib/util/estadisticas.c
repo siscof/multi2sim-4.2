@@ -291,8 +291,8 @@ void add_cu_mem_full()
 
 void add_uop_latencies(struct si_uop_t *uop)
 {
-	gpu_stats.start2fetch += uop->instruction_ready - uop->fetch_ready;
-	gpu_stats.fetch2complete += uop->fetch_ready - uop->execute_ready;
+	gpu_stats.start2fetch += uop->fetch_ready - uop->instruction_ready;
+	gpu_stats.fetch2complete += uop->execute_ready - uop->fetch_ready;
 }
 
 void ipc_instructions(long long cycle, si_units unit)
