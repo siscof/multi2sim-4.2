@@ -178,8 +178,8 @@ mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct 
 
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
-
-fran_debug_ipc("v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 lock_mshr_load evicted_dir_load finish_load access_load lock_mshr_nc_write evicted_dir_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
+fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
+fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 lock_mshr_load evicted_dir_load finish_load access_load lock_mshr_nc_write evicted_dir_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -234,10 +234,14 @@ long long add_si_inst(si_units unit)
 	return gpu_stats.total;
 }
 
-long long add_si_macroinst(si_units unit)
+long long add_si_macroinst(si_units unit, struct si_uop_t *uop)
 {
 	gpu_stats.macroinst[unit]++;
-        return gpu_stats.total;
+	
+	if(unit == simd_u)
+		add_uop_latencies(uop);
+	
+    return gpu_stats.total;
 }
 
 void add_CoalesceHit(int level)
@@ -285,6 +289,12 @@ void add_cu_mem_full()
 	gpu_stats.v_mem_full++;
 }
 
+void add_uop_latencies(struct si_uop_t *uop)
+{
+	gpu_stats.start2fetch += uop->instruction_ready - uop->fetch_ready;
+	gpu_stats.fetch2complete += uop->fetch_ready - uop->execute_ready;
+}
+
 void ipc_instructions(long long cycle, si_units unit)
 {
 	
@@ -324,7 +334,22 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
-        long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+    long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
+ 
+
+	for(int i = 0; i < 5; i++)
+	{
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.no_stall[i]);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_mem_access[i]);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_barrier[i]);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_instruction_infly[i]);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_fetch_buffer_full[i]);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_no_wavefront[i]);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_others[i]);
+	}
+
+	fran_debug_ipc("%lld ",gpu_stats.start2fetch - instrucciones_gpu_stats_anterior.start2fetch);
+	fran_debug_ipc("%lld ",gpu_stats.fetch2complete - instrucciones_gpu_stats_anterior.fetch2complete);
 
 	fran_debug_ipc("%lld ",gpu_stats.v_mem_full - instrucciones_gpu_stats_anterior.v_mem_full);
 	

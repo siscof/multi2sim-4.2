@@ -79,7 +79,7 @@ void si_lds_complete(struct si_lds_t *lds)
  		
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
-		add_si_macroinst(lds_u);
+		add_si_macroinst(lds_u, uop);
 
                 SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
                 {

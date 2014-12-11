@@ -8,6 +8,7 @@
 #include <lib/util/debug.h>
 #include <arch/southern-islands/emu/emu.h>
 #include <lib/util/list.h>
+#include <arch/southern-islands/timing/uop.h>
 
 #define cache_hit 1
 #define cache_accesses 0
@@ -21,6 +22,14 @@ typedef enum
 	branch_u,
 	lds_u
 }si_units;
+
+typedef enum
+{
+	si_uop_start = 0,
+	si_uop_fetch,
+	si_uop_issue,
+	si_uop_finish
+}latencies;
 
 extern long long ventana_muestreo;
 
@@ -83,12 +92,25 @@ struct si_gpu_unit_stats
 	long long loads_count;
 	long long simd_idle[4];
 	long long v_mem_full;
+	
+	//instruction latency
+	long long start2fetch;		
+	long long fetch2complete;   
+	
+	//stall causes
+	long long no_stall[5];
+	long long stall_instruction_infly[5];
+	long long stall_barrier[5];
+	long long stall_mem_access[5];
+	long long stall_fetch_buffer_full[5];
+	long long stall_no_wavefront[5];
+	long long stall_others[5];
 
-        // MSHR
-        long long superintervalo_latencia;
-        long long superintervalo_contador;
-        long long superintervalo_operacion;
-        long long superintervalo_ciclos;
+	// MSHR
+	long long superintervalo_latencia;
+	long long superintervalo_contador;
+	long long superintervalo_operacion;
+	long long superintervalo_ciclos;
 }; 
 
 struct mem_system_stats
@@ -136,7 +158,7 @@ void add_access(int level);
 void add_hit(int level);
 void add_miss(int level);
 long long add_si_inst(si_units unit);
-long long add_si_macroinst(si_units unit);
+long long add_si_macroinst(si_units unit, struct si_uop_t *uop);
 void add_CoalesceHit(int level);
 void add_CoalesceMiss(int level);
 void load_finish(long long latencia, long long cantidad);

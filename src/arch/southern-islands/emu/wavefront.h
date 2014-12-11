@@ -38,7 +38,8 @@ struct si_wavefront_t
 	
 	//fran
 	long long *latencies_counters;
-
+	long long instruction_ready;
+	
 	/* Program counter. Offset in 'inst_buffer' where we can find the next
 	 * instruction to be executed. */
 	unsigned int pc;

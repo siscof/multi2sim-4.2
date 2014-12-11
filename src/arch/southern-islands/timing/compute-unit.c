@@ -33,6 +33,7 @@
 #include "simd-unit.h"
 #include "uop.h"
 #include "wavefront-pool.h"
+#include <lib/util/estadisticas.h>
 
 #include "cycle-interval-report.h"
 
@@ -356,6 +357,14 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 	struct si_wavefront_pool_entry_t *wavefront_pool_entry;
 	char inst_str[MAX_INST_STR_SIZE];
 	char inst_str_trimmed[MAX_INST_STR_SIZE];
+	
+	//fran
+	int bloqueo_por_instruction_infly = 0;
+	int bloqueo_por_barrier = 0;
+	int bloqueo_por_mem_access = 0;
+	int bloqueo_por_fetch_buffer_full = 0;
+	int bloqueo_por_no_wavefront = 0;
+	
 
 	assert(active_fb < compute_unit->num_wavefront_pools);
 
@@ -363,6 +372,9 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 	{
 		wavefront = compute_unit->wavefront_pools[active_fb]->
 			entries[i]->wavefront;
+			
+		if(!wavefront->instruction_ready)
+			wavefront->instruction_ready = asTiming(si_gpu)->cycle;
 
 		/* No wavefront */
 		if (!wavefront) 
@@ -390,7 +402,10 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		/* Wavefront isn't ready (previous instruction is still 
 		 * in flight) */
 		if (!wavefront->wavefront_pool_entry->ready)
+		{
+			bloqueo_por_instruction_infly = 1;
 			continue;
+		}
 
 		/* If the wavefront finishes, there still may be outstanding 
 		 * memory operations, so if the entry is marked finished 
@@ -422,6 +437,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 				/* TODO Show a waiting state in visualization 
 				 * tool */
 				/* XXX uop is already freed */
+				bloqueo_por_mem_access = 1;
 				continue;
 			}
 		}
@@ -431,6 +447,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		{
 			/* TODO Show a waiting state in visualization tool */
 			/* XXX uop is already freed */
+			bloqueo_por_barrier = 1;
 			continue;
 		}
 
@@ -440,6 +457,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		if (list_count(compute_unit->fetch_buffers[active_fb]) == 
 					si_gpu_fe_fetch_buffer_size)
 		{
+			bloqueo_por_fetch_buffer_full = 1;
 			continue;
 		}
 
@@ -471,8 +489,9 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		uop->glc = wavefront->vector_mem_glc;
 		
 		//fran
-		uop->latencies_counters = wavefront->latencies_counters;
-		wavefront->latencies_counters = xcalloc(10, sizeof(long long *));
+		
+		uop->instruction_ready = wavefront->instruction_ready;
+		wavefront->instruction_ready = 0;
 		
 		assert(wavefront->work_group && uop->work_group);
 		
@@ -531,6 +550,22 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 
 		instructions_processed++;
 		compute_unit->inst_count++;
+	}
+	if(instructions_processed)
+	{
+		gpu_stats.no_stall[active_fb]++;
+	}else if(bloqueo_por_mem_access){	
+		gpu_stats.stall_mem_access[active_fb]++;
+	}else if(bloqueo_por_barrier){
+		gpu_stats.stall_barrier[active_fb]++;
+	}else if(bloqueo_por_instruction_infly){
+		gpu_stats.stall_instruction_infly[active_fb]++;
+	}else if(bloqueo_por_fetch_buffer_full){
+		gpu_stats.stall_fetch_buffer_full[active_fb]++;
+	}else if(bloqueo_por_no_wavefront){
+		gpu_stats.stall_no_wavefront[active_fb]++;
+	}else{
+		gpu_stats.stall_others[active_fb]++;
 	}
 }
 

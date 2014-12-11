@@ -81,6 +81,9 @@ struct si_uop_t
 	unsigned int glc : 1;
 
 	/* Timing */
+	//fran
+	long long instruction_ready;		/* Cycle when instruction is ready to fetch*/
+	
 	long long cycle_created;    /* Cycle when fetch completes */
 	long long fetch_ready;      /* Cycle when fetch completes */
 	long long decode_ready;     /* Cycle when decode completes */
