@@ -35,6 +35,9 @@ struct si_wavefront_t
 
 	/* Work-group it belongs to */
 	struct si_work_group_t *work_group;
+	
+	//fran
+	long long *latencies_counters;
 
 	/* Program counter. Offset in 'inst_buffer' where we can find the next
 	 * instruction to be executed. */

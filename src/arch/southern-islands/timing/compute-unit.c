@@ -469,6 +469,11 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		uop->inst = wavefront->inst;
 		uop->cycle_created = asTiming(si_gpu)->cycle;
 		uop->glc = wavefront->vector_mem_glc;
+		
+		//fran
+		uop->latencies_counters = wavefront->latencies_counters;
+		wavefront->latencies_counters = xcalloc(10, sizeof(long long *));
+		
 		assert(wavefront->work_group && uop->work_group);
 		
 		/* Trace */

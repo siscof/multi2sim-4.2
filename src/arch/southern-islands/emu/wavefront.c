@@ -49,6 +49,10 @@ struct si_wavefront_t *si_wavefront_create(int wavefront_id,
 
 	/* Create work items */
 	wavefront->work_items = xcalloc(si_emu_wavefront_size, sizeof(void *));
+	
+	//fran
+	wavefront->latencies_counters = xcalloc(10, sizeof(long long *));
+	
 	SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(wavefront, work_item_id)
 	{
 		wavefront->work_items[work_item_id] = si_work_item_create();

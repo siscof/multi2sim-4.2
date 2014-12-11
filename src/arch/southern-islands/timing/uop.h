@@ -62,6 +62,9 @@ struct si_uop_t
 	struct si_compute_unit_t *compute_unit; /* Compute unit it belongs to */
 	struct si_wavefront_pool_entry_t *wavefront_pool_entry;  /* IB entry where uop is located */
 	struct si_inst_t inst;
+	
+	//fran
+	long long *latencies_counters;
 
 	/* Flags */
 	unsigned int ready : 1;
