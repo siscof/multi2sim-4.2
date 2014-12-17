@@ -799,8 +799,21 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 				uop->id_in_wavefront);
 
 			compute_unit->simd_inst_count++;
+
 		}
+
 	}
+	
+	//fran
+	int ciclos_utiles = 0;
+	if(oldest_uop)
+	{
+		ciclos_utiles++;
+	}else{
+		
+	}
+	
+	
 
 	/* Vector memory */
 	oldest_uop = NULL;
