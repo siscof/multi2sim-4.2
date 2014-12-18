@@ -553,19 +553,19 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 	}
 	if(instructions_processed)
 	{
-		gpu_stats.no_stall[active_fb]++;
+		gpu_stats.no_stall++;
 	}else if(bloqueo_por_mem_access){	
-		gpu_stats.stall_mem_access[active_fb]++;
+		gpu_stats.stall_mem_access++;
 	}else if(bloqueo_por_barrier){
-		gpu_stats.stall_barrier[active_fb]++;
+		gpu_stats.stall_barrier++;
 	}else if(bloqueo_por_instruction_infly){
-		gpu_stats.stall_instruction_infly[active_fb]++;
+		gpu_stats.stall_instruction_infly++;
 	}else if(bloqueo_por_fetch_buffer_full){
-		gpu_stats.stall_fetch_buffer_full[active_fb]++;
+		gpu_stats.stall_fetch_buffer_full++;
 	}else if(bloqueo_por_no_wavefront){
-		gpu_stats.stall_no_wavefront[active_fb]++;
+		gpu_stats.stall_no_wavefront++;
 	}else{
-		gpu_stats.stall_others[active_fb]++;
+		gpu_stats.stall_others++;
 	}
 }
 
@@ -805,12 +805,11 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 	}
 	
 	//fran
-	int ciclos_utiles = 0;
 	if(oldest_uop)
 	{
-		ciclos_utiles++;
+		add_simd_running_cycle();
 	}else{
-		
+		analizarCausaBloqueo(compute_unit->wavefront_pools[active_fb],active_fb);
 	}
 	
 	

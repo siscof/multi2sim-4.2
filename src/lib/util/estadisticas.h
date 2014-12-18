@@ -9,6 +9,7 @@
 #include <arch/southern-islands/emu/emu.h>
 #include <lib/util/list.h>
 #include <arch/southern-islands/timing/uop.h>
+#include <arch/southern-islands/timing/wavefront-pool.h>
 
 #define cache_hit 1
 #define cache_accesses 0
@@ -95,16 +96,25 @@ struct si_gpu_unit_stats
 	
 	//instruction latency
 	long long start2fetch;		
-	long long fetch2complete;   
+	long long fetch2complete;  
 	
-	//stall causes
-	long long no_stall[5];
-	long long stall_instruction_infly[5];
-	long long stall_barrier[5];
-	long long stall_mem_access[5];
-	long long stall_fetch_buffer_full[5];
-	long long stall_no_wavefront[5];
-	long long stall_others[5];
+	//stall causes in dispatch stage 
+	long long cycles_simd_running;
+	long long dispatch_no_stall;
+	long long dispatch_stall_instruction_infly;
+	long long dispatch_stall_barrier;
+	long long dispatch_stall_mem_access;
+	long long dispatch_stall_no_wavefront;
+	long long dispatch_stall_others;
+	
+	//stall causes in fetch stage
+	long long no_stall;
+	long long stall_instruction_infly;
+	long long stall_barrier;
+	long long stall_mem_access;
+	long long stall_fetch_buffer_full;
+	long long stall_no_wavefront;
+	long long stall_others;
 
 	// MSHR
 	long long superintervalo_latencia;
@@ -168,6 +178,8 @@ void add_simd_idle_cycle(int simd_id);
 void add_cu_mem_full();
 void add_latencias_load(struct latenciometro *latencias);
 void add_latencias_nc_write(struct latenciometro *latencias);
+void add_simd_running_cycle();
+void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb);
 
 #endif
 

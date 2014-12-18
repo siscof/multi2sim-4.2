@@ -2,6 +2,8 @@
 #include <string.h>
 #include <mem-system/cache.h>
 #include <mem-system/mshr.h>
+#include <arch/southern-islands/emu/wavefront.h>
+#include <arch/southern-islands/timing/gpu.h>
 
 static long long intervalo_anterior = 0;
 //static long long ipc_anterior = 0;
@@ -178,6 +180,9 @@ mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct 
 
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
+
+fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
+
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
 fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 lock_mshr_load evicted_dir_load finish_load access_load lock_mshr_nc_write evicted_dir_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
 
@@ -295,6 +300,33 @@ void add_uop_latencies(struct si_uop_t *uop)
 	gpu_stats.fetch2complete += uop->execute_ready - uop->fetch_ready;
 }
 
+void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb)
+{
+	struct si_wavefront_pool_entry_t *wp_entry;
+	
+	for (int i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
+	{
+		wp_entry = wavefront_pool->entries[i];
+		
+		if(!wp_entry->ready){
+			gpu_stats.dispatch_stall_instruction_infly++;
+		}else if(wp_entry->wait_for_mem){
+			gpu_stats.dispatch_stall_mem_access++;
+		}else if(wp_entry->wait_for_barrier){
+			gpu_stats.dispatch_stall_barrier++;
+		}else if(!wp_entry->wavefront || wp_entry->wavefront_finished || wp_entry->wavefront->finished){
+			gpu_stats.dispatch_stall_no_wavefront++;
+		}else{
+			gpu_stats.dispatch_stall_others++;
+		}
+	}
+}
+
+void add_simd_running_cycle()
+{
+	gpu_stats.cycles_simd_running++;	
+}
+
 void ipc_instructions(long long cycle, si_units unit)
 {
 	
@@ -337,16 +369,23 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
  
 
-	for(int i = 0; i < 5; i++)
-	{
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.no_stall[i]);
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_mem_access[i]);
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_barrier[i]);
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_instruction_infly[i]);
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_fetch_buffer_full[i]);
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_no_wavefront[i]);
-	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_others[i]);
-	}
+
+	fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_no_stall);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_instruction_infly);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_barrier);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_mem_access);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_no_wavefront);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_others);
+
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.no_stall);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_mem_access);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_barrier);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_instruction_infly);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_fetch_buffer_full);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_no_wavefront);
+	fran_debug_ipc("%lld ",instrucciones_gpu_stats_anterior.stall_others);
+
 
 	fran_debug_ipc("%lld ",gpu_stats.start2fetch - instrucciones_gpu_stats_anterior.start2fetch);
 	fran_debug_ipc("%lld ",gpu_stats.fetch2complete - instrucciones_gpu_stats_anterior.fetch2complete);
