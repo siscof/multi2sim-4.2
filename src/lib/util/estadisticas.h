@@ -107,6 +107,13 @@ struct si_gpu_unit_stats
 	long long dispatch_stall_no_wavefront;
 	long long dispatch_stall_others;
 	
+	//type instruction in fly on dispatch
+	long long dispatch_branch_instruction_infly;
+	long long dispatch_scalar_instruction_infly;
+	long long dispatch_simd_instruction_infly;
+	long long dispatch_v_mem_instruction_infly;
+	long long dispatch_lds_instruction_infly;
+	
 	//stall causes in fetch stage
 	long long no_stall;
 	long long stall_instruction_infly;

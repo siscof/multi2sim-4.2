@@ -300,15 +300,69 @@ void add_uop_latencies(struct si_uop_t *uop)
 	gpu_stats.fetch2complete += uop->execute_ready - uop->fetch_ready;
 }
 
+void analizeTypeInstructionInFly(struct si_inst_t inst)
+{
+			/* Only evaluate branch instructions */
+			if (inst.info->fmt == SI_FMT_SOPP && (inst.micro_inst.sopp.op > 1 && 
+				inst.micro_inst.sopp.op < 10)
+			{
+				gpu_stats.dispatch_branch_instruction_infly++;
+				return;
+			}
+			
+			/* Only evaluate scalar instructions */
+			if ((inst.info->fmt == SI_FMT_SOPP && 
+			    (inst.micro_inst.sopp.op <= 1 || 
+				inst.micro_inst.sopp.op >= 10)) || 
+				inst.info->fmt == SI_FMT_SOP1 || 
+				inst.info->fmt == SI_FMT_SOP2 || 
+				inst.info->fmt == SI_FMT_SOPC || 
+				inst.info->fmt == SI_FMT_SOPK || 
+				inst.info->fmt == SI_FMT_SMRD)
+			{
+				gpu_stats.dispatch_scalar_instruction_infly++;
+				return;
+			}
+			
+			
+			/* Only evaluate SIMD instructions */
+			if (inst.info->fmt == SI_FMT_VOP2 || 
+				inst.info->fmt == SI_FMT_VOP1 || 
+				inst.info->fmt == SI_FMT_VOPC || 
+				inst.info->fmt == SI_FMT_VOP3a || 
+				inst.info->fmt == SI_FMT_VOP3b)
+			{	
+				gpu_stats.dispatch_simd_instruction_infly++;
+				return;
+			}
+			
+			/* Only evaluate memory instructions */
+			if (inst.info->fmt == SI_FMT_MTBUF)
+			{	
+				gpu_stats.dispatch_v_mem_instruction_infly++;
+				return;
+			}
+			
+			/* Only evaluate LDS instructions */
+			if (inst.info->fmt == SI_FMT_DS)
+			{	
+				gpu_stats.dispatch_lds_instruction_infly++;
+				return;
+			}
+}
+
 void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb)
 {
 	struct si_wavefront_pool_entry_t *wp_entry;
+	struct si_wavefront_t *wavefront;
 	
 	for (int i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 	{
 		wp_entry = wavefront_pool->entries[i];
+		wavefront = wp_entry->wavefront;
 		
 		if(!wp_entry->ready){
+			analizeTypeInstructionInFly(wavefront->inst);
 			gpu_stats.dispatch_stall_instruction_infly++;
 		}else if(wp_entry->wait_for_mem){
 			gpu_stats.dispatch_stall_mem_access++;
