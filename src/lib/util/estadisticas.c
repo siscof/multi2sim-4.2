@@ -181,6 +181,8 @@ mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct 
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
+fran_debug_ipc("dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
+
 fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
 
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
@@ -302,9 +304,10 @@ void add_uop_latencies(struct si_uop_t *uop)
 
 void analizeTypeInstructionInFly(struct si_inst_t inst)
 {
+			
 			/* Only evaluate branch instructions */
-			if (inst.info->fmt == SI_FMT_SOPP && (inst.micro_inst.sopp.op > 1 && 
-				inst.micro_inst.sopp.op < 10)
+			if (inst.info->fmt == SI_FMT_SOPP && 
+			(inst.micro_inst.sopp.op > 1 && inst.micro_inst.sopp.op < 10))
 			{
 				gpu_stats.dispatch_branch_instruction_infly++;
 				return;
@@ -362,7 +365,10 @@ void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active
 		wavefront = wp_entry->wavefront;
 		
 		if(!wp_entry->ready){
-			analizeTypeInstructionInFly(wavefront->inst);
+			
+			if(wavefront && wavefront->inst.info->fmt)
+				analizeTypeInstructionInFly(wavefront->inst);
+			
 			gpu_stats.dispatch_stall_instruction_infly++;
 		}else if(wp_entry->wait_for_mem){
 			gpu_stats.dispatch_stall_mem_access++;
@@ -422,7 +428,13 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
     long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
  
-	fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_branch_instruction_infly);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_scalar_instruction_infly);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_simd_instruction_infly);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_v_mem_instruction_infly);
+	fran_debug_ipc("%lld ",gpu_stats.dispatch_lds_instruction_infly);
+
+    	fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_no_stall);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_barrier);
