@@ -110,6 +110,7 @@ struct si_gpu_unit_stats
 	//type instruction in fly on dispatch
 	long long dispatch_branch_instruction_infly;
 	long long dispatch_scalar_instruction_infly;
+	long long dispatch_mem_scalar_instruction_infly;
 	long long dispatch_simd_instruction_infly;
 	long long dispatch_v_mem_instruction_infly;
 	long long dispatch_lds_instruction_infly;
