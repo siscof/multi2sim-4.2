@@ -364,9 +364,9 @@ void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active
 		wp_entry = wavefront_pool->entries[i];
 		wavefront = wp_entry->wavefront;
 		
-		if(!wp_entry->ready){
+		if(!wp_entry->ready && wavefront){
 			
-			if(wavefront && wavefront->inst.info->fmt)
+			if(wavefront->inst.info->fmt)
 				analizeTypeInstructionInFly(wavefront->inst);
 			
 			gpu_stats.dispatch_stall_instruction_infly++;
@@ -434,7 +434,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_v_mem_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_lds_instruction_infly);
 
-    	fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
+    fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_no_stall);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_barrier);
