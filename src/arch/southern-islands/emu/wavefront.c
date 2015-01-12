@@ -106,6 +106,7 @@ void si_wavefront_free(struct si_wavefront_t *wavefront)
 	
 	free(wavefront->work_items);
 
+	free(wavefront->latencies_counters);
 	memset(wavefront, 0, sizeof(struct si_wavefront_t));
 	free(wavefront);
 
