@@ -624,13 +624,7 @@ void mshr_control(int latencia, int opc)
          		break;       
 	}	
 
-        if(!latencia)
-        {               
-                printf("mshr = %d\n",mod->mshr_size);
-                return;
-        }
-
-	//reinicio
+        //reinicio
 	temporizador_reinicio--;
 
 	if(temporizador_reinicio <= 0)
@@ -657,24 +651,14 @@ void mshr_control(int latencia, int opc)
 				accion = 2;
 			else if(mod->mshr->size < mod->mshr->size_anterior)
 				accion = 1;
-			//MSHR2
-/*			else
+			else
 			{
 				if(mod->mshr->size == (mod->dir->ysize * mod->dir->xsize))
 					accion = 2;
 				else
 					accion = 1;
 			}
-*/			
-		// MSHR3	
-		/*	else
-			{
-				if(mod->mshr->size > mod->mshr->size_anterior)
-					accion = 2;
-				else
-					accion = 1;
-			}
-		*/		
+				
 		} 
 	}else if(accion == 0 && opc > (mod->mshr->ipc_anterior * 1.05)){
                 if(mod->mshr->size > mod->mshr->size_anterior)
@@ -692,12 +676,12 @@ void mshr_control(int latencia, int opc)
 		accion = 2;
 	}*/
 
-	if(accion)
-	{
+	//if(accion)
+	//{
         	mod->mshr->size_anterior = mod->mshr->size;
 		mod->mshr->ipc_anterior = opc;
 		mod->mshr->latencia_anterior = latencia;
-	}
+	//}
 
         for (int k = 0; k < list_count(mem_system->mod_list); k++)
         {
