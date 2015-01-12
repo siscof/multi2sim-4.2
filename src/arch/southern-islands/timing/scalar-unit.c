@@ -256,6 +256,8 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 			uop->wavefront->id, uop->id_in_wavefront);
 	}
 
+
+	list_index = 0;
 	list_entries = list_count(scalar_unit->inflight_buffer);
 
 
