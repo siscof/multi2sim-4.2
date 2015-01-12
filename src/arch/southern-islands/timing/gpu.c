@@ -361,10 +361,11 @@ int si_gpu_scalar_unit_decode_latency = 1;
 int si_gpu_scalar_unit_decode_buffer_size = 1;
 int si_gpu_scalar_unit_read_latency = 1;
 int si_gpu_scalar_unit_read_buffer_size = 1;
-int si_gpu_scalar_unit_exec_latency = 4;
-int si_gpu_scalar_unit_exec_buffer_size = 32;
+int si_gpu_scalar_unit_exec_latency = 1;
+int si_gpu_scalar_unit_exec_buffer_size = 1;
 int si_gpu_scalar_unit_write_latency = 1;
 int si_gpu_scalar_unit_write_buffer_size = 1;
+int si_gpu_scalar_unit_inflight_buffer_size = 32;
 
 /* Branch unit parameters */
 int si_gpu_branch_unit_width = 1;
@@ -823,6 +824,13 @@ void si_gpu_read_config(void)
 		si_gpu_scalar_unit_write_buffer_size);
 	if (si_gpu_scalar_unit_write_buffer_size < 1)
 		fatal("%s: invalid value for 'WriteBufferSize'.\n%s",
+			si_gpu_config_file_name, err_note);
+
+	si_gpu_scalar_unit_inflight_buffer_size = config_read_int(
+		gpu_config, section, "InFlightBufferSize", 
+		si_gpu_scalar_unit_inflight_buffer_size);
+	if (si_gpu_scalar_unit_inflight_buffer_size < 1)
+		fatal("%s: invalid value for 'InFlightBufferSize'.\n%s",
 			si_gpu_config_file_name, err_note);
 
 	/* Branch Unit */
