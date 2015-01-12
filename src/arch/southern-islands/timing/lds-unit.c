@@ -239,10 +239,6 @@ void si_lds_mem(struct si_lds_t *lds)
 				if(si_wavefront_work_item_active(uop->wavefront,
                                 work_item->id_in_wavefront))
 	                        {
-                                	/*estadisticas fran*/ 
-					/*si_units unit = lds_u;
-                                	ipc_instructions(asTiming(si_gpu)->cycle, unit);	
-					*/
 					if (work_item->lds_access_type[j] == 1)
 					{
 						access_type = mod_access_load;
