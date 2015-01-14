@@ -720,6 +720,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 
 			if (uop->inst.info->fmt == SI_FMT_SMRD)
 			{
+				assert(uop->scalar_mem_read);
 				uop->wavefront_pool_entry->
 					ready_next_cycle = 1;
 				compute_unit->scalar_mem_inst_count++;
@@ -727,6 +728,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 			}
 			else
 			{
+				assert(!uop->scalar_mem_read);
 				/* Scalar ALU instructions have to
 				 * complete before the next 
 				 * instruction can be fetched */

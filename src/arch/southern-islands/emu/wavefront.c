@@ -322,10 +322,7 @@ void si_wavefront_execute(struct si_wavefront_t *wavefront)
 		/* Stats */
 		si_emu->scalar_mem_inst_count++;
 		wavefront->scalar_mem_inst_count++;
-
-		/* Only one work item executes the instruction */
-		work_item = wavefront->scalar_work_item;
-		(*si_isa_inst_func[inst->info->inst])(work_item, inst);
+		//wavefront->scalar_mem_read = 1;
 
 		if (debug_status(si_isa_debug_category))
 		{
