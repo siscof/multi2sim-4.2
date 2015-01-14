@@ -4,6 +4,8 @@
 #include <mem-system/mshr.h>
 #include <arch/southern-islands/emu/wavefront.h>
 #include <arch/southern-islands/timing/gpu.h>
+#include <arch/common/arch.h>
+#include <arch/southern-islands/timing/compute-unit.h>
 
 static long long intervalo_anterior = 0;
 //static long long ipc_anterior = 0;
@@ -181,7 +183,7 @@ mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct 
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
-fran_debug_ipc("dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_mem_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
+fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_mem_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
 
 fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
 
@@ -431,6 +433,18 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
     long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
  
+	SIGpu *gpu = asSIGpu(arch_southern_islands->timing);
+
+	int compute_unit_id = 0;
+	int work_groups_running = 0;
+	SI_GPU_FOREACH_COMPUTE_UNIT(compute_unit_id)
+	{
+		work_groups_running += gpu->compute_units[compute_unit_id]->work_group_count; 
+	}
+			
+    	float gpu_utilization = work_groups_running / (float)(si_gpu_num_compute_units *  gpu->compute_units[0]->num_wavefront_pools * si_gpu_max_work_groups_per_wavefront_pool);
+		      	
+	fran_debug_ipc("%f ",gpu_utilization);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_branch_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_scalar_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_mem_scalar_instruction_infly);
@@ -438,7 +452,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_v_mem_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_lds_instruction_infly);
 
-    fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
+    	fran_debug_ipc("%lld ",gpu_stats.cycles_simd_running);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_no_stall);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_stall_barrier);

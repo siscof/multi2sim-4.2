@@ -189,5 +189,6 @@ void add_latencias_nc_write(struct latenciometro *latencias);
 void add_simd_running_cycle();
 void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb);
 void analizeTypeInstructionInFly(struct si_inst_t inst);
+void add_uop_latencies(struct si_uop_t *uop);
 #endif
 
