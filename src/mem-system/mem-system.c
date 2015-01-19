@@ -625,13 +625,13 @@ void mshr_control(int latencia, int opc)
 	}	
 
         //reinicio
-	temporizador_reinicio--;
+	/*temporizador_reinicio--;
 
 	if(temporizador_reinicio <= 0)
 	{
 		temporizador_reinicio = 50;
 		accion = 3;
-	}
+	}*/
 
 	// primera decision
 	if(!mod->mshr->size_anterior)

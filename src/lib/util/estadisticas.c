@@ -561,7 +561,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
-        if(mhsr_control_enabled && !(gpu_stats.total % 500000) /*&& (ciclo_ultimaI + lat_umbral) < cycle*/ )
+        if(mhsr_control_enabled && !(gpu_stats.total % 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
         {
 		ciclo_ultimaI = cycle;
                 mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);
