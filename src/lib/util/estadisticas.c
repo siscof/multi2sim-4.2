@@ -304,8 +304,9 @@ void add_uop_latencies(struct si_uop_t *uop)
 	gpu_stats.fetch2complete += uop->execute_ready - uop->fetch_ready;
 }
 
-void analizeTypeInstructionInFly(struct si_inst_t inst)
+void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 {
+			struct si_inst_t inst = wf->inst;
 			
 			/* Only evaluate branch instructions */
 			if (inst.info->fmt == SI_FMT_SOPP && 
@@ -324,7 +325,15 @@ void analizeTypeInstructionInFly(struct si_inst_t inst)
 				inst.info->fmt == SI_FMT_SOPC || 
 				inst.info->fmt == SI_FMT_SOPK)
 			{
-				gpu_stats.dispatch_scalar_instruction_infly++;
+
+				struct si_scalar_unit_t scalar_unit = wf->wavefront_pool_entry->wavefront_pool->compute_unit->scalar_unit;
+				struct si_uop_t *uop = list_get(scalar_unit.read_buffer,0);
+				if(scalar_unit.inflight_mem_buffer == si_gpu_scalar_unit_max_inflight_mem_accesses && uop->scalar_mem_read )
+				{
+					gpu_stats.dispatch_mem_scalar_instruction_infly++;
+				}else{
+					gpu_stats.dispatch_scalar_instruction_infly++;
+				}
 				return;
 			}
 			
@@ -372,7 +381,7 @@ void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active
 		if(!wp_entry->ready && wavefront){
 			
 			if(wavefront->inst.info->fmt)
-				analizeTypeInstructionInFly(wavefront->inst);
+				analizeTypeInstructionInFly(wavefront);
 			
 			gpu_stats.dispatch_stall_instruction_infly++;
 		}else if(wp_entry->wait_for_mem){
@@ -561,7 +570,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
-        if(mhsr_control_enabled && !(gpu_stats.total % 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
+        if(mhsr_control_enabled && !(gpu_stats.total % 500000) /*&& (ciclo_ultimaI + lat_umbral) < cycle*/ )
         {
 		ciclo_ultimaI = cycle;
                 mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);

@@ -152,7 +152,7 @@ extern int si_gpu_scalar_unit_exec_latency;
 extern int si_gpu_scalar_unit_exec_buffer_size;
 extern int si_gpu_scalar_unit_write_latency;
 extern int si_gpu_scalar_unit_write_buffer_size;
-extern int si_gpu_scalar_unit_inflight_mem_accesses;
+extern int si_gpu_scalar_unit_max_inflight_mem_accesses;
 
 extern int si_gpu_branch_unit_width;
 extern int si_gpu_branch_unit_issue_buffer_size;

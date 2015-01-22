@@ -72,7 +72,7 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->scalar_unit.read_buffer = list_create();
 	compute_unit->scalar_unit.exec_buffer = list_create();
 	compute_unit->scalar_unit.write_buffer = list_create();
-	compute_unit->scalar_unit.inflight_buffer = list_create();
+	compute_unit->scalar_unit.inflight_mem_buffer = list_create();
 	compute_unit->scalar_unit.compute_unit = compute_unit;
 
 	compute_unit->branch_unit.issue_buffer = list_create();
@@ -153,13 +153,13 @@ void si_compute_unit_free(struct si_compute_unit_t *compute_unit)
 	si_uop_list_free(compute_unit->scalar_unit.read_buffer);
 	si_uop_list_free(compute_unit->scalar_unit.exec_buffer);
 	si_uop_list_free(compute_unit->scalar_unit.write_buffer);
-	si_uop_list_free(compute_unit->scalar_unit.inflight_buffer);
+	si_uop_list_free(compute_unit->scalar_unit.inflight_mem_buffer);
 	list_free(compute_unit->scalar_unit.issue_buffer);
 	list_free(compute_unit->scalar_unit.decode_buffer);
 	list_free(compute_unit->scalar_unit.read_buffer);
 	list_free(compute_unit->scalar_unit.exec_buffer);
 	list_free(compute_unit->scalar_unit.write_buffer);
-	list_free(compute_unit->scalar_unit.inflight_buffer);
+	list_free(compute_unit->scalar_unit.inflight_mem_buffer);
 
 	/* Branch Unit */
 	si_uop_list_free(compute_unit->branch_unit.issue_buffer);
