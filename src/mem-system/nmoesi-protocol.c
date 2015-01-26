@@ -373,6 +373,9 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 	if (stack->err)
 	{
 		mod->read_retries++;
+		add_retry(stack,load_action_retry);
+
+		
 		retry_lat = mod_get_retry_latency(mod);
 		mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 		stack->retry = 1;
@@ -444,6 +447,8 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		if (stack->err)
 		{
 			mod->read_retries++;
+			add_retry(stack,load_miss_retry);
+
 			retry_lat = mod_get_retry_latency(mod);
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			if(stack->mshr_locked)
@@ -518,6 +523,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				mem_load_finish(ciclo - stack->tiempo_acceso);			
 				estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
 				estadis[0].media_latencia_contador++;
+				accu_retry_time_lost(stack);
 			/*estadis[mod->level].tiempo_acceso_latencia += stack->tiempo_acceso;
 			acumulado++; 
 			if(acumulado == 1000){
@@ -1120,6 +1126,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if (stack->err)
 		{
 			mod->nc_write_retries++;
+			add_retry(stack,nc_store_writeback_retry);
+
 			retry_lat = mod_get_retry_latency(mod);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -1165,6 +1173,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if (stack->err)
 		{
 			mod->nc_write_retries++;
+			add_retry(stack,nc_store_action_retry);
+
 			retry_lat = mod_get_retry_latency(mod);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -1235,7 +1245,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 	if (event == EV_MOD_NMOESI_NC_STORE_MISS)
 	{
 		int retry_lat;
-
+		
 		mem_debug("  %lld %lld 0x%x %s nc store miss\n", esim_time, stack->id,
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_miss\"\n",
@@ -1249,6 +1259,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if (stack->err)
 		{
 			mod->nc_write_retries++;
+			add_retry(stack,nc_store_miss_retry);
 			retry_lat = mod_get_retry_latency(mod);
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			if(stack->mshr_locked)
@@ -1307,6 +1318,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		{
 			//mod->mshr_count--;
 			//mshr_unlock(mod->mshr);
+			accu_retry_time_lost(stack);
+
 			if(!stack->latencias.invalidar)
 			{
 				stack->latencias.finish = asTiming(si_gpu)->cycle; 	
@@ -3539,7 +3552,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 				
 				//FRAN
 				estadis[mod->level - 1].invalidations++;
-
+				add_invalidation(mod->level - 1);
 				esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST, new_stack, 0);
 				stack->pending++;
 			}

@@ -183,6 +183,8 @@ mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct 
 //imprimir columnas
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
+fran_debug_ipc("counter_load_action_retry cycles_load_action_retry counter_load_miss_retry cycles_load_miss_retry counter_nc_store_writeback_retry cycles_nc_store_writeback_retry counter_nc_store_action_retry cycles_nc_store_action_retry counter_nc_store_miss_retry cycles_nc_store_miss_retry accesses_with_retries invalidations ");
+
 fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_mem_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
 
 fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
@@ -368,6 +370,35 @@ void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 			}
 }
 
+void add_invalidation(int level)
+{
+	mem_stats.mod_level[level].invalidations++;
+}
+
+void add_retry(struct mod_stack_t *stack, retries_kinds_t retry_type)
+{
+	long long lat_retries_anteriores = 0;
+	for(int i =0; i < num_retries_kinds; i++)
+	{
+		lat_retries_anteriores += stack->retries_counter[i].cycles;
+	}
+
+	stack->retries_counter[retry_type].counter++;
+	stack->retries_counter[retry_type].cycles += asTiming(si_gpu)->cycle - (stack->tiempo_acceso + lat_retries_anteriores);
+}
+
+
+void accu_retry_time_lost(struct mod_stack_t *stack)
+{
+	for(int i =0; i < num_retries_kinds; i++)
+	{
+		mem_stats.retries[i].counter += stack->retries_counter[i].counter;
+		mem_stats.retries[i].cycles += stack->retries_counter[i].cycles;
+	}
+	if(stack->retry)
+		mem_stats.stacks_with_retries++;
+}
+
 void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb)
 {
 	struct si_wavefront_pool_entry_t *wp_entry;
@@ -437,6 +468,21 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
                 }
         }
 }
+
+//retries
+fran_debug_ipc("%lld ",mem_stats.retries[load_action_retry].counter - instrucciones_mem_stats_anterior.retries[load_action_retry].counter);
+fran_debug_ipc("%lld ",mem_stats.retries[load_action_retry].cycles - instrucciones_mem_stats_anterior.retries[load_action_retry].cycles);
+fran_debug_ipc("%lld ",mem_stats.retries[load_miss_retry].counter - instrucciones_mem_stats_anterior.retries[load_miss_retry].counter);
+fran_debug_ipc("%lld ",mem_stats.retries[load_miss_retry].cycles -instrucciones_mem_stats_anterior.retries[load_miss_retry].cycles );
+fran_debug_ipc("%lld ",mem_stats.retries[nc_store_writeback_retry].counter - instrucciones_mem_stats_anterior.retries[nc_store_writeback_retry].counter);
+fran_debug_ipc("%lld ",mem_stats.retries[nc_store_writeback_retry].cycles - instrucciones_mem_stats_anterior.retries[nc_store_writeback_retry].cycles);
+fran_debug_ipc("%lld ",mem_stats.retries[nc_store_action_retry].counter - instrucciones_mem_stats_anterior.retries[nc_store_action_retry].counter);
+fran_debug_ipc("%lld ",mem_stats.retries[nc_store_action_retry].cycles - instrucciones_mem_stats_anterior.retries[nc_store_action_retry].cycles);
+fran_debug_ipc("%lld ",mem_stats.retries[nc_store_miss_retry].counter - instrucciones_mem_stats_anterior.retries[nc_store_miss_retry].counter);
+fran_debug_ipc("%lld ",mem_stats.retries[nc_store_miss_retry].cycles - instrucciones_mem_stats_anterior.retries[nc_store_miss_retry].cycles);
+fran_debug_ipc("%lld ",mem_stats.stacks_with_retries - instrucciones_mem_stats_anterior.stacks_with_retries);
+
+fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_stats_anterior.mod_level[1].invalidations);
 
 
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);

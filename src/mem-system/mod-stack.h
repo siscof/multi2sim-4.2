@@ -23,6 +23,7 @@
 #include "module.h"
 #include <lib/util/estadisticas.h>
 
+
 /* Current identifier for stack */
 extern long long mod_stack_id;
 
@@ -61,12 +62,15 @@ struct mod_stack_t
 	//FRAN
 	int mshr_locked;
 	long long tiempo_acceso;
+	long long retry_time_lost;
+	struct retry_stats_t retries_counter[num_retries_kinds];
+
 	struct latenciometro latencias;
-	int glc;
+        int glc;
 	int from_CU;
 	long long coalesced_count;
 	long long invalided_address;
-	struct mod_stack_t *stack_superior;	
+	struct mod_stack_t *stack_superior;
 	int stack_size;
 	unsigned int dirty_mask;
 	unsigned int valid_mask;
@@ -74,7 +78,6 @@ struct mod_stack_t
 	int work_group_id_in_cu;
 	struct dir_lock_t *dir_lock;
 
-	
 	struct linked_list_t *event_queue;
 	void *event_queue_item;
 	struct mod_client_info_t *client_info;
@@ -116,7 +119,7 @@ struct mod_stack_t
 	struct mod_stack_t *bucket_list_next;
 
 	/* Flags */
-	//Fran
+	//FRAN
 	int finished : 1;
 	int invalided : 1;
 	
@@ -132,15 +135,10 @@ struct mod_stack_t
 	int eviction : 1;
 	int retry : 1;
 	int coalesced : 1;
-	int waiting : 1;
 	int port_locked : 1;
 
 	/* Message sent through interconnect */
 	struct net_msg_t *msg;
-	
-		/* Linked list for waiting events */
-	struct mod_stack_t *coalesce_list_prev;
-	struct mod_stack_t *coalesce_list_next;
 
 	/* Linked list for waiting events */
 	int waiting_list_event;  /* Event to schedule when stack is waken up */
@@ -188,6 +186,7 @@ void mod_stack_wakeup_port(struct mod_port_t *port);
 void mod_stack_wait_in_stack(struct mod_stack_t *stack,
 	struct mod_stack_t *master_stack, int event);
 void mod_stack_wakeup_stack(struct mod_stack_t *master_stack);
+
 void mod_stack_merge_dirty_mask(struct mod_stack_t *stack, unsigned int mask);
 void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int words);
 void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words);

@@ -33,6 +33,22 @@ typedef enum
 	si_uop_finish
 }latencies;
 
+typedef enum
+{
+	load_action_retry = 0,
+	load_miss_retry,
+	nc_store_writeback_retry,
+	nc_store_action_retry,
+	nc_store_miss_retry,
+	num_retries_kinds
+}retries_kinds_t;
+
+struct retry_stats_t
+{
+	long long counter;
+	long long cycles;
+};
+
 extern long long ventana_muestreo;
 
 extern char *fran_file_ipc;
@@ -68,14 +84,23 @@ struct esta_t
 	long long misses;
         long long loads;
         long long invalidations;
-        long long busy_cicles_in;
+
+	long long load_action_retry;
+	long long load_miss_retry;
+	long long nc_store_writeback_retry;
+	long long nc_store_action_retry;
+	long long nc_store_miss_retry;
+
+	long long busy_cicles_in;
         long long busy_cicles_out;
         long long delayed_read_hit;
         long long esim_cycle_anterior;
         long long media_latencia;
         long long media_latencia_contador;
         long long tiempo_acceso_latencia;
-        long long latencia_red_acc;
+	long long retry_time_lost;
+
+	long long latencia_red_acc;
         long long latencia_red_cont;
         long long blk_compartidos;
         long long replicas_en_l1;
@@ -140,6 +165,8 @@ struct mem_system_stats
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;
 
+	struct retry_stats_t retries[num_retries_kinds];
+	long long stacks_with_retries;
 	// MSHR
 	long long superintervalo_latencia;
 	long long superintervalo_contador;
@@ -191,5 +218,14 @@ void add_simd_running_cycle();
 void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb);
 void analizeTypeInstructionInFly(struct si_wavefront_t *wf);
 void add_uop_latencies(struct si_uop_t *uop);
+void add_invalidation(int level);
+void add_load_action_retry(int level);
+void add_load_miss_retry(int level);
+void add_nc_store_writeback_retry(int level);
+void add_nc_store_action_retry(int level);
+void add_nc_store_miss_retry(int level);
+void add_retry_time_lost(struct mod_stack_t *stack);
+void accu_retry_time_lost(struct mod_stack_t *stack);
+
 #endif
 
