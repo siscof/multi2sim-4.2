@@ -2381,7 +2381,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
                         	return;
                         }*/
-			add_access(mod->level);
+			add_access(target_mod->level);
 		}
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
