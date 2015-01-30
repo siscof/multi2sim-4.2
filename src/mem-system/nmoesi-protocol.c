@@ -555,11 +555,11 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 	        
 			//mod->mshr_count--;
 			//mshr_unlock(mod->mshr);
-			if(!stack->latencias.invalidar)
-			{
-				stack->latencias.finish = asTiming(si_gpu)->cycle; 	
-				add_latencias_load(&(stack->latencias));
-			}
+			//if(!stack->latencias.invalidar)
+			//{
+			stack->latencias.finish = asTiming(si_gpu)->cycle; 	
+			add_latencias_load(&(stack->latencias));
+			//}
 		}
 
 		if(stack->state)
@@ -1319,12 +1319,13 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			//mod->mshr_count--;
 			//mshr_unlock(mod->mshr);
 			accu_retry_time_lost(stack);
-
-			if(!stack->latencias.invalidar)
-			{
-				stack->latencias.finish = asTiming(si_gpu)->cycle; 	
-				add_latencias_nc_write(&(stack->latencias));
-			}
+			long long ciclo = asTiming(si_gpu)->cycle;
+			mem_load_finish(ciclo - stack->tiempo_acceso);
+			//if(!stack->latencias.invalidar)
+			//{
+			stack->latencias.finish = asTiming(si_gpu)->cycle; 	
+			add_latencias_nc_write(&(stack->latencias));
+			//}
 		}
 
 		/* Increment witness variable */
@@ -1619,7 +1620,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (stack->hit)
 		{
 			//fran
-			ret->latencias.invalidar = 1;
+			//ret->latencias.invalidar = 1;
 			
 			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
 				stack->tag, mod->name, stack->set, stack->way,
@@ -1663,7 +1664,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		else if (stack->nc_write)  /* Must go after read */
 		{
 			//fran
-			ret->latencias.invalidar = 1;
+			//ret->latencias.invalidar = 1;
 			
 			mod->nc_writes++;
 			mod->effective_nc_writes++;
@@ -1674,7 +1675,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		else if (stack->write)
 		{
 			//fran
-			ret->latencias.invalidar = 1;
+			//ret->latencias.invalidar = 1;
 			
 			mod->writes++;
 			mod->effective_writes++;
@@ -1902,6 +1903,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (stack->eviction)
 		{
 			mod->evictions++;
+			add_eviction(mod->level);
 			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
 			assert(!stack->state);
 		}

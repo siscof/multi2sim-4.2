@@ -84,6 +84,7 @@ struct esta_t
 	long long misses;
         long long loads;
         long long invalidations;
+	long long evictions;
 
 	long long load_action_retry;
 	long long load_miss_retry;
@@ -226,6 +227,7 @@ void add_nc_store_action_retry(int level);
 void add_nc_store_miss_retry(int level);
 void add_retry_time_lost(struct mod_stack_t *stack);
 void accu_retry_time_lost(struct mod_stack_t *stack);
+void add_eviction(int level);
 
 #endif
 
