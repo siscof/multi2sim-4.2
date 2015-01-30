@@ -395,13 +395,15 @@ void add_retry(struct mod_stack_t *stack, retries_kinds_t retry_type)
 
 void accu_retry_time_lost(struct mod_stack_t *stack)
 {
-	for(int i =0; i < num_retries_kinds; i++)
-	{
-		mem_stats.retries[i].counter += stack->retries_counter[i].counter;
-		mem_stats.retries[i].cycles += stack->retries_counter[i].cycles;
-	}
 	if(stack->retry)
+	{
+		for(int i =0; i < num_retries_kinds; i++)
+		{
+			mem_stats.retries[i].counter += stack->retries_counter[i].counter;
+			mem_stats.retries[i].cycles += stack->retries_counter[i].cycles;
+		}
 		mem_stats.stacks_with_retries++;
+	}
 }
 
 void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb)
