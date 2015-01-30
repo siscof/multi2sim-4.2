@@ -25,3 +25,7 @@ lib/.libs
 config.guess
 config.sub
 ltmain.sh
+/.project
+/.cproject
+/.directory
+/.gitignore
