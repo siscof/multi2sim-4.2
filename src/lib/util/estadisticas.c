@@ -1,6 +1,6 @@
 #include "estadisticas.h"
 #include <string.h>
-#include <mem-system/cache.h>
+
 #include <mem-system/mshr.h>
 #include <arch/southern-islands/emu/wavefront.h>
 #include <arch/southern-islands/timing/gpu.h>
@@ -373,6 +373,25 @@ void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 void add_eviction(int level)
 {
 	mem_stats.mod_level[level].evictions++;
+}
+
+void add_cache_states(int state, int level)
+{
+	mem_stats.mod_level[level].cache_state[state]++;
+}
+
+void print_cache_states(char *reportFile, long long *results)
+{
+	if(!resultaFilesInitialized)
+	{
+		fprintf(ReportFile,"invalid noncoherent modified owned exclusivoe shared valid ");
+		return;
+	}
+
+	for(int i = 0; i < cache_block_state_size)
+	{
+		fprintf(reportFile,"%lld ",*(results+i))
+	}
 }
 
 void add_invalidation(int level)

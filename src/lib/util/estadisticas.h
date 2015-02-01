@@ -11,6 +11,7 @@
 #include <arch/southern-islands/timing/uop.h>
 #include <arch/southern-islands/timing/wavefront-pool.h>
 #include <arch/southern-islands/emu/wavefront.h>
+#include <mem-system/cache.h>
 
 #define cache_hit 1
 #define cache_accesses 0
@@ -56,6 +57,7 @@ extern char *fran_file_general;
 extern char *fran_file_t1000k;
 extern char *fran_file_hitRatio;
 extern char *fran_file_red;
+extern char *report_cache_states;
 extern int SALTAR_L1;
 extern int replace; // cache = 0; mod = 1
 
@@ -85,6 +87,8 @@ struct esta_t
         long long loads;
         long long invalidations;
 	long long evictions;
+
+	long long cache_state[cache_block_size];
 
 	long long load_action_retry;
 	long long load_miss_retry;

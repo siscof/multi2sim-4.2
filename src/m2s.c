@@ -620,7 +620,7 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 						
 			m2s_need_argument(argc, argv, argi);
 	
-                        argi++;
+            argi++;
 			
 			char a[200]="";
 			
@@ -648,15 +648,20 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			fran_file_hitRatio = xmalloc(1000);
 			memcpy(fran_file_hitRatio,a,strlen(a)+1);
 
+			strcpy(a,argv[argi]);
+			strcat(a, "_report_cache_states");
+			report_cache_states = xmalloc(1000);
+			memcpy(report_cache_states,a,strlen(a)+1);
+
 			continue;
 		}
 
-                /* mshr size control */
-                if (!strcmp(argv[argi], "--mshr-control"))
-                {
-                       	mhsr_control_enabled = 1;
-                        continue;
-                }
+        /* mshr size control */
+        if (!strcmp(argv[argi], "--mshr-control"))
+        {
+        	mhsr_control_enabled = 1;
+        	continue;
+        }
 
 		/* Context configuration file */
 		if (!strcmp(argv[argi], "--ctx-config"))
