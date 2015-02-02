@@ -398,7 +398,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
 		estadisticas(1, 0);
 
-		add_hit(mod->level);
+		//add_hit(mod->level);
                 mod->hits_aux++;
 
 			/* The prefetcher may have prefetched this earlier and hence
@@ -411,7 +411,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 
 		/* Miss */
 
-		add_miss(mod->level);
+		//add_miss(mod->level);
 		estadisticas(0, 0);
 
 		new_stack = mod_stack_create(stack->id, mod, stack->tag,
@@ -1927,6 +1927,17 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				stack->tag, stack->state);
 		}
 
+		if(!stack->retry && !stack->blocking)
+		{
+			if(stack->state)
+			{
+				add_hit(mod->level);
+			}else{
+				add_miss(mod->level);
+			}
+		}
+
+
 		/* Return */
 		ret->err = 0;
 		ret->set = stack->set;
@@ -2452,8 +2463,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                         {
 			        add_CoalesceHit(target_mod->level);
 
-				if(stack->coalesced == 0)
-					add_hit(target_mod->level);
+				//if(stack->coalesced == 0)
+				//	add_hit(target_mod->level);
 			}
 			/* Status = M/O/E/S/N
 			 * Check: address is a multiple of requester's block_size
@@ -2530,8 +2541,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                         {
                                 add_CoalesceMiss(target_mod->level);
 
-                                if(stack->coalesced == 0)
-	 	                       add_miss(target_mod->level);
+                              //  if(stack->coalesced == 0)
+	 	                      // add_miss(target_mod->level);
 			}
 
 			assert(!dir_entry_group_shared_or_owned(target_mod->dir,
