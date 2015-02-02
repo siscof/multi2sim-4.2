@@ -386,7 +386,7 @@ void add_cache_states(int state, int level)
 
 void print_cache_states(long long *results)
 {
-	if(!resultaFilesInitialized)
+	if(results == NULL && !resultaFilesInitialized)
 	{
 		report_cache_states("invalid noncoherent modified owned exclusive shared valid ");
 		resultaFilesInitialized = 1;
@@ -499,6 +499,9 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
                 }
         }
 }
+
+print_cache_states(mem_stats.mod_level[1].cache_state);
+
 //evitions
 
 fran_debug_ipc("%lld ",mem_stats.mod_level[2].evictions - instrucciones_mem_stats_anterior.mod_level[2].evictions);
