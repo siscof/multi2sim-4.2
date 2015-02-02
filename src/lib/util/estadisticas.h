@@ -88,7 +88,7 @@ struct esta_t
         long long invalidations;
 	long long evictions;
 
-	long long cache_state[cache_block_size];
+	long long cache_state[cache_block_state_size];
 
 	long long load_action_retry;
 	long long load_miss_retry;
