@@ -14,6 +14,8 @@ static long long ipc_last_cycle = 0;
 long long ciclo = 0;
 int resolucion = 0;
 
+int resultaFilesInitialized = 0;
+
 void estadisticas_por_intervalos(long long intervalo){
 
 //double latencia;
@@ -181,6 +183,8 @@ mem_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct late
 mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 
 //imprimir columnas
+print_cache_states((long long *) NULL);
+
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
 fran_debug_ipc("evictions_L2 counter_load_action_retry cycles_load_action_retry counter_load_miss_retry cycles_load_miss_retry counter_nc_store_writeback_retry cycles_nc_store_writeback_retry counter_nc_store_action_retry cycles_nc_store_action_retry counter_nc_store_miss_retry cycles_nc_store_miss_retry accesses_with_retries invalidations ");
@@ -380,17 +384,18 @@ void add_cache_states(int state, int level)
 	mem_stats.mod_level[level].cache_state[state]++;
 }
 
-void print_cache_states(char *reportFile, long long *results)
+void print_cache_states(long long *results)
 {
 	if(!resultaFilesInitialized)
 	{
-		fprintf(ReportFile,"invalid noncoherent modified owned exclusivoe shared valid ");
+		report_cache_states("invalid noncoherent modified owned exclusive shared valid ");
+		resultaFilesInitialized = 1;
 		return;
 	}
 
-	for(int i = 0; i < cache_block_state_size)
+	for(int i = 0; i < cache_block_state_size;i++)
 	{
-		fprintf(reportFile,"%lld ",*(results+i))
+		report_cache_states("%lld ",*(results+i));
 	}
 }
 

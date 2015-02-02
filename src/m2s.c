@@ -142,6 +142,7 @@ static char *mem_debug_file_name = "";
 //static char *fran_file_accesos = "";
 char *fran_file_ipc;
 char *fran_file_general;
+char *report_cache_states;
 char *fran_file_t1000k;
 char *fran_file_hitRatio;
 char *fran_file_red;
@@ -2067,6 +2068,7 @@ int main(int argc, char **argv)
     fran_t1000k = debug_new_category(fran_file_t1000k);
     fran_hitRatio = debug_new_category(fran_file_hitRatio);
 	fran_red = debug_new_category(fran_file_red);
+	report_cache_states_category = debug_new_category(report_cache_states);
 	
 	evg_opencl_debug_category = debug_new_category(evg_opencl_debug_file_name);
 	evg_isa_debug_category = debug_new_category(evg_isa_debug_file_name);

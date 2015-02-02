@@ -74,8 +74,11 @@ int fran_t1000k;
 #define fran_debug_hitRatio(...) debug(fran_hitRatio, __VA_ARGS__)
 int fran_hitRatio;
 
-#define fran_debug_red(...) debug_new_category(fran_red, __VA_ARGS__)
+#define fran_debug_red(...) debug(fran_red, __VA_ARGS__)
 int fran_red;
+
+#define report_cache_states(...) debug(report_cache_states_category, __VA_ARGS__)
+int report_cache_states_category;
 
 struct esta_t
 {

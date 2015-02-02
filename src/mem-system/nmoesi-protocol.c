@@ -1616,6 +1616,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		stack->hit = mod_find_block(mod, stack->addr, &stack->set,
 			&stack->way, &stack->tag, &stack->state);
 
+		add_cache_states(stack->state, mod->level);
+
 		/* Debug */
 		if (stack->hit)
 		{

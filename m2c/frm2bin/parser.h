@@ -1,19 +1,19 @@
-/* A Bison parser, made by GNU Bison 2.7.  */
+/* A Bison parser, made by GNU Bison 3.0.2.  */
 
 /* Bison interface for Yacc-like parsers in C
-   
-      Copyright (C) 1984, 1989-1990, 2000-2012 Free Software Foundation, Inc.
-   
+
+   Copyright (C) 1984, 1989-1990, 2000-2013 Free Software Foundation, Inc.
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -26,13 +26,13 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
 #ifndef YY_FRM2BIN_YY_PARSER_H_INCLUDED
 # define YY_FRM2BIN_YY_PARSER_H_INCLUDED
-/* Enabling traces.  */
+/* Debug traces.  */
 #ifndef YYDEBUG
 # define YYDEBUG 0
 #endif
@@ -40,40 +40,39 @@
 extern int frm2bin_yydebug;
 #endif
 
-/* Tokens.  */
+/* Token type.  */
 #ifndef YYTOKENTYPE
 # define YYTOKENTYPE
-   /* Put the tokens into the symbol table, so that GDB and other debuggers
-      know about them.  */
-   enum yytokentype {
-     TOK_PRED = 258,
-     TOK_PRED_REGISTER = 259,
-     TOK_ZERO_REGISTER = 260,
-     TOK_SCALAR_REGISTER = 261,
-     TOK_SPECIAL_REGISTER = 262,
-     TOK_CCOP = 263,
-     TOK_DECIMAL = 264,
-     TOK_HEX = 265,
-     TOK_PT = 266,
-     TOK_ARG_TYPE = 267,
-     TOK_ID = 268,
-     TOK_COMMA = 269,
-     TOK_COLON = 270,
-     TOK_ADD = 271,
-     TOK_SEMICOLON = 272,
-     TOK_OBRA = 273,
-     TOK_CBRA = 274,
-     TOK_OPAR = 275,
-     TOK_CPAR = 276,
-     TOK_NEW_LINE = 277,
-     TOK_AMP = 278,
-     TOK_ABS = 279,
-     TOK_NEG = 280,
-     TOK_NUM = 281,
-     TOK_GLOBAL = 282,
-     TOK_ARGS = 283,
-     TOK_TEXT = 284
-   };
+  enum yytokentype
+  {
+    TOK_PRED = 258,
+    TOK_PRED_REGISTER = 259,
+    TOK_ZERO_REGISTER = 260,
+    TOK_SCALAR_REGISTER = 261,
+    TOK_SPECIAL_REGISTER = 262,
+    TOK_CCOP = 263,
+    TOK_DECIMAL = 264,
+    TOK_HEX = 265,
+    TOK_PT = 266,
+    TOK_ARG_TYPE = 267,
+    TOK_ID = 268,
+    TOK_COMMA = 269,
+    TOK_COLON = 270,
+    TOK_ADD = 271,
+    TOK_SEMICOLON = 272,
+    TOK_OBRA = 273,
+    TOK_CBRA = 274,
+    TOK_OPAR = 275,
+    TOK_CPAR = 276,
+    TOK_NEW_LINE = 277,
+    TOK_AMP = 278,
+    TOK_ABS = 279,
+    TOK_NEG = 280,
+    TOK_NUM = 281,
+    TOK_GLOBAL = 282,
+    TOK_ARGS = 283,
+    TOK_TEXT = 284
+  };
 #endif
 /* Tokens.  */
 #define TOK_PRED 258
@@ -104,13 +103,12 @@ extern int frm2bin_yydebug;
 #define TOK_ARGS 283
 #define TOK_TEXT 284
 
-
-
+/* Value type.  */
 #if ! defined YYSTYPE && ! defined YYSTYPE_IS_DECLARED
-typedef union YYSTYPE
+typedef union YYSTYPE YYSTYPE;
+union YYSTYPE
 {
-/* Line 2058 of yacc.c  */
-#line 29 "parser.y"
+#line 29 "parser.y" /* yacc.c:1909  */
 
 	int num;
   	struct frm_id_t *id;
@@ -121,29 +119,15 @@ typedef union YYSTYPE
   	struct frm_mod_t *mod;
   	struct frm2bin_pred_t *pred;
 
-
-/* Line 2058 of yacc.c  */
-#line 127 "parser.h"
-} YYSTYPE;
+#line 123 "parser.h" /* yacc.c:1909  */
+};
 # define YYSTYPE_IS_TRIVIAL 1
-# define yystype YYSTYPE /* obsolescent; will be withdrawn */
 # define YYSTYPE_IS_DECLARED 1
 #endif
 
+
 extern YYSTYPE frm2bin_yylval;
 
-#ifdef YYPARSE_PARAM
-#if defined __STDC__ || defined __cplusplus
-int frm2bin_yyparse (void *YYPARSE_PARAM);
-#else
-int frm2bin_yyparse ();
-#endif
-#else /* ! YYPARSE_PARAM */
-#if defined __STDC__ || defined __cplusplus
 int frm2bin_yyparse (void);
-#else
-int frm2bin_yyparse ();
-#endif
-#endif /* ! YYPARSE_PARAM */
 
 #endif /* !YY_FRM2BIN_YY_PARSER_H_INCLUDED  */
