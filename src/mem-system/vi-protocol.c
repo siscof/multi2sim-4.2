@@ -344,7 +344,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, tag), tag,
 			ESIM_EV_NONE, NULL);
-			new_stack->origin = mod;
+			new_stack->src_mod = mod;
 			new_stack->reply_size = 8 + mod->block_size;
 			new_stack->request_dir = mod_request_up_down;
 			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
@@ -566,7 +566,7 @@ int retry_lat;
 			//stack->request_dir = mod_request_up_down;
             msg_size = 72;
             net = mod->high_net;
-            src_node = stack->origin->low_net_node;
+            src_node = stack->src_mod->low_net_node;
             dst_node = mod->high_net_node;
             return_event = EV_MOD_VI_STORE_RECEIVE;
             stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size, return_event, stack, event, stack);
@@ -642,7 +642,7 @@ int retry_lat;
 			stack->request_dir = mod_request_down_up;
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_STORE_SEND, stack);
 			new_stack->request_dir= mod_request_up_down;
-			new_stack->origin = mod;
+			new_stack->src_mod = mod;
 			new_stack->dirty_mask = stack->dirty_mask;
 			
 			// Increment witness variable 
@@ -685,7 +685,7 @@ int retry_lat;
 			// store al level 2
 			struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag, ESIM_EV_NONE, NULL);
-			new_stack->origin = mod;
+			new_stack->src_mod = mod;
 			new_stack->dirty_mask = stack->dirty_mask;
 			new_stack->request_dir = mod_request_up_down;
 			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
@@ -727,7 +727,7 @@ int retry_lat;
 					int tag = 0;
 					cache_get_block(mod->cache, stack->set, stack->way, &tag, NULL);
 					new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, tag), tag, ESIM_EV_NONE, NULL);
-					new_stack->origin = mod;
+					new_stack->src_mod = mod;
 					new_stack->dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
 					new_stack->reply_size = 8 + mod->block_size;
 					new_stack->request_dir = mod_request_up_down;
@@ -736,7 +736,7 @@ int retry_lat;
 				}
 				
 				new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,  EV_MOD_VI_STORE_SEND, stack);
-				new_stack->origin = mod;
+				new_stack->src_mod = mod;
 				new_stack->dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
 				new_stack->reply_size = 8 + mod->block_size;
 				new_stack->request_dir = mod_request_up_down;
@@ -878,7 +878,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		
 		/* Statistics */
 		mod->accesses++;
-		hrl2(stack->hit, mod, stack->ret_stack->from_CU);
+		//hrl2(stack->hit, mod, stack->ret_stack->from_CU);
 		if (stack->hit){
 			mod->hits++;
 			//sumamos acceso y hit

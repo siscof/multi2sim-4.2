@@ -194,7 +194,7 @@ fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scala
 fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
 
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
-fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 lock_mshr_load evicted_dir_load finish_load access_load lock_mshr_nc_write evicted_dir_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
+fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 lock_mshr_load evicted_dir_load retry_load miss_load finish_load access_load lock_mshr_nc_write evicted_dir_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -278,17 +278,21 @@ void gpu_load_finish(long long latencia, long long cantidad)
 
 void add_latencias_load(struct latenciometro *latencias)
 {
-	mem_stats.latencias_load->lock_mshr += latencias->lock_mshr - latencias->start;
-	mem_stats.latencias_load->evicted_dir += latencias->evicted_dir - latencias->lock_mshr;
-	mem_stats.latencias_load->finish += latencias->finish - latencias->evicted_dir;
+	mem_stats.latencias_load->lock_mshr += latencias->lock_mshr;
+	mem_stats.latencias_load->evicted_dir += latencias->evicted_dir;
+	mem_stats.latencias_load->retry += latencias->retry;
+	mem_stats.latencias_load->miss += latencias->miss;
+	mem_stats.latencias_load->finish += latencias->finish - latencias->start;
 	mem_stats.latencias_load->access++;
 }
 
 void add_latencias_nc_write(struct latenciometro *latencias)
 {
-	mem_stats.latencias_nc_write->lock_mshr += latencias->lock_mshr - latencias->start;
-	mem_stats.latencias_nc_write->evicted_dir += latencias->evicted_dir - latencias->lock_mshr;
-	mem_stats.latencias_nc_write->finish += latencias->finish - latencias->evicted_dir;
+	mem_stats.latencias_nc_write->lock_mshr += latencias->lock_mshr;
+	mem_stats.latencias_nc_write->evicted_dir += latencias->evicted_dir;
+	mem_stats.latencias_nc_write->retry += latencias->retry;
+	mem_stats.latencias_nc_write->miss += latencias->miss;
+	mem_stats.latencias_nc_write->finish += latencias->finish - latencias->start;
 	mem_stats.latencias_nc_write->access++;
 }
 
@@ -576,11 +580,15 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->lock_mshr);
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->evicted_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load->retry);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load->miss);
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->finish);
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->access);
 
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->lock_mshr);
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->evicted_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->retry);
+	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->miss);
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->finish);
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->access);
 

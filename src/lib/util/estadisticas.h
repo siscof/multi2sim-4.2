@@ -187,6 +187,8 @@ struct latenciometro
 	long long start;
 	long long lock_mshr;
 	long long evicted_dir;
+	long long retry;
+	long long miss;
 	long long finish;
 	long long access;
 	long long invalidar;
@@ -235,6 +237,7 @@ void add_nc_store_miss_retry(int level);
 void add_retry_time_lost(struct mod_stack_t *stack);
 void accu_retry_time_lost(struct mod_stack_t *stack);
 void add_eviction(int level);
+void print_cache_states(long long *results);
 
 #endif
 

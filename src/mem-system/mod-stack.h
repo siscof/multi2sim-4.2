@@ -66,15 +66,15 @@ struct mod_stack_t
 	struct retry_stats_t retries_counter[num_retries_kinds];
 
 	struct latenciometro latencias;
-        int glc;
-	int from_CU;
+    int glc;
+	int origin;
 	long long coalesced_count;
 	long long invalided_address;
 	struct mod_stack_t *stack_superior;
 	int stack_size;
 	unsigned int dirty_mask;
 	unsigned int valid_mask;
-	struct mod_t *origin;
+	struct mod_t *src_mod;
 	int work_group_id_in_cu;
 	struct dir_lock_t *dir_lock;
 
