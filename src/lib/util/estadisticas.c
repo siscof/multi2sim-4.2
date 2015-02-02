@@ -388,7 +388,7 @@ void print_cache_states(long long *results)
 {
 	if(results == NULL && !resultaFilesInitialized)
 	{
-		report_cache_states("invalid noncoherent modified owned exclusive shared valid ");
+		report_cache_states("invalid noncoherent modified owned exclusive shared valid \n");
 		resultaFilesInitialized = 1;
 		return;
 	}
@@ -397,6 +397,8 @@ void print_cache_states(long long *results)
 	{
 		report_cache_states("%lld ",*(results+i));
 	}
+	report_cache_states("\n");
+
 }
 
 void add_invalidation(int level)
