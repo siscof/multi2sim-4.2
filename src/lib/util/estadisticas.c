@@ -282,7 +282,7 @@ void add_latencias_load(struct latenciometro *latencias)
 	mem_stats.latencias_load->evicted_dir += latencias->evicted_dir;
 	mem_stats.latencias_load->retry += latencias->retry;
 	mem_stats.latencias_load->miss += latencias->miss;
-	mem_stats.latencias_load->finish += latencias->finish - latencias->start;
+	mem_stats.latencias_load->finish += latencias->finish;
 	mem_stats.latencias_load->access++;
 }
 
@@ -292,7 +292,7 @@ void add_latencias_nc_write(struct latenciometro *latencias)
 	mem_stats.latencias_nc_write->evicted_dir += latencias->evicted_dir;
 	mem_stats.latencias_nc_write->retry += latencias->retry;
 	mem_stats.latencias_nc_write->miss += latencias->miss;
-	mem_stats.latencias_nc_write->finish += latencias->finish - latencias->start;
+	mem_stats.latencias_nc_write->finish += latencias->finish;
 	mem_stats.latencias_nc_write->access++;
 }
 
