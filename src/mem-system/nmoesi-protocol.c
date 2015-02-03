@@ -1927,7 +1927,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				stack->tag, stack->state);
 		}
 
-		if(!stack->retry && !stack->blocking)
+		if(!stack->retry && (ret->origin || !stack->blocking))
 		{
 			if(stack->state)
 			{
