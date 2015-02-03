@@ -469,7 +469,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			return;
 		}
 
-		stack->latencias.miss = asTiming(si_gpu)->cycle - stack->latencias.evicted_dir;
+		stack->latencias.miss = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.lock_mshr - stack->latencias.evicted_dir;
 		/* Set block state to excl/shared depending on return var 'shared'.
 		 * Also set the tag of the block. */
 		cache_set_block(mod->cache, stack->set, stack->way, stack->tag,
@@ -1185,7 +1185,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		}
 
 
-		stack->latencias.evicted_dir = asTiming(si_gpu)->cycle - stack->latencias.start;
+		stack->latencias.evicted_dir = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.lock_mshr;
 
 		/* Main memory modules are a special case */
 		if (mod->kind == mod_kind_main_memory)
@@ -1281,7 +1281,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			return;
 		}
 
-		stack->latencias.miss = asTiming(si_gpu)->cycle - stack->latencias.evicted_dir;
+		stack->latencias.miss = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.lock_mshr - stack->latencias.evicted_dir;
 		/* Continue */
 		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
 		return;
