@@ -564,7 +564,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			//if(!stack->latencias.invalidar)
 			//{
 			accu_retry_time_lost(stack);
-			stack->latencias.finish = asTiming(si_gpu)->cycle - stack->latencias->start - stack->latencias->lock_mshr - stack->latencias->evicted_dir - stack->latencias->miss;
+			stack->latencias.finish = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.lock_mshr - stack->latencias.evicted_dir - stack->latencias.miss;
 			add_latencias_load(&(stack->latencias));
 			//}
 		}
@@ -1331,7 +1331,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mem_load_finish(ciclo - stack->tiempo_acceso);
 			//if(!stack->latencias.invalidar)
 			//{
-			stack->latencias.finish = asTiming(si_gpu)->cycle - stack->latencias->start - stack->latencias->lock_mshr - stack->latencias->evicted_dir - stack->latencias->miss;
+			stack->latencias.finish = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.lock_mshr - stack->latencias.evicted_dir - stack->latencias.miss;
 			add_latencias_nc_write(&(stack->latencias));
 			//}
 		}
