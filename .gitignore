@@ -31,3 +31,6 @@ ltmain.sh
 /.gitignore
 /Release/
 /Debug/
+/.settings/
+/.pydevproject
+/compile
