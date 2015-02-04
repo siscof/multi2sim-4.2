@@ -185,8 +185,10 @@ struct mem_system_stats
 struct latenciometro
 {
 	long long start;
+	long long queue;
 	long long lock_mshr;
-	long long evicted_dir;
+	long long lock_dir;
+	long long eviction;
 	long long retry;
 	long long miss;
 	long long finish;
