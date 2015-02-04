@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/python3.4
 
 import time
 import multiprocessing
@@ -288,9 +288,7 @@ def benchXexp(directorioResultados, monton):
                 latencia.ix[exp] = pd.DataFrame({'latencia total':(df_aux['lat loads mem'].sum() / df_aux['num loads mem'].sum()) - lat_retry, 'latencia retry':lat_retry},index=[exp]).ix[exp]
 
                 evictionsL2.ix[exp,'evictions L2'] = df_aux['evictions L2'].sum() / df_aux['num loads mem'].sum()
-                pprint.pprint(pd.DataFrame(df_aux[['lock mshr load','evicted dir load','retry load','miss load','finish load']].sum(0)/ df_aux['access load'].sum(0),columns=[exp]))
-          
-                pprint.pprint(pd.DataFrame(df_aux[['lock mshr load','evicted dir load','retry load','miss load','finish load']].sum(0)/ df_aux['access load'].sum(0),columns=[exp]).transpose() )
+                
                 memEventsLoad.ix[exp] = pd.DataFrame(df_aux[['lock mshr load','evicted dir load','retry load','miss load','finish load']].sum(0)/ df_aux['access load'].sum(0),columns=[exp]).transpose().ix[exp]
                 memEventsStore.ix[exp] = pd.DataFrame(df_aux[['lock mshr nc write','evicted dir nc write','retry nc write','miss nc write','finish nc write']].sum(0)/ df_aux['access nc write'].sum(0),columns=[exp]).transpose().ix[exp]
           
@@ -312,13 +310,33 @@ def benchXexp(directorioResultados, monton):
 
             evictionsL2.plot(ax=t[0][1], kind='bar',stacked=True,title='evictions en L2')
 
-            #invalidations.plot(ax=t[1][0], kind='bar',stacked=True,title='invalidations')
-            memEventsLoad.plot(ax=t[1][0], kind='bar',stacked=True,title='memEventsLoad')
+            invalidations.plot(ax=t[1][0], kind='bar',stacked=True,title='invalidations')
+            hitratio.plot(ax=t[1][1], kind='bar',stacked=True,title='HitRatio')             
+            
 
-            #hitratio.plot(ax=t[1][1], kind='bar',stacked=True,title='HitRatio')
-            memEventsStore.plot(ax=t[1][1], kind='bar',stacked=True,title='memEventsWrite')
+            f.savefig(dir+bench+'.eps',format='eps', bbox_inches='tight')
+            
+            f_mem, t_mem = plt.subplots(1,2)
+            f_mem.set_size_inches(30, 20)
+            f_mem.set_dpi(300)
 
-            f.savefig(dir+bench+'.eps',format='eps')
+            memEventsLoad.plot(ax=t_mem[0], kind='bar',stacked=True,title='memEventsLoad')
+
+            memEventsStore.plot(ax=t_mem[1], kind='bar',stacked=True,title='memEventsWrite')
+            #.legend(loc='upper left', bbox_to_anchor=(0.6, 1.4))
+            
+            t_mem[0].set_ylabel('Latencia (ciclos)')
+            t_mem[1].set_ylabel('Latencia (ciclos)')
+            
+            max_ylim = max([t_mem[0].get_ylim()[1],t_mem[1].get_ylim()[1]])
+            t_mem[0].set_ylim([0,max_ylim])
+            t_mem[1].set_ylim([0,max_ylim]) 
+            
+            f_mem.suptitle(bench, fontsize=25)
+            
+            f_mem.savefig(dir+bench+'_memEvents.eps',format='eps', bbox_inches='tight')
+            
+            plt.close(f_mem)
             t[0][0].cla()
             t[0][1].cla()
             t[1][0].cla()
@@ -360,7 +378,6 @@ def barras_opc(directorioResultados, monton):
                 print(e)
 
         #latencia retry
-
 
     opc.plot(ax=t, kind='bar')
     f.savefig(dir + 'opc.eps',format='eps')
@@ -1614,7 +1631,7 @@ if __name__ == '__main__':
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
     # variables de los test
-    nombre_resumen = ['02-03_prueba']
+    nombre_resumen = ['02-03_mshr16','02-03_mshr32','02-03_mshr64','02-03_mshr128','02-03_mshr256']
 
     #nombre_resumen = ['01-28_mshr16_128L2','01-28_mshr32_128L2' ,'01-28_mshr64_128L2','01-28_mshr128_128L2','01-28_mshr256_128L2','01-28_mshr16_512L2','01-28_mshr32_512L2' ,'01-28_mshr64_512L2','01-28_mshr128_512L2','01-28_mshr256_512L2']
 
@@ -1643,11 +1660,8 @@ if __name__ == '__main__':
     # columnas datos sueltos
     datos = ['latencia_red_l1-l2','latencia_red_l2-mm','compartidos desde l2','replicas en l1','latencia','ciclos','IPC','evictions','evictions con sharers','Invalidations','HitRatio L2','HitRatio L1','loads L1','Coalesced L1','loads L2','coalesce L2']
 
-
-    #benchmarks_amd = ['BlackScholes','FloydWarshall','FastWalshTransform','MatrixMultiplication','MersenneTwister','RadixSort','SimpleConvolution']
-
-    #benchmarks_amd = ['BinarySearch','BinomialOption','BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RadixSort','RecursiveGaussian','Reduction','ScanLargeArrays','SimpleConvolution']
-    benchmarks_amd = ['BlackScholes','FastWalshTransform','FloydWarshall','MatrixMultiplication','MersenneTwister']
+    benchmarks_amd = ['BinarySearch','BinomialOption','BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RadixSort','RecursiveGaussian','Reduction','ScanLargeArrays','SimpleConvolution']
+    #benchmarks_amd = ['BlackScholes','FastWalshTransform','FloydWarshall','MatrixMultiplication','MersenneTwister']
     benchmarks_rodinia = ['backprop','bfs','b+tree','gaussian','kmeans','lud','streamcluster']
 
     BENCHMARKS = benchmarks_amd
