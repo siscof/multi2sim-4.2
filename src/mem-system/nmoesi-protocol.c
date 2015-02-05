@@ -1903,7 +1903,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		if(!stack->retry && (ret->origin || !stack->blocking))
 		{
-			if(stack->state)
+			if(stack->hit)
 			{
 				add_hit(mod->level);
 			}else{
