@@ -350,7 +350,7 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
             mod->mshr_count++;
 */
 
-	stack->latencias.queue += asTiming(si_gpu)->cycle - stack->latencias.start;
+	stack->latencias.queue = asTiming(si_gpu)->cycle - stack->latencias.start;
 
 	/* Call find and lock */
 	new_stack = mod_stack_create(stack->id, mod, stack->addr,
@@ -1067,7 +1067,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			return;
 		}
 
-		stack->latencias.queue += asTiming(si_gpu)->cycle - stack->latencias.start;
+		stack->latencias.queue = asTiming(si_gpu)->cycle - stack->latencias.start;
 
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,

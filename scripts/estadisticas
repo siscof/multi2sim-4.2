@@ -278,8 +278,8 @@ def benchXexp(directorioResultados, monton):
         evictionsL2 = pd.DataFrame(index=nombre_resumen, columns=['evictions L2'])
         invalidations = pd.DataFrame(index=nombre_resumen, columns=['invalidations'])
         hitratio = pd.DataFrame(index=nombre_resumen, columns=['hit ratio'])
-        memEventsLoad = pd.DataFrame(index=nombre_resumen, columns=['lock mshr load','evicted dir load','retry load','miss load','finish load'])  
-        memEventsStore = pd.DataFrame(index=nombre_resumen, columns=['lock mshr nc write','evicted dir nc write','retry nc write','miss nc write','finish nc write'])  
+        memEventsLoad = pd.DataFrame(index=nombre_resumen, columns=['queue load','lock mshr load','lock dir load','eviction load','retry load','miss load','finish load'])  
+        memEventsStore = pd.DataFrame(index=nombre_resumen, columns=['queue nc write','lock mshr nc write','lock dir nc write','eviction nc write','retry nc write','miss nc write','finish nc write'])  
         for exp in nombre_resumen :
             try:
                 df_aux = monton[exp][bench]['con L1'].df
@@ -289,8 +289,8 @@ def benchXexp(directorioResultados, monton):
 
                 evictionsL2.ix[exp,'evictions L2'] = df_aux['evictions L2'].sum() / df_aux['num loads mem'].sum()
                 
-                memEventsLoad.ix[exp] = pd.DataFrame(df_aux[['lock mshr load','evicted dir load','retry load','miss load','finish load']].sum(0)/ df_aux['access load'].sum(0),columns=[exp]).transpose().ix[exp]
-                memEventsStore.ix[exp] = pd.DataFrame(df_aux[['lock mshr nc write','evicted dir nc write','retry nc write','miss nc write','finish nc write']].sum(0)/ df_aux['access nc write'].sum(0),columns=[exp]).transpose().ix[exp]
+                memEventsLoad.ix[exp] = pd.DataFrame(df_aux[['queue load','lock mshr load','lock dir load','eviction load','retry load','miss load','finish load']].sum(0)/ df_aux['access load'].sum(0),columns=[exp]).transpose().ix[exp]
+                memEventsStore.ix[exp] = pd.DataFrame(df_aux[['queue nc write','lock mshr nc write','lock dir nc write','eviction nc write','retry nc write','miss nc write','finish nc write']].sum(0)/ df_aux['access nc write'].sum(0),columns=[exp]).transpose().ix[exp]
           
                 invalidations.ix[exp,'invalidations'] = df_aux['invalidations'].sum() / df_aux['num loads mem'].sum()
                 pprint.pprint(contenedor_de_datos+'/'+exp+'_conL1/'+bench+'-mem-report')
@@ -1631,7 +1631,7 @@ if __name__ == '__main__':
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
     # variables de los test
-    nombre_resumen = ['02-03_mshr16','02-03_mshr32','02-03_mshr64','02-03_mshr128','02-03_mshr256']
+    nombre_resumen = ['02-04_mshr16','02-04_mshr32','02-04_mshr64','02-04_mshr128','02-04_mshr256']
 
     #nombre_resumen = ['01-28_mshr16_128L2','01-28_mshr32_128L2' ,'01-28_mshr64_128L2','01-28_mshr128_128L2','01-28_mshr256_128L2','01-28_mshr16_512L2','01-28_mshr32_512L2' ,'01-28_mshr64_512L2','01-28_mshr128_512L2','01-28_mshr256_512L2']
 
@@ -1660,8 +1660,8 @@ if __name__ == '__main__':
     # columnas datos sueltos
     datos = ['latencia_red_l1-l2','latencia_red_l2-mm','compartidos desde l2','replicas en l1','latencia','ciclos','IPC','evictions','evictions con sharers','Invalidations','HitRatio L2','HitRatio L1','loads L1','Coalesced L1','loads L2','coalesce L2']
 
-    benchmarks_amd = ['BinarySearch','BinomialOption','BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RadixSort','RecursiveGaussian','Reduction','ScanLargeArrays','SimpleConvolution']
-    #benchmarks_amd = ['BlackScholes','FastWalshTransform','FloydWarshall','MatrixMultiplication','MersenneTwister']
+    #benchmarks_amd = ['BinarySearch','BinomialOption','BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RadixSort','RecursiveGaussian','Reduction','ScanLargeArrays','SimpleConvolution']
+    benchmarks_amd = ['BlackScholes','FastWalshTransform','FloydWarshall','MatrixMultiplication','MersenneTwister']
     benchmarks_rodinia = ['backprop','bfs','b+tree','gaussian','kmeans','lud','streamcluster']
 
     BENCHMARKS = benchmarks_amd
@@ -1675,7 +1675,7 @@ if __name__ == '__main__':
 
     #prueba
 
-    pool = multiprocessing.Pool(processes=4)
+    pool = multiprocessing.Pool(processes=8)
     resultados_temp = []
     pool_result = []
     for EXPERIMENTO in nombre_resumen:
