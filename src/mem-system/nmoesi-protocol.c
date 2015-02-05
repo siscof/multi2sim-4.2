@@ -1611,7 +1611,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
 				stack->tag, mod->name, stack->set, stack->way,
 				str_map_value(&cache_block_state_map, stack->state));
-
+		}
 
 		/* Statistics */
 		mod->accesses++;
@@ -3731,3 +3731,4 @@ void mod_handler_nmoesi_message(int event, void *data)
 
 	abort();
 }
+
