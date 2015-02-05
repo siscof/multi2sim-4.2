@@ -963,6 +963,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod->nc_writes++;
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_NC_STORE_FINISH);
+			if (stack->witness_ptr)
+				(*stack->witness_ptr)++;
+			stack->witness_ptr = NULL;
 			return;
 		}
 
@@ -1075,6 +1078,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
 		new_stack->retry = stack->retry;
+		new_stack->witness_ptr = stack->witness_ptr;
 		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -1607,22 +1611,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
 				stack->tag, mod->name, stack->set, stack->way,
 				str_map_value(&cache_block_state_map, stack->state));
-		}else{
-			/*if(mod->level == 1)
-			{
-			       	if(!mshr_lock(mod->mshr))
-				{
-					mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK); 
-					mod_unlock_port(mod, port, stack);
-					ret->port_locked = 0;
-					return;
-				}
-			}*/
-		}
+
 
 		/* Statistics */
 		mod->accesses++;
-		//hrl2(stack->hit, mod, stack->ret_stack->from_CU);
+
 		if (stack->hit){
 			mod->hits++;
 			//sumamos acceso y hit
@@ -1645,19 +1638,23 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		}
 		else if (stack->nc_write)  /* Must go after read */
 		{
-			//fran
-			//ret->latencias.invalidar = 1;
 			
 			mod->nc_writes++;
 			mod->effective_nc_writes++;
 			stack->blocking ? mod->blocking_nc_writes++ : mod->non_blocking_nc_writes++;
+
+			/* Increment witness variable when port is locked */
+			if (stack->witness_ptr)
+			{
+				(*stack->witness_ptr)++;
+				stack->witness_ptr = NULL;
+			}
+
 			if (stack->hit)
 				mod->nc_write_hits++;
 		}
 		else if (stack->write)
 		{
-			//fran
-			//ret->latencias.invalidar = 1;
 			
 			mod->writes++;
 			mod->effective_writes++;
