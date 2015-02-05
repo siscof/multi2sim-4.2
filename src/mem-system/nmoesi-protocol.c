@@ -1644,10 +1644,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->blocking ? mod->blocking_nc_writes++ : mod->non_blocking_nc_writes++;
 
 			/* Increment witness variable when port is locked */
-			if (stack->witness_ptr)
+			if (ret->witness_ptr)
 			{
-				(*stack->witness_ptr)++;
-				stack->witness_ptr = NULL;
+				(*ret->witness_ptr)++;
+				ret->witness_ptr = NULL;
 			}
 
 			if (stack->hit)
