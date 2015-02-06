@@ -726,13 +726,16 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 		stack = stack->bucket_list_next)
 	{
 		/* This stack is not older than 'older_than_stack' */
-		if (older_than_stack && stack->id >= older_than_stack->id)
+		//original
+		//if (older_than_stack && stack->id >= older_than_stack->id)
+		if (older_than_stack && stack->id == older_than_stack->id)
 			continue;
 
 		/* Address matches */
 		// comento mi version
-		//if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
-		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+		if ((stack->waiting_list_event == 0) && (stack->addr >> mod->log_block_size == addr >> mod->log_block_size))
+			//version original
+			//if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			return stack;
 	}
 
