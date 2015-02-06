@@ -955,6 +955,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 		stack->latencias.start = asTiming(si_gpu)->cycle;
 
+		if (stack->witness_ptr)
+			(*stack->witness_ptr)++;
+		stack->witness_ptr = NULL;
 		/* Coalesce access */
         stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
