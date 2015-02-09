@@ -414,9 +414,18 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
              else
                 access_kind = mod_access_nc_load;
                 
-			mod_access(scalar_unit->compute_unit->scalar_cache,
+			/*mod_access(scalar_unit->compute_unit->scalar_cache,
 				access_kind, uop->global_mem_access_addr,
 				&uop->global_mem_witness, NULL, NULL, NULL);
+			*/
+
+				struct mod_t *mod = scalar_unit->compute_unit->scalar_cache;
+				//hacer coalesce
+				unsigned int addr = uop->global_mem_access_addr;
+				int bytes = uop->global_mem_access_size;
+
+				mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, uop->wavefront, NULL, NULL, NULL);
+
 			
 			add_access(0);
 

@@ -292,7 +292,7 @@ void add_latencias_load(struct latenciometro *latencias)
 void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf)
 {
 	long long stack_latency = latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->retry + latencias->miss + latencias->finish;
-
+	assert(wf != NULL);
 	if(wf->latencies->total < stack_latency)
 	{
 		memcpy(wf->latencies,latencias,sizeof(struct latenciometro));
@@ -300,8 +300,9 @@ void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wave
 	}
 }
 
-void add_wavefront_latencias_load(struct latenciometro *latencias)
+void add_wavefront_latencias_load(struct si_wavefront_t *wf)
 {
+	struct latenciometro *latencias = wf->latencies;
 	gpu_stats.latencias_load->queue += latencias->queue;
 	gpu_stats.latencias_load->lock_mshr += latencias->lock_mshr;
 	gpu_stats.latencias_load->lock_dir += latencias->lock_dir;
@@ -311,6 +312,8 @@ void add_wavefront_latencias_load(struct latenciometro *latencias)
 	gpu_stats.latencias_load->finish += latencias->finish;
 	gpu_stats.latencias_load->total += latencias->total;
 	gpu_stats.latencias_load->access++;
+	free(wf->latencies);
+	wf->latencies = calloc(1, sizeof(struct latenciometro));
 }
 
 

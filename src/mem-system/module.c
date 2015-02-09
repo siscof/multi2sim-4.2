@@ -115,7 +115,7 @@ void mod_dump(struct mod_t *mod, FILE *f)
 }
 
 long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
-	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue, struct si_wavefront_t *wavefront,
+	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct si_wavefront_t *wavefront, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info)
 {
 	struct mod_stack_t *stack;

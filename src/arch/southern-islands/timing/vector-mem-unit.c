@@ -163,7 +163,7 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 			si_gpu_vector_mem_write_latency;
 
 		gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, uop->active_work_items);
-		add_wavefront_latencias_load(uop->wavefront->latencies);
+		add_wavefront_latencias_load(uop->wavefront);
 		
 		/* In the above context, access means any of the 
 		 * mod_access calls in si_vector_mem_mem. Means all 
@@ -348,7 +348,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				}
 				else
 				{	
-					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, uop, NULL, NULL, NULL);
+					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, uop->wavefront, NULL, NULL, NULL);
 					uop->global_mem_witness--;
 				}
 			
