@@ -21,6 +21,7 @@
 #define MEM_SYSTEM_MODULE_H
 
 #include <stdio.h>
+#include <arch/southern-islands/emu/wavefront.h>
 
 
 
@@ -269,7 +270,7 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	void *event_queue_item, struct mod_client_info_t *client_info);
 	
 long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
-	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue,
+	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue, struct si_wavefront_t *wavefront,
 	void *event_queue_item, struct mod_client_info_t *client_info);
 
 int mod_can_access(struct mod_t *mod, unsigned int addr);

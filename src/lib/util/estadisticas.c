@@ -181,7 +181,8 @@ estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
 mem_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
-
+gpu_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+gpu_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 //imprimir columnas
 print_cache_states((long long *) NULL);
 
@@ -194,7 +195,7 @@ fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scala
 fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
 
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
-fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
+fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load gpu_queue_load gpu_lock_mshr_load gpu_lock_dir_load gpu_eviction_load gpu_retry_load gpu_miss_load gpu_finish_load gpu_access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -287,6 +288,31 @@ void add_latencias_load(struct latenciometro *latencias)
 	mem_stats.latencias_load->finish += latencias->finish;
 	mem_stats.latencias_load->access++;
 }
+
+void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf)
+{
+	long long stack_latency = latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->retry + latencias->miss + latencias->finish;
+
+	if(wf->latencies->total < stack_latency)
+	{
+		memcpy(wf->latencies,latencias,sizeof(struct latenciometro));
+		wf->latencies->total = stack_latency;
+	}
+}
+
+void add_wavefront_latencias_load(struct latenciometro *latencias)
+{
+	gpu_stats.latencias_load->queue += latencias->queue;
+	gpu_stats.latencias_load->lock_mshr += latencias->lock_mshr;
+	gpu_stats.latencias_load->lock_dir += latencias->lock_dir;
+	gpu_stats.latencias_load->eviction += latencias->eviction;
+	gpu_stats.latencias_load->retry += latencias->retry;
+	gpu_stats.latencias_load->miss += latencias->miss;
+	gpu_stats.latencias_load->finish += latencias->finish;
+	gpu_stats.latencias_load->total += latencias->total;
+	gpu_stats.latencias_load->access++;
+}
+
 
 void add_latencias_nc_write(struct latenciometro *latencias)
 {
@@ -590,6 +616,16 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->miss);
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->finish);
 	fran_debug_ipc("%lld ",mem_stats.latencias_load->access);
+
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->queue);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->lock_mshr);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->lock_dir);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->eviction);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->retry);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->miss);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->finish);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->total);
+	fran_debug_ipc("%lld ",gpu_stats.latencias_load->access);
 
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->queue);
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->lock_mshr);

@@ -115,7 +115,7 @@ void mod_dump(struct mod_t *mod, FILE *f)
 }
 
 long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
-	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue,
+	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct linked_list_t *event_queue, struct si_wavefront_t *wavefront,
 	void *event_queue_item, struct mod_client_info_t *client_info)
 {
 	struct mod_stack_t *stack;
@@ -128,8 +128,11 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 		
 	stack->stack_size = bytes;
 	
-	//fran
-	//DOUBLE_LINKED_LIST_INSERT_TAIL(mod, coalesce, stack);
+	// uop reference
+	//stack->uop = uop;
+
+	stack->wavefront = wavefront;
+
 	stack->work_group_id_in_cu = wg_id;
 	
 	/* Initialize */

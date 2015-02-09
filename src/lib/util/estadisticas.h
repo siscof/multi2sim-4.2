@@ -128,6 +128,10 @@ struct si_gpu_unit_stats
 	long long simd_idle[4];
 	long long v_mem_full;
 	
+	//latecias de las instrucciones de acceso a memoria
+	struct latenciometro *latencias_load;
+	struct latenciometro *latencias_nc_write;
+
 	//instruction latency
 	long long start2fetch;		
 	long long fetch2complete;  
@@ -194,6 +198,7 @@ struct latenciometro
 	long long finish;
 	long long access;
 	long long invalidar;
+	long long total;
 };
 
 struct mem_system_stats mem_stats, instrucciones_mem_stats_anterior, ciclos_mem_stats_anterior;

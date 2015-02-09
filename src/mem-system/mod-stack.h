@@ -66,6 +66,8 @@ struct mod_stack_t
 	struct retry_stats_t retries_counter[num_retries_kinds];
 
 	struct latenciometro latencias;
+	struct si_wavefront_t *wavefront;
+	struct si_uop_t *uop;
     int glc;
 	int origin;
 	long long coalesced_count;

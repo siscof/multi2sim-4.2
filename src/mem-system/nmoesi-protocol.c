@@ -567,6 +567,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			accu_retry_time_lost(stack);
 			stack->latencias.finish = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction - stack->latencias.miss;
 			add_latencias_load(&(stack->latencias));
+			copy_latencies_to_wavefront(&(stack->latencias),stack->wavefront);
 			//}
 		}
 
