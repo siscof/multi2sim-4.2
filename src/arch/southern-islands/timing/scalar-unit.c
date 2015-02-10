@@ -307,6 +307,8 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 		
 		instructions_processed++;	
 
+		add_wavefront_scalar_latencias_load(uop->wavefront);
+
 		uop->write_ready = asTiming(si_gpu)->cycle + 
 			si_gpu_scalar_unit_write_latency;
 		//gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);			
@@ -392,6 +394,8 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 					scalar_unit->compute_unit->id, 
 					uop->wavefront->id, uop->id_in_wavefront);
 				list_index++;
+				struct si_uop_t *uop_blocking = list_get(scalar_unit->read_buffer, 0);
+				uop_blocking->wavefront->scalar_mem_blocking = 1;
 				continue;
 			}
 

@@ -58,6 +58,7 @@ struct si_wavefront_t
 
 	/* Flags updated during instruction execution */
 	unsigned int mem_blocking : 1;
+	unsigned int scalar_mem_blocking : 1;
 	unsigned int vector_mem_read : 1;
 	unsigned int vector_mem_write : 1;
 	unsigned int scalar_mem_read : 1;

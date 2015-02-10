@@ -656,7 +656,6 @@ def IPCmultitest(directorioResultados, monton):
 
                     #v_mem_full
                     dato = pd.DataFrame({exp:(df2['v mem full'] / 5)/df2['ciclos intervalo']})
-                    pprint.pprint(dato)
                     dato.plot(ax=t[1][0],legend=False)
 
 
