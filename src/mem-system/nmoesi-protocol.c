@@ -382,7 +382,6 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
 		stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
 
-		retry_lat = mod_get_retry_latency(mod);
 		mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 		stack->retry = 1;
 		esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
@@ -452,11 +451,12 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		if (stack->err)
 		{
 			mod->read_retries++;
+			retry_lat = mod_get_retry_latency(mod);
 			add_retry(stack,load_miss_retry);
 			stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
 			stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
 
-			retry_lat = mod_get_retry_latency(mod);
+
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			if(stack->mshr_locked)
 			{

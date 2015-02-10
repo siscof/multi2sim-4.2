@@ -163,6 +163,7 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 			si_gpu_vector_mem_write_latency;
 
 		gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, uop->active_work_items);
+
 		add_wavefront_latencias_load(uop->wavefront);
 		
 		/* In the above context, access means any of the 
