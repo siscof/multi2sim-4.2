@@ -312,6 +312,9 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 		stack->addr, mod->name);
 	mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_lock\"\n",
 		stack->id, mod->name);
+
+	if(stack->latencias.start == 0)
+		stack->latencias.start = asTiming(si_gpu)->cycle;
 		
 	//if(!stack->latencias.lock_mshr) 	
 	//	stack->latencias.lock_mshr = asTiming(si_gpu)->cycle;
@@ -380,7 +383,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 		retry_lat = mod_get_retry_latency(mod);
 
 		stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
-		stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
+		stack->latencias.start = 0;
 
 		mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 		stack->retry = 1;
@@ -454,7 +457,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			retry_lat = mod_get_retry_latency(mod);
 			add_retry(stack,load_miss_retry);
 			stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
-			stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
+			stack->latencias.start = 0;
 
 
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
@@ -1054,6 +1057,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_lock\"\n",
 			stack->id, mod->name);
 
+		if(stack->latencias.start == 0)
+			stack->latencias.start = asTiming(si_gpu)->cycle;
 
 		/* If there is any older write, wait for it */
 		older_stack = mod_in_flight_write(mod, stack);
@@ -1105,7 +1110,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			retry_lat = mod_get_retry_latency(mod);
 
 			stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
-			stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
+			stack->latencias.start = 0;
 
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -1156,7 +1161,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			retry_lat = mod_get_retry_latency(mod);
 
 			stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
-			stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
+			stack->latencias.start = 0;
 
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -1246,7 +1251,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			retry_lat = mod_get_retry_latency(mod);
 
 			stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
-			stack->latencias.start = asTiming(si_gpu)->cycle + retry_lat;
+			stack->latencias.start = 0;
 
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			if(stack->mshr_locked)
