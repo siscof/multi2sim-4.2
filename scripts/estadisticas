@@ -451,28 +451,28 @@ def analisis_stall(directorioResultados, monton):
         df_dispatch = pd.DataFrame(index=sorted_nicely(monton[exp].keys()),columns = ['cycles_simd_running','dispatch_stall_others','dispatch_stall_barrier','dispatch_stall_mem_access','dispatch_stall_instruction_infly'])
         df_instructions = pd.DataFrame(index=sorted_nicely(monton[exp].keys()),columns = ['i_scalar','mi_simd','i_branch','mi_lds','i_s_mem','mi_v_mem'])
         df_operations = pd.DataFrame(index=sorted_nicely(monton[exp].keys()),columns = ['i_scalar', 'i_simd', 'i_s_mem', 'i_v_mem', 'i_branch', 'i_lds',])
-        df_instructions_infly = pd.DataFrame(index=sorted_nicely(monton[exp].keys()),columns = ['dispatch branch instruction infly', 'dispatch scalar_instruction infly','dispatch simd instruction infly', 'dispatch lds instruction infly', 'dispatch mem scalar instruction infly', 'dispatch v mem instruction infly'])
+        df_instructions_infly = pd.DataFrame(index=sorted_nicely(monton[exp].keys()),columns = ['dispatch_branch_instruction infly', 'dispatch_scalar_instruction_infly','dispatch_simd_instruction_infly', 'dispatch_lds_instruction_infly', 'dispatch_mem_scalar_instruction_infly', 'dispatch_v_mem_instruction_infly'])
 
         for bench in BENCHMARKS:
             try:
                 df_max = pd.DataFrame(monton[exp][bench]['con L1'].df.max(),columns=[bench]).transpose()
                 df_sum = pd.DataFrame(monton[exp][bench]['con L1'].df.sum(),columns=[bench]).transpose()
 
-                df_fetch.ix[bench] = df_max.ix[bench,['no stall','stall mem access','stall barrier','stall instruction infly','stall no wavefront','stall others','stall fetch buffer full']]
-                df_dispatch.ix[bench] = df_max.ix[bench,['cycles simd running','dispatch stall mem access','dispatch stall barrier','dispatch stall instruction infly','dispatch stall others']]
-                df_instructions_infly.ix[bench] = df_max.ix[bench,['dispatch branch instruction infly', 'dispatch scalar instruction infly', 'dispatch mem scalar instruction infly', 'dispatch simd instruction infly', 'dispatch v mem instruction infly', 'dispatch lds instruction infly']]
+                df_fetch.ix[bench] = df_max.ix[bench,['no_stall','stall mem_access','stall_barrier','stall_instruction_infly','stall_no_wavefront','stall_others','stall_fetch_buffer_full']]
+                df_dispatch.ix[bench] = df_max.ix[bench,['cycles_simd_running','dispatch_stall_mem_access','dispatch_stall_barrier','dispatch_stall_instruction_infly','dispatch_stall_others']]
+                df_instructions_infly.ix[bench] = df_max.ix[bench,['dispatch_branch_instruction_infly', 'dispatch_scalar_instruction_infly', 'dispatch_mem_scalar_instruction_infly', 'dispatch_simd_instruction_infly', 'dispatch_v_mem_instruction_infly', 'dispatch_lds_instruction_infly']]
 
 
-                df_instructions.ix[bench] = df_sum.ix[bench,['i scalar', 'mi simd', 'i s mem', 'mi v mem', 'i branch', 'mi lds',]]
+                df_instructions.ix[bench] = df_sum.ix[bench,['i_scalar', 'mi_simd', 'i_s_mem', 'mi_v_mem', 'i_branch', 'mi_lds',]]
 
-                df_operations.ix[bench] = df_sum.ix[bench,['i scalar', 'i simd', 'i s mem', 'i v mem', 'i branch', 'i lds',]]
+                df_operations.ix[bench] = df_sum.ix[bench,['i_scalar', 'i_simd', 'i_s_mem', 'i_v_mem', 'i_branch', 'i_lds',]]
 
                 #comparacion latencias
                 df_lat = monton[exp][bench]['con L1'].df
 
-                latencia_retries = pd.DataFrame({'retry lat':df_lat[['cycles load action retry','cycles load miss retry','cycles nc store writeback retry','cycles nc store action retry','cycles nc store miss retry']].sum(1) / df_lat['num loads mem']})
+                latencia_retries = pd.DataFrame({'retry_lat':df_lat[['cycles_load_action_retry','cycles_load_miss_retry','cycles_nc_store_writeback_retry','cycles_nc_store_action_retry','cycles_nc_store_miss_retry']].sum(1) / df_lat['num_loads_mem']})
                                                              #df_lat[['counter load action retry','counter load miss retry','counter nc store writeback retry','counter nc store action retry','counter nc store miss retry']].sum(1)})
-                latencia_total = pd.DataFrame({'latencia total':df_lat['lat loads mem'] /  df_lat['num loads mem']})
+                latencia_total = pd.DataFrame({'latencia_total':df_lat['lat_loads_mem'] /  df_lat['num_loads_mem']})
 
                 f2, t2 = plt.subplots()
                 f2.set_size_inches(30, 20)
@@ -490,7 +490,7 @@ def analisis_stall(directorioResultados, monton):
                 print(e)
 
         df_fetch = df_fetch.div(df_fetch.sum(1), axis=0)
-        df_dispatch[['dispatch stall mem access','dispatch stall barrier','dispatch stall instruction infly','dispatch stall others']] = df_dispatch[['dispatch stall mem access','dispatch stall barrier','dispatch stall instruction infly','dispatch stall others']] / 10
+        df_dispatch[['dispatch_stall_mem_access','dispatch_stall_barrier','dispatch_stall_instruction_infly','dispatch_stall_others']] = df_dispatch[['dispatch_stall_mem_access','dispatch_stall_barrier','dispatch_stall_instruction_infly','dispatch_stall_others']] / 10
 
         #prueba
         #df_dispatch_aux = pd.DataFrame(df_dispatch)
@@ -1611,13 +1611,13 @@ def tablas_access_list(nombreArchivo):
                     df = pd.DataFrame(np.loadtxt(archivo,comments='#', skiprows=1, delimiter = ' ', dtype=tip))
                     #df = ajustarResolucionPorTamanyo(df, 10).df
 
-                    dato = pd.DataFrame({prueba : df['write access list count']})
+                    dato = pd.DataFrame({prueba : df['write_access_list_count']})
                     dato.plot(ax=t[0])
 
-                    dato = pd.DataFrame({prueba : df['access list count']})
+                    dato = pd.DataFrame({prueba : df['access_list_count']})
                     dato.plot(ax=t[1])
 
-                    dato = pd.DataFrame({prueba : df['nc write access list count']})
+                    dato = pd.DataFrame({prueba : df['nc_write_access_list_count']})
                     dato.plot(ax=t[2])
 
 
@@ -1677,7 +1677,7 @@ if __name__ == '__main__':
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
     # variables de los test
-    nombre_resumen = ['02-11_mshr8','02-10_mshr16','02-10_mshr32','02-10_mshr64','02-10_mshr128','02-11_mshr256']
+    nombre_resumen = ['02-10_mshr32','02-16_mshr32_con_repochungo']
     
     #nombre_resumen = ['02-06_mshr16','02-06_mshr32','02-06_mshr64','02-06_mshr128','02-06_mshr256']
 
@@ -1781,12 +1781,17 @@ if __name__ == '__main__':
         #tablas_access_list(DIR_GRAFICOS+'/por_instrucciones/')
         #comparar_velocidad('/nfs/gap/fracanma/benchmark/resultados/prueba_resumen/grafico')fracanma/benchmark/resultados/prueba_resumen/grafico')
         #gc.collect()
-
+        
+    IPCmultitest(DIR_GRAFICOS+'/por_instrucciones/', dict_por_instrucciones)
+    barras_opc(DIR_GRAFICOS, dict_por_instrucciones)
+    analisis_stall(DIR_GRAFICOS, dict_por_instrucciones)
+    benchXexp(DIR_GRAFICOS, dict_por_instrucciones)
+    '''                       
     pool.starmap_async(IPCmultitest,[(DIR_GRAFICOS+'/por_instrucciones/', dict_por_instrucciones)])
     pool.starmap_async(barras_opc,[(DIR_GRAFICOS, dict_por_instrucciones)])
     pool.starmap_async(analisis_stall,[(DIR_GRAFICOS, dict_por_instrucciones)])
     pool.starmap_async(benchXexp,[(DIR_GRAFICOS, dict_por_instrucciones)])
-
+    '''
     pool.close()
     pool.join()
     print('TIEMPO DE EXECUCION : ',time.time() - start)
