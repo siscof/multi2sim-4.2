@@ -1,0 +1,4 @@
+[submodule "src/dramsim"]
+	path = src/dramsim
+	url = git@bitbucket.org:vtselfa/dramsim.git
+	ignore = untracked
