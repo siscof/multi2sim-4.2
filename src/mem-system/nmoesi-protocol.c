@@ -1761,10 +1761,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
 		dir_lock = dir_lock_get(mod->dir, stack->set, stack->way);
-		if (dir_lock->lock && !stack->blocking)
+
+		/*if (dir_lock->lock && !stack->blocking)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
+
 			ret->err = 1;
 			
 			if (stack->mshr_locked == 1)
@@ -1778,13 +1780,15 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->mshr_locked = 0;
 			mod_stack_return(stack);
 			return;
-		}
+
+		}*/
 
 		/* Lock directory entry. If lock fails, port needs to be released to prevent 
 		 * deadlock.  When the directory entry is released, locking port and 
 		 * directory entry will be retried. */
-		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, 
-			stack))
+
+
+		if (!cc_add_transaction(mod->coherence_controller, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
@@ -1798,6 +1802,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			ret->port_locked = 0;
 			return;
 		}
+
+
 
 		ret->latencias.lock_dir = asTiming(si_gpu)->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
 
