@@ -248,6 +248,12 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 		{
 			lock_queue_iter = dir_lock->lock_queue;
 
+			if(stack->request_dir == mod_request_down_up)
+			{
+				while (lock_queue_iter->dir_lock_next && lock_queue_iter->dir_lock_next->request_dir == mod_request_down_up)
+					lock_queue_iter = lock_queue_iter->dir_lock_next;
+			}else{
+
 			/* FIXME - Code below is the queue insertion algorithm based on stack id.
 			 * This causes a deadlock when, for example, A-10 keeps retrying an up-down access and
 			 * gets always priority over A-20, which is waiting to finish a down-up access. */
@@ -264,9 +270,11 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 			/* FIXME - Replaced with code below, just inserting at the end of the queue.
 			 * But this seems to be what this function was doing before, isn't it? Why
 			 * weren't we happy with this policy? */
-			while (lock_queue_iter->dir_lock_next)
-				lock_queue_iter = lock_queue_iter->dir_lock_next;
+
+				while (lock_queue_iter->dir_lock_next)
+					lock_queue_iter = lock_queue_iter->dir_lock_next;
 			/* ------------------------------------------------------------------------ */
+			}
 
 			if (!lock_queue_iter->dir_lock_next) 
 			{
@@ -279,6 +287,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 				stack->dir_lock_next = lock_queue_iter->dir_lock_next;
 				lock_queue_iter->dir_lock_next = stack;
 			}
+
 		}
 		mem_debug("    0x%x access suspended\n", stack->tag);
 		return 0;

@@ -1762,7 +1762,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		 * blocking, release port and return error. */
 		dir_lock = dir_lock_get(mod->dir, stack->set, stack->way);
 
-		/*if (dir_lock->lock && !stack->blocking)
+		if (dir_lock->lock && !stack->blocking)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
@@ -1781,14 +1781,15 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			mod_stack_return(stack);
 			return;
 
-		}*/
+		}
 
 		/* Lock directory entry. If lock fails, port needs to be released to prevent 
 		 * deadlock.  When the directory entry is released, locking port and 
 		 * directory entry will be retried. */
 
 
-		if (!cc_add_transaction(mod->coherence_controller, stack))
+		//if (!cc_add_transaction(mod->coherence_controller, stack))
+		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
@@ -1827,14 +1828,14 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		cache_access_block(mod->cache, stack->set, stack->way);
 
 		/* Access latency */
-		if( stack->ret_stack->coalesced == -1)
+		/*if( stack->ret_stack->coalesced == -1)
 		{
 			esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, 0);
 		}
 		else
-		{
-			esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
-		}
+		{*/
+		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
+		//}
 		return;
 	}
 

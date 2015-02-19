@@ -15,7 +15,9 @@ struct coherence_controller_t{
 
 };
 
-int cc_init();
+struct coherence_controller_t *cc_create();
+int cc_free(struct coherence_controller_t *cc);
 int cc_add_transaction(struct coherence_controller *cc, struct mod_stack *stack);
+int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack);
 
 #endif /* MEM_SYSTEM_COHERENCE_CONTROLLER_H */
