@@ -250,6 +250,14 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 
 			if(stack->request_dir == mod_request_down_up)
 			{
+				if(lock_queue_iter->request_dir != mod_request_down_up)
+				{
+					dir_lock->lock_queue = stack;
+					stack->dir_lock_next = lock_queue_iter;
+					mem_debug("    0x%x access suspended\n", stack->tag);
+					return 0;
+				}
+
 				while (lock_queue_iter->dir_lock_next && lock_queue_iter->dir_lock_next->request_dir == mod_request_down_up)
 					lock_queue_iter = lock_queue_iter->dir_lock_next;
 			}else{
