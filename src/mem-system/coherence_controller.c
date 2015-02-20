@@ -21,7 +21,7 @@ void cc_free(struct coherence_controller_t * cc)
 	list_free(cc->transaction_queue);
 	free(cc);
 }
-/*
+
 // desde el find and lock se tiene que pasar stack->ret
 int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack)
 {
@@ -77,4 +77,4 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, struct mod_t *
 	return -1;
 
 }
-*/
+

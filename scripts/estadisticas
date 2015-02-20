@@ -107,7 +107,7 @@ def IPC(nombreArchivo, monton):
 
                 df = monton[bench][clave].sum
 
-                dato = df['total intervalo']/ df['ciclos intervalo']
+                dato = df['total_intervalo']/ df['ciclos_intervalo']
                 dato.plot(ax=t, label=clave, legend=True)
 
                 plt.legend()
@@ -147,18 +147,18 @@ def IPCmultitest_worker(directorioResultados, bench):
             for clave in ['con L1'] :
 
                 df = dict_por_instrucciones[exp][bench][clave].df
-                ind = pd.Index(dict_por_instrucciones[exp][bench][clave].df['total global'], name='Operaciones')
+                ind = pd.Index(dict_por_instrucciones[exp][bench][clave].df['total_global'], name='Operaciones')
                 tamanyoGrupo = 10000 * np.ceil(df.shape[0]/100)
 
                 df2 = df.set_index(ind).groupby( lambda x :  (x // tamanyoGrupo) * tamanyoGrupo).sum() #.astype(np.int32)
 
                 if exp in nombre_resumen[3:]:
-                     pd.DataFrame({exp:df2['total global']/df2['ciclos totales']}).plot(ax=t[1][2])
-                     pd.DataFrame({exp:df2['mshr size L1']/tamanyoGrupo}).plot(ax=t[0][2])
+                     pd.DataFrame({exp:df2['total_global']/df2['ciclos_totales']}).plot(ax=t[1][2])
+                     pd.DataFrame({exp:df2['mshr_size_L1']/tamanyoGrupo}).plot(ax=t[0][2])
                      continue
 
                 #OPC
-                dato = pd.DataFrame({exp:df2['total intervalo']/ df2['ciclos intervalo']})
+                dato = pd.DataFrame({exp:df2['total_intervalo']/ df2['ciclos_intervalo']})
 
                 #if exists(opcOptimo)
                 #opcOptimo.merge(dato)
@@ -166,16 +166,16 @@ def IPCmultitest_worker(directorioResultados, bench):
                 dato.plot(ax=t[0][0])
 
                 #latencia
-                dato = pd.DataFrame({exp:df2['lat loads gpu']/ df2['num loads gpu']})
+                dato = pd.DataFrame({exp:df2['lat_loads_gpu']/ df2['num_loads_gpu']})
                 #dato = dato.set_index(ind).groupby( lambda x :  (x // tamanyoGrupo) * tamanyoGrupo).mean()
                 dato.plot(ax=t[0][1])
 
                 #accesos
-                dato = pd.DataFrame({exp:df2['accesos gpu']})
+                dato = pd.DataFrame({exp:df2['accesos_gpu']})
                 dato.plot(ax=t[1][1])
 
                 #opc acumulado
-                dato = pd.DataFrame({exp:df2['total global']/df2['ciclos totales']})
+                dato = pd.DataFrame({exp:df2['total_global']/df2['ciclos_totales']})
                 dato.plot(ax=t[1][0])
                 aux = aux.join(dato, how="right")
 
@@ -282,8 +282,7 @@ def benchXexp(directorioResultados, monton):
         gpuEventsLoad = pd.DataFrame(index=nombre_resumen, columns=['gpu_queue_load','gpu_lock_mshr_load','gpu_lock_dir_load','gpu_eviction_load','gpu_retry_load','gpu_miss_load','gpu_finish_load'])  
         memEventsStore = pd.DataFrame(index=nombre_resumen, columns=['queue_nc_write','lock_mshr_nc_write','lock_dir_nc_write','eviction_nc_write','retry_nc_write','miss_nc_write','finish_nc_write'])  
         df_dispatch = pd.DataFrame(index=nombre_resumen, columns=['cycles_simd_running','dispatch_stall_mem_access','dispatch_stall_barrier','dispatch_stall_instruction_infly','dispatch_stall_others'])
-        df_instructions_infly = pd.DataFrame(index=nombre_resumen, columns=['dispatch_branch_instruction_infly', 'dispatch_scalar_instruction_infly','dispatch_simd_instruction_infly', 'dispatch_lds_instruction_infly', 'dispatch_mem_scalar_instruction_infly', 'dispatch_v_mem_instruction_infly'])
-       
+        df_instructions_infly = pd.DataFrame(index=nombre_resumen, columns=['dispatch_branch_instruction_infly', 'dispatch_scalar_instruction_infly','dispatch_simd_instruction_infly', 'dispatch_lds_instruction_infly', 'dispatch_mem_scalar_instruction_infly', 'dispatch_v_mem_instruction_infly'])          
         
         for exp in nombre_resumen :
             try:
@@ -311,6 +310,8 @@ def benchXexp(directorioResultados, monton):
                 fi = open(contenedor_de_datos+'/'+exp+'_conL1/'+bench+'-mem-report')
                 hitratio.ix[exp,'hit ratio'] =  buscar_y_acumular(fi,'[ l2-0 ]','[ l1-cu00 ]','HitRatio')
                 fi.close()
+
+                
 
             except IOError as e:
                 print('fallo en benchXexp para:')
@@ -410,13 +411,23 @@ def barras_opc(directorioResultados, monton):
                 opc[exp][bench] = df_aux['total_global'].max() / float(df_aux['ciclos_totales'].max())
                 invalidations[exp][bench] = df_aux['invalidations'].sum() / (df_aux['accesos_gpu'].sum() - df_aux['Coalesces_gpu'].sum() - df_aux['Coalesces_L1'].sum())
                 retries[exp][bench] = df_aux['accesses_with_retries'].sum() / (df_aux['accesos_gpu'].sum() - df_aux['Coalesces_gpu'].sum() - df_aux['Coalesces_L1'].sum())
-                latencia = df_aux['lat_loads_mem'].sum() / df_aux['num_loads_mem'].sum()
+                latencia[exp][bench] = df_aux['lat_loads_mem'].sum() / df_aux['num_loads_mem'].sum()
+
+                
+                memEventsLoad = df_aux[['queue_load','lock_mshr_load','lock_dir_load','eviction_load','retry_load','miss_load','finish_load']].sum(0).sum()/ df_aux['access_load'].sum(0).sum()
+                memEventsStore = df_aux[['queue_nc_write','lock_mshr_nc_write','lock_dir_nc_write','eviction_nc_write','retry_nc_write','miss_nc_write','finish_nc_write']].sum(0).sum()/ df_aux['access_nc_write'].sum(0).sum()
+                gpuEventsLoad = df_aux[['gpu_queue_load','gpu_lock_mshr_load','gpu_lock_dir_load','gpu_eviction_load','gpu_retry_load','gpu_miss_load','gpu_finish_load']].sum(0).sum()/ df_aux['gpu_access_load'].sum(0).sum()
+                
+                latencia[exp][bench] = memEventsLoad + memEventsStore
 
             except Exception as e:
                 print('Fallo barras_opc(): '+exp+' '+bench)
                 print(e)
 
         #latencia retry
+    latencia.plot(ax=t, kind='bar')
+    f.savefig(dir + 'latencias.eps',format='eps')
+    t.cla()
 
     opc.plot(ax=t, kind='bar')
     f.savefig(dir + 'opc.eps',format='eps')
@@ -640,7 +651,7 @@ def IPCmultitest(directorioResultados, monton):
                     if exp in nombre_resumen[0:]:
                         pd.DataFrame({exp:df_cumsum['total_intervalo']/df_cumsum['ciclos_intervalo']}).plot(ax=t[1][2],legend=False)
                         pd.DataFrame({exp:df2['mshr_size_L1']/(tamanyoGrupo/10000)}).plot(ax=t[0][2],legend=False)
-                        pd.DataFrame({exp:df2['lat_loads_gpu']/ df2['num loads_gpu']}).plot(ax=t[0][1],legend=False)
+                        pd.DataFrame({exp:df2['lat_loads_gpu']/ df2['num_loads_gpu']}).plot(ax=t[0][1],legend=False)
                         pd.DataFrame({exp:df2['total_intervalo']/ df2['ciclos_intervalo']}).plot(ax=t[0][0])
                         if 'simd_idle1' in df2.columns:
                             dato = pd.DataFrame({exp:((df2['simd_idle1'] + df2['simd_idle2'] + df2['simd_idle3'] + df2['simd_idle4']) / (4 * 5)) / df2['ciclos_intervalo']}).plot(ax=t[1][1],legend=False)
@@ -1677,7 +1688,7 @@ if __name__ == '__main__':
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
     # variables de los test
-    nombre_resumen = ['02-10_mshr256','02-16_mshr32_con_repochungo']
+    nombre_resumen = ['02-10_mshr32','02-19_prueba_dir_32','02-19_prueba_dir_32_2']
     
     #nombre_resumen = ['02-06_mshr16','02-06_mshr32','02-06_mshr64','02-06_mshr128','02-06_mshr256']
 
