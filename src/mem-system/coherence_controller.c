@@ -28,7 +28,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 	struct mod_t *mod = stack->mod;
 
 	list_add(cc->transaction_queue,(void *)stack);
-	struct dir_lock_t *dir_lock = dir_lock_get(mod->dir, stack->fal_stack->set, stack->fal->way);
+	struct dir_lock_t *dir_lock = dir_lock_get(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way);
 
 	if(dir_lock->lock)
 	{

@@ -1788,8 +1788,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		 * directory entry will be retried. */
 
 
-		//if (!cc_add_transaction(mod->coherence_controller, stack))
-		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
+		if (!cc_add_transaction(mod->coherence_controller, stack))
+		//if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
