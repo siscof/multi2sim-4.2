@@ -28,6 +28,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 	struct mod_t *mod = stack->mod;
 
 	list_add(cc->transaction_queue,(void *)stack);
+
 	struct dir_lock_t *dir_lock = dir_lock_get(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way);
 
 	if(dir_lock->lock)
@@ -35,9 +36,27 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 		return 0;
 	}
 
-	dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
+	int locked = dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
+	assert(locked);
 	return 1;
 }
+
+void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *stack)
+{
+	int colision_detected = -1;
+
+	for(int i = 0; i < list_count(cc); i++)
+	{
+		struct mod_stack_t *stack_in_queue = (struct mod_stack_t *) list_get(cc->transaction_queue, i);
+
+		if(stack_in_queue->find_and_lock_stack->set == stack->find_and_lock_stack->set
+				&& stack_in_queue->find_and_lock_stack->way == stack->find_and_lock_stack->way)
+		{
+			colision_detected = i;
+		}
+	}
+}
+
 
 int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack)
 {
@@ -55,7 +74,10 @@ void cc_launch_next_transaction(struct coherence_controller_t *cc, struct mod_st
 
 	if(index >= 0)
 	{
-
+		struct mod_stack_t *launch_stack = (struct mod_stack_t *) list_get(cc->transaction_queue, index);
+		int locked = dir_entry_lock(launch_stack->mod->dir, launch_stack->find_and_lock_stack->set, launch_stack->find_and_lock_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
+		assert(locked);
+		return 1;
 	}
 
 

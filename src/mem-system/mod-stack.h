@@ -64,6 +64,7 @@ struct mod_stack_t
 	long long tiempo_acceso;
 	long long retry_time_lost;
 	struct retry_stats_t retries_counter[num_retries_kinds];
+	struct mod_stack_t *find_and_lock_stack;
 
 	struct latenciometro latencias;
 	struct si_wavefront_t *wavefront;
