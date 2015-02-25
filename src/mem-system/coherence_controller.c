@@ -53,8 +53,11 @@ void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *
 				&& stack_in_queue->find_and_lock_stack->way == stack->find_and_lock_stack->way)
 		{
 			colision_detected = i;
+
+
 		}
 	}
+	//añadir tareas a la stack principal. esto deberia incrementar el memory level parallelism
 }
 
 
