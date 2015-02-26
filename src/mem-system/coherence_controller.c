@@ -4,9 +4,12 @@
  *  Created on: 18/2/2015
  *      Author: sisco
  */
-#include <mem-system/module.h>
-#include <mem-system/mod_stack.h>
+
+#include <mem-system/coherence_controller.h>
 #include <lib/mhandle/mhandle.h>
+#include <mem-system/directory.h>
+#include <mem-system/mshr.h>
+#include <mem-system/nmoesi-protocol.h>
 
 struct coherence_controller_t *cc_create()
 {
@@ -16,14 +19,14 @@ struct coherence_controller_t *cc_create()
 	return cc;
 }
 
-void cc_free(struct coherence_controller_t * cc)
+void cc_free(struct coherence_controller_t *cc)
 {
 	list_free(cc->transaction_queue);
 	free(cc);
 }
 
 // desde el find and lock se tiene que pasar stack->ret
-int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack)
+int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack, int event)
 {
 	struct mod_t *mod = stack->mod;
 
@@ -33,6 +36,10 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 
 	if(dir_lock->lock)
 	{
+		//cc_search_colisions(cc, stack)
+		//puedo procesar la peticion??
+		stack->find_and_lock_stack->dir_lock_event = event;
+		stack->way = stack->find_and_lock_stack->way;
 		return 0;
 	}
 
@@ -60,12 +67,21 @@ void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *
 	//añadir tareas a la stack principal. esto deberia incrementar el memory level parallelism
 }
 
-
+// este metodo debe liberar el directorio
 int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack)
 {
 
 	int index = list_index_of(cc->transaction_queue,(void *)stack);
 	struct mod_stack_t *removed_stack= (struct mod_stack_t *) list_remove_at(cc->transaction_queue, index);
+
+	/* Unlock directory entry */
+	dir_entry_unlock(stack->mod->dir, stack->set, stack->way);
+
+	if(stack->mshr_locked)
+	{
+		mshr_unlock2(stack->mod);
+		stack->mshr_locked = 0;
+	}
 
 	cc_launch_next_transaction(cc,removed_stack);
 	return 0;
@@ -78,9 +94,10 @@ void cc_launch_next_transaction(struct coherence_controller_t *cc, struct mod_st
 	if(index >= 0)
 	{
 		struct mod_stack_t *launch_stack = (struct mod_stack_t *) list_get(cc->transaction_queue, index);
-		int locked = dir_entry_lock(launch_stack->mod->dir, launch_stack->find_and_lock_stack->set, launch_stack->find_and_lock_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
-		assert(locked);
-		return 1;
+		/*int locked = dir_entry_lock(launch_stack->mod->dir, launch_stack->find_and_lock_stack->set, launch_stack->find_and_lock_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
+		assert(locked);*/
+
+		esim_schedule_event(stack->find_and_lock_stack->dir_lock_event, stack->find_and_lock_stack, 1);
 	}
 
 
@@ -93,7 +110,7 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, struct mod_t *
 	for(int i = 0;i < list_count(cc->transaction_queue); i++)
 	{
 		stack_in_list = (struct mod_stack_t *) list_get(cc->transaction_queue, i);
-		if( stack_in_list->mod == mod && stack_in_list->set == set, stack_in_list->way == way)
+		if( stack_in_list->set == set && stack_in_list->way == way)
 		{
 			return i;
 		}

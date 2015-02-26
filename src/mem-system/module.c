@@ -73,6 +73,7 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	/* MSHR */
 	mod->mshr = mshr_create();
 	//xcalloc(1,sizeof(struct mshr_t));
+	mod->coherence_controller = cc_create();
 	
 	/* Ports */
 	mod->num_ports = num_ports;
@@ -103,6 +104,9 @@ void mod_free(struct mod_t *mod)
 	if (mod->mshr)
 		mshr_free(mod->mshr);
 	
+	if(mod->coherence_controller)
+		cc_free(mod->coherence_controller);
+
 	free(mod->ports);
 	repos_free(mod->client_info_repos);
 	free(mod->name);

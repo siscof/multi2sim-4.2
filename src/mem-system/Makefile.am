@@ -2,8 +2,8 @@ lib_LIBRARIES = libmemsystem.a
 
 libmemsystem_a_SOURCES = \
 	\
-        mshr.c \
-        mshr.h \
+    mshr.c \
+    mshr.h \
 	\
 	cache.c \
 	cache.h \
@@ -14,7 +14,7 @@ libmemsystem_a_SOURCES = \
 	config.c \
 	config.h \
         \
-        directory.c \
+    directory.c \
 	directory.h \
 	\
 	local-mem-protocol.c \
@@ -48,7 +48,10 @@ libmemsystem_a_SOURCES = \
 	prefetch-history.h \
 	\
 	prefetcher.c \
-	prefetcher.h
+	prefetcher.h \
+	\
+	coherence_controller.c \
+	coherence_controller.h
 
 INCLUDES = @M2S_INCLUDES@
 

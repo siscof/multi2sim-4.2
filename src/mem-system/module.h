@@ -96,6 +96,7 @@ struct mod_t
 	int mshr_size;
 	//FRAN
 	int mshr_count;
+	struct coherence_controller_t *coherence_controller;
 	struct mshr_t *mshr;
 
 	/* Module level starting from entry points */
