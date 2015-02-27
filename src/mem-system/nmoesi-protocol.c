@@ -1779,11 +1779,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
-			if (stack->mshr_locked != 0)
+			/*if (stack->mshr_locked != 0)
 			{
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
-			}
+			}*/
 			
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
