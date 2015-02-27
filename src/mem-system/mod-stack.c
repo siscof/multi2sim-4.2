@@ -59,10 +59,13 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 void mod_stack_return(struct mod_stack_t *stack)
 {
 	int ret_event = stack->ret_event;
-	void *ret_stack = stack->ret_stack;
+	struct mod_stack_t *ret_stack = stack->ret_stack;
 
 	/* Wake up dependent accesses */
 	mod_stack_wakeup_stack(stack);
+
+	if(ret_stack && ret_stack->find_and_lock_stack == stack)
+		ret_stack->find_and_lock_stack = NULL;
 
 	/* Free */
 

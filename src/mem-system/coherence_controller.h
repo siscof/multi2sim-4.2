@@ -24,6 +24,6 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack);
 void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *stack);
 void cc_launch_next_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack);
-int cc_search_next_transaction(struct coherence_controller_t *cc, struct mod_t *mod, int set, int way);
+int cc_search_next_transaction(struct coherence_controller_t *cc, int set, int way);
 
 #endif /* MEM_SYSTEM_COHERENCE_CONTROLLER_H */

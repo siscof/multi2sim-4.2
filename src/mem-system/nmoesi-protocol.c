@@ -1564,6 +1564,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* Default return values */
 		ret->err = 0;
+		ret->find_and_lock_stack = stack;
+		assert(ret->id == stack->id);
 
 		/* If this stack has already been assigned a way, keep using it */
 		stack->way = ret->way;
@@ -1731,10 +1733,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					{
 						ret->err = 1;
 						mod_stack_return(stack);
+					}else{
+						mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
 					}
-					else
-						mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK); 
-
 					return;
 				}
 				stack->mshr_locked = 1;
@@ -1754,7 +1755,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 			ret->err = 1;
 			
-			if (stack->mshr_locked == 1)
+			if (stack->mshr_locked != 0)
 			{
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
@@ -1762,7 +1763,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
-			stack->mshr_locked = 0;
+			//stack->mshr_locked = 0;
 			mod_stack_return(stack);
 			return;
 
@@ -1773,12 +1774,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		 * directory entry will be retried. */
 
 
-		if (!cc_add_transaction(mod->coherence_controller, stack))
+		if (!cc_add_transaction(mod->coherence_controller, ret, EV_MOD_NMOESI_FIND_AND_LOCK))
 		//if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
-			if (stack->mshr_locked)
+			if (stack->mshr_locked != 0)
 			{
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
@@ -1876,7 +1877,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			cc_finish_transaction(mod->coherence_controller, stack);
+			cc_finish_transaction(mod->coherence_controller, stack->ret_stack);
 			
 			mod_stack_return(stack);
 			return;
