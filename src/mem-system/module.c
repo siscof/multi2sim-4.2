@@ -636,6 +636,7 @@ void mod_unlock_port(struct mod_t *mod, struct mod_port_t *port,
 	/* Wake up one access waiting for a free port */
 	stack = mod->port_waiting_list_head;
 	event = stack->port_waiting_list_event;
+	stack->port_waiting_list_event = 0;
 	assert(DOUBLE_LINKED_LIST_MEMBER(mod, port_waiting, stack));
 	DOUBLE_LINKED_LIST_REMOVE(mod, port_waiting, stack);
 	mod_lock_port(mod, stack, event);
