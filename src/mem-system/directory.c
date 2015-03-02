@@ -214,7 +214,7 @@ struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y)
 {
 	struct dir_lock_t *dir_lock;
 
-	assert(x < dir->xsize && y < dir->ysize);
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
 	//mem_debug("  dir_lock retrieve\n");
 	return dir_lock;
@@ -227,7 +227,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 	struct mod_stack_t *lock_queue_iter;
 
 	/* Get lock */
-	assert(x < dir->xsize && y < dir->ysize);
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
 
 	/* If the entry is already locked, enqueue a new waiter and
@@ -319,8 +319,12 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 	FILE *f;
 
 	/* Get lock */
-	assert(x < dir->xsize && y < dir->ysize);
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
+
+
+	//fran
+	assert(!dir_lock->lock_queue);
 
 	/* Wake up first waiter */
 	if (dir_lock->lock_queue)

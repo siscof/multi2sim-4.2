@@ -47,7 +47,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 		return 0;
 	}
 
-	int locked = dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack->find_and_lock_stack);
+	int locked = dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
 	assert(locked);
 	return 1;
 }
@@ -60,12 +60,13 @@ void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *
 	{
 		struct mod_stack_t *stack_in_queue = (struct mod_stack_t *) list_get(cc->transaction_queue, i);
 
-		if(stack_in_queue->find_and_lock_stack->set == stack->find_and_lock_stack->set
-				&& stack_in_queue->find_and_lock_stack->way == stack->find_and_lock_stack->way)
+		if(stack_in_queue->find_and_lock_stack)
+			stack_in_queue = stack_in_queue->find_and_lock_stack;
+
+		if(stack_in_queue->set == stack->find_and_lock_stack->set
+				&& stack_in_queue->way == stack->find_and_lock_stack->way)
 		{
 			colision_detected = i;
-
-
 		}
 	}
 	//añadir tareas a la stack principal. esto deberia incrementar el memory level parallelism
@@ -76,7 +77,15 @@ int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t 
 {
 
 	int index = list_index_of(cc->transaction_queue,(void *)stack);
-	struct mod_stack_t *removed_stack= (struct mod_stack_t *) list_remove_at(cc->transaction_queue, index);
+
+	assert(index != -1);
+
+	//struct mod_stack_t *removed_stack = (struct mod_stack_t *)
+	list_remove_at(cc->transaction_queue, index);
+
+	if(stack->find_and_lock_stack)
+		stack = stack->find_and_lock_stack;
+
 
 	/* Unlock directory entry */
 	if (stack->target_mod)
@@ -98,7 +107,7 @@ int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t 
 		}
 	}
 
-	cc_launch_next_transaction(cc,removed_stack);
+	cc_launch_next_transaction(cc,stack);
 	return 0;
 }
 
