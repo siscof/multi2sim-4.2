@@ -901,7 +901,7 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 		if (!stack->coalesced)
 		{
-			mod->mshr_count--;
+			//mod->mshr_count--;
 			//mod_stack_wakeup_mod_head(mod);
 		}
 		/* Return event queue element into event queue */
@@ -980,12 +980,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
         }
 
 		/* Next event */
-		//if(mshr_lock(mod->mshr, stack))
-		//{
-			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, 0);
-		/*}else{
-			mshr_enqueue(mod->mshr, stack, EV_MOD_NMOESI_NC_STORE_LOCK);
-		}*/
+		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, 0);
+
 		return;
 	}
 

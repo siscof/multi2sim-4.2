@@ -34,6 +34,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 	if(list_index_of(cc->transaction_queue,(void *)stack) == -1)
 		list_add(cc->transaction_queue,(void *)stack);
 
+
 	assert(stack->id == stack->find_and_lock_stack->id);
 
 	struct dir_lock_t *dir_lock = dir_lock_get(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way);
@@ -124,8 +125,10 @@ void cc_launch_next_transaction(struct coherence_controller_t *cc, struct mod_st
 		if(launch_stack->find_and_lock_stack)
 		{
 			esim_schedule_event(launch_stack->find_and_lock_stack->dir_lock_event, launch_stack->find_and_lock_stack, 1);
+			launch_stack->find_and_lock_stack->dir_lock_event = 0;
 		}else{
 			esim_schedule_event(launch_stack->dir_lock_event, launch_stack, 1);
+			launch_stack->dir_lock_event = 0;
 		}
 	}
 
@@ -142,7 +145,12 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, int set, int w
 		if(stack_in_list->find_and_lock_stack)
 		{
 			stack_in_list = stack_in_list->find_and_lock_stack;
+		}else{
+			printf("La stack N %lld no tiene find_and_lock_stack\n",stack_in_list->id);
 		}
+		if(stack_in_list->dir_lock_event == 0)
+			continue;
+
 		if( stack_in_list->set == set && stack_in_list->way == way)
 		{
 			return i;
