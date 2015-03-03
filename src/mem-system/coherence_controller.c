@@ -143,11 +143,8 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, int set, int w
 	{
 		stack_in_list = (struct mod_stack_t *) list_get(cc->transaction_queue, i);
 		if(stack_in_list->find_and_lock_stack)
-		{
 			stack_in_list = stack_in_list->find_and_lock_stack;
-		}else{
-			printf("La stack N %lld no tiene find_and_lock_stack\n",stack_in_list->id);
-		}
+
 		if(stack_in_list->dir_lock_event == 0)
 			continue;
 
