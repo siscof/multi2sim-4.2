@@ -43,6 +43,26 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 
 	if(dir_lock->lock)
 	{
+		stack->transaction_idle = 1;
+		struct mod_stack_t *stack_locked = NULL;
+		if(!stack->find_and_lock_stack->blocking)
+			{
+			//up-down
+			stack_locked = stack->ret_stack;
+			//transaction is blocked
+			stack_locked->transaction_blocked = 1;
+			stack_locked->stack_superior == stack;
+
+		}else if(stack->mod->level != 1){
+			//else down-up
+
+			stack_locked = cc_search_transaction(cc,dir_lock->stack_id);
+			//the transaction is blocking other transaction
+			stack_locked->transaction_blocking = 1;
+			stack->high_priority_transaction = 1;
+			dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
+			stack->transaction_idle = 0;
+		}
 		//cc_search_colisions(cc, stack)
 		//puedo procesar la peticion??
 		stack->find_and_lock_stack->dir_lock_event = event;
@@ -52,6 +72,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 
 	int locked = dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
 	assert(locked);
+	stack->transaction_idle = 0;
 	return 1;
 }
 
@@ -153,6 +174,7 @@ void cc_launch_next_transaction(struct coherence_controller_t *cc, struct mod_st
 			esim_schedule_event(launch_stack->dir_lock_event, launch_stack, 1);
 			launch_stack->dir_lock_event = 0;
 		}
+		launch_stack->transaction_idle = 0;
 	}
 
 
@@ -180,6 +202,9 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, int set, int w
 			stack_in_list = stack_in_list->find_and_lock_stack;
 
 		if(stack_in_list->dir_lock_event == 0)
+			continue;
+
+		if(stack_in_list->transaction_idle)
 			continue;
 
 		if( stack_in_list->set == set && stack_in_list->way == way)
