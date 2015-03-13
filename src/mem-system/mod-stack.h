@@ -65,6 +65,10 @@ struct mod_stack_t
 	long long retry_time_lost;
 	struct retry_stats_t retries_counter[num_retries_kinds];
 	struct mod_stack_t *find_and_lock_stack;
+	int transaction_blocked;
+	int transaction_blocking;
+	int high_priority_transaction;
+	int transaction_idle;
 
 	struct latenciometro latencias;
 	struct si_wavefront_t *wavefront;

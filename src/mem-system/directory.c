@@ -322,10 +322,6 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
 
-
-	//fran
-	assert(!dir_lock->lock_queue);
-
 	/* Wake up first waiter */
 	if (dir_lock->lock_queue)
 	{
@@ -356,5 +352,6 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 
 	/* Unlock entry */
 	dir_lock->lock = 0;
+	dir_lock->stack_id = 0;
 }
 
