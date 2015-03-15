@@ -60,7 +60,8 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 			//the transaction is blocking other transaction
 			stack_locked->transaction_blocking = 1;
 			stack->high_priority_transaction = 1;
-			//dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
+			dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
+			printf("stack_id = %d  |  mod_level = %d \n",stack->id,stack->mod->level);
 			stack->transaction_idle = 0;
 		}
 		//cc_search_colisions(cc, stack)
