@@ -355,6 +355,9 @@ if (event == EV_MOD_NMOESI_LOAD_LOCK)
 
 	stack->latencias.queue = asTiming(si_gpu)->cycle - stack->latencias.start;
 
+	stack->transaction_blocked = 0;
+	stack->transaction_blocking = 0;
+
 	/* Call find and lock */
 	new_stack = mod_stack_create(stack->id, mod, stack->addr,
 		EV_MOD_NMOESI_LOAD_ACTION, stack);
@@ -466,7 +469,6 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			cc_finish_transaction(mod->coherence_controller, stack);
 				
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -865,7 +867,6 @@ void mod_handler_nmoesi_store(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			cc_finish_transaction(mod->coherence_controller, stack);
 				
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -1069,6 +1070,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 		stack->latencias.queue = asTiming(si_gpu)->cycle - stack->latencias.start;
 
+		stack->transaction_blocked = 0;
+		stack->transaction_blocking = 0;
+
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_NC_STORE_WRITEBACK, stack);
@@ -1235,7 +1239,6 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			cc_finish_transaction(mod->coherence_controller, stack);
 			
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
@@ -1464,7 +1467,6 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			cc_finish_transaction(mod->coherence_controller, stack);
 				
 			mem_debug("    lock error, aborting prefetch\n");
 			esim_schedule_event(EV_MOD_NMOESI_PREFETCH_FINISH, stack, 0);

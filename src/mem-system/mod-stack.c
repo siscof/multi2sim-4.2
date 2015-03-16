@@ -27,6 +27,7 @@
 #include "cache.h"
 #include "mem-system.h"
 #include "mod-stack.h"
+#include "coherence_controller.h"
 
 long long mod_stack_id;
 
@@ -80,6 +81,13 @@ void mod_stack_return(struct mod_stack_t *stack)
 		//free(stack->find_and_lock_stack);
 
 	/* Free */
+	int aux;
+	if(stack->target_mod)
+		aux = cc_search_transaction_index(stack->target_mod->coherence_controller,stack);
+	else
+		aux = cc_search_transaction_index(stack->mod->coherence_controller,stack);
+
+	assert(aux == -1);
 
 	free(stack);
 	esim_schedule_event(ret_event, ret_stack, 0);
