@@ -76,6 +76,9 @@ void mod_stack_return(struct mod_stack_t *stack)
 	if(ret_stack && ret_stack->find_and_lock_stack == stack)
 		ret_stack->find_and_lock_stack = NULL;
 
+	//if(stack->find_and_lock_stack)
+		//free(stack->find_and_lock_stack);
+
 	/* Free */
 
 	free(stack);
