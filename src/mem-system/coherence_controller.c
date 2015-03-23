@@ -307,6 +307,13 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, int set, int w
 	{
 		stack_in_list = (struct mod_stack_t *) list_get(cc->transaction_queue, i);
 
+		if(stack_in_list->id == 0 || stack_in_list->id > mod_stack_id)
+		{
+					list_remove_at(cc->transaction_queue, i);
+					i--;
+					continue;
+		}
+
 		if(stack_in_list->find_and_lock_stack)
 			stack_in_list = stack_in_list->find_and_lock_stack;
 

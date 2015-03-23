@@ -469,7 +469,7 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-				
+			cc_finish_transaction(mod->coherence_controller, stack);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 			esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
@@ -1154,7 +1154,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 			stack->latencias.retry += asTiming(si_gpu)->cycle - stack->latencias.start + retry_lat;
 			stack->latencias.start = 0;
-
+			cc_finish_transaction(mod->coherence_controller, stack);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
@@ -1239,7 +1239,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			
+			cc_finish_transaction(mod->coherence_controller, stack);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
