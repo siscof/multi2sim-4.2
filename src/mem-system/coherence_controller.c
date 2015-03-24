@@ -33,8 +33,11 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 
 	struct mod_port_t *port = stack->find_and_lock_stack->port;
 
+	//int index = cc_search_transaction_index(cc,stack->id);
+	int index = list_index_of(cc->transaction_queue,(void *)stack);
 
-	if(list_index_of(cc->transaction_queue,(void *)stack) == -1)
+
+	if(index == -1)
 		list_add(cc->transaction_queue,(void *)stack);
 
 
@@ -207,6 +210,7 @@ int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t 
 {
 
 	int index = list_index_of(cc->transaction_queue,(void *)stack);
+	//int index = cc_search_transaction_index(cc,stack->id);
 
 	assert(index != -1);
 
@@ -218,9 +222,9 @@ int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t 
 
 
 	/* Unlock directory entry */
-	if (stack->target_mod)
+	/*if (stack->target_mod)
 	{
-		dir_entry_unlock(stack->target_mod->dir, stack->set, stack->way);
+		dir_entry_unlock_stack(stack->target_mod->dir, stack->set, stack->way, stack);
 
 		if(stack->mshr_locked)
 		{
@@ -228,30 +232,31 @@ int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t 
 			stack->mshr_locked = 0;
 		}
 	}else{
-		dir_entry_unlock(stack->mod->dir, stack->set, stack->way);
+		dir_entry_unlock_stack(stack->mod->dir, stack->set, stack->way, stack);
 
 		if(stack->mshr_locked)
 		{
 			mshr_unlock2(stack->mod);
 			stack->mshr_locked = 0;
 		}
-	}
+	}*/
 
 	stack->transaction_blocked = 0;
 	stack->transaction_blocking = 0;
-	cc_launch_next_transaction(cc,stack);
+	//cc_launch_next_transaction(cc,stack);
 	return 0;
 }
 
 void cc_launch_next_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack)
 {
+	if(stack->find_and_lock_stack)
+		stack = stack->find_and_lock_stack;
+
 	int index =	cc_search_next_transaction(cc, stack->set, stack->way);
 
 	if(index >= 0)
 	{
 		struct mod_stack_t *launch_stack = (struct mod_stack_t *) list_get(cc->transaction_queue, index);
-		/*int locked = dir_entry_lock(launch_stack->mod->dir, launch_stack->find_and_lock_stack->set, launch_stack->find_and_lock_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
-		assert(locked);*/
 
 		if(launch_stack->find_and_lock_stack)
 		{

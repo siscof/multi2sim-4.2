@@ -87,6 +87,7 @@ void dir_entry_dump_sharers(struct dir_t *dir, int x, int y, int z);
 struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y);
 int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack);
 void dir_entry_unlock(struct dir_t *dir, int x, int y);
+void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *unlock_stack);
 
 
 #endif

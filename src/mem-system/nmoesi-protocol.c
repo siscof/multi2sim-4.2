@@ -469,7 +469,16 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
+			dir_entry_unlock_stack(mod->dir, stack->set, stack->way,stack);
+			if(stack->mshr_locked)
+			{
+				mshr_unlock2(mod);
+				stack->mshr_locked = 0;
+			}
 			cc_finish_transaction(mod->coherence_controller, stack);
+			cc_launch_next_transaction(mod->coherence_controller,stack);
+
+
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 			esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
@@ -500,8 +509,14 @@ if (event == EV_MOD_NMOESI_LOAD_ACTION)
 			mshr_unlock2(mod);
 			stack->mshr_locked = 0;
 		}*/
-
+		dir_entry_unlock_stack(mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(mod->coherence_controller, stack);
+		cc_launch_next_transaction(mod->coherence_controller,stack);
 					
 		stack->request_dir = mod_request_down_up;
 
@@ -883,7 +898,15 @@ void mod_handler_nmoesi_store(int event, void *data)
 			mshr_unlock2(mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(mod->coherence_controller, stack);
+		cc_launch_next_transaction(mod->coherence_controller,stack);
+
 
 		/* Impose the access latency before continuing */
 		esim_schedule_event(EV_MOD_NMOESI_STORE_FINISH, stack, 
@@ -1239,7 +1262,16 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
+			dir_entry_unlock_stack(mod->dir, stack->set, stack->way,stack);
+			if(stack->mshr_locked)
+			{
+				mshr_unlock2(mod);
+				stack->mshr_locked = 0;
+			}
 			cc_finish_transaction(mod->coherence_controller, stack);
+			cc_launch_next_transaction(mod->coherence_controller,stack);
+
+
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
@@ -1271,7 +1303,15 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mshr_unlock2(mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(mod->coherence_controller, stack);
+		cc_launch_next_transaction(mod->coherence_controller,stack);
+
 
 		/* Impose the access latency before continuing */
 		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_FINISH, stack, 
@@ -1875,8 +1915,17 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
 			}*/
-			cc_finish_transaction(mod->coherence_controller, stack->ret_stack);
 			
+			dir_entry_unlock_stack(mod->dir, stack->set, stack->way,stack);
+			if(stack->mshr_locked)
+			{
+				mshr_unlock2(mod);
+				stack->mshr_locked = 0;
+			}
+			cc_finish_transaction(mod->coherence_controller, stack->ret_stack);
+			cc_launch_next_transaction(mod->coherence_controller,stack->ret_stack);
+
+
 			mod_stack_return(stack);
 			return;
 		}
@@ -1913,6 +1962,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* Return */
 		ret->err = 0;
+		ret->dir_lock = stack->dir_lock;
 		ret->set = stack->set;
 		ret->way = stack->way;
 		ret->state = stack->state;
@@ -2149,7 +2199,16 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 				
 		esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, target_mod->latency);
 		return;
@@ -2232,7 +2291,15 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 
 		esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, target_mod->latency);
 		return;
@@ -2552,7 +2619,15 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				mshr_unlock2(target_mod);
 				stack->mshr_locked = 0;
 			}*/
+			dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+			if(stack->mshr_locked)
+			{
+				mshr_unlock2(target_mod);
+				stack->mshr_locked = 0;
+			}
 			cc_finish_transaction(target_mod->coherence_controller, stack);
+			cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 				
 			ret->err = 1;
 			mod_stack_set_reply(ret, reply_ack_error);
@@ -2665,8 +2740,16 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
 		
+
 		int latency = stack->reply == /*reply_ack_data_sent_to_peer ? 0 : */target_mod->latency;
 		
 		/*if(stack->coalesced == -1)
@@ -2929,7 +3012,15 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 				
 		int latency = stack->reply == /*reply_ack_data_sent_to_peer ? 0 :*/ target_mod->latency;
 		esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, latency);
@@ -3209,7 +3300,15 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 				mshr_unlock2(target_mod);
 				stack->mshr_locked = 0;
 			}*/
+			dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+			if(stack->mshr_locked)
+			{
+				mshr_unlock2(target_mod);
+				stack->mshr_locked = 0;
+			}
 			cc_finish_transaction(target_mod->coherence_controller, stack);
+			cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 				
 			esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 0);
 			return;
@@ -3257,7 +3356,15 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 				
 		int latency = stack->reply == /*reply_ack_data_sent_to_peer ? 0 :*/ target_mod->latency;
 		esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, latency);
@@ -3344,7 +3451,15 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 
 		int latency = ret->reply == /*reply_ack_data_sent_to_peer ? 0 :*/ target_mod->latency;
 		esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, latency);
@@ -3697,7 +3812,15 @@ void mod_handler_nmoesi_message(int event, void *data)
 			mshr_unlock2(target_mod);
 			stack->mshr_locked = 0;
 		}*/
+		dir_entry_unlock_stack(target_mod->dir, stack->set, stack->way,stack);
+		if(stack->mshr_locked)
+		{
+			mshr_unlock2(target_mod);
+			stack->mshr_locked = 0;
+		}
 		cc_finish_transaction(target_mod->coherence_controller, stack);
+		cc_launch_next_transaction(target_mod->coherence_controller,stack);
+
 
 		esim_schedule_event(EV_MOD_NMOESI_MESSAGE_REPLY, stack, 0);
 		return;
