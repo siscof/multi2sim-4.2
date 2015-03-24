@@ -12,6 +12,8 @@
 #include <mem-system/nmoesi-protocol.h>
 #include <lib/esim/esim.h>
 
+int tunks = 0;
+
 struct coherence_controller_t *cc_create()
 {
 	struct coherence_controller_t *cc;
@@ -154,8 +156,8 @@ void cc_remove_stack(struct coherence_controller_t *cc, struct mod_stack_t *stac
 
 	//assert(index != -1);
 
-	struct mod_stack_t *stack_in_list = list_remove_at(cc->transaction_queue, index);
-
+	//struct mod_stack_t *stack_in_list = list_remove_at(cc->transaction_queue, index);
+	struct mod_stack_t *stack_in_list = list_get(cc->transaction_queue, index);
 	if(stack_in_list->find_and_lock_stack)
 		stack_in_list = stack_in_list->find_and_lock_stack;
 
@@ -212,7 +214,12 @@ int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t 
 	int index = list_index_of(cc->transaction_queue,(void *)stack);
 	//int index = cc_search_transaction_index(cc,stack->id);
 
-	assert(index != -1);
+	//assert(index != -1);
+	if(index == -1)
+	{
+		tunks++;
+		printf("veces que se ha intentado elimenar un acceso que no estaba: %d\n",tunks);
+	}
 
 	//struct mod_stack_t *removed_stack = (struct mod_stack_t *)
 	list_remove_at(cc->transaction_queue, index);
