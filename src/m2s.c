@@ -149,6 +149,7 @@ char *fran_file_red;
 int SALTAR_L1;
 int mhsr_control_enabled = 0;
 long long ventana_muestreo = 10000;
+int cache_replace_block_prioritize_invalid = 0;
 //int fran_latencia;
 //int fran_accesos;
 static char *net_debug_file_name = "";

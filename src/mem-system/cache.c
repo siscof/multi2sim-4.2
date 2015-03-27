@@ -286,6 +286,7 @@ int cache_replace_block(struct cache_t *cache, int set)
 	assert(set >= 0 && set < cache->num_sets);
 	
 	if(cache_replace_block_prioritize_invalid)
+	{
 		for (block = cache->sets[set].way_tail; block; block = block->way_prev)
 		{
 			if (!block->state)
@@ -299,7 +300,7 @@ int cache_replace_block(struct cache_t *cache, int set)
 
 	/* LRU and FIFO replacement: return block at the
 	 * tail of the linked list */
-	if (cache->policy == cache_policy_lru ||
+	if(cache->policy == cache_policy_lru ||
 		cache->policy == cache_policy_fifo)
 	{
 		int way = cache->sets[set].way_tail->way;
