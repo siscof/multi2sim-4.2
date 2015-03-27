@@ -29,6 +29,9 @@
 #include "uop.h"
 #include "cycle-interval-report.h"
 
+#include <arch/southern-islands/emu/emu.h>
+
+#include <lib/util/estadisticas.h>
 
 void si_simd_complete(struct si_simd_t *simd)
 {
@@ -36,8 +39,16 @@ void si_simd_complete(struct si_simd_t *simd)
 	int list_entries;
 	int list_index = 0;
 	int i;
+        
+    struct si_work_item_t *work_item;
+    int work_item_id;
+
 
 	list_entries = list_count(simd->exec_buffer);
+	
+	if(list_entries == 0)
+		add_simd_idle_cycle(simd->id_in_compute_unit);
+		
 
 	assert(list_entries <= si_gpu_simd_exec_buffer_size);
 
@@ -58,12 +69,27 @@ void si_simd_complete(struct si_simd_t *simd)
 		si_trace("si.end_inst id=%lld cu=%d\n", uop->id_in_compute_unit,
 			uop->compute_unit->id);
 
-		/* Free uop */
-		si_uop_free(uop);
-
 		/* Statistics */
 		simd->inst_count++;
-		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+	
+        si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+
+		add_si_macroinst(simd_u, uop);
+
+		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+        {
+
+			work_item = uop->wavefront->work_items[work_item_id];
+
+            if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+            {
+				si_units unit = simd_u;
+				ipc_instructions(asTiming(si_gpu)->cycle, unit);
+			}
+		}
+		
+		/* Free uop */
+		si_uop_free(uop);
 	}
 }
 

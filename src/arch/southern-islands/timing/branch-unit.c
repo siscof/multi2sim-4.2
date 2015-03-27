@@ -28,6 +28,8 @@
 #include "uop.h"
 #include "wavefront-pool.h"
 
+#include <lib/util/estadisticas.h>
+
 void si_branch_unit_complete(struct si_branch_unit_t *branch_unit)
 {
 	struct si_uop_t *uop;
@@ -193,6 +195,13 @@ void si_branch_unit_execute(struct si_branch_unit_t *branch_unit)
 		/* Branch */
 		uop->execute_ready = asTiming(si_gpu)->cycle + 
 			si_gpu_branch_unit_exec_latency;
+
+			
+		/*estadisticas fran*/
+		si_units unit = branch_u;
+		ipc_instructions(si_gpu->last_complete_cycle, unit);
+
+
 
 		/* Transfer the uop to the outstanding execution buffer */
 		list_remove(branch_unit->read_buffer, uop);

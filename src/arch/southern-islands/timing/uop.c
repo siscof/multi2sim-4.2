@@ -107,6 +107,8 @@ void si_uop_free(struct si_uop_t *gpu_uop)
 {
 	if (!gpu_uop)
 		return;
+	if (gpu_uop->latencies_counters)
+		free(gpu_uop->latencies_counters);
 	repos_free_object(gpu_uop_repos, gpu_uop);
 }
 

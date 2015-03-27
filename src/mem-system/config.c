@@ -39,7 +39,7 @@
 #include "mmu.h"
 #include "module.h"
 #include "prefetcher.h"
-
+#include "mshr.h"
 
 /*
  * Global Variables
@@ -315,6 +315,7 @@ static void mem_config_check(struct arch_t *arch, void *user_data)
 static void mem_config_read_general(struct config_t *config)
 {
 	char *section;
+	char *dir_type;
 
 	/* Section with general parameters */
 	section = "General";
@@ -337,6 +338,23 @@ static void mem_config_read_general(struct config_t *config)
 	/* Peer transfers */
 	mem_peer_transfers = config_read_bool(config, section, 
 		"PeerTransfers", 1);
+		
+	/* Directory type*/
+	dir_type = config_read_string(config, section, "DirectoryType", "nmoesi");
+	
+	if(!strncasecmp(dir_type,"nmoesi", 7))
+	{
+		directory_type = dir_type_nmoesi;
+	}
+	else if(!strncasecmp(dir_type,"vi", 3))
+	{
+		directory_type = dir_type_vi;		
+	}
+	else
+	{
+		fatal("%s: directory type: %s : isn't a valid directory type (nmoesi, vi)\n",
+				mem_config_file_name, dir_type);	
+	}
 }
 
 
@@ -620,6 +638,8 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	
 	/* Initialize */
 	mod->mshr_size = mshr_size;
+	mshr_init(mod->mshr, mshr_size);
+	//mod->mshr->size = mshr_size;
 	mod->dir_assoc = assoc;
 	mod->dir_num_sets = num_sets;
 	mod->dir_size = num_sets * assoc;
@@ -670,6 +690,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	int num_ports;
 	int dir_size;
 	int dir_assoc;
+	int mshr_size;
 
 	char *net_name;
 	char *net_node_name;
@@ -687,6 +708,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	num_ports = config_read_int(config, section, "Ports", 2);
 	dir_size = config_read_int(config, section, "DirectorySize", 1024);
 	dir_assoc = config_read_int(config, section, "DirectoryAssoc", 8);
+	mshr_size = config_read_int(config, section, "MSHR", 16384);
 
 	/* Check parameters */
 	if (block_size < 1 || (block_size & (block_size - 1)))
@@ -712,6 +734,10 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	/* Create module */
 	mod = mod_create(mod_name, mod_kind_main_memory, num_ports,
 			block_size, latency);
+			
+	/* Initialize MSHR */
+	mod->mshr_size = mshr_size;
+	mshr_init(mod->mshr, mshr_size);
 
 	/* Store directory size */
 	mod->dir_size = dir_size;
@@ -889,11 +915,11 @@ static void mem_config_read_modules(struct config_t *config)
 		/* Create module, depending on the type. */
 		str_token(mod_name, sizeof mod_name, section, 1, " ");
 		mod_type = config_read_string(config, section, "Type", "");
-		if (!strcasecmp(mod_type, "Cache"))
+		if (!strcasecmp(mod_type, "Cache")){
 			mod = mem_config_read_cache(config, section);
-		else if (!strcasecmp(mod_type, "MainMemory"))
+		}else if (!strcasecmp(mod_type, "MainMemory")){
 			mod = mem_config_read_main_memory(config, section);
-		else
+		}else
 			fatal("%s: %s: invalid or missing value for 'Type'.\n%s",
 				mem_config_file_name, mod_name,
 				mem_err_config_note);

@@ -62,6 +62,9 @@ struct si_uop_t
 	struct si_compute_unit_t *compute_unit; /* Compute unit it belongs to */
 	struct si_wavefront_pool_entry_t *wavefront_pool_entry;  /* IB entry where uop is located */
 	struct si_inst_t inst;
+	
+	//fran
+	long long *latencies_counters;
 
 	/* Flags */
 	unsigned int ready : 1;
@@ -78,6 +81,9 @@ struct si_uop_t
 	unsigned int glc : 1;
 
 	/* Timing */
+	//fran
+	long long instruction_ready;		/* Cycle when instruction is ready to fetch*/
+	
 	long long cycle_created;    /* Cycle when fetch completes */
 	long long fetch_ready;      /* Cycle when fetch completes */
 	long long decode_ready;     /* Cycle when decode completes */
@@ -94,6 +100,9 @@ struct si_uop_t
 	int num_global_mem_read ;
 	int num_global_mem_write ;
 
+	/* estadisticas fran*/
+	long long active_work_items ;
+	long long send_cycle;
 
 	/* Last scalar memory accesses */
 	unsigned int global_mem_access_addr;

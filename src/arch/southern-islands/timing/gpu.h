@@ -29,6 +29,9 @@
 #define si_trace_header(...) trace_header(si_trace_category, __VA_ARGS__)
 extern int si_trace_category;
 
+//FRAN
+extern int fran_l1_off;
+
 extern char *si_gpu_config_help;
 extern char *si_gpu_config_file_name;
 extern char *si_gpu_dump_default_config_file_name;
@@ -149,7 +152,7 @@ extern int si_gpu_scalar_unit_exec_latency;
 extern int si_gpu_scalar_unit_exec_buffer_size;
 extern int si_gpu_scalar_unit_write_latency;
 extern int si_gpu_scalar_unit_write_buffer_size;
-extern int si_gpu_scalar_unit_inflight_mem_accesses;
+extern int si_gpu_scalar_unit_max_inflight_mem_accesses;
 
 extern int si_gpu_branch_unit_width;
 extern int si_gpu_branch_unit_issue_buffer_size;

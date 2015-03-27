@@ -64,9 +64,7 @@ struct si_work_item_t
 };
 
 #define SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(WAVEFRONT, WORK_ITEM_ID) \
-	for ((WORK_ITEM_ID) = 0; \
-		(WORK_ITEM_ID) < si_emu_wavefront_size; \
-		(WORK_ITEM_ID)++)
+	for ((WORK_ITEM_ID) = 0; (WORK_ITEM_ID) < si_emu_wavefront_size; (WORK_ITEM_ID)++)
 
 struct si_work_item_t *si_work_item_create(void);
 void si_work_item_free(struct si_work_item_t *work_item);

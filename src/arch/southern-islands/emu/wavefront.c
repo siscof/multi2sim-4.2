@@ -21,6 +21,7 @@
 #include <lib/mhandle/mhandle.h>
 #include <lib/util/debug.h>
 #include <mem-system/memory.h>
+#include <lib/util/estadisticas.h>
 
 #include "isa.h"
 #include "ndrange.h"
@@ -49,6 +50,11 @@ struct si_wavefront_t *si_wavefront_create(int wavefront_id,
 
 	/* Create work items */
 	wavefront->work_items = xcalloc(si_emu_wavefront_size, sizeof(void *));
+	
+	//fran
+	wavefront->latencies_counters = xcalloc(10, sizeof(long long *));
+	wavefront->latencies = xcalloc(1, sizeof(struct latenciometro));
+	
 	SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(wavefront, work_item_id)
 	{
 		wavefront->work_items[work_item_id] = si_work_item_create();
@@ -101,7 +107,9 @@ void si_wavefront_free(struct si_wavefront_t *wavefront)
 	/* Free wavefront */
 	
 	free(wavefront->work_items);
+	free(wavefront->latencies);
 
+	free(wavefront->latencies_counters);
 	memset(wavefront, 0, sizeof(struct si_wavefront_t));
 	free(wavefront);
 
@@ -129,6 +137,7 @@ void si_wavefront_execute(struct si_wavefront_t *wavefront)
 	inst = NULL;
 
 	/* Reset instruction flags */
+	wavefront->mem_blocking = 0;
 	wavefront->vector_mem_write = 0;
 	wavefront->vector_mem_read = 0;
 	wavefront->scalar_mem_read = 0;

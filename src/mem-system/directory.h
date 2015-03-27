@@ -20,6 +20,8 @@
 #ifndef MEM_SYSTEM_DIRECTORY_H
 #define MEM_SYSTEM_DIRECTORY_H
 
+#include "module.h"
+
 
 struct dir_lock_t
 {
@@ -62,6 +64,12 @@ struct dir_t
 	unsigned char data[0];
 };
 
+enum dir_type_t
+{
+	dir_type_nmoesi = 0,
+	dir_type_vi
+};
+
 struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes);
 void dir_free(struct dir_t *dir);
 
@@ -79,6 +87,7 @@ void dir_entry_dump_sharers(struct dir_t *dir, int x, int y, int z);
 struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y);
 int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack);
 void dir_entry_unlock(struct dir_t *dir, int x, int y);
+void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *unlock_stack);
 
 
 #endif

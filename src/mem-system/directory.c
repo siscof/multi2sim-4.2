@@ -28,6 +28,7 @@
 #include "directory.h"
 #include "mem-system.h"
 #include "mod-stack.h"
+#include "mshr.h"
 
 
 #define DIR_ENTRY_SHARERS_SIZE ((dir->num_nodes + 7) / 8)
@@ -213,7 +214,7 @@ struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y)
 {
 	struct dir_lock_t *dir_lock;
 
-	assert(x < dir->xsize && y < dir->ysize);
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
 	mem_debug("  dir_lock retrieve\n");
 	return dir_lock;
@@ -226,7 +227,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 	struct mod_stack_t *lock_queue_iter;
 
 	/* Get lock */
-	assert(x < dir->xsize && y < dir->ysize);
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
 
 	/* If the entry is already locked, enqueue a new waiter and
@@ -247,10 +248,24 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 		{
 			lock_queue_iter = dir_lock->lock_queue;
 
+			if(stack->request_dir == mod_request_down_up)
+			{
+				if(lock_queue_iter->request_dir != mod_request_down_up)
+				{
+					dir_lock->lock_queue = stack;
+					stack->dir_lock_next = lock_queue_iter;
+					mem_debug("    0x%x access suspended\n", stack->tag);
+					return 0;
+				}
+
+				while (lock_queue_iter->dir_lock_next && lock_queue_iter->dir_lock_next->request_dir == mod_request_down_up)
+					lock_queue_iter = lock_queue_iter->dir_lock_next;
+			}else{
+
 			/* FIXME - Code below is the queue insertion algorithm based on stack id.
 			 * This causes a deadlock when, for example, A-10 keeps retrying an up-down access and
 			 * gets always priority over A-20, which is waiting to finish a down-up access. */
-#if 0
+/*
 			while (stack->id > lock_queue_iter->id)
 			{
 				if (!lock_queue_iter->dir_lock_next)
@@ -258,14 +273,16 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 
 				lock_queue_iter = lock_queue_iter->dir_lock_next;
 			}
-#endif
+*/
 			/* ------------------------------------------------------------------------ */
 			/* FIXME - Replaced with code below, just inserting at the end of the queue.
 			 * But this seems to be what this function was doing before, isn't it? Why
 			 * weren't we happy with this policy? */
-			while (lock_queue_iter->dir_lock_next)
-				lock_queue_iter = lock_queue_iter->dir_lock_next;
+
+				while (lock_queue_iter->dir_lock_next)
+					lock_queue_iter = lock_queue_iter->dir_lock_next;
 			/* ------------------------------------------------------------------------ */
+			}
 
 			if (!lock_queue_iter->dir_lock_next) 
 			{
@@ -278,6 +295,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 				stack->dir_lock_next = lock_queue_iter->dir_lock_next;
 				lock_queue_iter->dir_lock_next = stack;
 			}
+
 		}
 		mem_debug("    0x%x access suspended\n", stack->tag);
 		return 0;
@@ -290,6 +308,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 	/* Lock entry */
 	dir_lock->lock = 1;
 	dir_lock->stack_id = stack->id;
+	stack->dir_lock = dir_lock;
 	return 1;
 }
 
@@ -301,7 +320,7 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 	FILE *f;
 
 	/* Get lock */
-	assert(x < dir->xsize && y < dir->ysize);
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
 
 	/* Wake up first waiter */
@@ -334,5 +353,50 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 
 	/* Unlock entry */
 	dir_lock->lock = 0;
+	dir_lock->stack_id = 0;
+}
+
+void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *unlock_stack)
+{
+	struct dir_lock_t *dir_lock;
+	struct mod_stack_t *stack;
+	FILE *f;
+
+	/* Get lock */
+	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
+	dir_lock = &dir->dir_lock[x * dir->ysize + y];
+
+	/* Wake up first waiter */
+	if (dir_lock->lock_queue)
+	{
+		/* Debug */
+		f = debug_file(mem_debug_category);
+		if (f)
+		{
+			mem_debug("    A-%lld resumed", dir_lock->lock_queue->id);
+			if (dir_lock->lock_queue->dir_lock_next)
+			{
+				mem_debug(" - {");
+				for (stack = dir_lock->lock_queue->dir_lock_next; stack;
+						stack = stack->dir_lock_next)
+					mem_debug(" A-%lld", stack->id);
+				mem_debug(" } still waiting");
+			}
+			mem_debug("\n");
+		}
+
+		/* Wake up access */
+		esim_schedule_event(dir_lock->lock_queue->dir_lock_event, dir_lock->lock_queue, 1);
+		dir_lock->lock_queue = dir_lock->lock_queue->dir_lock_next;
+	}
+
+	/* Trace */
+	mem_trace("mem.end_access_block cache=\"%s\" access=\"A-%lld\" set=%d way=%d\n",
+		dir->name, dir_lock->stack_id, x, y);
+
+	/* Unlock entry */
+	dir_lock->lock = 0;
+	dir_lock->stack_id = 0;
+	unlock_stack->dir_lock = NULL;
 }
 

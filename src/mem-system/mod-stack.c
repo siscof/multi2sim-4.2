@@ -27,7 +27,7 @@
 #include "cache.h"
 #include "mem-system.h"
 #include "mod-stack.h"
-
+#include "coherence_controller.h"
 
 long long mod_stack_id;
 
@@ -44,7 +44,10 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 	stack->ret_event = ret_event;
 	stack->ret_stack = ret_stack;
 	if (ret_stack != NULL)
+	{
 		stack->client_info = ret_stack->client_info;
+	        ret_stack->stack_superior = stack;
+	}
 	stack->way = -1;
 	stack->set = -1;
 	stack->tag = -1;
@@ -56,13 +59,30 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 
 void mod_stack_return(struct mod_stack_t *stack)
 {
-	int ret_event = stack->ret_event;
-	void *ret_stack = stack->ret_stack;
-
 	/* Wake up dependent accesses */
 	mod_stack_wakeup_stack(stack);
 
+	if(stack->ret_stack == 0)
+	{
+		free(stack);
+		return;
+	}
+
+	int ret_event = stack->ret_event;
+	struct mod_stack_t *ret_stack = stack->ret_stack;
+
+	if(ret_stack && ret_stack->find_and_lock_stack == stack)
+		ret_stack->find_and_lock_stack = NULL;
+
 	/* Free */
+	int aux;
+	if(stack->target_mod)
+		aux = cc_search_transaction_index(stack->target_mod->coherence_controller,stack);
+	else
+		aux = cc_search_transaction_index(stack->mod->coherence_controller,stack);
+
+	assert(aux == -1);
+
 	free(stack);
 	esim_schedule_event(ret_event, ret_stack, 0);
 }
@@ -89,6 +109,7 @@ void mod_stack_wakeup_mod(struct mod_t *mod)
 	{
 		stack = mod->waiting_list_head;
 		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(mod, waiting, stack);
 		esim_schedule_event(event, stack, 0);
 	}
@@ -116,6 +137,7 @@ void mod_stack_wakeup_port(struct mod_port_t *port)
 	{
 		stack = port->waiting_list_head;
 		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(port, waiting, stack);
 		esim_schedule_event(event, stack, 0);
 	}
@@ -148,12 +170,17 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 	mem_debug("  %lld %lld 0x%x wake up accesses:", esim_time,
 		master_stack->id, master_stack->addr);
 
+	//fran
+	master_stack->coalesced_count = 0;
+
 	/* Wake up all coalesced accesses */
 	while (master_stack->waiting_list_head)
 	{
 		stack = master_stack->waiting_list_head;
 		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
+        stack->state = master_stack->state;
 		esim_schedule_event(event, stack, 0);
 		mem_debug(" %lld", stack->id);
 	}
@@ -183,5 +210,57 @@ struct mod_t *mod_stack_set_peer(struct mod_t *peer, int state)
 		ret = peer;	
 
 	return ret;
+}
+
+void mod_stack_merge_dirty_mask(struct mod_stack_t *stack, unsigned int mask)
+{
+	//assert(!(stack->dirty_mask & mask));
+	stack->dirty_mask |= mask;
+}
+
+void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask)
+{
+	//assert(!(stack->valid_mask & mask));
+	stack->valid_mask |= mask;
+}
+
+/* word debe contarse en BYTE o en PALABRAS? */
+void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int words)
+{
+	unsigned int shift = (addr & (stack->mod->sub_block_size - 1)) >> 2;
+	int tag = stack->addr & ~(stack->mod->sub_block_size - 1);
+	if(words == 0)
+		words = 1;
+	
+	stack->stack_size += 4*words;
+	
+	assert((tag + stack->mod->sub_block_size) >= (addr + words * 4));
+	for(;words > 0 ; words--)
+	{
+		assert(!(stack->dirty_mask & (shift + words - 1)));
+		stack->dirty_mask |= 1 << (shift + words - 1);
+		stack->valid_mask |= 1 << (shift + words - 1);
+		
+	}
+	
+}
+
+void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words)
+{
+	unsigned int shift = (addr & (stack->mod->sub_block_size - 1)) >> 2;
+	int tag = stack->addr & ~(stack->mod->sub_block_size - 1);
+	if(words == 0)
+		words = 1;
+		
+	stack->stack_size += 4*words;
+		
+	assert((tag + stack->mod->sub_block_size) >= (addr + words * 4));
+	for(;words > 0 ; words--)
+	{
+		assert(!(stack->valid_mask & (shift + words - 1)));
+		stack->valid_mask |= 1 << (shift + words - 1);
+		stack->dirty_mask |= 1 << (shift + words - 1);
+	}
+	stack->stack_size += 4*words;
 }
 

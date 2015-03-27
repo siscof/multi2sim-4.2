@@ -31,12 +31,18 @@
 #include "wavefront-pool.h"
 #include "cycle-interval-report.h"
 
+#include <lib/util/estadisticas.h>
+
 void si_lds_complete(struct si_lds_t *lds)
 {
 	struct si_uop_t *uop = NULL;
 	int list_entries;
 	int i;
 	int list_index = 0;
+	
+        struct si_work_item_t *work_item;
+        int work_item_id;
+
 
 	/* Process completed memory instructions */
 	list_entries = list_count(lds->write_buffer);
@@ -70,7 +76,22 @@ void si_lds_complete(struct si_lds_t *lds)
 
 		/* Statistics */
 		lds->inst_count++;
+ 		
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
+
+		add_si_macroinst(lds_u, uop);
+
+                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+                {
+
+			work_item = uop->wavefront->work_items[work_item_id];
+	                if(si_wavefront_work_item_active(uop->wavefront,
+        	        work_item->id_in_wavefront))
+                	{
+				si_units unit = lds_u;
+                        	ipc_instructions(asTiming(si_gpu)->cycle, unit);
+			}
+		}
 	}
 }
 
@@ -214,26 +235,31 @@ void si_lds_mem(struct si_lds_t *lds)
 
 			for (j = 0; j < work_item_uop->lds_access_count; j++)
 			{
-				if (work_item->lds_access_type[j] == 1)
-				{
-					access_type = mod_access_load;
-				}
-				else if (work_item->lds_access_type[j] == 2)
-				{
-					access_type = mod_access_store;
-				}
-				else
-				{
-					fatal("%s: invalid lds access "
-						"type (%d)", __FUNCTION__,
-						work_item->lds_access_type[j]);
-				}
 
-				mod_access(lds->compute_unit->lds_module, 
-					access_type, 
-					work_item_uop->lds_access_addr[j],
-					&uop->lds_witness, NULL, NULL, NULL);
-				uop->lds_witness--;
+				if(si_wavefront_work_item_active(uop->wavefront,
+                                work_item->id_in_wavefront))
+	                        {
+					if (work_item->lds_access_type[j] == 1)
+					{
+						access_type = mod_access_load;
+					}
+					else if (work_item->lds_access_type[j] == 2)
+					{
+						access_type = mod_access_store;
+					}
+					else
+					{
+						fatal("%s: invalid lds access "
+							"type (%d)", __FUNCTION__,
+							work_item->lds_access_type[j]);
+					}
+
+					mod_access(lds->compute_unit->lds_module, 
+						access_type, 
+						work_item_uop->lds_access_addr[j],
+						&uop->lds_witness, NULL, NULL, NULL);
+					uop->lds_witness--;
+				}
 			}
 		}
 

@@ -35,7 +35,12 @@ struct si_wavefront_t
 
 	/* Work-group it belongs to */
 	struct si_work_group_t *work_group;
-
+	
+	//fran
+	long long *latencies_counters;
+	long long instruction_ready;
+	struct latenciometro *latencies;
+	
 	/* Program counter. Offset in 'inst_buffer' where we can find the next
 	 * instruction to be executed. */
 	unsigned int pc;
@@ -52,6 +57,8 @@ struct si_wavefront_t
 	union si_reg_t sreg[256];
 
 	/* Flags updated during instruction execution */
+	unsigned int mem_blocking : 1;
+	unsigned int scalar_mem_blocking : 1;
 	unsigned int vector_mem_read : 1;
 	unsigned int vector_mem_write : 1;
 	unsigned int scalar_mem_read : 1;

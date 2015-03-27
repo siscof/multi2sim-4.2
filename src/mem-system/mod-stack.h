@@ -21,6 +21,7 @@
 #define MEM_SYSTEM_MOD_STACK_H
 
 #include "module.h"
+#include <lib/util/estadisticas.h>
 
 
 /* Current identifier for stack */
@@ -57,6 +58,32 @@ struct mod_stack_t
 	long long id;
 	enum mod_access_kind_t access_kind;
 	int *witness_ptr;
+
+	//FRAN
+	int mshr_locked;
+	long long tiempo_acceso;
+	long long retry_time_lost;
+	struct retry_stats_t retries_counter[num_retries_kinds];
+	struct mod_stack_t *find_and_lock_stack;
+	int transaction_blocked;
+	int transaction_blocking;
+	int high_priority_transaction;
+	int transaction_idle;
+
+	struct latenciometro latencias;
+	struct si_wavefront_t *wavefront;
+	struct si_uop_t *uop;
+    int glc;
+	int origin;
+	long long coalesced_count;
+	long long invalided_address;
+	struct mod_stack_t *stack_superior;
+	int stack_size;
+	unsigned int dirty_mask;
+	unsigned int valid_mask;
+	struct mod_t *src_mod;
+	int work_group_id_in_cu;
+	struct dir_lock_t *dir_lock;
 
 	struct linked_list_t *event_queue;
 	void *event_queue_item;
@@ -99,6 +126,10 @@ struct mod_stack_t
 	struct mod_stack_t *bucket_list_next;
 
 	/* Flags */
+	//FRAN
+	int finished : 1;
+	int invalided : 1;
+	
 	int hit : 1;
 	int err : 1;
 	int shared : 1;
@@ -163,6 +194,11 @@ void mod_stack_wait_in_stack(struct mod_stack_t *stack,
 	struct mod_stack_t *master_stack, int event);
 void mod_stack_wakeup_stack(struct mod_stack_t *master_stack);
 
+void mod_stack_merge_dirty_mask(struct mod_stack_t *stack, unsigned int mask);
+void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int words);
+void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words);
+void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask);
+void mod_stack_wakeup_mod_head(struct mod_t *mod);
 
 #endif
 

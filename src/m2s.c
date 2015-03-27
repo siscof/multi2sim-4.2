@@ -72,6 +72,12 @@
 #include <sys/time.h>
 #include <visual/common/visual.h>
 
+//fran
+#include <lib/util/estadisticas.h>
+#include <lib/esim/esim.h>
+#include <mem-system/mshr.h>
+
+long long ciclo_anterior = 0;
 
 static char *visual_file_name = "";
 static char *ctx_config_file_name = "";
@@ -131,7 +137,20 @@ static char *mips_call_debug_file_name = "";
 static enum arch_sim_kind_t mips_sim_kind = arch_sim_kind_functional;
 
 static char *mem_debug_file_name = "";
-
+//FRAN
+//static char *fran_file_latencia = "";
+//static char *fran_file_accesos = "";
+char *fran_file_ipc;
+char *fran_file_general;
+char *report_cache_states;
+char *fran_file_t1000k;
+char *fran_file_hitRatio;
+char *fran_file_red;
+int SALTAR_L1;
+int mhsr_control_enabled = 0;
+long long ventana_muestreo = 10000;
+//int fran_latencia;
+//int fran_accesos;
 static char *net_debug_file_name = "";
 
 static char *dram_debug_file_name = "";
@@ -588,6 +607,62 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 		/*
 		 * General Options
 		 */
+
+		if (!strcmp(argv[argi], "--saltar_l1"))
+		{
+
+			m2s_need_argument(argc, argv, argi);
+			if(!strcmp(argv[++argi],"enable")){
+				SALTAR_L1 = 1;
+			}else{
+				SALTAR_L1 = 0;
+				
+			}
+						
+			m2s_need_argument(argc, argv, argi);
+	
+            argi++;
+			
+			char a[200]="";
+			
+			strcpy(a,argv[argi]);
+			strcat(a, "_ipc");
+			fran_file_ipc = xmalloc(1000);
+			memcpy(fran_file_ipc,a,strlen(a)+1);
+			
+			fran_file_red = xmalloc(1000);
+			strcpy(fran_file_red,argv[argi]);
+			strcat(fran_file_red, "_red-l1-l2-latencia");
+			
+			strcpy(a,argv[argi]);
+			strcat(a, "_general");
+			fran_file_general = xmalloc(1000);
+			memcpy(fran_file_general,a,strlen(a)+1);
+			
+			strcpy(a,argv[argi]);
+			strcat(a, "_t10000k");
+			fran_file_t1000k = xmalloc(1000);
+			memcpy(fran_file_t1000k,a,strlen(a)+1);
+			
+			strcpy(a,argv[argi]);
+			strcat(a, "_hitRatio");
+			fran_file_hitRatio = xmalloc(1000);
+			memcpy(fran_file_hitRatio,a,strlen(a)+1);
+
+			strcpy(a,argv[argi]);
+			strcat(a, "_report_cache_states");
+			report_cache_states = xmalloc(1000);
+			memcpy(report_cache_states,a,strlen(a)+1);
+
+			continue;
+		}
+
+        /* mshr size control */
+        if (!strcmp(argv[argi], "--mshr-control"))
+        {
+        	mhsr_control_enabled = 1;
+        	continue;
+        }
 
 		/* Context configuration file */
 		if (!strcmp(argv[argi], "--ctx-config"))
@@ -1864,10 +1939,14 @@ static void m2s_loop(void)
 		 * The argument 'num_timing_active' is interpreted as a flag TRUE/FALSE. */
 		esim_process_events(num_timing_active);
 
+		if(si_gpu != NULL)
+			estadisticas_por_intervalos(asTiming(si_gpu)->cycle);
+
 		/* If neither functional nor timing simulation was performed for any architecture,
 		 * it means that all guest contexts finished execution - simulation can end. */
 		if (!num_emu_active && !num_timing_active)
 			esim_finish = esim_finish_ctx;
+
 
 		/* Count loop iterations, and check for limit in simulation time only every
 		 * 128k iterations. This avoids a constant overhead of system calls. */
@@ -1880,6 +1959,10 @@ static void m2s_loop(void)
 		if (m2s_signal_received)
 			m2s_signal_process();
 	}
+
+
+        if(si_gpu != NULL)
+	        estadisticas_por_intervalos(asTiming(si_gpu)->cycle + ventana_muestreo);
 
 	/* Restore default signal handlers */
 	signal(SIGABRT, SIG_DFL);
@@ -1967,6 +2050,14 @@ int main(int argc, char **argv)
 	x86_sys_debug_category = debug_new_category(x86_sys_debug_file_name);
 	x86_trace_cache_debug_category = debug_new_category(x86_trace_cache_debug_file_name);
 	mem_debug_category = debug_new_category(mem_debug_file_name);
+	//fran
+	fran_ipc = debug_new_category(fran_file_ipc);
+	fran_general = debug_new_category(fran_file_general);
+    fran_t1000k = debug_new_category(fran_file_t1000k);
+    fran_hitRatio = debug_new_category(fran_file_hitRatio);
+	fran_red = debug_new_category(fran_file_red);
+	report_cache_states_category = debug_new_category(report_cache_states);
+	
 	evg_opencl_debug_category = debug_new_category(evg_opencl_debug_file_name);
 	evg_isa_debug_category = debug_new_category(evg_isa_debug_file_name);
 	evg_stack_debug_category = debug_new_category(evg_stack_debug_file_name);  /* GPU-REL */

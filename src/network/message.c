@@ -33,7 +33,6 @@
 #include "node.h"
 #include "routing-table.h"
 
-
 /* 
  * Message
  */

@@ -1,0 +1,911 @@
+src/arch/evergreen/timing/gpu.c:		coalesced_reads = local_mod->reads - local_mod->effective_reads;
+src/arch/evergreen/timing/gpu.c:		coalesced_writes = local_mod->writes - local_mod->effective_writes;
+src/arch/evergreen/timing/gpu.c:		fprintf(f, "LocalMemory.Accesses = %lld\n", local_mod->reads + local_mod->writes);
+src/arch/evergreen/timing/gpu.c:		fprintf(f, "LocalMemory.Reads = %lld\n", local_mod->reads);
+src/arch/evergreen/timing/gpu.c:		fprintf(f, "LocalMemory.EffectiveReads = %lld\n", local_mod->effective_reads);
+src/arch/evergreen/timing/gpu.c:		fprintf(f, "LocalMemory.Writes = %lld\n", local_mod->writes);
+src/arch/evergreen/timing/gpu.c:		fprintf(f, "LocalMemory.EffectiveWrites = %lld\n", local_mod->effective_writes);
+src/arch/southern-islands/timing/gpu.c:		coalesced_reads = lds_mod->reads - lds_mod->effective_reads;
+src/arch/southern-islands/timing/gpu.c:		coalesced_writes = lds_mod->writes - lds_mod->effective_writes;
+src/arch/southern-islands/timing/gpu.c:			lds_mod->reads + lds_mod->writes);
+src/arch/southern-islands/timing/gpu.c:		fprintf(f, "LDS.Reads = %lld\n", lds_mod->reads);
+src/arch/southern-islands/timing/gpu.c:			lds_mod->effective_reads);
+src/arch/southern-islands/timing/gpu.c:		fprintf(f, "LDS.Writes = %lld\n", lds_mod->writes);
+src/arch/southern-islands/timing/gpu.c:			lds_mod->effective_writes);
+src/arch/x86/timing/fetch.c:	block = self->fetch_neip & ~(self->inst_mod->block_size - 1);
+src/arch/x86/timing/fetch.c:			self->fetch_neip, self->inst_mod->block_size);
+src/arch/x86/timing/fetch.c:	block = self->fetch_neip & ~(self->inst_mod->block_size - 1);
+src/arch/x86/timing/fetch.c:	while ((self->fetch_neip & ~(self->inst_mod->block_size - 1)) == block)
+src/arch/x86/timing/mem-config.c:	mem_debug("\t\tEntry for instructions -> %s\n", thread->inst_mod->name);
+src/arch/x86/timing/mem-config.c:	mem_debug("\t\tEntry for data -> %s\n", thread->data_mod->name);
+src/arch/fermi/timing/gpu.c:		coalesced_reads = lds_mod->reads - lds_mod->effective_reads;
+src/arch/fermi/timing/gpu.c:		coalesced_writes = lds_mod->writes - lds_mod->effective_writes;
+src/arch/fermi/timing/gpu.c:		fprintf(f, "SharedMem.Accesses = %lld\n", lds_mod->reads + lds_mod->writes);
+src/arch/fermi/timing/gpu.c:		fprintf(f, "SharedMem.Reads = %lld\n", lds_mod->reads);
+src/arch/fermi/timing/gpu.c:		fprintf(f, "SharedMem.EffectiveReads = %lld\n", lds_mod->effective_reads);
+src/arch/fermi/timing/gpu.c:		fprintf(f, "SharedMem.Writes = %lld\n", lds_mod->writes);
+src/arch/fermi/timing/gpu.c:		fprintf(f, "SharedMem.EffectiveWrites = %lld\n", lds_mod->effective_writes);
+src/mem-system/mem-system.c:	//mod_contador.misses += mod->accesses - mod->hits);
+src/mem-system/mem-system.c:		if(mod->level == 2){
+src/mem-system/mem-system.c:			accesses += mod->accesses;
+src/mem-system/mem-system.c:			effective_reads += mod->effective_reads;
+src/mem-system/mem-system.c:			effective_writes += mod->effective_writes;
+src/mem-system/mem-system.c:			effective_nc_writes += mod->effective_nc_writes;
+src/mem-system/mem-system.c:			hits += mod->hits;
+src/mem-system/mem-system.c:			//mod_contador.misses += mod->accesses - mod->hits);
+src/mem-system/mem-system.c:			delayed_read_hit += mod->delayed_read_hit;
+src/mem-system/mem-system.c:			reads += mod->reads;
+src/mem-system/mem-system.c:			read_retries += mod->read_retries;
+src/mem-system/mem-system.c:			writes += mod->writes;
+src/mem-system/mem-system.c:			write_retries += mod->write_retries;
+src/mem-system/mem-system.c:			effective_reads += mod->effective_reads;
+src/mem-system/mem-system.c:		cache = mod->cache;
+src/mem-system/mem-system.c:		fprintf(f, "[ %s ]\n", mod->name);
+src/mem-system/mem-system.c:			fprintf(f, "Level = %d\n",mod->level);
+src/mem-system/mem-system.c:		fprintf(f, "BlockSize = %d\n", mod->block_size);
+src/mem-system/mem-system.c:		fprintf(f, "Latency = %d\n", mod->latency);
+src/mem-system/mem-system.c:		fprintf(f, "Ports = %d\n", mod->num_ports);
+src/mem-system/mem-system.c:		fprintf(f, "Accesses = %lld\n", mod->accesses);
+src/mem-system/mem-system.c:		fprintf(f, "Hits = %lld\n", mod->hits);
+src/mem-system/mem-system.c:		fprintf(f, "Misses = %lld\n", mod->accesses - mod->hits);
+src/mem-system/mem-system.c:		fprintf(f, "HitRatio = %.4g\n", mod->accesses ?
+src/mem-system/mem-system.c:			(double) mod->hits / mod->accesses : 0.0);
+src/mem-system/mem-system.c:		fprintf(f, "Evictions = %lld\n", mod->evictions);
+src/mem-system/mem-system.c:		fprintf(f, "Retries = %lld\n", mod->read_retries + mod->write_retries + 
+src/mem-system/mem-system.c:			mod->nc_write_retries);
+src/mem-system/mem-system.c:		fprintf(f, "Reads = %lld\n", mod->reads);
+src/mem-system/mem-system.c:		fprintf(f, "ReadRetries = %lld\n", mod->read_retries);
+src/mem-system/mem-system.c:		fprintf(f, "BlockingReads = %lld\n", mod->blocking_reads);
+src/mem-system/mem-system.c:		fprintf(f, "NonBlockingReads = %lld\n", mod->non_blocking_reads);
+src/mem-system/mem-system.c:		fprintf(f, "ReadHits = %lld\n", mod->read_hits);
+src/mem-system/mem-system.c:		fprintf(f, "ReadMisses = %lld\n", mod->reads - mod->read_hits);
+src/mem-system/mem-system.c:		fprintf(f, "Writes = %lld\n", mod->writes);
+src/mem-system/mem-system.c:		fprintf(f, "WriteRetries = %lld\n", mod->write_retries);
+src/mem-system/mem-system.c:		fprintf(f, "BlockingWrites = %lld\n", mod->blocking_writes);
+src/mem-system/mem-system.c:		fprintf(f, "NonBlockingWrites = %lld\n", mod->non_blocking_writes);
+src/mem-system/mem-system.c:		fprintf(f, "WriteHits = %lld\n", mod->write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "WriteMisses = %lld\n", mod->writes - mod->write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NCWrites = %lld\n", mod->nc_writes);
+src/mem-system/mem-system.c:		fprintf(f, "NCWriteRetries = %lld\n", mod->nc_write_retries);
+src/mem-system/mem-system.c:		fprintf(f, "NCBlockingWrites = %lld\n", mod->blocking_nc_writes);
+src/mem-system/mem-system.c:		fprintf(f, "NCNonBlockingWrites = %lld\n", mod->non_blocking_nc_writes);
+src/mem-system/mem-system.c:		fprintf(f, "NCWriteHits = %lld\n", mod->nc_write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NCWriteMisses = %lld\n", mod->nc_writes - mod->nc_write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "Prefetches = %lld\n", mod->prefetches);
+src/mem-system/mem-system.c:		fprintf(f, "PrefetchAborts = %lld\n", mod->prefetch_aborts);
+src/mem-system/mem-system.c:		fprintf(f, "UselessPrefetches = %lld\n", mod->useless_prefetches);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryAccesses = %lld\n", mod->no_retry_accesses);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryHits = %lld\n", mod->no_retry_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryMisses = %lld\n", mod->no_retry_accesses - mod->no_retry_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryHitRatio = %.4g\n", mod->no_retry_accesses ?
+src/mem-system/mem-system.c:			(double) mod->no_retry_hits / mod->no_retry_accesses : 0.0);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryReads = %lld\n", mod->no_retry_reads);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryReadHits = %lld\n", mod->no_retry_read_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryReadMisses = %lld\n", (mod->no_retry_reads -
+src/mem-system/mem-system.c:			mod->no_retry_read_hits));
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryWrites = %lld\n", mod->no_retry_writes);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryWriteHits = %lld\n", mod->no_retry_write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryWriteMisses = %lld\n", mod->no_retry_writes
+src/mem-system/mem-system.c:			- mod->no_retry_write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryNCWrites = %lld\n", mod->no_retry_nc_writes);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryNCWriteHits = %lld\n", mod->no_retry_nc_write_hits);
+src/mem-system/mem-system.c:		fprintf(f, "NoRetryNCWriteMisses = %lld\n", mod->no_retry_nc_writes
+src/mem-system/mem-system.c:			- mod->no_retry_nc_write_hits);
+src/mem-system/mem-system.c:		if (!strcasecmp(mod->name, mod_name))
+Binary file src/mem-system/.nmoesi-protocol.c.swp matches
+src/mem-system/config.c:			mem_config_file_name, mod->name,
+src/mem-system/config.c:			mod->name, mem_err_config_note);
+src/mem-system/config.c:	if (def_input_buffer_size < mod->block_size + 8)
+src/mem-system/config.c:			mod->block_size + 8, mod->name, mem_err_config_note);
+src/mem-system/config.c:	if (def_output_buffer_size < mod->block_size + 8)
+src/mem-system/config.c:			mod->block_size + 8, mod->name, mem_err_config_note);
+src/mem-system/config.c:		def_output_buffer_size, mod->name, mod);
+src/mem-system/config.c:			"network.\n%s%s", mem_config_file_name, mod->name,
+src/mem-system/config.c:			mod->name, mem_err_config_note);
+src/mem-system/config.c:	mod->mshr_size = mshr_size;
+src/mem-system/config.c:	mod->dir_assoc = assoc;
+src/mem-system/config.c:	mod->dir_num_sets = num_sets;
+src/mem-system/config.c:	mod->dir_size = num_sets * assoc;
+src/mem-system/config.c:	mod->dir_latency = dir_latency;
+src/mem-system/config.c:	mod->high_net = net;
+src/mem-system/config.c:	mod->high_net_node = net_node;
+src/mem-system/config.c:	mod->low_net = net;
+src/mem-system/config.c:	mod->low_net_node = net_node;
+src/mem-system/config.c:	mod->cache = cache_create(mod->name, num_sets, block_size, assoc, 
+src/mem-system/config.c:		mod->cache->prefetcher = prefetcher_create(prefetcher_ghb_size, 
+src/mem-system/config.c:	mod->dir_size = dir_size;
+src/mem-system/config.c:	mod->dir_assoc = dir_assoc;
+src/mem-system/config.c:	mod->dir_num_sets = dir_size / dir_assoc;
+src/mem-system/config.c:	mod->high_net = net;
+src/mem-system/config.c:	mod->high_net_node = net_node;
+src/mem-system/config.c:	mod->cache = cache_create(mod->name, dir_size / dir_assoc, block_size,
+src/mem-system/config.c:		mod->range_kind = mod_range_bounds;
+src/mem-system/config.c:		mod->range.bounds.low = 0;
+src/mem-system/config.c:		mod->range.bounds.high = -1;
+src/mem-system/config.c:		mod->range_kind = mod_range_bounds;
+src/mem-system/config.c:		mod->range.bounds.low = str_to_int(token, &err);
+src/mem-system/config.c:				mem_config_file_name, mod->name, token);
+src/mem-system/config.c:		if (mod->range.bounds.low % mod->block_size)
+src/mem-system/config.c:				mod->name, mem_err_config_note);
+src/mem-system/config.c:		mod->range.bounds.high = str_to_int(token, &err);
+src/mem-system/config.c:				mem_config_file_name, mod->name, token);
+src/mem-system/config.c:		if ((mod->range.bounds.high + 1) % mod->block_size)
+src/mem-system/config.c:				mem_config_file_name, mod->name, 
+src/mem-system/config.c:		mod->range_kind = mod_range_interleaved;
+src/mem-system/config.c:		mod->range.interleaved.div = str_to_int(token, &err);
+src/mem-system/config.c:				mem_config_file_name, mod->name, token);
+src/mem-system/config.c:		if (mod->range.interleaved.div < 1)
+src/mem-system/config.c:		if (mod->range.interleaved.div % mod->block_size)
+src/mem-system/config.c:				mem_config_file_name, mod->name, mem_err_config_note);
+src/mem-system/config.c:		mod->range.interleaved.mod = str_to_int(token, &err);
+src/mem-system/config.c:				mem_config_file_name, mod->name, token);
+src/mem-system/config.c:		if (mod->range.interleaved.mod < 1)
+src/mem-system/config.c:		mod->range.interleaved.eq = str_to_int(token, &err);
+src/mem-system/config.c:				mem_config_file_name, mod->name, token);
+src/mem-system/config.c:		if (mod->range.interleaved.eq >= mod->range.interleaved.mod)
+src/mem-system/config.c:		mem_config_file_name, mod->name, mem_err_config_note);
+src/mem-system/config.c:		snprintf(buf, sizeof buf, "Module %s", mod->name);
+src/mem-system/config.c:			mem_config_file_name, mod->name,
+src/mem-system/config.c:	if (mod->block_size < block_size)
+src/mem-system/config.c:			mem_config_file_name, mod->name,
+src/mem-system/config.c:	block_size = mod->block_size;
+src/mem-system/config.c:	mem_debug("%s\n", mod->name);
+src/mem-system/config.c:	if (!linked_list_count(mod->low_mod_list) && mod->kind == mod_kind_cache)
+src/mem-system/config.c:			mem_config_file_name, mod->name,
+src/mem-system/config.c:	for (linked_list_head(mod->low_mod_list); !linked_list_is_end(mod->low_mod_list);
+src/mem-system/config.c:		linked_list_next(mod->low_mod_list))
+src/mem-system/config.c:		low_mod = linked_list_get(mod->low_mod_list);
+src/mem-system/config.c:		if (mod->kind != mod_kind_cache)
+src/mem-system/config.c:		snprintf(buf, sizeof buf, "Module %s", mod->name);
+src/mem-system/config.c:					mem_config_file_name, mod->name,
+src/mem-system/config.c:			linked_list_add(mod->low_mod_list, low_mod);
+src/mem-system/config.c:			linked_list_add(low_mod->high_mod_list, mod);
+src/mem-system/config.c:		mem_config_check_route_to_main_memory(mod, mod->block_size, 1);
+src/mem-system/config.c:		mem_debug("\t%s\n", mod->name);
+src/mem-system/config.c:		for (linked_list_head(mod->low_mod_list); !linked_list_is_end(mod->low_mod_list);
+src/mem-system/config.c:			linked_list_next(mod->low_mod_list))
+src/mem-system/config.c:			low_mod = linked_list_get(mod->low_mod_list);
+src/mem-system/config.c:			mem_debug(" %s", low_mod->name);
+src/mem-system/config.c:			if (mod->low_net != low_mod->high_net)
+src/mem-system/config.c:					mem_config_file_name, mod->name, low_mod->name,
+src/mem-system/config.c:			entry = net_routing_table_lookup(mod->low_net->routing_table,
+src/mem-system/config.c:				mod->low_net_node, low_mod->high_net_node);
+src/mem-system/config.c:					mem_config_file_name, mod->low_net->name,
+src/mem-system/config.c:					mod->name, low_mod->name, err_mem_connect);
+src/mem-system/config.c:		for (linked_list_head(mod->high_mod_list); !linked_list_is_end(mod->high_mod_list);
+src/mem-system/config.c:			linked_list_next(mod->high_mod_list))
+src/mem-system/config.c:			high_mod = linked_list_get(mod->high_mod_list);
+src/mem-system/config.c:			mem_debug(" %s", high_mod->name);
+src/mem-system/config.c:			if (mod->high_net != high_mod->low_net)
+src/mem-system/config.c:					mem_config_file_name, mod->name, high_mod->name,
+src/mem-system/config.c:			entry = net_routing_table_lookup(mod->high_net->routing_table,
+src/mem-system/config.c:				mod->high_net_node, high_mod->low_net_node);
+src/mem-system/config.c:					mem_config_file_name, mod->high_net->name,
+src/mem-system/config.c:					mod->name, high_mod->name, err_mem_connect);
+src/mem-system/config.c:	if (mod->arch)
+src/mem-system/config.c:		return mod->arch;
+src/mem-system/config.c:	LINKED_LIST_FOR_EACH(mod->low_mod_list)
+src/mem-system/config.c:		low_mod = linked_list_get(mod->low_mod_list);
+src/mem-system/config.c:	mod->arch = arch;
+src/mem-system/config.c:		mod->sub_block_size = mod->block_size;
+src/mem-system/config.c:		for (linked_list_head(mod->high_mod_list); !linked_list_is_end(mod->high_mod_list);
+src/mem-system/config.c:			linked_list_next(mod->high_mod_list))
+src/mem-system/config.c:			high_mod = linked_list_get(mod->high_mod_list);
+src/mem-system/config.c:			mod->sub_block_size = MIN(mod->sub_block_size, high_mod->block_size);
+src/mem-system/config.c:		if (mod->high_net && list_count(mod->high_net->node_list))
+src/mem-system/config.c:			num_nodes = list_count(mod->high_net->node_list);
+src/mem-system/config.c:		mod->num_sub_blocks = mod->block_size / mod->sub_block_size;
+src/mem-system/config.c:		mod->dir = dir_create(mod->name, mod->dir_num_sets, mod->dir_assoc, mod->num_sub_blocks, num_nodes);
+src/mem-system/config.c:			mod->name, mod->dir_num_sets, mod->dir_assoc, num_nodes,
+src/mem-system/config.c:			mod->dir_num_sets, mod->dir_assoc, linked_list_count(mod->high_mod_list),
+src/mem-system/config.c:			mod->dir_size, mod->num_sub_blocks);
+src/mem-system/config.c:	if (mod->level >= level)
+src/mem-system/config.c:	mod->level = level;
+src/mem-system/config.c:	LINKED_LIST_FOR_EACH(mod->low_mod_list)
+src/mem-system/config.c:		low_mod = linked_list_get(mod->low_mod_list);
+src/mem-system/config.c:		mem_debug("\t%s -> ", mod->name);
+src/mem-system/config.c:		if (mod->level)
+src/mem-system/config.c:			mem_debug("level %d\n", mod->level);
+src/mem-system/config.c:		if (!mod->level)
+src/mem-system/config.c:		high_net_name = mod->high_net ? mod->high_net->name : "";
+src/mem-system/config.c:		high_net_node_index = mod->high_net_node ? mod->high_net_node->index : 0;
+src/mem-system/config.c:		low_net_name = mod->low_net ? mod->low_net->name : "";
+src/mem-system/config.c:		low_net_node_index = mod->low_net_node ? mod->low_net_node->index : 0;
+src/mem-system/config.c:			mod->name, mod->cache->num_sets, mod->cache->assoc,
+src/mem-system/config.c:			mod->cache->block_size, mod->sub_block_size, mod->dir->num_nodes,
+src/mem-system/config.c:			mod->level, high_net_name, high_net_node_index,
+src/mem-system/Makefile.in:	memory.$(OBJEXT) mmu.$(OBJEXT) mod-stack.$(OBJEXT) \
+src/mem-system/Makefile.in:	mod-stack.c \
+src/mem-system/Makefile.in:	mod-stack.h \
+src/mem-system/Makefile.in:@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mod-stack.Po@am__quote@
+src/mem-system/nmoesi-protocol.c:#include "mod-stack.h"
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name, stack->addr);
+src/mem-system/nmoesi-protocol.c:			mod->reads++;   //Los reads incluyen los delayed_read
+src/mem-system/nmoesi-protocol.c:			//mod->hits++
+src/mem-system/nmoesi-protocol.c:			mod->delayed_read_hit++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->read_retries++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->read_retries++;
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(mod->cache, stack->set, stack->way, stack->tag,
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:			mod->latency);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name, stack->addr);
+src/mem-system/nmoesi-protocol.c:			mod->writes++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->write_retries++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->write_retries++;
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(mod->cache, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:			mod->latency);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			"state=\"%s:nc store\" addr=0x%x\n", stack->id, mod->name, stack->addr);
+src/mem-system/nmoesi-protocol.c:			mod->nc_writes++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->nc_write_retries++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->nc_write_retries++;
+src/mem-system/nmoesi-protocol.c:		if (mod->kind == mod_kind_main_memory)
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->nc_write_retries++;
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(mod->cache, stack->set, stack->way, stack->tag,
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:			mod->latency);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name, stack->addr);
+src/mem-system/nmoesi-protocol.c:				  esim_time, stack->id, stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->useless_prefetches++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->prefetch_aborts++;
+src/mem-system/nmoesi-protocol.c:				  esim_time, stack->id, stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->useless_prefetches++;
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			mod->prefetch_aborts++;
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(mod->cache, stack->set, stack->way, stack->tag,
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			esim_time, stack->id, stack->addr, mod->name, stack->blocking);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:				stack->tag, mod->name, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:		mod->accesses++;
+src/mem-system/nmoesi-protocol.c:			mod->hits++;
+src/mem-system/nmoesi-protocol.c:			mod->reads++;
+src/mem-system/nmoesi-protocol.c:			mod->effective_reads++;
+src/mem-system/nmoesi-protocol.c:			stack->blocking ? mod->blocking_reads++ : mod->non_blocking_reads++;
+src/mem-system/nmoesi-protocol.c:				mod->read_hits++;
+src/mem-system/nmoesi-protocol.c:			mod->prefetches++;
+src/mem-system/nmoesi-protocol.c:			mod->nc_writes++;
+src/mem-system/nmoesi-protocol.c:			mod->effective_nc_writes++;
+src/mem-system/nmoesi-protocol.c:			stack->blocking ? mod->blocking_nc_writes++ : mod->non_blocking_nc_writes++;
+src/mem-system/nmoesi-protocol.c:				mod->nc_write_hits++;
+src/mem-system/nmoesi-protocol.c:			mod->writes++;
+src/mem-system/nmoesi-protocol.c:			mod->effective_writes++;
+src/mem-system/nmoesi-protocol.c:			stack->blocking ? mod->blocking_writes++ : mod->non_blocking_writes++;
+src/mem-system/nmoesi-protocol.c:				mod->write_hits++;
+src/mem-system/nmoesi-protocol.c:			mod->no_retry_accesses++;
+src/mem-system/nmoesi-protocol.c:				mod->no_retry_hits++;
+src/mem-system/nmoesi-protocol.c:				mod->no_retry_reads++;
+src/mem-system/nmoesi-protocol.c:					mod->no_retry_read_hits++;
+src/mem-system/nmoesi-protocol.c:				mod->no_retry_nc_writes++;
+src/mem-system/nmoesi-protocol.c:					mod->no_retry_nc_write_hits++;
+src/mem-system/nmoesi-protocol.c:				mod->no_retry_writes++;
+src/mem-system/nmoesi-protocol.c:					mod->no_retry_write_hits++;
+src/mem-system/nmoesi-protocol.c:				stack->way = cache_replace_block(mod->cache, stack->set);
+src/mem-system/nmoesi-protocol.c:		dir_lock = dir_lock_get(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
+src/mem-system/nmoesi-protocol.c:		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, 
+src/mem-system/nmoesi-protocol.c:				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
+src/mem-system/nmoesi-protocol.c:			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
+src/mem-system/nmoesi-protocol.c:			assert(stack->state || !dir_entry_group_shared_or_owned(mod->dir,
+src/mem-system/nmoesi-protocol.c:				stack->id, stack->tag, mod->name, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:		cache_set_transient_tag(mod->cache, stack->set, stack->way, stack->tag);
+src/mem-system/nmoesi-protocol.c:		cache_access_block(mod->cache, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name, stack->err);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:			mod->evictions++;
+src/mem-system/nmoesi-protocol.c:			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
+src/mem-system/nmoesi-protocol.c:		if (mod->kind == mod_kind_main_memory && !stack->state)
+src/mem-system/nmoesi-protocol.c:			cache_set_block(mod->cache, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:		cache_get_block(mod->cache, stack->set, stack->way, &stack->tag, &stack->state);
+src/mem-system/nmoesi-protocol.c:		assert(stack->state || !dir_entry_group_shared_or_owned(mod->dir,
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		if (mod->kind == mod_kind_main_memory)
+src/mem-system/nmoesi-protocol.c:			cache_set_block(mod->cache, stack->src_set, stack->src_way,
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		low_node = low_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:		cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
+src/mem-system/nmoesi-protocol.c:			msg_size = 8 + mod->block_size;
+src/mem-system/nmoesi-protocol.c:		stack->msg = net_try_send_ev(mod->low_net, mod->low_net_node,
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:				cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:			assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:				dir_entry_tag >= stack->src_tag + mod->block_size)
+src/mem-system/nmoesi-protocol.c:				mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:			if (dir_entry->owner == mod->low_net_node->index)
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:		esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, target_mod->latency);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:				cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:				cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:			assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:				dir_entry_tag >= stack->src_tag + mod->block_size)
+src/mem-system/nmoesi-protocol.c:				mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:			if (dir_entry->owner == mod->low_net_node->index)
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:		esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, target_mod->latency);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		stack->msg = net_try_send_ev(target_mod->high_net, target_mod->high_net_node,
+src/mem-system/nmoesi-protocol.c:			mod->low_net_node, 8, EV_MOD_NMOESI_EVICT_REPLY_RECEIVE, stack,
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		net_receive(mod->low_net, mod->low_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			cache_set_block(mod->cache, stack->src_set, stack->src_way,
+src/mem-system/nmoesi-protocol.c:		assert(!dir_entry_group_shared_or_owned(mod->dir, stack->src_set, stack->src_way));
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			net = mod->low_net;
+src/mem-system/nmoesi-protocol.c:			src_node = mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = target_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			net = mod->high_net;
+src/mem-system/nmoesi-protocol.c:			src_node = mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = target_mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			stack->addr, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		stack->reply_size = mod->block_size + 8;
+src/mem-system/nmoesi-protocol.c:			assert(stack->addr % mod->block_size == 0);
+src/mem-system/nmoesi-protocol.c:			dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:				assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:				if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + mod->block_size)
+src/mem-system/nmoesi-protocol.c:				assert(dir_entry->owner != mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:				if (dir_entry->owner == mod->low_net_node->index)
+src/mem-system/nmoesi-protocol.c:				node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+src/mem-system/nmoesi-protocol.c:					dir_entry_tag < stack->addr + mod->block_size)
+src/mem-system/nmoesi-protocol.c:			assert(!dir_entry_group_shared_or_owned(target_mod->dir,
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:				if (dir_entry->owner != mod->low_net_node->index)
+src/mem-system/nmoesi-protocol.c:			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:			if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + mod->block_size)
+src/mem-system/nmoesi-protocol.c:			dir_entry_set_sharer(dir, stack->set, stack->way, z, mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:				if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + mod->block_size)
+src/mem-system/nmoesi-protocol.c:				dir_entry_set_owner(dir, stack->set, stack->way, z, mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:		int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:			assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:			node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+src/mem-system/nmoesi-protocol.c:			esim_time, stack->id, stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			esim_time, stack->id, stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:				cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:				dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:					dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:					assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:				ret->reply_size -= target_mod->block_size;
+src/mem-system/nmoesi-protocol.c:				cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:				dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:					dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:					assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:				stack->reply_size = target_mod->block_size + 8;
+src/mem-system/nmoesi-protocol.c:			cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:			dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:				assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:				ret->reply_size -= target_mod->block_size;
+src/mem-system/nmoesi-protocol.c:				ret->reply_size -= target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:					cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:					cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:					stack->reply_size = target_mod->sub_block_size + 8;
+src/mem-system/nmoesi-protocol.c:				cache_set_block(target_mod->cache, stack->set, stack->way, 
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			net = mod->low_net;
+src/mem-system/nmoesi-protocol.c:			src_node = target_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			net = mod->high_net;
+src/mem-system/nmoesi-protocol.c:			src_node = target_mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			net_receive(mod->low_net, mod->low_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			net_receive(mod->high_net, mod->high_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		stack->reply_size = mod->block_size + 8;
+src/mem-system/nmoesi-protocol.c:			net = mod->low_net;
+src/mem-system/nmoesi-protocol.c:			src_node = mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = target_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			net = mod->high_net;
+src/mem-system/nmoesi-protocol.c:			src_node = mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = target_mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			stack->addr, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:			assert(stack->addr % mod->block_size == 0);
+src/mem-system/nmoesi-protocol.c:			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:			assert(dir_entry_tag < stack->tag + target_mod->block_size);
+src/mem-system/nmoesi-protocol.c:			if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + mod->block_size)
+src/mem-system/nmoesi-protocol.c:			dir_entry_set_sharer(dir, stack->set, stack->way, z, mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:			dir_entry_set_owner(dir, stack->set, stack->way, z, mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(target_mod->cache, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		assert(!dir_entry_group_shared_or_owned(target_mod->dir, stack->set, stack->way));
+src/mem-system/nmoesi-protocol.c:			stack->reply_size = target_mod->block_size + 8;
+src/mem-system/nmoesi-protocol.c:				ret->ret_stack->reply_size -= target_mod->block_size;
+src/mem-system/nmoesi-protocol.c:				stack->reply_size = target_mod->block_size + 8;
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		cache_set_block(target_mod->cache, stack->set, stack->way, 0, cache_block_invalid);
+src/mem-system/nmoesi-protocol.c:		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+src/mem-system/nmoesi-protocol.c:		int latency = ret->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			net = mod->low_net;
+src/mem-system/nmoesi-protocol.c:			src_node = target_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			net = mod->high_net;
+src/mem-system/nmoesi-protocol.c:			src_node = target_mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			dst_node = mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			net_receive(mod->low_net, mod->low_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			net_receive(mod->high_net, mod->high_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:		cache_get_block(mod->cache, stack->set, stack->way, &stack->tag, &stack->state);
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name, stack->set, stack->way,
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:		dir = mod->dir;
+src/mem-system/nmoesi-protocol.c:			dir_entry_tag = stack->tag + z * mod->sub_block_size;
+src/mem-system/nmoesi-protocol.c:			assert(dir_entry_tag < stack->tag + mod->block_size);
+src/mem-system/nmoesi-protocol.c:				node = list_get(mod->high_net->node_list, i);
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:			stack->id, mod->name);
+src/mem-system/nmoesi-protocol.c:			cache_set_block(mod->cache, stack->set, stack->way, stack->tag,
+src/mem-system/nmoesi-protocol.c:			stack->addr, mod->name);
+src/mem-system/nmoesi-protocol.c:		net = mod->low_net;
+src/mem-system/nmoesi-protocol.c:		src_node = mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:		dst_node = target_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:			stack->addr, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:			dir = target_mod->dir;
+src/mem-system/nmoesi-protocol.c:				if (stack->addr == stack->tag + z * target_mod->sub_block_size)
+src/mem-system/nmoesi-protocol.c:					assert(dir_entry->owner == mod->low_net_node->index);
+src/mem-system/nmoesi-protocol.c:			stack->tag, target_mod->name);
+src/mem-system/nmoesi-protocol.c:		net = mod->low_net;
+src/mem-system/nmoesi-protocol.c:		src_node = target_mod->high_net_node;
+src/mem-system/nmoesi-protocol.c:		dst_node = mod->low_net_node;
+src/mem-system/nmoesi-protocol.c:			stack->tag, mod->name);
+src/mem-system/nmoesi-protocol.c:		net_receive(mod->low_net, mod->low_net_node, stack->msg);
+src/mem-system/command.c:	if (!IN_RANGE(set, 0, mod->cache->num_sets - 1))
+src/mem-system/command.c:	if (!IN_RANGE(way, 0, mod->cache->assoc - 1))
+src/mem-system/command.c:	if (!mod->dir)
+src/mem-system/command.c:			__FUNCTION__, mod->name, command_line);
+src/mem-system/command.c:	if (!IN_RANGE(sub_block, 0, mod->dir->zsize - 1))
+src/mem-system/command.c:				__FUNCTION__, mod->name, tag, command_line);
+src/mem-system/command.c:				__FUNCTION__, mod->name, tag, set_check, command_line);
+src/mem-system/command.c:				__FUNCTION__, mod->name, command_line);
+src/mem-system/command.c:		cache_set_block(mod->cache, set, way, tag, state);
+src/mem-system/command.c:			if (owner->low_net != mod->high_net || !owner->low_net)
+src/mem-system/command.c:					__FUNCTION__, owner->name, mod->name, command_line);
+src/mem-system/command.c:		dir_entry_set_owner(mod->dir, set, way, sub_block, owner_index);
+src/mem-system/command.c:		dir_entry_clear_all_sharers(mod->dir, set, way, sub_block);
+src/mem-system/command.c:			if (sharer->low_net != mod->high_net || !sharer->low_net)
+src/mem-system/command.c:					__FUNCTION__, sharer->name, mod->name, command_line);
+src/mem-system/command.c:			dir_entry_set_sharer(mod->dir, set, way, sub_block, sharer->low_net_node->index);
+src/mem-system/command.c:				__FUNCTION__, mod->name, tag, command_line);
+src/mem-system/command.c:			mod->name, set, way, str_map_value(&cache_block_state_map, state), tag);
+src/mem-system/command.c:		cache_get_block(mod->cache, set, way, &tag_check, &state_check);
+src/mem-system/command.c:		if (mod->dir)
+src/mem-system/command.c:			dir_entry = dir_entry_get(mod->dir, set, way, sub_block);
+src/mem-system/command.c:				assert(mod->high_net);
+src/mem-system/command.c:				net_node = list_get(mod->high_net->node_list, dir_entry->owner);
+src/mem-system/command.c:			mod->name, set, way, sub_block, owner ? owner->name : "None");
+src/mem-system/command.c:			mod->name, set, way, sub_block);
+src/mem-system/command.c:		assert(mod->high_net);
+src/mem-system/command.c:		for (node_index = 0; node_index < mod->high_net->node_count; node_index++)
+src/mem-system/command.c:			if (!dir_entry_is_sharer(mod->dir, set, way, sub_block, node_index))
+src/mem-system/command.c:			node = list_get(mod->high_net->node_list, node_index);
+src/mem-system/command.c:			node = mod->high_net_node;
+src/mem-system/command.c:			node = mod->low_net_node;
+Binary file src/mem-system/.mem-system.c.swo matches
+src/mem-system/directory.c:#include "mod-stack.h"
+Binary file src/mem-system/mod-stack.o matches
+src/mem-system/prefetcher.c:#include "mod-stack.h"
+src/mem-system/prefetcher.c:	struct prefetcher_t *pref = target_mod->cache->prefetcher;
+src/mem-system/prefetcher.c:			  prefetch_addr, mod->name);
+src/mem-system/prefetcher.c:	cache_decode_address(mod->cache, stack->addr, &set1, &tag1, NULL);
+src/mem-system/prefetcher.c:	cache_decode_address(mod->cache, prefetch_addr, &set2, &tag2, NULL);
+src/mem-system/prefetcher.c:		  prefetch_addr, mod->name);
+src/mem-system/prefetcher.c:	assert(mod->kind == mod_kind_cache && mod->cache != NULL);
+src/mem-system/prefetcher.c:	pref = mod->cache->prefetcher;
+src/mem-system/prefetcher.c:	assert(mod->kind == mod_kind_cache && mod->cache != NULL);
+src/mem-system/prefetcher.c:	pref = mod->cache->prefetcher;
+src/mem-system/prefetcher.c:	if (target_mod->kind != mod_kind_cache || !target_mod->cache->prefetcher)
+src/mem-system/prefetcher.c:	if (target_mod->cache->prefetcher->type == prefetcher_type_ghb_pc_cs)
+src/mem-system/prefetcher.c:		assert(target_mod->cache->prefetcher->type == prefetcher_type_ghb_pc_dc);
+src/mem-system/prefetcher.c:	if (target_mod->kind != mod_kind_cache || !target_mod->cache->prefetcher)
+src/mem-system/prefetcher.c:			   stack->addr, target_mod->name);
+src/mem-system/prefetcher.c:		if (target_mod->cache->prefetcher->type == prefetcher_type_ghb_pc_cs)
+src/mem-system/prefetcher.c:			assert(target_mod->cache->prefetcher->type == prefetcher_type_ghb_pc_dc);
+src/mem-system/prefetch-history.c:	if(mod->kind != mod_kind_cache)
+src/mem-system/prefetch-history.c:		cache_decode_address(mod->cache, ph->table[i], &set1, &tag1, NULL);
+src/mem-system/prefetch-history.c:		cache_decode_address(mod->cache, phy_addr, &set2, &tag2, NULL);
+src/mem-system/Makefile.am:	mod-stack.c \
+src/mem-system/Makefile.am:	mod-stack.h \
+src/mem-system/Makefile:	memory.$(OBJEXT) mmu.$(OBJEXT) mod-stack.$(OBJEXT) \
+src/mem-system/Makefile:	mod-stack.c \
+src/mem-system/Makefile:	mod-stack.h \
+src/mem-system/Makefile:include ./$(DEPDIR)/mod-stack.Po
+src/mem-system/local-mem-protocol.c:#include "mod-stack.h"
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name, stack->addr);
+src/mem-system/local-mem-protocol.c:			mod->reads++;
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name, stack->addr);
+src/mem-system/local-mem-protocol.c:			mod->writes++;
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:			esim_time, stack->id, stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->addr, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:		mod->accesses++;
+src/mem-system/local-mem-protocol.c:			mod->reads++;
+src/mem-system/local-mem-protocol.c:			mod->effective_reads++;
+src/mem-system/local-mem-protocol.c:			mod->writes++;
+src/mem-system/local-mem-protocol.c:			mod->effective_writes++;
+src/mem-system/local-mem-protocol.c:		esim_schedule_event(EV_MOD_LOCAL_MEM_FIND_AND_LOCK_ACTION, stack, mod->latency);
+src/mem-system/local-mem-protocol.c:			stack->tag, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/local-mem-protocol.c:			stack->tag, mod->name, stack->err);
+src/mem-system/local-mem-protocol.c:			stack->id, mod->name);
+src/mem-system/.deps/directory.Po:  ../../src/lib/util/debug.h directory.h mem-system.h mod-stack.h \
+src/mem-system/.deps/directory.Po:mod-stack.h:
+src/mem-system/.deps/prefetcher.Po:  prefetcher.h cache.h mod-stack.h module.h
+src/mem-system/.deps/prefetcher.Po:mod-stack.h:
+src/mem-system/.deps/local-mem-protocol.Po:  mod-stack.h module.h
+src/mem-system/.deps/local-mem-protocol.Po:mod-stack.h:
+src/mem-system/.deps/mod-stack.Po:mod-stack.o: mod-stack.c /usr/include/assert.h /usr/include/features.h \
+src/mem-system/.deps/mod-stack.Po:  ../../src/lib/util/debug.h cache.h mem-system.h mod-stack.h module.h
+src/mem-system/.deps/mod-stack.Po:mod-stack.h:
+src/mem-system/.deps/nmoesi-protocol.Po:  ../../src/network/node.h cache.h directory.h mem-system.h mod-stack.h \
+src/mem-system/.deps/nmoesi-protocol.Po:mod-stack.h:
+src/mem-system/.deps/module.Po:  directory.h local-mem-protocol.h mem-system.h mod-stack.h module.h \
+src/mem-system/.deps/module.Po:mod-stack.h:
+src/mem-system/mod-stack.c:#include "mod-stack.h"
+src/mem-system/mod-stack.c:	while (mod->waiting_list_head)
+src/mem-system/mod-stack.c:		stack = mod->waiting_list_head;
+src/mem-system/module.c:#include "mod-stack.h"
+src/mem-system/module.c:	mod->name = xstrdup(name);
+src/mem-system/module.c:	mod->kind = kind;
+src/mem-system/module.c:	mod->latency = latency;
+src/mem-system/module.c:	mod->num_ports = num_ports;
+src/mem-system/module.c:	mod->ports = xcalloc(num_ports, sizeof(struct mod_port_t));
+src/mem-system/module.c:	mod->low_mod_list = linked_list_create();
+src/mem-system/module.c:	mod->high_mod_list = linked_list_create();
+src/mem-system/module.c:	mod->block_size = block_size;
+src/mem-system/module.c:	mod->log_block_size = log_base2(block_size);
+src/mem-system/module.c:	mod->client_info_repos = repos_create(sizeof(struct mod_client_info_t), mod->name);
+src/mem-system/module.c:	printf("%s = %d",mod->name,mod->kind);
+src/mem-system/module.c:	linked_list_free(mod->low_mod_list);
+src/mem-system/module.c:	linked_list_free(mod->high_mod_list);
+src/mem-system/module.c:	if (mod->cache)
+src/mem-system/module.c:		cache_free(mod->cache);
+src/mem-system/module.c:	if (mod->dir)
+src/mem-system/module.c:		dir_free(mod->dir);
+src/mem-system/module.c:	free(mod->ports);
+src/mem-system/module.c:	repos_free(mod->client_info_repos);
+src/mem-system/module.c:	free(mod->name);
+src/mem-system/module.c:	if (mod->kind == mod_kind_cache || mod->kind == mod_kind_main_memory)
+src/mem-system/module.c:	else if (mod->kind == mod_kind_local_memory)
+src/mem-system/module.c:	assert(mod->num_locked_ports <= mod->num_ports);
+src/mem-system/module.c:	if (mod->num_locked_ports == mod->num_ports)
+src/mem-system/module.c:	if (!mod->mshr_size)
+src/mem-system/module.c:	non_coalesced_accesses = mod->access_list_count -
+src/mem-system/module.c:		mod->access_list_coalesced_count;
+src/mem-system/module.c:	return non_coalesced_accesses < mod->mshr_size;
+src/mem-system/module.c:	struct cache_t *cache = mod->cache;
+src/mem-system/module.c:	if (mod->range_kind == mod_range_interleaved)
+src/mem-system/module.c:		unsigned int num_mods = mod->range.interleaved.mod;
+src/mem-system/module.c:	else if (mod->range_kind == mod_range_bounds)
+src/mem-system/module.c:		panic("%s: invalid range kind (%d)", __FUNCTION__, mod->range_kind);
+src/mem-system/module.c:			dir_lock = dir_lock_get(mod->dir, set, way);
+src/mem-system/module.c:	assert(mod->kind == mod_kind_cache && mod->cache != NULL);
+src/mem-system/module.c:	if (mod->cache->prefetcher && mod_find_block(mod, addr, &set, &way, NULL, NULL))
+src/mem-system/module.c:		mod->cache->sets[set].blocks[way].prefetched = val;
+src/mem-system/module.c:	assert(mod->kind == mod_kind_cache && mod->cache != NULL);
+src/mem-system/module.c:	if (mod->cache->prefetcher && mod_find_block(mod, addr, &set, &way, NULL, NULL))
+src/mem-system/module.c:		return mod->cache->sets[set].blocks[way].prefetched;
+src/mem-system/module.c:	if (mod->num_locked_ports >= mod->num_ports)
+src/mem-system/module.c:	for (i = 0; i < mod->num_ports; i++)
+src/mem-system/module.c:		port = &mod->ports[i];
+src/mem-system/module.c:	assert(port && i < mod->num_ports);
+src/mem-system/module.c:	mod->num_locked_ports++;
+src/mem-system/module.c:	mem_debug("  %lld stack %lld %s port %d locked\n", esim_time, stack->id, mod->name, i);
+src/mem-system/module.c:	assert(mod->num_locked_ports > 0);
+src/mem-system/module.c:	mod->num_locked_ports--;
+src/mem-system/module.c:		stack->id, mod->name);
+src/mem-system/module.c:	if (!mod->port_waiting_list_count)
+src/mem-system/module.c:	stack = mod->port_waiting_list_head;
+src/mem-system/module.c:	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+src/mem-system/module.c:	DOUBLE_LINKED_LIST_INSERT_TAIL(&mod->access_hash_table[index], bucket, stack);
+src/mem-system/module.c:	index = (stack->addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+src/mem-system/module.c:	DOUBLE_LINKED_LIST_REMOVE(&mod->access_hash_table[index], bucket, stack);
+src/mem-system/module.c:		assert(mod->access_list_coalesced_count > 0);
+src/mem-system/module.c:		mod->access_list_coalesced_count--;
+src/mem-system/module.c:	index = (addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+src/mem-system/module.c:	for (stack = mod->access_hash_table[index].bucket_list_head; stack; stack = stack->bucket_list_next)
+src/mem-system/module.c:	index = (addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+src/mem-system/module.c:	for (stack = mod->access_hash_table[index].bucket_list_head; stack;
+src/mem-system/module.c:		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+src/mem-system/module.c:		return mod->write_access_list_tail;
+src/mem-system/module.c:	if (mod->range_kind == mod_range_bounds)
+src/mem-system/module.c:		return addr >= mod->range.bounds.low &&
+src/mem-system/module.c:			addr <= mod->range.bounds.high;
+src/mem-system/module.c:	if (mod->range_kind == mod_range_interleaved)
+src/mem-system/module.c:		return (addr / mod->range.interleaved.div) %
+src/mem-system/module.c:			mod->range.interleaved.mod ==
+src/mem-system/module.c:			mod->range.interleaved.eq;
+src/mem-system/module.c:	if (mod->kind == mod_kind_main_memory)
+src/mem-system/module.c:		assert(!linked_list_count(mod->low_mod_list));
+src/mem-system/module.c:	LINKED_LIST_FOR_EACH(mod->low_mod_list)
+src/mem-system/module.c:		low_mod = linked_list_get(mod->low_mod_list);
+src/mem-system/module.c:				mod->name, server_mod->name, low_mod->name, addr);
+src/mem-system/module.c:			mod->name, addr);
+src/mem-system/module.c:	return random() % mod->latency + mod->latency;
+src/mem-system/module.c:		mod->access_list_tail;
+src/mem-system/module.c:			if (stack->addr >> mod->log_block_size ==
+src/mem-system/module.c:				addr >> mod->log_block_size)
+src/mem-system/module.c:		if (stack->addr >> mod->log_block_size != addr >> mod->log_block_size)
+src/mem-system/module.c:		if (stack->addr >> mod->log_block_size != addr >> mod->log_block_size)
+src/mem-system/module.c:			if (stack->addr >> mod->log_block_size ==
+src/mem-system/module.c:				addr >> mod->log_block_size)
+src/mem-system/module.c:		stack->id, stack->addr, mod->name, master_stack->id);
+src/mem-system/module.c:	assert(mod->access_list_coalesced_count <= mod->access_list_count);
+src/mem-system/module.c:	mod->access_list_coalesced_count++;
+src/mem-system/module.c:	client_info = repos_create_object(mod->client_info_repos);
+src/mem-system/module.c:	repos_free_object(mod->client_info_repos, client_info);
+Binary file src/mem-system/libmemsystem.a matches
+src/visual/memory/mem-system.c:#include "mod-access.h"
+src/visual/memory/mem-system.c:	access = hash_table_get(mod->access_table, access_name);
+src/visual/memory/mem-system.c:		hash_table_insert(mod->access_table, access_name, access);
+src/visual/memory/mem-system.c:	access = hash_table_get(mod->access_table, access_name);
+src/visual/memory/mem-system.c:		access = hash_table_remove(mod->access_table, access_name);
+src/visual/memory/mem-system.c:		str_write_to_file(f, mod->name);
+src/visual/memory/mem-system.c:			hash_table_insert(vi_mem_system->mod_table, mod->name, mod);
+src/visual/memory/mem-system.c:			if (mod->level < 1)
+src/visual/memory/mem-system.c:				panic("%s: %s: invalid level (%d)", __FUNCTION__, mod->name, mod->level);
+src/visual/memory/mem-system.c:			while (vi_mem_system->mod_level_list->count < mod->level)
+src/visual/memory/mem-system.c:			mod_level = list_get(vi_mem_system->mod_level_list, mod->level - 1);
+src/visual/memory/Makefile.in:@HAVE_GTK_TRUE@	mod-access.c \
+src/visual/memory/Makefile.in:@HAVE_GTK_TRUE@	mod-access.h \
+src/visual/memory/Makefile.in:@HAVE_GTK_TRUE@	mod-widget.c \
+src/visual/memory/Makefile.in:@HAVE_GTK_TRUE@	mod-widget.h \
+src/visual/memory/Makefile.in:am__libmemory_a_SOURCES_DIST = mem-system.c mem-system.h mod-access.c \
+src/visual/memory/Makefile.in:	mod-access.h mod.c mod.h mod-widget.c mod-widget.h net.c net.h \
+src/visual/memory/Makefile.in:@HAVE_GTK_TRUE@	mod-access.$(OBJEXT) mod.$(OBJEXT) \
+src/visual/memory/Makefile.in:@HAVE_GTK_TRUE@	mod-widget.$(OBJEXT) net.$(OBJEXT) \
+src/visual/memory/Makefile.in:@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mod-access.Po@am__quote@
+src/visual/memory/Makefile.in:@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mod-widget.Po@am__quote@
+src/visual/memory/mod.c:#include "mod-access.h"
+src/visual/memory/mod.c:	mod->name = xstrdup(name);
+src/visual/memory/mod.c:	mod->num_sets = vi_trace_line_get_symbol_int(trace_line, "num_sets");
+src/visual/memory/mod.c:	mod->assoc = vi_trace_line_get_symbol_int(trace_line, "assoc");
+src/visual/memory/mod.c:	mod->block_size = vi_trace_line_get_symbol_int(trace_line, "block_size");
+src/visual/memory/mod.c:	mod->sub_block_size = vi_trace_line_get_symbol_int(trace_line, "sub_block_size");
+src/visual/memory/mod.c:	mod->num_sub_blocks = mod->block_size / mod->sub_block_size;
+src/visual/memory/mod.c:	mod->num_sharers = vi_trace_line_get_symbol_int(trace_line, "num_sharers");
+src/visual/memory/mod.c:	mod->level = vi_trace_line_get_symbol_int(trace_line, "level");
+src/visual/memory/mod.c:	mod->high_net_node_index = vi_trace_line_get_symbol_int(trace_line, "high_net_node");
+src/visual/memory/mod.c:	mod->high_net = hash_table_get(vi_mem_system->net_table, high_net_name);
+src/visual/memory/mod.c:	mod->low_net_node_index = vi_trace_line_get_symbol_int(trace_line, "low_net_node");
+src/visual/memory/mod.c:	mod->low_net = hash_table_get(vi_mem_system->net_table, low_net_name);
+src/visual/memory/mod.c:	if (mod->high_net)
+src/visual/memory/mod.c:		vi_net_attach_mod(mod->high_net, mod, mod->high_net_node_index);
+src/visual/memory/mod.c:	if (mod->low_net)
+src/visual/memory/mod.c:		vi_net_attach_mod(mod->low_net, mod, mod->low_net_node_index);
+src/visual/memory/mod.c:	mod->blocks = xcalloc(mod->num_sets * mod->assoc, sizeof(struct vi_mod_block_t));
+src/visual/memory/mod.c:	for (set = 0; set < mod->num_sets; set++)
+src/visual/memory/mod.c:		for (way = 0; way < mod->assoc; way++)
+src/visual/memory/mod.c:			block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:			block->dir_entries = xcalloc(mod->num_sub_blocks, VI_MOD_DIR_ENTRY_SIZE(mod));
+src/visual/memory/mod.c:			for (sub_block = 0; sub_block < mod->num_sub_blocks; sub_block++)
+src/visual/memory/mod.c:	mod->access_table = hash_table_create(0, FALSE);
+src/visual/memory/mod.c:	for (i = 0; i < mod->num_sets * mod->assoc; i++)
+src/visual/memory/mod.c:		block = &mod->blocks[i];
+src/visual/memory/mod.c:		free(mod->blocks[i].dir_entries);
+src/visual/memory/mod.c:	free(mod->blocks);
+src/visual/memory/mod.c:	HASH_TABLE_FOR_EACH(mod->access_table, access_name, access)
+src/visual/memory/mod.c:	hash_table_free(mod->access_table);
+src/visual/memory/mod.c:	free(mod->name);
+src/visual/memory/mod.c:	assert(IN_RANGE(set, 0, mod->num_sets - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(way, 0, mod->assoc - 1));
+src/visual/memory/mod.c:	block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:	assert(IN_RANGE(set, 0, mod->num_sets - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(way, 0, mod->assoc - 1));
+src/visual/memory/mod.c:	block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:	assert(IN_RANGE(set, 0, mod->num_sets - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(way, 0, mod->assoc - 1));
+src/visual/memory/mod.c:	block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:	assert(IN_RANGE(set, 0, mod->num_sets - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(way, 0, mod->assoc - 1));
+src/visual/memory/mod.c:	block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:	if (!IN_RANGE(set, 0, mod->num_sets - 1))
+src/visual/memory/mod.c:	if (!IN_RANGE(way, 0, mod->assoc - 1))
+src/visual/memory/mod.c:	block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:	for (i = 0; i < mod->num_sub_blocks; i++)
+src/visual/memory/mod.c:	HASH_TABLE_FOR_EACH(mod->access_table, access_name, access)
+src/visual/memory/mod.c:	hash_table_clear(mod->access_table);
+src/visual/memory/mod.c:		hash_table_insert(mod->access_table, access->name, access);
+src/visual/memory/mod.c:	for (set = 0; set < mod->num_sets; set++)
+src/visual/memory/mod.c:		for (way = 0; way < mod->assoc; way++)
+src/visual/memory/mod.c:			block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:			for (i = 0; i < mod->num_sub_blocks; i++)
+src/visual/memory/mod.c:	num_accesses = hash_table_count(mod->access_table);
+src/visual/memory/mod.c:	HASH_TABLE_FOR_EACH(mod->access_table, access_name, access)
+src/visual/memory/mod.c:	for (set = 0; set < mod->num_sets; set++)
+src/visual/memory/mod.c:		for (way = 0; way < mod->assoc; way++)
+src/visual/memory/mod.c:			block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:			for (i = 0; i < mod->num_sub_blocks; i++)
+src/visual/memory/mod.c:	assert(IN_RANGE(set, 0, mod->num_sets - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(way, 0, mod->assoc - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(sub_block, 0, mod->num_sub_blocks - 1));
+src/visual/memory/mod.c:	block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod.c:	assert(IN_RANGE(sharer, 0, mod->num_sharers - 1));
+src/visual/memory/mod.c:	assert(dir_entry->num_sharers < mod->num_sharers);
+src/visual/memory/mod.c:	assert(IN_RANGE(sharer, 0, mod->num_sharers - 1));
+src/visual/memory/mod.c:	assert(IN_RANGE(sharer, 0, mod->num_sharers - 1));
+src/visual/memory/mod.c:	assert(owner == -1 || IN_RANGE(owner, 0, mod->num_sharers - 1));
+src/visual/memory/panel.c:#include "mod-access.h"
+src/visual/memory/panel.c:#include "mod-widget.h"
+src/visual/memory/panel.c:	snprintf(str, sizeof str, "Module %s", mod->name);
+src/visual/memory/panel.c:	mod_widget = vi_mod_widget_create(mod->name);
+src/visual/memory/panel.c:	snprintf(str, sizeof str, "<b>%s</b>", mod->name);
+src/visual/memory/panel.c:	HASH_TABLE_FOR_EACH(board->mod->access_table, access_name, access)
+src/visual/memory/Makefile.am:	mod-access.c \
+src/visual/memory/Makefile.am:	mod-access.h \
+src/visual/memory/Makefile.am:	mod-widget.c \
+src/visual/memory/Makefile.am:	mod-widget.h \
+src/visual/memory/Makefile:#	mod-access.c \
+src/visual/memory/Makefile:#	mod-access.h \
+src/visual/memory/Makefile:#	mod-widget.c \
+src/visual/memory/Makefile:#	mod-widget.h \
+src/visual/memory/Makefile:am__libmemory_a_SOURCES_DIST = mem-system.c mem-system.h mod-access.c \
+src/visual/memory/Makefile:	mod-access.h mod.c mod.h mod-widget.c mod-widget.h net.c net.h \
+src/visual/memory/Makefile:#	mod-access.$(OBJEXT) mod.$(OBJEXT) \
+src/visual/memory/Makefile:#	mod-widget.$(OBJEXT) net.$(OBJEXT) \
+src/visual/memory/Makefile:include ./$(DEPDIR)/mod-access.Po
+src/visual/memory/Makefile:include ./$(DEPDIR)/mod-widget.Po
+src/visual/memory/.deps/mod-widget.Po:mod-widget.o: mod-widget.c /usr/include/stdc-predef.h \
+src/visual/memory/.deps/mod-widget.Po: mem-system.h mod.h mod-access.h mod-widget.h net.h
+src/visual/memory/.deps/mod-widget.Po:mod-access.h:
+src/visual/memory/.deps/mod-widget.Po:mod-widget.h:
+src/visual/memory/.deps/mod-access.Po:mod-access.o: mod-access.c /usr/include/stdc-predef.h \
+src/visual/memory/.deps/mod-access.Po: mem-system.h mod-access.h
+src/visual/memory/.deps/mod-access.Po:mod-access.h:
+src/visual/memory/.deps/panel.Po: mem-system.h mod.h mod-access.h mod-widget.h panel.h
+src/visual/memory/.deps/panel.Po:mod-access.h:
+src/visual/memory/.deps/panel.Po:mod-widget.h:
+src/visual/memory/.deps/mem-system.Po: ../../../src/visual/common/trace.h mem-system.h mod.h mod-access.h net.h
+src/visual/memory/.deps/mem-system.Po:mod-access.h:
+src/visual/memory/.deps/mod.Po: mem-system.h mod.h mod-access.h net.h
+src/visual/memory/.deps/mod.Po:mod-access.h:
+src/visual/memory/mod-widget.c:#include "mod-access.h"
+src/visual/memory/mod-widget.c:#include "mod-widget.h"
+src/visual/memory/mod-widget.c:	net = mod->high_net;
+src/visual/memory/mod-widget.c:		title_format_begin, mod->name, sharers_label->set, sharers_label->way, title_format_end);
+src/visual/memory/mod-widget.c:	for (sub_block = 0; sub_block < mod->num_sub_blocks; sub_block++)
+src/visual/memory/mod-widget.c:		for (sharer = 0; sharer < mod->num_sharers; sharer++)
+src/visual/memory/mod-widget.c:		title_format_begin, mod->name, accesses_label->set, accesses_label->way, title_format_end);
+src/visual/memory/mod-widget.c:	HASH_TABLE_FOR_EACH(mod->access_table, access_name, access)
+src/visual/memory/mod-widget.c:	table_width = VI_MOD_CELL_WIDTH * mod->assoc;
+src/visual/memory/mod-widget.c:	table_height = VI_MOD_CELL_HEIGHT * mod->num_sets;
+src/visual/memory/mod-widget.c:	while (x < width && way < mod->assoc)
+src/visual/memory/mod-widget.c:	while (y < height && set < mod->num_sets)
+src/visual/memory/mod-widget.c:	while (y < height && set < mod->num_sets)
+src/visual/memory/mod-widget.c:		while (x < width && way < mod->assoc)
+src/visual/memory/mod-widget.c:			assert(IN_RANGE(set, 0, mod->num_sets - 1));
+src/visual/memory/mod-widget.c:			assert(IN_RANGE(way, 0, mod->assoc - 1));
+src/visual/memory/mod-widget.c:			block = &mod->blocks[set * mod->assoc + way];
+src/visual/memory/mod-widget.c:			sharers_label = sharers_label_create(mod->name, set, way);
+src/visual/memory/mod-widget.c:			accesses_label = accesses_label_create(mod->name, set, way);
+src/visual/memory/mod-access.c:#include "mod-access.h"

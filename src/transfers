@@ -1,0 +1,784 @@
+Coincidencia en el fichero binario arch/fermi/timing/libtiming.a
+Coincidencia en el fichero binario arch/fermi/timing/mem-config.o
+arch/fermi/timing/mem-config.c:87:		config_write_string(config, section, "LowNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:103:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:104:	config_write_string(config, section, "LowNetwork", "frm-net-l2-0-gm-0");
+arch/fermi/timing/mem-config.c:112:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:113:	config_write_string(config, section, "LowNetwork", "frm-net-l2-1-gm-1");
+arch/fermi/timing/mem-config.c:121:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:122:	config_write_string(config, section, "LowNetwork", "frm-net-l2-2-gm-2");
+arch/fermi/timing/mem-config.c:130:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:131:	config_write_string(config, section, "LowNetwork", "frm-net-l2-3-gm-3");
+arch/fermi/timing/mem-config.c:139:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:140:	config_write_string(config, section, "LowNetwork", "frm-net-l2-4-gm-4");
+arch/fermi/timing/mem-config.c:148:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:149:	config_write_string(config, section, "LowNetwork", "frm-net-l2-5-gm-5");
+arch/fermi/timing/mem-config.c:157:	config_write_string(config, section, "HighNetwork", "frm-net-l2-0-gm-0");
+arch/fermi/timing/mem-config.c:165:	config_write_string(config, section, "HighNetwork", "frm-net-l2-1-gm-1");
+arch/fermi/timing/mem-config.c:173:	config_write_string(config, section, "HighNetwork", "frm-net-l2-2-gm-2");
+arch/fermi/timing/mem-config.c:181:	config_write_string(config, section, "HighNetwork", "frm-net-l2-3-gm-3");
+arch/fermi/timing/mem-config.c:189:	config_write_string(config, section, "HighNetwork", "frm-net-l2-4-gm-4");
+arch/fermi/timing/mem-config.c:197:	config_write_string(config, section, "HighNetwork", "frm-net-l2-5-gm-5");
+arch/fermi/timing/mem-config.c:204:	snprintf(section, sizeof section, "Network frm-net-l1-l2");
+arch/fermi/timing/mem-config.c:210:	snprintf(section, sizeof section, "Network frm-net-l2-0-gm-0");
+arch/fermi/timing/mem-config.c:215:	snprintf(section, sizeof section, "Network frm-net-l2-1-gm-1");
+arch/fermi/timing/mem-config.c:220:	snprintf(section, sizeof section, "Network frm-net-l2-2-gm-2");
+arch/fermi/timing/mem-config.c:225:	snprintf(section, sizeof section, "Network frm-net-l2-3-gm-3");
+arch/fermi/timing/mem-config.c:230:	snprintf(section, sizeof section, "Network frm-net-l2-4-gm-4");
+arch/fermi/timing/mem-config.c:235:	snprintf(section, sizeof section, "Network frm-net-l2-5-gm-5");
+Coincidencia en el fichero binario arch/x86/timing/libtiming.a
+Coincidencia en el fichero binario arch/x86/timing/mem-config.o
+arch/x86/timing/mem-config.c:66:		config_write_string(config, section, "LowNetwork", "x86-net-l1-l2");
+arch/x86/timing/mem-config.c:86:	config_write_string(config, section, "HighNetwork", "x86-net-l1-l2");
+arch/x86/timing/mem-config.c:87:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/x86/timing/mem-config.c:93:	config_write_string(config, section, "HighNetwork", "x86-net-l2-mm");
+arch/x86/timing/mem-config.c:98:	snprintf(section, sizeof section, "Network x86-net-l1-l2");
+arch/x86/timing/mem-config.c:104:	snprintf(section, sizeof section, "Network x86-net-l2-mm");
+Coincidencia en el fichero binario arch/southern-islands/timing/libtiming.a
+Coincidencia en el fichero binario arch/southern-islands/timing/mem-config.o
+arch/southern-islands/timing/mem-config.c:72:			"si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:85:			"si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:107:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:108:	config_write_string(config, section, "LowNetwork", "si-net-l2-0-gm-0");
+arch/southern-islands/timing/mem-config.c:116:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:117:	config_write_string(config, section, "LowNetwork", "si-net-l2-1-gm-1");
+arch/southern-islands/timing/mem-config.c:125:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:126:	config_write_string(config, section, "LowNetwork", "si-net-l2-2-gm-2");
+arch/southern-islands/timing/mem-config.c:134:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:135:	config_write_string(config, section, "LowNetwork", "si-net-l2-3-gm-3");
+arch/southern-islands/timing/mem-config.c:143:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:144:	config_write_string(config, section, "LowNetwork", "si-net-l2-4-gm-4");
+arch/southern-islands/timing/mem-config.c:152:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:153:	config_write_string(config, section, "LowNetwork", "si-net-l2-5-gm-5");
+arch/southern-islands/timing/mem-config.c:161:	config_write_string(config, section, "HighNetwork", "si-net-l2-0-gm-0");
+arch/southern-islands/timing/mem-config.c:169:	config_write_string(config, section, "HighNetwork", "si-net-l2-1-gm-1");
+arch/southern-islands/timing/mem-config.c:177:	config_write_string(config, section, "HighNetwork", "si-net-l2-2-gm-2");
+arch/southern-islands/timing/mem-config.c:185:	config_write_string(config, section, "HighNetwork", "si-net-l2-3-gm-3");
+arch/southern-islands/timing/mem-config.c:193:	config_write_string(config, section, "HighNetwork", "si-net-l2-4-gm-4");
+arch/southern-islands/timing/mem-config.c:201:	config_write_string(config, section, "HighNetwork", "si-net-l2-5-gm-5");
+arch/southern-islands/timing/mem-config.c:208:	snprintf(section, sizeof section, "Network si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:214:	snprintf(section, sizeof section, "Network si-net-l2-0-gm-0");
+arch/southern-islands/timing/mem-config.c:219:	snprintf(section, sizeof section, "Network si-net-l2-1-gm-1");
+arch/southern-islands/timing/mem-config.c:224:	snprintf(section, sizeof section, "Network si-net-l2-2-gm-2");
+arch/southern-islands/timing/mem-config.c:229:	snprintf(section, sizeof section, "Network si-net-l2-3-gm-3");
+arch/southern-islands/timing/mem-config.c:234:	snprintf(section, sizeof section, "Network si-net-l2-4-gm-4");
+arch/southern-islands/timing/mem-config.c:239:	snprintf(section, sizeof section, "Network si-net-l2-5-gm-5");
+arch/southern-islands/timing/mem-config.c:284:			"si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:297:			"si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:319:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:320:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/southern-islands/timing/mem-config.c:328:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:329:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/southern-islands/timing/mem-config.c:337:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:338:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/southern-islands/timing/mem-config.c:346:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:347:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/southern-islands/timing/mem-config.c:355:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:356:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/southern-islands/timing/mem-config.c:364:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:365:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+arch/southern-islands/timing/mem-config.c:371:	snprintf(section, sizeof section, "Network si-net-l1-l2");
+arch/southern-islands/timing/mem-config.c:377:	snprintf(section, sizeof section, "Network x86-net-l2-mm");
+Coincidencia en el fichero binario arch/evergreen/timing/libtiming.a
+Coincidencia en el fichero binario arch/evergreen/timing/mem-config.o
+arch/evergreen/timing/mem-config.c:65:		config_write_string(config, section, "LowNetwork", "evg-net-l1-l2");
+arch/evergreen/timing/mem-config.c:82:		config_write_string(config, section, "HighNetwork", "evg-net-l1-l2");
+arch/evergreen/timing/mem-config.c:83:		config_write_string(config, section, "LowNetwork", "evg-net-l2-gm");
+arch/evergreen/timing/mem-config.c:95:		config_write_string(config, section, "HighNetwork", "evg-net-l2-gm");
+arch/evergreen/timing/mem-config.c:104:	snprintf(section, sizeof section, "Network evg-net-l1-l2");
+arch/evergreen/timing/mem-config.c:110:	snprintf(section, sizeof section, "Network evg-net-l2-gm");
+Coincidencia en el fichero binario backpup/arch/fermi/timing/libtiming.a
+Coincidencia en el fichero binario backpup/arch/fermi/timing/mem-config.o
+backpup/arch/fermi/timing/mem-config.c:87:		config_write_string(config, section, "LowNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:103:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:104:	config_write_string(config, section, "LowNetwork", "frm-net-l2-0-gm-0");
+backpup/arch/fermi/timing/mem-config.c:112:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:113:	config_write_string(config, section, "LowNetwork", "frm-net-l2-1-gm-1");
+backpup/arch/fermi/timing/mem-config.c:121:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:122:	config_write_string(config, section, "LowNetwork", "frm-net-l2-2-gm-2");
+backpup/arch/fermi/timing/mem-config.c:130:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:131:	config_write_string(config, section, "LowNetwork", "frm-net-l2-3-gm-3");
+backpup/arch/fermi/timing/mem-config.c:139:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:140:	config_write_string(config, section, "LowNetwork", "frm-net-l2-4-gm-4");
+backpup/arch/fermi/timing/mem-config.c:148:	config_write_string(config, section, "HighNetwork", "frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:149:	config_write_string(config, section, "LowNetwork", "frm-net-l2-5-gm-5");
+backpup/arch/fermi/timing/mem-config.c:157:	config_write_string(config, section, "HighNetwork", "frm-net-l2-0-gm-0");
+backpup/arch/fermi/timing/mem-config.c:165:	config_write_string(config, section, "HighNetwork", "frm-net-l2-1-gm-1");
+backpup/arch/fermi/timing/mem-config.c:173:	config_write_string(config, section, "HighNetwork", "frm-net-l2-2-gm-2");
+backpup/arch/fermi/timing/mem-config.c:181:	config_write_string(config, section, "HighNetwork", "frm-net-l2-3-gm-3");
+backpup/arch/fermi/timing/mem-config.c:189:	config_write_string(config, section, "HighNetwork", "frm-net-l2-4-gm-4");
+backpup/arch/fermi/timing/mem-config.c:197:	config_write_string(config, section, "HighNetwork", "frm-net-l2-5-gm-5");
+backpup/arch/fermi/timing/mem-config.c:204:	snprintf(section, sizeof section, "Network frm-net-l1-l2");
+backpup/arch/fermi/timing/mem-config.c:210:	snprintf(section, sizeof section, "Network frm-net-l2-0-gm-0");
+backpup/arch/fermi/timing/mem-config.c:215:	snprintf(section, sizeof section, "Network frm-net-l2-1-gm-1");
+backpup/arch/fermi/timing/mem-config.c:220:	snprintf(section, sizeof section, "Network frm-net-l2-2-gm-2");
+backpup/arch/fermi/timing/mem-config.c:225:	snprintf(section, sizeof section, "Network frm-net-l2-3-gm-3");
+backpup/arch/fermi/timing/mem-config.c:230:	snprintf(section, sizeof section, "Network frm-net-l2-4-gm-4");
+backpup/arch/fermi/timing/mem-config.c:235:	snprintf(section, sizeof section, "Network frm-net-l2-5-gm-5");
+Coincidencia en el fichero binario backpup/arch/x86/timing/libtiming.a
+Coincidencia en el fichero binario backpup/arch/x86/timing/mem-config.o
+backpup/arch/x86/timing/mem-config.c:66:		config_write_string(config, section, "LowNetwork", "x86-net-l1-l2");
+backpup/arch/x86/timing/mem-config.c:86:	config_write_string(config, section, "HighNetwork", "x86-net-l1-l2");
+backpup/arch/x86/timing/mem-config.c:87:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/x86/timing/mem-config.c:93:	config_write_string(config, section, "HighNetwork", "x86-net-l2-mm");
+backpup/arch/x86/timing/mem-config.c:98:	snprintf(section, sizeof section, "Network x86-net-l1-l2");
+backpup/arch/x86/timing/mem-config.c:104:	snprintf(section, sizeof section, "Network x86-net-l2-mm");
+Coincidencia en el fichero binario backpup/arch/southern-islands/timing/libtiming.a
+Coincidencia en el fichero binario backpup/arch/southern-islands/timing/mem-config.o
+backpup/arch/southern-islands/timing/mem-config.c:72:			"si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:85:			"si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:107:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:108:	config_write_string(config, section, "LowNetwork", "si-net-l2-0-gm-0");
+backpup/arch/southern-islands/timing/mem-config.c:116:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:117:	config_write_string(config, section, "LowNetwork", "si-net-l2-1-gm-1");
+backpup/arch/southern-islands/timing/mem-config.c:125:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:126:	config_write_string(config, section, "LowNetwork", "si-net-l2-2-gm-2");
+backpup/arch/southern-islands/timing/mem-config.c:134:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:135:	config_write_string(config, section, "LowNetwork", "si-net-l2-3-gm-3");
+backpup/arch/southern-islands/timing/mem-config.c:143:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:144:	config_write_string(config, section, "LowNetwork", "si-net-l2-4-gm-4");
+backpup/arch/southern-islands/timing/mem-config.c:152:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:153:	config_write_string(config, section, "LowNetwork", "si-net-l2-5-gm-5");
+backpup/arch/southern-islands/timing/mem-config.c:161:	config_write_string(config, section, "HighNetwork", "si-net-l2-0-gm-0");
+backpup/arch/southern-islands/timing/mem-config.c:169:	config_write_string(config, section, "HighNetwork", "si-net-l2-1-gm-1");
+backpup/arch/southern-islands/timing/mem-config.c:177:	config_write_string(config, section, "HighNetwork", "si-net-l2-2-gm-2");
+backpup/arch/southern-islands/timing/mem-config.c:185:	config_write_string(config, section, "HighNetwork", "si-net-l2-3-gm-3");
+backpup/arch/southern-islands/timing/mem-config.c:193:	config_write_string(config, section, "HighNetwork", "si-net-l2-4-gm-4");
+backpup/arch/southern-islands/timing/mem-config.c:201:	config_write_string(config, section, "HighNetwork", "si-net-l2-5-gm-5");
+backpup/arch/southern-islands/timing/mem-config.c:208:	snprintf(section, sizeof section, "Network si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:214:	snprintf(section, sizeof section, "Network si-net-l2-0-gm-0");
+backpup/arch/southern-islands/timing/mem-config.c:219:	snprintf(section, sizeof section, "Network si-net-l2-1-gm-1");
+backpup/arch/southern-islands/timing/mem-config.c:224:	snprintf(section, sizeof section, "Network si-net-l2-2-gm-2");
+backpup/arch/southern-islands/timing/mem-config.c:229:	snprintf(section, sizeof section, "Network si-net-l2-3-gm-3");
+backpup/arch/southern-islands/timing/mem-config.c:234:	snprintf(section, sizeof section, "Network si-net-l2-4-gm-4");
+backpup/arch/southern-islands/timing/mem-config.c:239:	snprintf(section, sizeof section, "Network si-net-l2-5-gm-5");
+backpup/arch/southern-islands/timing/mem-config.c:284:			"si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:297:			"si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:319:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:320:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/southern-islands/timing/mem-config.c:328:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:329:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/southern-islands/timing/mem-config.c:337:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:338:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/southern-islands/timing/mem-config.c:346:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:347:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/southern-islands/timing/mem-config.c:355:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:356:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/southern-islands/timing/mem-config.c:364:	config_write_string(config, section, "HighNetwork", "si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:365:	config_write_string(config, section, "LowNetwork", "x86-net-l2-mm");
+backpup/arch/southern-islands/timing/mem-config.c:371:	snprintf(section, sizeof section, "Network si-net-l1-l2");
+backpup/arch/southern-islands/timing/mem-config.c:377:	snprintf(section, sizeof section, "Network x86-net-l2-mm");
+Coincidencia en el fichero binario backpup/arch/evergreen/timing/libtiming.a
+Coincidencia en el fichero binario backpup/arch/evergreen/timing/mem-config.o
+backpup/arch/evergreen/timing/mem-config.c:65:		config_write_string(config, section, "LowNetwork", "evg-net-l1-l2");
+backpup/arch/evergreen/timing/mem-config.c:82:		config_write_string(config, section, "HighNetwork", "evg-net-l1-l2");
+backpup/arch/evergreen/timing/mem-config.c:83:		config_write_string(config, section, "LowNetwork", "evg-net-l2-gm");
+backpup/arch/evergreen/timing/mem-config.c:95:		config_write_string(config, section, "HighNetwork", "evg-net-l2-gm");
+backpup/arch/evergreen/timing/mem-config.c:104:	snprintf(section, sizeof section, "Network evg-net-l1-l2");
+backpup/arch/evergreen/timing/mem-config.c:110:	snprintf(section, sizeof section, "Network evg-net-l2-gm");
+Coincidencia en el fichero binario backpup/network/node.o
+Coincidencia en el fichero binario backpup/network/bus.o
+backpup/network/buffer.c:29:#include "net-system.h"
+backpup/network/buffer.c:130:		net->name,
+backpup/network/buffer.c:161:		net->name,
+backpup/network/routing-table.c:29:#include "net-system.h"
+backpup/network/routing-table.c:75:		node_adj = list_get(net->node_list, j);
+backpup/network/routing-table.c:122:							net->name, net_err_cycle);
+backpup/network/routing-table.c:160:		node_i = list_get(net->node_list, i);
+backpup/network/routing-table.c:228:			__FUNCTION__, net->name);
+backpup/network/routing-table.c:229:	routing_table->dim = list_count(net->node_list);
+backpup/network/routing-table.c:235:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:237:		for (j = 0; j < net->node_count; j++)
+backpup/network/routing-table.c:239:			src_node = list_get(net->node_list, i);
+backpup/network/routing-table.c:240:			dst_node = list_get(net->node_list, j);
+backpup/network/routing-table.c:250:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:252:		src_node = list_get(net->node_list, i);
+backpup/network/routing-table.c:328:	for (k = 0; k < net->node_count; k++)
+backpup/network/routing-table.c:330:		for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:332:			for (j = 0; j < net->node_count; j++)
+backpup/network/routing-table.c:342:				node_i = list_get(net->node_list, i);
+backpup/network/routing-table.c:343:				node_j = list_get(net->node_list, j);
+backpup/network/routing-table.c:344:				node_k = list_get(net->node_list, k);
+backpup/network/routing-table.c:360:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:362:		for (j = 0; j < net->node_count; j++)
+backpup/network/routing-table.c:368:			node_i = list_get(net->node_list, i);
+backpup/network/routing-table.c:370:			node_j = list_get(net->node_list, j);
+backpup/network/routing-table.c:440:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:442:		for (j = 0; j < net->node_count; j++)
+backpup/network/routing-table.c:448:			node_i = list_get(net->node_list, i);
+backpup/network/routing-table.c:449:			node_j = list_get(net->node_list, j);
+backpup/network/routing-table.c:475:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:477:		node_l = list_get(net->node_list, i);
+backpup/network/routing-table.c:482:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:484:		node_l = list_get(net->node_list, i);
+backpup/network/routing-table.c:486:		for (j = 0; j < net->node_count; j++)
+backpup/network/routing-table.c:492:			node_i = list_get(net->node_list, i);
+backpup/network/routing-table.c:493:			node_j = list_get(net->node_list, j);
+backpup/network/routing-table.c:519:	for (i = 0; i < net->node_count; i++)
+backpup/network/routing-table.c:521:		for (j = 0; j < net->node_count; j++)
+backpup/network/routing-table.c:526:			node_i = list_get(net->node_list, i);
+backpup/network/routing-table.c:527:			node_j = list_get(net->node_list, j);
+backpup/network/routing-table.c:536:				node_k = list_get(net->node_list, k);
+backpup/network/routing-table.c:615:							routing_table->net->name, src_node->name,
+backpup/network/routing-table.c:651:						routing_table->net->name, src_node->name,
+backpup/network/routing-table.c:659:			routing_table->net->name, src_node->name, dst_node->name,
+backpup/network/routing-table.c:676:				net->name,net_err_config);
+backpup/network/visual.c:74:	for (i = 0; i < list_count(net->node_list); i++)
+backpup/network/visual.c:79:		node = list_get(net->node_list, i);
+backpup/network/visual.c:98:	for(i = 0; i < list_count(net->link_list); i++)
+backpup/network/visual.c:104:		link = list_get(net->link_list, i);
+backpup/network/Makefile.am:13:	net-system.c \
+backpup/network/Makefile.am:14:	net-system.h \
+Coincidencia en el fichero binario backpup/network/buffer.o
+Coincidencia en el fichero binario backpup/network/message.o
+backpup/network/link.c:30:#include "net-system.h"
+backpup/network/link.c:103:	fprintf(f, "[ Network.%s.Link.%s ]\n", net->name, link->name);
+backpup/network/network.c:31:#include "net-system.h"
+backpup/network/network.c:49:	for (int i = 0; i < net->node_count; i++)
+backpup/network/network.c:52:		for (int j = 0; j < net->node_count; j++)
+backpup/network/network.c:63:			src_node_r = list_get(net->node_list, i);
+backpup/network/network.c:64:			dst_node_r = list_get(net->node_list, j);
+backpup/network/network.c:92:								net->name, section, net_err_config);
+backpup/network/network.c:105:								net->name, section,net_err_config);
+backpup/network/network.c:109:						(net->routing_table,
+backpup/network/network.c:130:				"\t option --net-injection-rate should not be used \n",
+backpup/network/network.c:131:				net->name,section);
+backpup/network/network.c:137:				"traffic pattern\n (%s)", net->name,
+backpup/network/network.c:176:	msg->bucket_next = net->msg_table[index];
+backpup/network/network.c:177:	net->msg_table[index] = msg;
+backpup/network/network.c:188:	msg = net->msg_table[index];
+backpup/network/network.c:203:	msg = net->msg_table[index];
+backpup/network/network.c:214:		net->msg_table[index] = msg->bucket_next;
+backpup/network/network.c:231:	net->name = xstrdup(name);
+backpup/network/network.c:232:	net->node_list = list_create();
+backpup/network/network.c:233:	net->link_list = list_create();
+backpup/network/network.c:234:	net->routing_table = net_routing_table_create(net);
+backpup/network/network.c:262:		net->def_input_buffer_size = config_read_int(config, section,
+backpup/network/network.c:264:		net->def_output_buffer_size = config_read_int(config, section,
+backpup/network/network.c:268:		if (!net->def_input_buffer_size)
+backpup/network/network.c:270:					net->name, section, net_err_config);
+backpup/network/network.c:271:		if (!net->def_output_buffer_size)
+backpup/network/network.c:273:					net->name, section, net_err_config);
+backpup/network/network.c:276:					net->name, section, net_err_config);
+backpup/network/network.c:277:		def_output_buffer_size = net->def_output_buffer_size;
+backpup/network/network.c:278:		def_input_buffer_size = net->def_input_buffer_size;
+backpup/network/network.c:317:					net->name, section, net_err_config);
+backpup/network/network.c:345:						net->name, section);
+backpup/network/network.c:351:						net->name, section, net_err_config);
+backpup/network/network.c:356:					net->name, section, net_err_config);
+backpup/network/network.c:498:	net_routing_table_initiate(net->routing_table);
+backpup/network/network.c:572:		net_routing_table_floyd_warshall(net->routing_table);
+backpup/network/network.c:584:	for (i = 0; i < list_count(net->node_list); i++)
+backpup/network/network.c:585:		net_node_free(list_get(net->node_list, i));
+backpup/network/network.c:586:	list_free(net->node_list);
+backpup/network/network.c:589:	for (i = 0; i < list_count(net->link_list); i++)
+backpup/network/network.c:590:		net_link_free(list_get(net->link_list, i));
+backpup/network/network.c:591:	list_free(net->link_list);
+backpup/network/network.c:594:	net_routing_table_free(net->routing_table);
+backpup/network/network.c:599:		while (net->msg_table[i])
+backpup/network/network.c:603:			next = net->msg_table[i]->bucket_next;
+backpup/network/network.c:604:			net_msg_free(net->msg_table[i]);
+backpup/network/network.c:605:			net->msg_table[i] = next;
+backpup/network/network.c:610:	free(net->name);
+backpup/network/network.c:621:	fprintf(f, "*\n* Network %s\n*\n\n", net->name);
+backpup/network/network.c:624:	for (i = 0; i < list_count(net->node_list); i++)
+backpup/network/network.c:627:		node = list_get(net->node_list, i);
+backpup/network/network.c:639:	fprintf(f, "[ Network.%s.General ]\n", net->name);
+backpup/network/network.c:640:	fprintf(f, "Transfers = %lld\n", net->transfers);
+backpup/network/network.c:641:	fprintf(f, "AverageMessageSize = %.2f\n", net->transfers ?
+backpup/network/network.c:642:			(double) net->msg_size_acc / net->transfers : 0.0);
+backpup/network/network.c:643:	fprintf(f, "AverageLatency = %.4f\n", net->transfers ?
+backpup/network/network.c:644:			(double) net->lat_acc / net->transfers : 0.0);
+backpup/network/network.c:648:	for (i = 0; i < list_count(net->link_list); i++)
+backpup/network/network.c:652:		link = list_get(net->link_list, i);
+backpup/network/network.c:657:	for (i = 0; i < list_count(net->node_list); i++)
+backpup/network/network.c:661:		node = list_get(net->node_list, i);
+backpup/network/network.c:675:	fprintf(f, "Title = \" Network: %s \"\n", graph->net->name);
+backpup/network/network.c:794:			net->node_count,  /* index */
+backpup/network/network.c:802:	net->node_count++;
+backpup/network/network.c:803:	net->end_node_count++;
+backpup/network/network.c:804:	list_add(net->node_list, node);
+backpup/network/network.c:817:			net->node_count,  /* index */
+backpup/network/network.c:825:	net->node_count++;
+backpup/network/network.c:826:	list_add(net->node_list, node);
+backpup/network/network.c:850:			net->node_count,  /* index */
+backpup/network/network.c:858:	net->node_count++;
+backpup/network/network.c:859:	list_add(net->node_list, node);
+backpup/network/network.c:873:	for (i = 0; i < list_count(net->node_list); i++)
+backpup/network/network.c:875:		node = list_get(net->node_list, i);
+backpup/network/network.c:890:	for (i = 0; i < list_count(net->node_list); i++)
+backpup/network/network.c:892:		node = list_get(net->node_list, i);
+backpup/network/network.c:911:				net->name);
+backpup/network/network.c:918:	list_add(net->link_list, link);
+backpup/network/network.c:959:		fatal("network \"%s\" : BUS to BUS connection is not supported.", net->name);
+backpup/network/network.c:1018:	struct net_routing_table_t *routing_table = net->routing_table;
+backpup/network/network.c:1057:	struct net_routing_table_t *routing_table = net->routing_table;
+backpup/network/network.c:1072:				net->name, src_node->name, dst_node->name,
+backpup/network/network.c:1077:		fatal("%s: message too long.\n%s", net->name,
+backpup/network/command.c:27:#include "net-system.h"
+backpup/network/command.c:206:					net->msg_id_counter + 1);
+backpup/network/command.c:208:			if (msg_id != net->msg_id_counter + 1)
+Coincidencia en el fichero binario backpup/network/link.o
+Coincidencia en el fichero binario backpup/network/routing-table.o
+backpup/network/Makefile:102:	message.$(OBJEXT) net-system.$(OBJEXT) network.$(OBJEXT) \
+backpup/network/Makefile:292:	net-system.c \
+backpup/network/Makefile:293:	net-system.h \
+backpup/network/Makefile:395:include ./$(DEPDIR)/net-system.Po
+backpup/network/message.c:31:#include "net-system.h"
+backpup/network/message.c:57:	msg->id = ++net->msg_id_counter;
+backpup/network/message.c:109:	struct net_routing_table_t *routing_table = net->routing_table;
+backpup/network/message.c:136:				net->name,
+backpup/network/message.c:147:			fatal("%s: no route from %s to %s.\n%s", net->name,
+backpup/network/message.c:187:				net->name,
+backpup/network/message.c:202:				net->name,
+backpup/network/message.c:217:				net->name,
+backpup/network/message.c:238:					net->name,
+backpup/network/message.c:258:						net->name,
+backpup/network/message.c:275:					net->name, msg->id);
+backpup/network/message.c:284:				fatal("%s: message does not fit in buffer.\n%s", net->name, net_err_large_message);
+backpup/network/message.c:293:					net->name, msg->id);
+backpup/network/message.c:318:				if(strstr(link->net->name,"net-l1-to-l2"))
+backpup/network/message.c:322:				else if(strstr(link->net->name,"net-l2-to-mm"))
+backpup/network/message.c:374:				"buffer for the route between %s and %s \n", net->name,
+backpup/network/message.c:387:					net->name,
+backpup/network/message.c:395:					net->name, net_err_large_message);
+backpup/network/message.c:405:					net->name, msg->id);
+backpup/network/message.c:421:					net->name, msg->id);
+backpup/network/message.c:483:			net->name,
+backpup/network/message.c:497:				 net->name, msg->id);
+backpup/network/message.c:517:				net->name,
+backpup/network/message.c:529:			fatal("%s: no route from %s to %s.\n%s", net->name,
+backpup/network/message.c:540:				net->name,
+backpup/network/message.c:550:				net->name, net_err_large_message);
+backpup/network/message.c:560:				net->name,
+backpup/network/message.c:574:				net->name,
+backpup/network/message.c:607:			net->name,
+backpup/network/message.c:612:		net->transfers++;
+backpup/network/message.c:613:		net->lat_acc += cycle - msg->send_cycle;
+backpup/network/message.c:614:		net->msg_size_acc += msg->size;
+backpup/network/Makefile.in:102:	message.$(OBJEXT) net-system.$(OBJEXT) network.$(OBJEXT) \
+backpup/network/Makefile.in:292:	net-system.c \
+backpup/network/Makefile.in:293:	net-system.h \
+backpup/network/Makefile.in:395:@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net-system.Po@am__quote@
+Coincidencia en el fichero binario backpup/network/libnetwork.a
+backpup/network/node.c:30:#include "net-system.h"
+backpup/network/node.c:60:		fatal("%s: duplicated node name.\n%s", net->name,
+backpup/network/node.c:148:	fprintf(f, "[ Network.%s.Node.%s ]\n", net->name, node->name);
+backpup/network/node.c:250:	struct net_routing_table_t *routing_table = net->routing_table;
+backpup/network/.deps/command.Po:21: ../../src/lib/util/debug.h net-system.h command.h network.h \
+backpup/network/.deps/command.Po:106:net-system.h:
+backpup/network/.deps/link.Po:21: ../../src/lib/util/string.h buffer.h message.h link.h net-system.h \
+backpup/network/.deps/link.Po:112:net-system.h:
+backpup/network/.deps/message.Po:21: bus.h link.h net-system.h network.h ../../src/lib/util/config.h node.h \
+backpup/network/.deps/message.Po:112:net-system.h:
+backpup/network/.deps/node.Po:21: ../../src/lib/util/string.h buffer.h message.h bus.h net-system.h \
+backpup/network/.deps/node.Po:112:net-system.h:
+backpup/network/.deps/network.Po:21: ../../src/lib/util/string.h buffer.h message.h bus.h link.h net-system.h \
+backpup/network/.deps/network.Po:115:net-system.h:
+backpup/network/.deps/routing-table.Po:19: ../../src/lib/util/list.h buffer.h message.h bus.h link.h net-system.h \
+backpup/network/.deps/routing-table.Po:102:net-system.h:
+backpup/network/.deps/net-system.Po:1:net-system.o: net-system.c /usr/include/math.h /usr/include/features.h \
+backpup/network/.deps/net-system.Po:25: ../../src/lib/util/misc.h ../../src/lib/util/string.h net-system.h \
+backpup/network/.deps/net-system.Po:130:net-system.h:
+backpup/network/.deps/buffer.Po:21: ../../src/lib/util/list.h buffer.h message.h net-system.h network.h \
+backpup/network/.deps/buffer.Po:110:net-system.h:
+backpup/network/.deps/bus.Po:21: bus.h net-system.h node.h
+backpup/network/.deps/bus.Po:109:net-system.h:
+Coincidencia en el fichero binario backpup/network/net-system.o
+backpup/network/net-system.c:31:#include "net-system.h"
+backpup/network/net-system.c:139:		"\texpected format. Please run 'm2s --help-net-config' for a list of\n"
+backpup/network/net-system.c:220:		for (i = 0; i < net->node_count; i++)
+backpup/network/net-system.c:223:			node = list_get(net->node_list, i);
+backpup/network/net-system.c:234:				dst_node = list_get(net->node_list, random() %
+backpup/network/net-system.c:235:						list_count(net->node_list));
+backpup/network/net-system.c:488:	inject_time = xcalloc(net->node_count, sizeof(double));
+backpup/network/net-system.c:514:		fatal("Network %s: unknown traffic pattern (%s). \n", net->name
+Coincidencia en el fichero binario backpup/network/command.o
+backpup/network/message.h:43:	/* Liked list for bucket chain in net->msg_table */
+backpup/network/bus.c:29:#include "net-system.h"
+Coincidencia en el fichero binario backpup/network/network.o
+Coincidencia en el fichero binario backpup/.m2s.c.swp
+backpup/visual/memory/mem-system.c:540:			hash_table_insert(vi_mem_system->net_table, net->name, net);
+backpup/visual/memory/net.c:77:	net->name = xstrdup(name);
+backpup/visual/memory/net.c:81:	net->node_list = list_create();
+backpup/visual/memory/net.c:83:		list_add(net->node_list, vi_net_node_create());
+backpup/visual/memory/net.c:96:	LIST_FOR_EACH(net->node_list, i)
+backpup/visual/memory/net.c:97:		vi_net_node_free(list_get(net->node_list, i));
+backpup/visual/memory/net.c:98:	list_free(net->node_list);
+backpup/visual/memory/net.c:101:	free(net->name);
+backpup/visual/memory/net.c:112:	if (!IN_RANGE(node_index, 0, net->node_list->count - 1))
+backpup/visual/memory/net.c:116:	node = list_get(net->node_list, node_index);
+backpup/visual/memory/net.c:127:	if (!IN_RANGE(node_index, 0, net->node_list->count - 1))
+backpup/visual/memory/net.c:131:	node = list_get(net->node_list, node_index);
+Coincidencia en el fichero binario backpup/.m2s.c.swo
+Coincidencia en el fichero binario backpup/mem-system/.mem-system.c.swo
+Coincidencia en el fichero binario backpup/mem-system/config.o
+backpup/mem-system/command.c:594:				net_node = list_get(mod->high_net->node_list, dir_entry->owner);
+backpup/mem-system/command.c:661:		for (node_index = 0; node_index < mod->high_net->node_count; node_index++)
+backpup/mem-system/command.c:665:			node = list_get(mod->high_net->node_list, node_index);
+Coincidencia en el fichero binario backpup/mem-system/libmemsystem.a
+backpup/mem-system/config.c:30:#include <network/net-system.h>
+backpup/mem-system/config.c:57:	"way is using option '--net-config <file>' (use option '--help-net-config'\n"
+backpup/mem-system/config.c:257:	"\t'--net-config').\n";
+backpup/mem-system/config.c:377:		snprintf(buf, sizeof buf, "Network %s", net->name);
+backpup/mem-system/config.c:425:			mem_config_file_name, net->name,
+backpup/mem-system/config.c:436:			"missing.\n%s", mem_config_file_name, net->name, 
+backpup/mem-system/config.c:442:			"missing.\n%s", mem_config_file_name, net->name, 
+backpup/mem-system/config.c:448:			"cache '%s'.\n%s", mem_config_file_name, net->name, 
+backpup/mem-system/config.c:453:			"cache '%s'.\n%s", mem_config_file_name, net->name, 
+backpup/mem-system/config.c:491:			mem_config_file_name, net->name,
+backpup/mem-system/config.c:497:			mem_config_file_name, net->name,
+backpup/mem-system/config.c:1133:		snprintf(buf, sizeof buf, "Network %s", net->name);
+backpup/mem-system/config.c:1138:				mem_config_file_name, net->name, mem_err_config_note);
+backpup/mem-system/config.c:1151:		mem_debug("\t%s.Switch ->", net->name);
+backpup/mem-system/config.c:1154:		for (j = 0; j < list_count(net->node_list); j++)
+backpup/mem-system/config.c:1156:			net_node = list_get(net->node_list, j);
+backpup/mem-system/config.c:1166:		net_routing_table_initiate(net->routing_table);
+backpup/mem-system/config.c:1167:		net_routing_table_floyd_warshall(net->routing_table);
+backpup/mem-system/config.c:1209:			entry = net_routing_table_lookup(mod->low_net->routing_table,
+backpup/mem-system/config.c:1214:					mem_config_file_name, mod->low_net->name,
+backpup/mem-system/config.c:1236:			entry = net_routing_table_lookup(mod->high_net->routing_table,
+backpup/mem-system/config.c:1240:					mem_config_file_name, mod->high_net->name,
+backpup/mem-system/config.c:1322:		if (mod->high_net && list_count(mod->high_net->node_list))
+backpup/mem-system/config.c:1323:			num_nodes = list_count(mod->high_net->node_list);
+backpup/mem-system/config.c:1420:			net->name, net->node_list->count);
+backpup/mem-system/config.c:1427:			net->name, net->node_list->count);
+backpup/mem-system/config.c:1449:		high_net_name = mod->high_net ? mod->high_net->name : "";
+backpup/mem-system/config.c:1453:		low_net_name = mod->low_net ? mod->low_net->name : "";
+backpup/mem-system/mem-system.c:537:		if (!strcasecmp(net->name, net_name))
+Coincidencia en el fichero binario backpup/mem-system/.nmoesi-protocol.c.swp
+backpup/mem-system/.deps/config.Po:26: ../../src/network/net-system.h ../../src/network/network.h \
+backpup/mem-system/.deps/config.Po:127:../../src/network/net-system.h:
+backpup/mem-system/nmoesi-protocol.c:1962:				node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+backpup/mem-system/nmoesi-protocol.c:2172:			node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+backpup/mem-system/nmoesi-protocol.c:2958:				node = list_get(mod->high_net->node_list, i);
+backpup/.deps/m2s.Po:69: ../src/network/net-system.h ../src/dram/dram-system.h \
+backpup/.deps/m2s.Po:335:../src/network/net-system.h:
+backpup/m2s.c:70:#include <network/net-system.h>
+backpup/m2s.c:524:		"  --net-config <file>\n"
+backpup/m2s.c:527:		"      description of the format, use option '--net-help'.\n"
+backpup/m2s.c:529:		"  --net-debug\n"
+backpup/m2s.c:533:		"  --net-help\n"
+backpup/m2s.c:535:		"      the simulator with option '--net-config <file>'.\n"
+backpup/m2s.c:537:		"  --net-injection-rate <rate>\n"
+backpup/m2s.c:541:		"      = <rate>. This option must be used together with '--net-sim'.\n"
+backpup/m2s.c:543:		"  --net-max-cycles <cycles>\n"
+backpup/m2s.c:545:		"      together with option '--net-sim'.\n"
+backpup/m2s.c:547:		"  --net-msg-size <size>\n"
+backpup/m2s.c:551:		"      used together with '--net-sim'.\n"
+backpup/m2s.c:553:		"  --net-report <file>\n"
+backpup/m2s.c:555:		"      configuration file (option '--net-config'). The report includes statistics\n"
+backpup/m2s.c:558:		"  --net-visual <file>\n"
+backpup/m2s.c:563:		"  --net-sim <network>\n"
+backpup/m2s.c:566:		"      '--net-config').\n"
+backpup/m2s.c:1396:		if (!strcmp(argv[argi], "--net-debug"))
+backpup/m2s.c:1404:		if (!strcmp(argv[argi], "--net-config"))
+backpup/m2s.c:1412:		if (!strcmp(argv[argi], "--net-help"))
+backpup/m2s.c:1419:		if (!strcmp(argv[argi], "--net-injection-rate"))
+backpup/m2s.c:1429:		if (!strcmp(argv[argi], "--net-traffic-pattern"))
+backpup/m2s.c:1437:		if (!strcmp(argv[argi], "--net-max-cycles"))
+backpup/m2s.c:1450:		if (!strcmp(argv[argi], "--net-msg-size"))
+backpup/m2s.c:1460:		if (!strcmp(argv[argi], "--net-report"))
+backpup/m2s.c:1468:		if (!strcmp(argv[argi], "--net-visual"))
+backpup/m2s.c:1475:		if (!strcmp(argv[argi], "--net-sim"))
+backpup/m2s.c:1638:		fatal("option '%s' requires '--net-sim'", net_sim_last_option);
+backpup/m2s.c:1640:		fatal("option '--net-sim' requires '--net-config'");
+Coincidencia en el fichero binario backpup/m2s.o
+m2s.c:70:#include <network/net-system.h>
+m2s.c:524:		"  --net-config <file>\n"
+m2s.c:527:		"      description of the format, use option '--net-help'.\n"
+m2s.c:529:		"  --net-debug\n"
+m2s.c:533:		"  --net-help\n"
+m2s.c:535:		"      the simulator with option '--net-config <file>'.\n"
+m2s.c:537:		"  --net-injection-rate <rate>\n"
+m2s.c:541:		"      = <rate>. This option must be used together with '--net-sim'.\n"
+m2s.c:543:		"  --net-max-cycles <cycles>\n"
+m2s.c:545:		"      together with option '--net-sim'.\n"
+m2s.c:547:		"  --net-msg-size <size>\n"
+m2s.c:551:		"      used together with '--net-sim'.\n"
+m2s.c:553:		"  --net-report <file>\n"
+m2s.c:555:		"      configuration file (option '--net-config'). The report includes statistics\n"
+m2s.c:558:		"  --net-visual <file>\n"
+m2s.c:563:		"  --net-sim <network>\n"
+m2s.c:566:		"      '--net-config').\n"
+m2s.c:1396:		if (!strcmp(argv[argi], "--net-debug"))
+m2s.c:1404:		if (!strcmp(argv[argi], "--net-config"))
+m2s.c:1412:		if (!strcmp(argv[argi], "--net-help"))
+m2s.c:1419:		if (!strcmp(argv[argi], "--net-injection-rate"))
+m2s.c:1429:		if (!strcmp(argv[argi], "--net-traffic-pattern"))
+m2s.c:1437:		if (!strcmp(argv[argi], "--net-max-cycles"))
+m2s.c:1450:		if (!strcmp(argv[argi], "--net-msg-size"))
+m2s.c:1460:		if (!strcmp(argv[argi], "--net-report"))
+m2s.c:1468:		if (!strcmp(argv[argi], "--net-visual"))
+m2s.c:1475:		if (!strcmp(argv[argi], "--net-sim"))
+m2s.c:1638:		fatal("option '%s' requires '--net-sim'", net_sim_last_option);
+m2s.c:1640:		fatal("option '--net-sim' requires '--net-config'");
+Coincidencia en el fichero binario m2s.o
+Coincidencia en el fichero binario mem-system/.mem-system.c.swo
+Coincidencia en el fichero binario mem-system/config.o
+mem-system/command.c:594:				net_node = list_get(mod->high_net->node_list, dir_entry->owner);
+mem-system/command.c:661:		for (node_index = 0; node_index < mod->high_net->node_count; node_index++)
+mem-system/command.c:665:			node = list_get(mod->high_net->node_list, node_index);
+Coincidencia en el fichero binario mem-system/libmemsystem.a
+mem-system/config.c:30:#include <network/net-system.h>
+mem-system/config.c:57:	"way is using option '--net-config <file>' (use option '--help-net-config'\n"
+mem-system/config.c:257:	"\t'--net-config').\n";
+mem-system/config.c:377:		snprintf(buf, sizeof buf, "Network %s", net->name);
+mem-system/config.c:425:			mem_config_file_name, net->name,
+mem-system/config.c:436:			"missing.\n%s", mem_config_file_name, net->name, 
+mem-system/config.c:442:			"missing.\n%s", mem_config_file_name, net->name, 
+mem-system/config.c:448:			"cache '%s'.\n%s", mem_config_file_name, net->name, 
+mem-system/config.c:453:			"cache '%s'.\n%s", mem_config_file_name, net->name, 
+mem-system/config.c:491:			mem_config_file_name, net->name,
+mem-system/config.c:497:			mem_config_file_name, net->name,
+mem-system/config.c:1133:		snprintf(buf, sizeof buf, "Network %s", net->name);
+mem-system/config.c:1138:				mem_config_file_name, net->name, mem_err_config_note);
+mem-system/config.c:1151:		mem_debug("\t%s.Switch ->", net->name);
+mem-system/config.c:1154:		for (j = 0; j < list_count(net->node_list); j++)
+mem-system/config.c:1156:			net_node = list_get(net->node_list, j);
+mem-system/config.c:1166:		net_routing_table_initiate(net->routing_table);
+mem-system/config.c:1167:		net_routing_table_floyd_warshall(net->routing_table);
+mem-system/config.c:1209:			entry = net_routing_table_lookup(mod->low_net->routing_table,
+mem-system/config.c:1214:					mem_config_file_name, mod->low_net->name,
+mem-system/config.c:1236:			entry = net_routing_table_lookup(mod->high_net->routing_table,
+mem-system/config.c:1240:					mem_config_file_name, mod->high_net->name,
+mem-system/config.c:1322:		if (mod->high_net && list_count(mod->high_net->node_list))
+mem-system/config.c:1323:			num_nodes = list_count(mod->high_net->node_list);
+mem-system/config.c:1420:			net->name, net->node_list->count);
+mem-system/config.c:1427:			net->name, net->node_list->count);
+mem-system/config.c:1449:		high_net_name = mod->high_net ? mod->high_net->name : "";
+mem-system/config.c:1453:		low_net_name = mod->low_net ? mod->low_net->name : "";
+mem-system/mem-system.c:537:		if (!strcasecmp(net->name, net_name))
+Coincidencia en el fichero binario mem-system/.nmoesi-protocol.c.swp
+mem-system/.deps/config.Po:26: ../../src/network/net-system.h ../../src/network/network.h \
+mem-system/.deps/config.Po:127:../../src/network/net-system.h:
+mem-system/nmoesi-protocol.c:1957:				node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+mem-system/nmoesi-protocol.c:2167:			node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+mem-system/nmoesi-protocol.c:2953:				node = list_get(mod->high_net->node_list, i);
+network/buffer.c:29:#include "net-system.h"
+network/buffer.c:130:		net->name,
+network/buffer.c:161:		net->name,
+network/routing-table.c:29:#include "net-system.h"
+network/routing-table.c:75:		node_adj = list_get(net->node_list, j);
+network/routing-table.c:122:							net->name, net_err_cycle);
+network/routing-table.c:160:		node_i = list_get(net->node_list, i);
+network/routing-table.c:228:			__FUNCTION__, net->name);
+network/routing-table.c:229:	routing_table->dim = list_count(net->node_list);
+network/routing-table.c:235:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:237:		for (j = 0; j < net->node_count; j++)
+network/routing-table.c:239:			src_node = list_get(net->node_list, i);
+network/routing-table.c:240:			dst_node = list_get(net->node_list, j);
+network/routing-table.c:250:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:252:		src_node = list_get(net->node_list, i);
+network/routing-table.c:328:	for (k = 0; k < net->node_count; k++)
+network/routing-table.c:330:		for (i = 0; i < net->node_count; i++)
+network/routing-table.c:332:			for (j = 0; j < net->node_count; j++)
+network/routing-table.c:342:				node_i = list_get(net->node_list, i);
+network/routing-table.c:343:				node_j = list_get(net->node_list, j);
+network/routing-table.c:344:				node_k = list_get(net->node_list, k);
+network/routing-table.c:360:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:362:		for (j = 0; j < net->node_count; j++)
+network/routing-table.c:368:			node_i = list_get(net->node_list, i);
+network/routing-table.c:370:			node_j = list_get(net->node_list, j);
+network/routing-table.c:440:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:442:		for (j = 0; j < net->node_count; j++)
+network/routing-table.c:448:			node_i = list_get(net->node_list, i);
+network/routing-table.c:449:			node_j = list_get(net->node_list, j);
+network/routing-table.c:475:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:477:		node_l = list_get(net->node_list, i);
+network/routing-table.c:482:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:484:		node_l = list_get(net->node_list, i);
+network/routing-table.c:486:		for (j = 0; j < net->node_count; j++)
+network/routing-table.c:492:			node_i = list_get(net->node_list, i);
+network/routing-table.c:493:			node_j = list_get(net->node_list, j);
+network/routing-table.c:519:	for (i = 0; i < net->node_count; i++)
+network/routing-table.c:521:		for (j = 0; j < net->node_count; j++)
+network/routing-table.c:526:			node_i = list_get(net->node_list, i);
+network/routing-table.c:527:			node_j = list_get(net->node_list, j);
+network/routing-table.c:536:				node_k = list_get(net->node_list, k);
+network/routing-table.c:615:							routing_table->net->name, src_node->name,
+network/routing-table.c:651:						routing_table->net->name, src_node->name,
+network/routing-table.c:659:			routing_table->net->name, src_node->name, dst_node->name,
+network/routing-table.c:676:				net->name,net_err_config);
+network/visual.c:74:	for (i = 0; i < list_count(net->node_list); i++)
+network/visual.c:79:		node = list_get(net->node_list, i);
+network/visual.c:98:	for(i = 0; i < list_count(net->link_list); i++)
+network/visual.c:104:		link = list_get(net->link_list, i);
+network/Makefile.am:13:	net-system.c \
+network/Makefile.am:14:	net-system.h \
+Coincidencia en el fichero binario network/message.o
+network/link.c:30:#include "net-system.h"
+network/link.c:103:	fprintf(f, "[ Network.%s.Link.%s ]\n", net->name, link->name);
+network/network.c:31:#include "net-system.h"
+network/network.c:49:	for (int i = 0; i < net->node_count; i++)
+network/network.c:52:		for (int j = 0; j < net->node_count; j++)
+network/network.c:63:			src_node_r = list_get(net->node_list, i);
+network/network.c:64:			dst_node_r = list_get(net->node_list, j);
+network/network.c:92:								net->name, section, net_err_config);
+network/network.c:105:								net->name, section,net_err_config);
+network/network.c:109:						(net->routing_table,
+network/network.c:130:				"\t option --net-injection-rate should not be used \n",
+network/network.c:131:				net->name,section);
+network/network.c:137:				"traffic pattern\n (%s)", net->name,
+network/network.c:176:	msg->bucket_next = net->msg_table[index];
+network/network.c:177:	net->msg_table[index] = msg;
+network/network.c:188:	msg = net->msg_table[index];
+network/network.c:203:	msg = net->msg_table[index];
+network/network.c:214:		net->msg_table[index] = msg->bucket_next;
+network/network.c:231:	net->name = xstrdup(name);
+network/network.c:232:	net->node_list = list_create();
+network/network.c:233:	net->link_list = list_create();
+network/network.c:234:	net->routing_table = net_routing_table_create(net);
+network/network.c:262:		net->def_input_buffer_size = config_read_int(config, section,
+network/network.c:264:		net->def_output_buffer_size = config_read_int(config, section,
+network/network.c:268:		if (!net->def_input_buffer_size)
+network/network.c:270:					net->name, section, net_err_config);
+network/network.c:271:		if (!net->def_output_buffer_size)
+network/network.c:273:					net->name, section, net_err_config);
+network/network.c:276:					net->name, section, net_err_config);
+network/network.c:277:		def_output_buffer_size = net->def_output_buffer_size;
+network/network.c:278:		def_input_buffer_size = net->def_input_buffer_size;
+network/network.c:317:					net->name, section, net_err_config);
+network/network.c:345:						net->name, section);
+network/network.c:351:						net->name, section, net_err_config);
+network/network.c:356:					net->name, section, net_err_config);
+network/network.c:498:	net_routing_table_initiate(net->routing_table);
+network/network.c:572:		net_routing_table_floyd_warshall(net->routing_table);
+network/network.c:584:	for (i = 0; i < list_count(net->node_list); i++)
+network/network.c:585:		net_node_free(list_get(net->node_list, i));
+network/network.c:586:	list_free(net->node_list);
+network/network.c:589:	for (i = 0; i < list_count(net->link_list); i++)
+network/network.c:590:		net_link_free(list_get(net->link_list, i));
+network/network.c:591:	list_free(net->link_list);
+network/network.c:594:	net_routing_table_free(net->routing_table);
+network/network.c:599:		while (net->msg_table[i])
+network/network.c:603:			next = net->msg_table[i]->bucket_next;
+network/network.c:604:			net_msg_free(net->msg_table[i]);
+network/network.c:605:			net->msg_table[i] = next;
+network/network.c:610:	free(net->name);
+network/network.c:621:	fprintf(f, "*\n* Network %s\n*\n\n", net->name);
+network/network.c:624:	for (i = 0; i < list_count(net->node_list); i++)
+network/network.c:627:		node = list_get(net->node_list, i);
+network/network.c:639:	fprintf(f, "[ Network.%s.General ]\n", net->name);
+network/network.c:640:	fprintf(f, "Transfers = %lld\n", net->transfers);
+network/network.c:641:	fprintf(f, "AverageMessageSize = %.2f\n", net->transfers ?
+network/network.c:642:			(double) net->msg_size_acc / net->transfers : 0.0);
+network/network.c:643:	fprintf(f, "AverageLatency = %.4f\n", net->transfers ?
+network/network.c:644:			(double) net->lat_acc / net->transfers : 0.0);
+network/network.c:648:	for (i = 0; i < list_count(net->link_list); i++)
+network/network.c:652:		link = list_get(net->link_list, i);
+network/network.c:657:	for (i = 0; i < list_count(net->node_list); i++)
+network/network.c:661:		node = list_get(net->node_list, i);
+network/network.c:675:	fprintf(f, "Title = \" Network: %s \"\n", graph->net->name);
+network/network.c:794:			net->node_count,  /* index */
+network/network.c:802:	net->node_count++;
+network/network.c:803:	net->end_node_count++;
+network/network.c:804:	list_add(net->node_list, node);
+network/network.c:817:			net->node_count,  /* index */
+network/network.c:825:	net->node_count++;
+network/network.c:826:	list_add(net->node_list, node);
+network/network.c:850:			net->node_count,  /* index */
+network/network.c:858:	net->node_count++;
+network/network.c:859:	list_add(net->node_list, node);
+network/network.c:873:	for (i = 0; i < list_count(net->node_list); i++)
+network/network.c:875:		node = list_get(net->node_list, i);
+network/network.c:890:	for (i = 0; i < list_count(net->node_list); i++)
+network/network.c:892:		node = list_get(net->node_list, i);
+network/network.c:911:				net->name);
+network/network.c:918:	list_add(net->link_list, link);
+network/network.c:959:		fatal("network \"%s\" : BUS to BUS connection is not supported.", net->name);
+network/network.c:1018:	struct net_routing_table_t *routing_table = net->routing_table;
+network/network.c:1057:	struct net_routing_table_t *routing_table = net->routing_table;
+network/network.c:1072:				net->name, src_node->name, dst_node->name,
+network/network.c:1077:		fatal("%s: message too long.\n%s", net->name,
+network/command.c:27:#include "net-system.h"
+network/command.c:206:					net->msg_id_counter + 1);
+network/command.c:208:			if (msg_id != net->msg_id_counter + 1)
+network/Makefile:79:	message.$(OBJEXT) net-system.$(OBJEXT) network.$(OBJEXT) \
+network/Makefile:252:	net-system.c \
+network/Makefile:253:	net-system.h \
+network/Makefile:356:include ./$(DEPDIR)/net-system.Po
+network/message.c:31:#include "net-system.h"
+network/message.c:57:	msg->id = ++net->msg_id_counter;
+network/message.c:109:	struct net_routing_table_t *routing_table = net->routing_table;
+network/message.c:136:				net->name,
+network/message.c:147:			fatal("%s: no route from %s to %s.\n%s", net->name,
+network/message.c:187:				net->name,
+network/message.c:202:				net->name,
+network/message.c:217:				net->name,
+network/message.c:238:					net->name,
+network/message.c:258:						net->name,
+network/message.c:275:					net->name, msg->id);
+network/message.c:284:				fatal("%s: message does not fit in buffer.\n%s", net->name, net_err_large_message);
+network/message.c:293:					net->name, msg->id);
+network/message.c:318:				if(strstr(link->net->name,"net-l1-to-l2"))
+network/message.c:322:				else if(strstr(link->net->name,"net-l2-to-mm"))
+network/message.c:374:				"buffer for the route between %s and %s \n", net->name,
+network/message.c:387:					net->name,
+network/message.c:395:					net->name, net_err_large_message);
+network/message.c:405:					net->name, msg->id);
+network/message.c:421:					net->name, msg->id);
+network/message.c:483:			net->name,
+network/message.c:497:				 net->name, msg->id);
+network/message.c:517:				net->name,
+network/message.c:529:			fatal("%s: no route from %s to %s.\n%s", net->name,
+network/message.c:540:				net->name,
+network/message.c:550:				net->name, net_err_large_message);
+network/message.c:560:				net->name,
+network/message.c:574:				net->name,
+network/message.c:607:			net->name,
+network/message.c:612:		net->transfers++;
+network/message.c:613:		net->lat_acc += cycle - msg->send_cycle;
+network/message.c:614:		net->msg_size_acc += msg->size;
+network/Makefile.in:79:	message.$(OBJEXT) net-system.$(OBJEXT) network.$(OBJEXT) \
+network/Makefile.in:252:	net-system.c \
+network/Makefile.in:253:	net-system.h \
+network/Makefile.in:356:@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/net-system.Po@am__quote@
+Coincidencia en el fichero binario network/libnetwork.a
+network/node.c:30:#include "net-system.h"
+network/node.c:60:		fatal("%s: duplicated node name.\n%s", net->name,
+network/node.c:148:	fprintf(f, "[ Network.%s.Node.%s ]\n", net->name, node->name);
+network/node.c:250:	struct net_routing_table_t *routing_table = net->routing_table;
+network/.deps/command.Po:21: ../../src/lib/util/debug.h net-system.h command.h network.h \
+network/.deps/command.Po:106:net-system.h:
+network/.deps/link.Po:22: link.h net-system.h network.h ../../src/lib/util/config.h node.h
+network/.deps/link.Po:112:net-system.h:
+network/.deps/message.Po:21: ../../src/lib/util/list.h buffer.h message.h bus.h link.h net-system.h \
+network/.deps/message.Po:113:net-system.h:
+network/.deps/node.Po:22: bus.h net-system.h network.h ../../src/lib/util/config.h node.h \
+network/.deps/node.Po:113:net-system.h:
+network/.deps/network.Po:22: bus.h link.h net-system.h network.h ../../src/lib/util/config.h node.h \
+network/.deps/network.Po:115:net-system.h:
+network/.deps/routing-table.Po:20: bus.h link.h net-system.h network.h ../../src/lib/util/config.h node.h \
+network/.deps/routing-table.Po:103:net-system.h:
+network/.deps/net-system.Po:1:net-system.o: net-system.c /usr/include/math.h /usr/include/features.h \
+network/.deps/net-system.Po:27: ../../src/lib/util/string.h net-system.h network.h \
+network/.deps/net-system.Po:134:net-system.h:
+network/.deps/buffer.Po:22: message.h net-system.h network.h ../../src/lib/util/config.h node.h
+network/.deps/buffer.Po:110:net-system.h:
+network/.deps/bus.Po:21: ../../src/lib/util/list.h buffer.h message.h bus.h net-system.h node.h
+network/.deps/bus.Po:109:net-system.h:
+Coincidencia en el fichero binario network/net-system.o
+network/net-system.c:31:#include "net-system.h"
+network/net-system.c:139:		"\texpected format. Please run 'm2s --help-net-config' for a list of\n"
+network/net-system.c:220:		for (i = 0; i < net->node_count; i++)
+network/net-system.c:223:			node = list_get(net->node_list, i);
+network/net-system.c:234:				dst_node = list_get(net->node_list, random() %
+network/net-system.c:235:						list_count(net->node_list));
+network/net-system.c:488:	inject_time = xcalloc(net->node_count, sizeof(double));
+network/net-system.c:514:		fatal("Network %s: unknown traffic pattern (%s). \n", net->name
+network/message.h:43:	/* Liked list for bucket chain in net->msg_table */
+network/bus.c:29:#include "net-system.h"
+Coincidencia en el fichero binario network/network.o
+visual/memory/mem-system.c:540:			hash_table_insert(vi_mem_system->net_table, net->name, net);
+visual/memory/net.c:77:	net->name = xstrdup(name);
+visual/memory/net.c:81:	net->node_list = list_create();
+visual/memory/net.c:83:		list_add(net->node_list, vi_net_node_create());
+visual/memory/net.c:96:	LIST_FOR_EACH(net->node_list, i)
+visual/memory/net.c:97:		vi_net_node_free(list_get(net->node_list, i));
+visual/memory/net.c:98:	list_free(net->node_list);
+visual/memory/net.c:101:	free(net->name);
+visual/memory/net.c:112:	if (!IN_RANGE(node_index, 0, net->node_list->count - 1))
+visual/memory/net.c:116:	node = list_get(net->node_list, node_index);
+visual/memory/net.c:127:	if (!IN_RANGE(node_index, 0, net->node_list->count - 1))
+visual/memory/net.c:131:	node = list_get(net->node_list, node_index);

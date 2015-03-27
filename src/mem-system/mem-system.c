@@ -32,7 +32,12 @@
 #include "mem-system.h"
 #include "module.h"
 #include "nmoesi-protocol.h"
-
+#include "vi-protocol.h"
+#include "directory.h"
+#include "mshr.h"
+//fran
+#include <lib/util/estadisticas.h>
+//#include "directory.h"
 
 /*
  * Global Variables
@@ -41,9 +46,11 @@
 int mem_debug_category;
 int mem_trace_category;
 int mem_peer_transfers;
+int fran_category;
 
 /* Frequency domain, as returned by function 'esim_new_domain'. */
 int mem_frequency = 1000;
+enum dir_type_t directory_type = dir_type_nmoesi;
 int mem_domain_index;
 
 struct mem_system_t *mem_system;
@@ -103,6 +110,10 @@ void mem_system_init(void)
 {
 	int count;
 
+	//FRAN
+	ini_estadisticas();
+
+
 	/* If any file name was specific for a command-line option related with the
 	 * memory hierarchy, make sure that at least one architecture is running
 	 * timing simulation. */
@@ -132,11 +143,62 @@ void mem_system_init(void)
 	if (*mem_report_file_name && !file_can_open_for_write(mem_report_file_name))
 		fatal("%s: cannot open GPU cache report file",
 			mem_report_file_name);
+			
+	/* VI memory event-driven simulation*/
+	
+	EV_MOD_VI_LOAD = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load");
+	EV_MOD_VI_LOAD_SEND = esim_register_event_with_name(mod_handler_vi_load,
+                        mem_domain_index, "mod_vi_load_send");
+	EV_MOD_VI_LOAD_RECEIVE = esim_register_event_with_name(mod_handler_vi_load,
+                        mem_domain_index, "mod_vi_load_receive");
+	EV_MOD_VI_LOAD_LOCK = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_lock");
+	EV_MOD_VI_LOAD_ACTION = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_action");
+	EV_MOD_VI_LOAD_MISS = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_miss");
+	EV_MOD_VI_LOAD_UNLOCK = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_unlock");
+	EV_MOD_VI_LOAD_FINISH = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_finish");
+
+	EV_MOD_VI_NC_LOAD = esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_nc_load");
+	EV_MOD_VI_NC_STORE = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_nc_store");
+	EV_MOD_VI_STORE = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store");
+    EV_MOD_VI_STORE_SEND = esim_register_event_with_name(mod_handler_vi_store,
+                        mem_domain_index, "mod_vi_store_send");
+    EV_MOD_VI_STORE_RECEIVE = esim_register_event_with_name(mod_handler_vi_store,
+                        mem_domain_index, "mod_vi_store_receive");
+	EV_MOD_VI_STORE_LOCK = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_lock");
+	EV_MOD_VI_STORE_ACTION = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_action");
+	EV_MOD_VI_STORE_UNLOCK = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_unlock");
+	EV_MOD_VI_STORE_FINISH = esim_register_event_with_name(mod_handler_vi_store,
+			mem_domain_index, "mod_vi_store_finish");
+			
+	EV_MOD_VI_FIND_AND_LOCK = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock");
+	EV_MOD_VI_FIND_AND_LOCK_PORT = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock_port");
+	EV_MOD_VI_FIND_AND_LOCK_ACTION = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock_action");
+	EV_MOD_VI_FIND_AND_LOCK_FINISH = esim_register_event_with_name(mod_handler_vi_find_and_lock,
+			mem_domain_index, "mod_vi_find_and_lock_finish");
 
 	/* NMOESI memory event-driven simulation */
 
 	EV_MOD_NMOESI_LOAD = esim_register_event_with_name(mod_handler_nmoesi_load,
 			mem_domain_index, "mod_nmoesi_load");
+	EV_MOD_NMOESI_LOAD_SEND = esim_register_event_with_name(mod_handler_nmoesi_load,
+                        mem_domain_index, "mod_nmoesi_load_send");
+	EV_MOD_NMOESI_LOAD_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_load,
+                        mem_domain_index, "mod_nmoesi_load_receive");
 	EV_MOD_NMOESI_LOAD_LOCK = esim_register_event_with_name(mod_handler_nmoesi_load,
 			mem_domain_index, "mod_nmoesi_load_lock");
 	EV_MOD_NMOESI_LOAD_ACTION = esim_register_event_with_name(mod_handler_nmoesi_load,
@@ -150,6 +212,10 @@ void mem_system_init(void)
 
 	EV_MOD_NMOESI_STORE = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store");
+	EV_MOD_NMOESI_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_store,
+                        mem_domain_index, "mod_nmoesi_store_send");
+    EV_MOD_NMOESI_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_store,
+                        mem_domain_index, "mod_nmoesi_store_receive");
 	EV_MOD_NMOESI_STORE_LOCK = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store_lock");
 	EV_MOD_NMOESI_STORE_ACTION = esim_register_event_with_name(mod_handler_nmoesi_store,
@@ -161,6 +227,10 @@ void mem_system_init(void)
 	
 	EV_MOD_NMOESI_NC_STORE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store");
+	EV_MOD_NMOESI_NC_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
+                        mem_domain_index, "mod_nmoesi_nc_store_send");
+    EV_MOD_NMOESI_NC_STORE_RECEIVE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
+                        mem_domain_index, "mod_nmoesi_nc_store_receive");
 	EV_MOD_NMOESI_NC_STORE_LOCK = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store_lock");
 	EV_MOD_NMOESI_NC_STORE_WRITEBACK = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
@@ -322,6 +392,47 @@ void mem_system_done(void)
 	mem_system_free(mem_system);
 }
 
+void fran_report_general(){
+
+	struct mod_t *mod;
+	int i;
+
+	long long accesses = 0;
+	long long effective_reads = 0;
+	long long effective_writes = 0;
+	long long effective_nc_writes = 0;
+	long long hits = 0;
+	//mod_contador.misses += mod->accesses - mod->hits);
+	long long delayed_read_hit = 0;
+	long long reads = 0;
+	long long read_retries = 0;
+	long long writes = 0;
+	long long write_retries = 0;
+
+	/* Report for each cache */
+	for (i = 0; i < list_count(mem_system->mod_list); i++)
+	{
+		mod = list_get(mem_system->mod_list, i);
+
+		if(mod->level == 2){
+			accesses += mod->accesses;
+			effective_reads += mod->effective_reads;
+			effective_writes += mod->effective_writes;
+			effective_nc_writes += mod->effective_nc_writes;
+			hits += mod->hits;
+			//mod_contador.misses += mod->accesses - mod->hits);
+			delayed_read_hit += mod->delayed_read_hit;
+			reads += mod->reads;
+			read_retries += mod->read_retries;
+			writes += mod->writes;
+			write_retries += mod->write_retries;
+			effective_reads += mod->effective_reads;
+       		}
+	}
+//fran_debug_general("%lld,%lld,%lld,%lld,%lld,%lld,%.4g,%lld,%lld,%lld\n", accesses, effective_reads, effective_writes, effective_nc_writes, hits, accesses - hits, accesses ? ((double) hits) / accesses : 0.0, reads, delayed_read_hit, writes);
+
+
+}
 
 void mem_system_dump_report(void)
 {
@@ -355,6 +466,8 @@ void mem_system_dump_report(void)
 	fprintf(f, ";    NonBlockingReads, NonBlockingWrites, NonBlockingNCWrites - Coming from upper-level cache\n");
 	fprintf(f, "\n\n");
 	
+	fprintf(f, "Directory type = %d\n\n",directory_type);
+	
 	/* Report for each cache */
 	for (i = 0; i < list_count(mem_system->mod_list); i++)
 	{
@@ -365,26 +478,44 @@ void mem_system_dump_report(void)
 
 		/* Configuration */
 		if (cache) {
+			fprintf(f, "Level = %d\n",mod->level);
 			fprintf(f, "Sets = %d\n", cache->num_sets);
 			fprintf(f, "Assoc = %d\n", cache->assoc);
 			fprintf(f, "Policy = %s\n", str_map_value(&cache_policy_map, cache->policy));
 		}
 		fprintf(f, "BlockSize = %d\n", mod->block_size);
 		fprintf(f, "Latency = %d\n", mod->latency);
+		fprintf(f, "DirectoryLatency = %d\n", mod->dir_latency);
 		fprintf(f, "Ports = %d\n", mod->num_ports);
 		fprintf(f, "\n");
 
 		/* Statistics */
 		fprintf(f, "Accesses = %lld\n", mod->accesses);
+                fprintf(f, "Loads = %lld\n", mod->loads);
 		fprintf(f, "Hits = %lld\n", mod->hits);
+		fprintf(f, "Hits_aux = %lld\n", mod->hits_aux);
 		fprintf(f, "Misses = %lld\n", mod->accesses - mod->hits);
 		fprintf(f, "HitRatio = %.4g\n", mod->accesses ?
 			(double) mod->hits / mod->accesses : 0.0);
+                fprintf(f, "HitRatio_aux = %.4g\n", mod->loads ?
+                        (double) mod->hits_aux / mod->loads : 0.0);
 		fprintf(f, "Evictions = %lld\n", mod->evictions);
+		//FRAN
+		fprintf(f, "EvictionsWithSharers = %lld\n", mod->evictions_with_sharers);
+		fprintf(f, "EvictionsSharersInvalidation = %lld\n", mod->evictions_sharers_invalidation);
 		fprintf(f, "Retries = %lld\n", mod->read_retries + mod->write_retries + 
 			mod->nc_write_retries);
+		fprintf(f,"\n");
+		fprintf(f,"Scalar_Load = %lld\n",mod->scalar_load);
+		fprintf(f,"Scalar_Load_nc = %lld\n",mod->scalar_load_nc);
+		fprintf(f,"Vector_Load = %lld\n",mod->vector_load);
+		fprintf(f,"Vector_Load_nc = %lld\n",mod->vector_load_nc);
+		fprintf(f,"Vector_Write = %lld\n",mod->vector_write);
+		fprintf(f,"Vector_Write_ncb= %lld\n",mod->vector_write_nc);
+
 		fprintf(f, "\n");
 		fprintf(f, "Reads = %lld\n", mod->reads);
+		fprintf(f, "CoalescedRead = %lld\n",mod->delayed_read_hit);
 		fprintf(f, "ReadRetries = %lld\n", mod->read_retries);
 		fprintf(f, "BlockingReads = %lld\n", mod->blocking_reads);
 		fprintf(f, "NonBlockingReads = %lld\n", mod->non_blocking_reads);
@@ -476,4 +607,124 @@ struct net_t *mem_system_get_net(char *net_name)
 	/* Not found */
 	return NULL;
 }
+
+int temporizador_reinicio = 50;
+
+void mshr_control(int latencia, int opc)
+{
+        int flag = 1;
+	int accion = 0;
+        struct mod_t *mod;
+
+        for (int k = 0; k < list_count(mem_system->mod_list); k++)
+        {
+                mod = list_get(mem_system->mod_list, k);
+		if(mod->level == 1)
+         		break;       
+	}	
+
+        //reinicio
+	temporizador_reinicio--;
+
+	if(temporizador_reinicio <= 0)
+	{
+		temporizador_reinicio = 50;
+		accion = 3;
+	}
+
+	// primera decision
+	if(!mod->mshr->size_anterior)
+	{
+		if(latencia > 1000)
+			accion = 2;
+		else
+			accion = 1;
+	}
+	
+	// dependiendo del OPC
+	if(accion == 0 && opc < (mod->mshr->ipc_anterior * 0.95))
+	{
+		if((mod->mshr->latencia_anterior*1.05) < latencia)
+		{
+			if(mod->mshr->size > mod->mshr->size_anterior)
+				accion = 2;
+			else if(mod->mshr->size < mod->mshr->size_anterior)
+				accion = 1;
+			else
+			{
+				if(mod->mshr->size == (mod->dir->ysize * mod->dir->xsize))
+					accion = 2;
+				else
+					accion = 1;
+			}
+				
+		} 
+	}else if(accion == 0 && opc > (mod->mshr->ipc_anterior * 1.05)){
+                if(mod->mshr->size > mod->mshr->size_anterior)
+                        accion = 1;
+                else if(mod->mshr->size < mod->mshr->size_anterior)
+                        accion = 2;
+	}
+
+	//dependiendo de la latencia
+
+	/*(latencia > 1000)
+        {
+		accion = 1;
+	}else if(latencia <= 1000){
+		accion = 2;
+	}*/
+
+	//if(accion)
+	//{
+        	mod->mshr->size_anterior = mod->mshr->size;
+		mod->mshr->ipc_anterior = opc;
+		mod->mshr->latencia_anterior = latencia;
+	//}
+
+        for (int k = 0; k < list_count(mem_system->mod_list); k++)
+        {
+                mod = list_get(mem_system->mod_list, k);
+
+		if(mod->level == 1)
+		{
+			switch(accion)
+			{
+				case 1:	if(mod->mshr->size < (mod->dir->ysize * mod->dir->xsize))
+					{
+						if(mod->mshr->size >= 64)
+						{
+							mod->mshr->size += 32;
+							mod->mshr_size += 32;
+						}else{
+							mod->mshr->size *= 2;
+							mod->mshr_size *= 2;
+						}
+					}
+					break;
+
+				case 2:	if(mod->mshr->size > 8)
+					{
+						if(mod->mshr->size >= 64)
+						{
+							mod->mshr->size -= 32;
+							mod->mshr_size -= 32;
+						}else{
+							mod->mshr->size /= 2;
+							mod->mshr_size /= 2;
+						}
+					}
+					break;
+
+				case 3: mod->mshr->size_anterior = 0;
+					mod->mshr->size = 32;
+					mod->mshr_size = 32;
+					break;
+
+				default : break;
+			}
+		}
+        }
+}
+
 
