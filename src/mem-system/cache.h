@@ -23,7 +23,6 @@
 
 extern struct str_map_t cache_policy_map;
 extern struct str_map_t cache_block_state_map;
-extern int cache_replace_block_prioritize_invalid;
 
 enum cache_policy_t
 {

@@ -285,16 +285,13 @@ int cache_replace_block(struct cache_t *cache, int set)
 	 * MRU while its state has not changed to valid yet. */
 	assert(set >= 0 && set < cache->num_sets);
 	
-	if(cache_replace_block_prioritize_invalid)
+	for (block = cache->sets[set].way_tail; block; block = block->way_prev)
 	{
-		for (block = cache->sets[set].way_tail; block; block = block->way_prev)
+		if (!block->state)
 		{
-			if (!block->state)
-			{
-				cache_update_waylist(&cache->sets[set], block, 
-					cache_waylist_head);
-				return block->way;
-			}
+			cache_update_waylist(&cache->sets[set], block,
+				cache_waylist_head);
+			return block->way;
 		}
 	}
 
