@@ -703,8 +703,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 		/* Increment witness variable */
 		if (stack->witness_ptr)
+		{
 			(*stack->witness_ptr)++;
-
+			stack->witness_ptr = NULL;
+		}
 		stack->latencias.start = asTiming(si_gpu)->cycle;
 		
 		stack->origin = 1;
