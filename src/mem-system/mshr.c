@@ -91,6 +91,8 @@ void mshr_unlock2(struct mod_t *mod)
 		struct mod_stack_t *stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
 		int event = stack->waiting_list_event;
 		stack->mshr_locked = 1;
+		if(stack->ret_stack)
+			stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
 		stack->waiting_list_event = 0;
 		esim_schedule_event(event, stack, 0);
 	}else{
