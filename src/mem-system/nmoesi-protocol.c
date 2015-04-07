@@ -134,6 +134,7 @@ int t1000k = 0;
 long long tiempo_medio = 0;
 long long ciclo_acceso = 0;
 int acumulado = 0;
+int flag_witness = 1;
 
 int FRAN = 0;
 int load_finished = 0;
@@ -702,7 +703,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mod_access_start(mod, stack, mod_access_nc_store);
 
 		/* Increment witness variable */
-		if (stack->witness_ptr)
+		if (flag_witness && stack->witness_ptr)
 		{
 			(*stack->witness_ptr)++;
 			stack->witness_ptr = NULL;
@@ -1493,11 +1494,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
-			if (stack->mshr_locked != 0)
+			/*if (stack->mshr_locked != 0)
 			{
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
-			}
+			}*/
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
 			return;
