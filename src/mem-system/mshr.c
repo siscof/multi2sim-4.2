@@ -10,6 +10,7 @@
 #include "cache.h"
 #include "mem-system.h"
 #include "directory.h"
+#include <arch/southern-islands/timing/gpu.h>
 #include <stdlib.h> 
 
 void mshr_init(struct mshr_t *mshr, int size)
