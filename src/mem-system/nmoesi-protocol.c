@@ -386,6 +386,9 @@ void mod_handler_nmoesi_load(int event, void *data)
 			return;
 		}
 
+		stack->latencias.miss = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction;
+
+
 		/* Set block state to excl/shared depending on return var 'shared'.
 		 * Also set the tag of the block. */
 		cache_set_block(mod->cache, stack->set, stack->way, stack->tag,
@@ -1445,6 +1448,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			}
 			if(stack->read && stack->mshr_locked == 0)
 			{
+
+
 				if(!mshr_lock(mod->mshr, stack))
 				{
 
@@ -1461,9 +1466,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					}
 					return;
 				}
-				stack->mshr_locked = 1;
 				ret->latencias.lock_mshr = asTiming(si_gpu)->cycle - ret->latencias.start - ret->latencias.queue;
- 			}
+				stack->mshr_locked = 1;
+			}
 		}
 		assert(stack->way >= 0);
 
@@ -1504,8 +1509,6 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			return;
 		}
 
-		ret->latencias.lock_dir = asTiming(si_gpu)->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
-
 		/* Miss */
 		if (!stack->hit)
 		{
@@ -1543,6 +1546,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		/* Release port */
 		mod_unlock_port(mod, port, stack);
 		ret->port_locked = 0;
+		ret->latencias.lock_dir = asTiming(si_gpu)->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
 
 		/* On miss, evict if victim is a valid block. */
 		if (!stack->hit && stack->state)
@@ -1585,6 +1589,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			mod_stack_return(stack);
 			return;
 		}
+
+		stack->latencias.eviction = asTiming(si_gpu)->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir;
+
 
 		/* Eviction */
 		if (stack->eviction)
