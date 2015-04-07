@@ -134,7 +134,7 @@ int t1000k = 0;
 long long tiempo_medio = 0;
 long long ciclo_acceso = 0;
 int acumulado = 0;
-int flag_witness = 1;
+int flag_witness = 0;
 
 int FRAN = 0;
 int load_finished = 0;
