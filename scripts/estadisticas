@@ -11,6 +11,7 @@ import os
 import pprint
 import gc
 import re
+import seaborn as sb
 
 #funciones
 
@@ -269,7 +270,7 @@ def benchXexp(directorioResultados, monton):
     if not os.path.exists(dir):
         os.mkdir(dir)
 
-    pprint.pprint(nombre_resumen)
+    #pprint.pprint(nombre_resumen)
 
     for bench in sorted_nicely(BENCHMARKS) :
 
@@ -306,7 +307,7 @@ def benchXexp(directorioResultados, monton):
                 
                
                 invalidations.ix[exp,'invalidations'] = df_aux['invalidations'].sum() / df_aux['num_loads_mem'].sum()
-                pprint.pprint(contenedor_de_datos+'/'+exp+'_conL1/'+bench+'-mem-report')
+                #pprint.pprint(contenedor_de_datos+'/'+exp+'_conL1/'+bench+'-mem-report')
                 fi = open(contenedor_de_datos+'/'+exp+'_conL1/'+bench+'-mem-report')
                 hitratio.ix[exp,'hit ratio'] =  buscar_y_acumular(fi,'[ l2-0 ]','[ l1-cu00 ]','HitRatio')
                 fi.close()
@@ -347,11 +348,19 @@ def benchXexp(directorioResultados, monton):
         max_ylim = max([t_mem[0].get_ylim()[1],t_mem[1].get_ylim()[1]])
         t_mem[0].set_ylim([0,max_ylim])
         t_mem[1].set_ylim([0,max_ylim]) 
+        t_mem[0].set_ylabel("Latency Cycles")
         
         f_mem.suptitle(bench, fontsize=25)
         
         f_mem.savefig(dir+bench+'_memEvents.eps',format='eps', bbox_inches='tight')
         
+        fig_paper , tab_paper = plt.subplots()
+        fig_paper.set_size_inches(30, 20)
+        fig_paper.set_dpi(300)
+        memEventsLoad.plot(ax=tab_paper, kind='bar',stacked=True,title="Latency variations")
+        fig_paper.savefig(dir+bench+'_latpaper.eps',format='eps', bbox_inches='tight')
+        
+        plt.close(fig_paper)
         plt.close(f_mem)
         t[0][0].cla()
         t[0][1].cla()
@@ -428,9 +437,24 @@ def barras_opc(directorioResultados, monton):
     latencia.plot(ax=t, kind='bar')
     f.savefig(dir + 'latencias.eps',format='eps')
     t.cla()
-
+    
+    t.set_ylabel("OPC")
+    t.set_xlabel("Benchmarks")
     opc.plot(ax=t, kind='bar')
-    f.savefig(dir + 'opc.eps',format='eps')
+    f.savefig(dir + 'opc.eps',format='eps', bbox_inches='tight')
+    t.cla()
+
+    
+    t.set_ylabel("OPC")
+    t.set_xlabel("Benchmarks")
+    opc.ix[['BlackScholes','DCT','MersenneTwister','QuasiRandomSequence']].plot(ax=t, kind='bar')
+    f.savefig(dir + 'opc_altos.eps',format='eps', bbox_inches='tight')
+    t.cla()
+    
+    t.set_ylabel("OPC")
+    t.set_xlabel("Benchmarks")
+    opc.ix[['DwtHaar1D','FastWalshTransform','FloydWarshall','RecursiveGaussian','Reduction','ScanLargeArrays']].plot(ax=t, kind='bar')
+    f.savefig(dir + 'opc_bajos.eps',format='eps', bbox_inches='tight')
     t.cla()
 
     invalidations.plot(ax=t, kind='bar')
@@ -1673,11 +1697,26 @@ if __name__ == '__main__':
 
     #from mpltools import style
     #from mpltools import layout
+    sb.set(font_scale=4)
+    sb.set_style("whitegrid")
+    #cmap = sb.blend_palette(["firebrick", "palegreen"], 8)
+    cmap = sb.color_palette("Greys", 8)
+    #sb.palplot(cmap)
+    #sb.set_palette(cmap)
+    #sb.palplot(sb.color_palette() )
+    #sb.palplot(sb.color_palette(n_colors=8) )
+
+    # but setting the number of colors explicitly allows it to use them all
+    sb.set_palette(cmap, n_colors=8)
+    # Even though unless you explicitly request all the colors it only shows 6
+    #sb.palplot(sb.color_palette() )
+    #sb.palplot(sb.color_palette(n_colors=8) )
+    
 
     #style.use('ggplot')
     mpl.rcParams.update({'font.size': 16})
 
-    #plt.rcParams['figure.autolayout'] = True
+     
 
     '''
     tipos_instrucciones = np.dtype([('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
@@ -1688,7 +1727,7 @@ if __name__ == '__main__':
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
     # variables de los test
-    nombre_resumen = ['04-01_mshr4_m2s_witness','04-01_mshr8_m2s_witness','04-01_mshr16_m2s_witness','04-01_mshr32_m2s_witness','04-07_mshr4_witness','04-07_mshr8_witness','04-07_mshr16_witness','04-07_mshr32_witness','04-07_mshr64_witness','04-07_mshr128_witness','04-07_mshr256_witness']
+    nombre_resumen = ['04-07_mshr4_witness','04-07_mshr8_witness','04-07_mshr16_witness','04-07_mshr32_witness','03-27_mshr64_m2s_sin_mod']
     #nombre_resumen = ['03-27_mshr4_m2s_sin_mod','03-27_mshr8_m2s_sin_mod','03-27_mshr16_m2s_sin_mod','03-27_mshr32_m2s_sin_mod','03-27_mshr64_m2s_sin_mod','03-27_mshr128_m2s_sin_mod','03-27_mshr256_m2s_sin_mod','04-01_mshr4_m2s_mshr2','04-01_mshr8_m2s_mshr2','04-01_mshr16_m2s_mshr2','04-01_mshr32_m2s_mshr2','04-01_mshr64_m2s_mshr2','04-01_mshr128_m2s_mshr2','04-01_mshr256_m2s_mshr2','04-01_mshr4_m2s_witness','04-01_mshr8_m2s_witness','04-01_mshr16_m2s_witness','04-01_mshr32_m2s_witness']
     
     #nombre_resumen = ['02-23_mshr4','02-23_mshr8','02-23_mshr16','02-23_mshr32','02-23_mshr64','02-23_mshr128','02-23_mshr256','03-23_mshr4_base1_cc','03-23_mshr8_base1_cc','03-23_mshr16_base1_cc','03-23_mshr32_base1_cc','03-23_mshr64_base1_cc','03-23_mshr128_base1_cc','03-23_mshr256_base1_cc','03-24_mshr4_cc_test','03-24_mshr8_cc_test','03-24_mshr16_cc_test','03-24_mshr32_cc_test','03-24_mshr64_cc_test','03-24_mshr128_cc_test','03-24_mshr256_cc_test','03-27_mshr4_m2s_sin_mod','03-27_mshr8_m2s_sin_mod','03-27_mshr16_m2s_sin_mod','03-27_mshr32_m2s_sin_mod','03-27_mshr64_m2s_sin_mod','03-27_mshr128_m2s_sin_mod','03-27_mshr256_m2s_sin_mod']
@@ -1726,7 +1765,9 @@ if __name__ == '__main__':
     # columnas datos sueltos
     datos = ['latencia_red_l1-l2','latencia_red_l2-mm','compartidos desde l2','replicas en l1','latencia','ciclos','IPC','evictions','evictions con sharers','Invalidations','HitRatio L2','HitRatio L1','loads L1','Coalesced L1','loads L2','coalesce L2']
 
-    benchmarks_amd = ['BinarySearch','BinomialOption','BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RadixSort','RecursiveGaussian','Reduction','ScanLargeArrays','SimpleConvolution']
+    benchmarks_amd =['BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RecursiveGaussian','Reduction','ScanLargeArrays']
+ 
+    #benchmarks_amd = ['BinarySearch','BinomialOption','BlackScholes','DCT','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose','MersenneTwister','QuasiRandomSequence','RadixSort','RecursiveGaussian','Reduction','ScanLargeArrays','SimpleConvolution']
     #benchmarks_amd = ['BinomialOption','DwtHaar1D','FastWalshTransform','FloydWarshall','MatrixMultiplication','MatrixTranspose']
     #benchmarks_amd = ['BlackScholes','FastWalshTransform','FloydWarshall','MatrixMultiplication','MersenneTwister']
     benchmarks_rodinia = ['backprop','bfs','b+tree','gaussian','kmeans','lud','streamcluster']
