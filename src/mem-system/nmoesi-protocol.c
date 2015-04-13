@@ -1446,7 +1446,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 				stack->way = cache_replace_block(mod->cache, stack->set);
 			}
-			if(stack->read && stack->mshr_locked == 0)
+			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0)
 			{
 
 
