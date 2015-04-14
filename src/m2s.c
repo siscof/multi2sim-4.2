@@ -150,6 +150,7 @@ int SALTAR_L1;
 int flag_mshr_enabled = 0;
 int mshr_control_enabled = 0;
 int flag_coalesce_gpu_enabled = 0;
+int flag_no_blocking_store = 0;
 long long ventana_muestreo = 10000;
 //int fran_latencia;
 //int fran_accesos;
@@ -678,6 +679,13 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
         {
         	flag_coalesce_gpu_enabled = 1;
         	continue;
+        }
+
+        /* mshr enable */
+        if (!strcmp(argv[argi], "--no_blocking_store_enable"))
+        {
+        	flag_no_blocking_store = 1;
+    		continue;
         }
 
 		/* Context configuration file */
