@@ -327,7 +327,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				add_access(0);
 				
 				//instruccion coalesce
-				if (master_stack)
+				if (flag_coalesce_gpu_enabled && master_stack)
 				{		
 					unsigned int shift = (addr & (mod->sub_block_size - 1));
 					int tag = addr & ~(mod->sub_block_size - 1);

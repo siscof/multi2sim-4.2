@@ -170,7 +170,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Coalesce access */
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
-		if (master_stack)
+		if (!flag_coalesce_gpu_enabled && master_stack)
 		{
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
@@ -518,7 +518,7 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 		/* Coalesce access */
 		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, stack);
-		if (master_stack)
+		if (!flag_coalesce_gpu_enabled && master_stack)
 		{
 			mod->writes++;
 			mod_coalesce(mod, master_stack, stack);
@@ -717,7 +717,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		
 		/* Coalesce access */
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
-		if (master_stack)
+		if (!flag_coalesce_gpu_enabled && master_stack)
 		{
 			mod->nc_writes++;
 			mod_coalesce(mod, master_stack, stack);

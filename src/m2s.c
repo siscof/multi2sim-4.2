@@ -148,6 +148,7 @@ char *fran_file_hitRatio;
 char *fran_file_red;
 int SALTAR_L1;
 int mhsr_control_enabled = 0;
+int flag_coalesce_gpu_enabled = 0;
 long long ventana_muestreo = 10000;
 //int fran_latencia;
 //int fran_accesos;
