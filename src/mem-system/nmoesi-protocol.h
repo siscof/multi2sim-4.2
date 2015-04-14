@@ -21,6 +21,7 @@
 #define MEM_SYSTEM_NMOESI_PROTOCOL_H
 
 
+
 /* NMOESI Event-Driven Simulation */
 
 extern int EV_MOD_NMOESI_LOAD;

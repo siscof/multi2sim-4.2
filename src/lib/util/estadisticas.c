@@ -740,7 +740,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
-        if(mhsr_control_enabled && !(gpu_stats.total % 500000) /*&& (ciclo_ultimaI + lat_umbral) < cycle*/ )
+        if(mshr_control_enabled && !(gpu_stats.total % 500000) /*&& (ciclo_ultimaI + lat_umbral) < cycle*/ )
         {
 		ciclo_ultimaI = cycle;
                 mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);

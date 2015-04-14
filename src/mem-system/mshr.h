@@ -6,7 +6,7 @@
 #include "mod-stack.h"
 #include <stdio.h>
 
-extern int mhsr_control_enabled;
+extern int mshr_control_enabled;
 
 struct mshr_t
 {

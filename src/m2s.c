@@ -147,8 +147,13 @@ char *fran_file_t1000k;
 char *fran_file_hitRatio;
 char *fran_file_red;
 int SALTAR_L1;
+<<<<<<< HEAD
 int mhsr_control_enabled = 0;
 int flag_coalesce_gpu_enabled = 0;
+=======
+int flag_mshr_enabled = 0;
+int mshr_control_enabled = 0;
+>>>>>>> ab58e1fcf98ee9a3ef399d48caf329446364172b
 long long ventana_muestreo = 10000;
 //int fran_latencia;
 //int fran_accesos;
@@ -661,7 +666,14 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
         /* mshr size control */
         if (!strcmp(argv[argi], "--mshr-control"))
         {
-        	mhsr_control_enabled = 1;
+        	mshr_control_enabled = 1;
+        	continue;
+        }
+
+        /* mshr enable */
+        if (!strcmp(argv[argi], "--mshr-enable"))
+        {
+        	flag_mshr_enabled = 1;
         	continue;
         }
 

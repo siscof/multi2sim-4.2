@@ -63,6 +63,8 @@ extern int mem_domain_index;
 /* Global memory system */
 extern struct mem_system_t *mem_system;
 
+extern int flag_mshr_enabled;
+
 
 
 
