@@ -134,7 +134,7 @@ int t1000k = 0;
 long long tiempo_medio = 0;
 long long ciclo_acceso = 0;
 int acumulado = 0;
-int flag_witness = 1;
+
 
 int FRAN = 0;
 int load_finished = 0;
@@ -706,7 +706,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mod_access_start(mod, stack, mod_access_nc_store);
 
 		/* Increment witness variable */
-		if (flag_witness && stack->witness_ptr)
+		if (flag_no_blocking_store && stack->witness_ptr)
 		{
 			(*stack->witness_ptr)++;
 			stack->witness_ptr = NULL;
