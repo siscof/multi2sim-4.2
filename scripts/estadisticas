@@ -1727,7 +1727,28 @@ if __name__ == '__main__':
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
     # variables de los test
-    nombre_resumen = ['04-13_mshr4_con_mshr','04-13_mshr8_con_mshr','04-13_mshr16_con_mshr','04-13_mshr32_con_mshr','04-13_mshr4_sin_mshr','04-13_mshr8_sin_mshr','04-13_mshr16_sin_mshr','04-13_mshr32_sin_mshr']
+    
+    # no_blocking_write
+    nombre_resumen = ['04-15_mshr4_no_blocking_store_enable_5CU','04-15_mshr8_no_blocking_store_enable_5CU','04-15_mshr16_no_blocking_store_enable_5CU','04-15_mshr32_no_blocking_store_enable_5CU','04-15_mshr4_coalesce_gpu_enable_5CU','04-15_mshr8_coalesce_gpu_enable_5CU','04-15_mshr16_coalesce_gpu_enable_5CU','04-15_mshr32_coalesce_gpu_enable_5CU']
+    
+    # coalesce_gpu
+    #nombre_resumen = ['04-15_mshr4_coalesce_gpu_enable_5CU','04-15_mshr8_coalesce_gpu_enable_5CU','04-15_mshr16_coalesce_gpu_enable_5CU','04-15_mshr32_coalesce_gpu_enable_5CU','04-15_mshr4_mshr_enable_5CU','04-15_mshr8_mshr_enable_5CU','04-15_mshr16_mshr_enable_5CU','04-15_mshr32_mshr_enable_5CU']
+    
+    # mshr
+    #nombre_resumen = ['04-15_mshr4_mshr_enable_5CU','04-15_mshr8_mshr_enable_5CU','04-15_mshr16_mshr_enable_5CU','04-15_mshr32_mshr_enable_5CU','04-15_mshr16_mshr_disable_5CU']
+
+    # no_blocking_write
+    #nombre_resumen = ['04-15_mshr4_no_blocking_store_enable','04-15_mshr8_no_blocking_store_enable','04-15_mshr16_no_blocking_store_enable','04-15_mshr32_no_blocking_store_enable','04-15_mshr4_coalesce_gpu_enable','04-15_mshr8_coalesce_gpu_enable','04-15_mshr16_coalesce_gpu_enable','04-15_mshr32_coalesce_gpu_enable']
+    
+    # coalesce_gpu
+    #nombre_resumen = ['04-15_mshr4_coalesce_gpu_enable','04-15_mshr8_coalesce_gpu_enable','04-15_mshr16_coalesce_gpu_enable','04-15_mshr32_coalesce_gpu_enable','04-15_mshr4_mshr_enable','04-15_mshr8_mshr_enable','04-15_mshr16_mshr_enable','04-15_mshr32_mshr_enable']
+    
+    # mshr
+    #nombre_resumen = ['04-15_mshr4_mshr_enable','04-15_mshr8_mshr_enable','04-15_mshr16_mshr_enable','04-15_mshr32_mshr_enable','04-15_mshr16_mshr_disable']
+    
+    
+    
+    #nombre_resumen = ['04-13_mshr4_con_mshr','04-13_mshr8_con_mshr','04-13_mshr16_con_mshr','04-13_mshr32_con_mshr','04-13_mshr4_sin_mshr','04-13_mshr8_sin_mshr','04-13_mshr16_sin_mshr','04-13_mshr32_sin_mshr']
     
     #nombre_resumen = ['04-07_mshr4_witness','04-07_mshr8_witness','04-07_mshr16_witness','04-07_mshr32_witness','03-27_mshr64_m2s_sin_mod']
     #nombre_resumen = ['03-27_mshr4_m2s_sin_mod','03-27_mshr8_m2s_sin_mod','03-27_mshr16_m2s_sin_mod','03-27_mshr32_m2s_sin_mod','03-27_mshr64_m2s_sin_mod','03-27_mshr128_m2s_sin_mod','03-27_mshr256_m2s_sin_mod','04-01_mshr4_m2s_mshr2','04-01_mshr8_m2s_mshr2','04-01_mshr16_m2s_mshr2','04-01_mshr32_m2s_mshr2','04-01_mshr64_m2s_mshr2','04-01_mshr128_m2s_mshr2','04-01_mshr256_m2s_mshr2','04-01_mshr4_m2s_witness','04-01_mshr8_m2s_witness','04-01_mshr16_m2s_witness','04-01_mshr32_m2s_witness']
