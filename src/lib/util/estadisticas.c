@@ -188,6 +188,20 @@ print_cache_states((long long *) NULL);
 
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
+fran_debug_ipc("vmb_inst_counter ");
+
+for(int i = 0; i < 10; i++)
+{
+	fran_debug_ipc("vmb_blocked_load_CU%d ",i);
+}
+
+for(int i = 0; i < 10; i++)
+{
+	fran_debug_ipc("vmb_blocked_store_CU%d ",i);
+}
+
+fran_debug_ipc("gpu_coalesce_load gpu_coalesce_store mem_coalesce_load mem_coalesce_store ");
+
 fran_debug_ipc("evictions_L2 counter_load_action_retry cycles_load_action_retry counter_load_miss_retry cycles_load_miss_retry counter_nc_store_writeback_retry cycles_nc_store_writeback_retry counter_nc_store_action_retry cycles_nc_store_action_retry counter_nc_store_miss_retry cycles_nc_store_miss_retry accesses_with_retries invalidations ");
 
 fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_mem_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
@@ -462,6 +476,11 @@ void add_cache_states(int state, int level)
 	mem_stats.mod_level[level].cache_state[state]++;
 }
 
+void add_inst_to_vmb()
+{
+	gpu_stats.vmb_inst_counter++;
+}
+
 void print_cache_states(long long *results)
 {
 	if(results == NULL && !resultaFilesInitialized)
@@ -543,6 +562,16 @@ void add_simd_running_cycle()
 	gpu_stats.cycles_simd_running++;	
 }
 
+void add_cycle_vmb_blocked(int compute_unit_id, int blocked_by_store)
+{
+	if(blocked_by_store)
+	{
+	gpu_stats.cycles_vmb_blocked_store[compute_unit_id]++;
+	}else{
+	gpu_stats.cycles_vmb_blocked_load[compute_unit_id]++;
+	}
+}
+
 void ipc_instructions(long long cycle, si_units unit)
 {
 	
@@ -582,6 +611,27 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 print_cache_states(mem_stats.mod_level[1].cache_state);
 
+fran_debug_ipc("%lld ",gpu_stats.vmb_inst_counter);
+gpu_stats.vmb_inst_counter = 0;
+
+//vmb_blocks
+for(int i = 0; i < 10; i++)
+{
+	fran_debug_ipc("%lld ",gpu_stats.cycles_vmb_blocked_load[i]);
+	gpu_stats.cycles_vmb_blocked_load[i] = 0;
+}
+
+for(int i = 0; i < 10; i++)
+{
+	fran_debug_ipc("%lld ",gpu_stats.cycles_vmb_blocked_store[i]);
+	gpu_stats.cycles_vmb_blocked_store[i] = 0;
+}
+
+fran_debug_ipc("%lld %lld %lld %lld ",mem_stats.mod_level[0].coalesce_load, mem_stats.mod_level[0].coalesce_store, mem_stats.mod_level[1].coalesce_load, mem_stats.mod_level[1].coalesce_store);
+mem_stats.mod_level[0].coalesce_load = 0;
+mem_stats.mod_level[0].coalesce_store = 0;
+mem_stats.mod_level[1].coalesce_load = 0;
+mem_stats.mod_level[1].coalesce_store = 0;
 //evitions
 
 fran_debug_ipc("%lld ",mem_stats.mod_level[2].evictions - instrucciones_mem_stats_anterior.mod_level[2].evictions);

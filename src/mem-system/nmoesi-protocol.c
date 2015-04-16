@@ -166,7 +166,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_load);
-
+		add_access(mod->level);
 		/* Coalesce access */
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
@@ -174,21 +174,19 @@ void mod_handler_nmoesi_load(int event, void *data)
 		{
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
-			add_access(mod->level);
-			add_coalesce(mod->level);
+
 			mod->reads++;
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_LOAD_FINISH);
 
-			add_coalesce(1);
-			add_coalesce_load(1);
+			add_coalesce(mod->level);
+			add_coalesce_load(mod->level);
 
 			return;
 		}
 		
 		stack->latencias.start = asTiming(si_gpu)->cycle;
-		
-		add_access(mod->level);
+
 	 	mod->loads++;
 	 	
 		/* Next event */
@@ -520,6 +518,8 @@ void mod_handler_nmoesi_store(int event, void *data)
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_store);
 
+		add_access(1);
+
 		/* Coalesce access */
 		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, stack);
 		if (!flag_coalesce_gpu_enabled && master_stack)
@@ -528,8 +528,8 @@ void mod_handler_nmoesi_store(int event, void *data)
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_STORE_FINISH);
 
-			add_coalesce(1);
-			add_coalesce_store(1);
+			add_coalesce(mod->level);
+			add_coalesce_store(mod->level);
 
 			/* Increment witness variable */
 			if (stack->witness_ptr)
@@ -730,8 +730,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_NC_STORE_FINISH);
 
-			add_coalesce(1);
-			add_coalesce_store(1);
+			add_coalesce(mod->level);
+			add_coalesce_store(mod->level);
 			return;
 		}
 

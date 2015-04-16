@@ -127,9 +127,9 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		/* Uop is not ready yet */
 		if (uop->global_mem_witness)
 		{
-			if(i == 0 && uop->vector_mem_write)
+			if(i == 0 && list_count(vector_mem->mem_buffer) == si_gpu_vector_mem_max_inflight_mem_accesses)
 			{
-
+				add_cycle_vmb_blocked(uop->compute_unit->id, uop->vector_mem_write);
 				//add contador tiempo bloqueando
 			}
 
@@ -295,6 +295,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		uop->send_cycle = asTiming(si_gpu)->cycle;
 		
 		struct mod_t *mod;
+		add_inst_to_vmb();
 		
 		assert(!uop->global_mem_witness);
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
@@ -304,7 +305,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
 			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-		        {
+		    {
 				if (uop->vector_mem_write && !uop->glc)
 	            		{
 					aux->vector_write_nc++;

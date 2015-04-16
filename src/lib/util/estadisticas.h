@@ -84,6 +84,10 @@ struct esta_t
 {
         /* Statistics */
         long long coalesce;
+        long long coalesce_load;
+        long long coalesce_store;
+
+
         long long accesses;
         long long hits;
 	long long misses;
@@ -132,6 +136,10 @@ struct si_gpu_unit_stats
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;
 
+	long long cycles_vmb_blocked_load[10];
+	long long cycles_vmb_blocked_store[10];
+	long long vmb_inst_counter;
+
 	//instruction latency
 	long long start2fetch;		
 	long long fetch2complete;  
@@ -176,6 +184,8 @@ struct mem_system_stats
 	long long load_latency_count;
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;
+
+	//coalesce
 
 	struct retry_stats_t retries[num_retries_kinds];
 	long long stacks_with_retries;
