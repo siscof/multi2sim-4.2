@@ -179,6 +179,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 			mod->reads++;
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_LOAD_FINISH);
+
+			add_coalesce(1);
+			add_coalesce_load(1);
+
 			return;
 		}
 		
@@ -524,6 +528,9 @@ void mod_handler_nmoesi_store(int event, void *data)
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_STORE_FINISH);
 
+			add_coalesce(1);
+			add_coalesce_store(1);
+
 			/* Increment witness variable */
 			if (stack->witness_ptr)
 				(*stack->witness_ptr)++;
@@ -722,6 +729,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod->nc_writes++;
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_NC_STORE_FINISH);
+
+			add_coalesce(1);
+			add_coalesce_store(1);
 			return;
 		}
 

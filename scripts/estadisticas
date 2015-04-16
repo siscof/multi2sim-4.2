@@ -447,13 +447,13 @@ def barras_opc(directorioResultados, monton):
     
     t.set_ylabel("OPC")
     t.set_xlabel("Benchmarks")
-    opc.ix[['BlackScholes','DCT','MersenneTwister','QuasiRandomSequence']].plot(ax=t, kind='bar',rot=25)
+    opc.ix[['BlackScholes','DCT','MersenneTwister','QuasiRandomSequence']].plot(ax=t, kind='bar',rot=25, title='mshr performance')
     f.savefig(dir + 'opc_altos.eps',format='eps', bbox_inches='tight')
     t.cla()
     
     t.set_ylabel("OPC")
     t.set_xlabel("Benchmarks")
-    opc.ix[['DwtHaar1D','FastWalshTransform','FloydWarshall','RecursiveGaussian','Reduction','ScanLargeArrays']].plot(ax=t, kind='bar',rot=25)
+    opc.ix[['DwtHaar1D','FastWalshTransform','FloydWarshall','RecursiveGaussian','Reduction','ScanLargeArrays']].plot(ax=t, kind='bar',rot=25, title='mshr performance')
     f.savefig(dir + 'opc_bajos.eps',format='eps', bbox_inches='tight')
     t.cla()
 
@@ -1726,6 +1726,11 @@ if __name__ == '__main__':
 
     tipos_instrucciones = np.dtype([('access_list_count',np.int64),('mshr L1',np.int64),('mshr L2',np.int64),('entradas bloqueadas L1',np.int64),('entradas bloqueadas L2',np.int64),('Coalesces gpu',np.int64),('Coalesces L1',np.int64),('Coalesces L2',np.int64),('accesos gpu',np.int64),('accesos L1',np.int64),('accesos L2',np.int64),('efectivos L1',np.int64),('efectivos L2',np.int64),('misses L1',np.int64),('misses L2',np.int64),('hits L1',np.int64),('hits L2',np.int64),('Cmisses L1',np.int64),('Cmisses L2',np.int64),('Chits L1',np.int64),('Chits L2',np.int64),('lat L1-L2',np.int64),('paquetes L1-L2',np.int64),('lat L2-MM',np.int64),('paquetes L2-MM',np.int64),('lat loads gpu',np.int64),('num loads gpu',np.int64),('lat loads mem',np.int64),('num loads mem',np.int64),('i_scalar',np.int64),('i_simd',np.int64),('mi_simd',np.int64),('i_s_mem',np.int64),('i_v_mem',np.int64),('mi_v_mem',np.int64),('i_branch',np.int64),('i_lds',np.int64),('mi_lds',np.int64),('total intervalo',np.int64),('total global',np.int64),('ciclos intervalo',np.int64),('ciclos totales',np.int64)])
 
+   
+    #nombre_resumen = ['04-16_mshr32_solo_no_blocking_store_10CU','no_blocking_write_mshr_disabled']
+    #nombre_resumen = ['04-16_mshr32_solo_coalesce_gpu_10CU','04-16_mshr32_coalesce_gpu_mixto_10CU','coalesce_mshr_disabled']
+    
+
     # variables de los test
     
     #nombre_resumen = ['04-15_mshr4_cc','04-15_mshr8_cc','04-15_mshr16_cc','04-15_mshr32_cc','04-15_mshr4_no_blocking_store_enable','04-15_mshr8_no_blocking_store_enable','04-15_mshr16_no_blocking_store_enable','04-15_mshr32_no_blocking_store_enable','04-15_mshr4_coalesce_gpu_enable','04-15_mshr8_coalesce_gpu_enable','04-15_mshr16_coalesce_gpu_enable','04-15_mshr32_coalesce_gpu_enable']
@@ -1744,10 +1749,10 @@ if __name__ == '__main__':
     #nombre_resumen = ['04-15_mshr4_no_blocking_store_enable','04-15_mshr8_no_blocking_store_enable','04-15_mshr16_no_blocking_store_enable','04-15_mshr32_no_blocking_store_enable','04-15_mshr4_coalesce_gpu_enable','04-15_mshr8_coalesce_gpu_enable','04-15_mshr16_coalesce_gpu_enable','04-15_mshr32_coalesce_gpu_enable']
     
     # coalesce_gpu
-    nombre_resumen = ['04-15_mshr4_coalesce_gpu_enable','04-15_mshr8_coalesce_gpu_enable','04-15_mshr16_coalesce_gpu_enable','04-15_mshr32_coalesce_gpu_enable','04-15_mshr4_mshr_enable','04-15_mshr8_mshr_enable','04-15_mshr16_mshr_enable','04-15_mshr32_mshr_enable']
+    #nombre_resumen = ['04-15_mshr4_coalesce_gpu_enable','04-15_mshr8_coalesce_gpu_enable','04-15_mshr16_coalesce_gpu_enable','04-15_mshr32_coalesce_gpu_enable','04-15_mshr4_mshr_enable','04-15_mshr8_mshr_enable','04-15_mshr16_mshr_enable','04-15_mshr32_mshr_enable']
     
     # mshr
-    #nombre_resumen = ['04-15_mshr4_mshr_enable','04-15_mshr8_mshr_enable','04-15_mshr16_mshr_enable','04-15_mshr32_mshr_enable','04-15_mshr16_mshr_disable']
+    nombre_resumen = ['04-15_mshr4_mshr_enable','04-15_mshr8_mshr_enable','04-15_mshr16_mshr_enable','04-15_mshr32_mshr_enable','mshr_disable']
     
     
     

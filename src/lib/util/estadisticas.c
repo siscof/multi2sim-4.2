@@ -224,6 +224,18 @@ void add_coalesce(int level)
         mem_stats.mod_level[level].coalesce++;
 }
 
+void add_coalesce_load(int level)
+{
+	//(estadisticas_ipc + level)->coalesce++;
+        mem_stats.mod_level[level].coalesce_load++;
+}
+
+void add_coalesce_store(int level)
+{
+	//(estadisticas_ipc + level)->coalesce++;
+        mem_stats.mod_level[level].coalesce_store++;
+}
+
 void add_access(int level)
 {
 	//(estadisticas_ipc + level)->accesses++;

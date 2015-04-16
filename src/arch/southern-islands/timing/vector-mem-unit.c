@@ -127,6 +127,12 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		/* Uop is not ready yet */
 		if (uop->global_mem_witness)
 		{
+			if(i == 0 && uop->vector_mem_write)
+			{
+
+				//add contador tiempo bloqueando
+			}
+
 			list_index++;
 			continue;
 		}
@@ -346,6 +352,10 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 					mod_stack_merge_dirty_mask(master_stack, mask);
 					mod_stack_merge_valid_mask(master_stack, mask);
 					add_coalesce(0);
+					if(uop->vector_mem_write)
+						add_coalesce_load(0);
+					else
+						add_coalesce_store(0);
 				}
 				else
 				{	
