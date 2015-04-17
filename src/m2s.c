@@ -675,14 +675,14 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
         }
 
         /* mshr enable */
-        if (!strcmp(argv[argi], "--coalesce_gpu_enable"))
+        if (!strcmp(argv[argi], "--coalesce-gpu-enable"))
         {
         	flag_coalesce_gpu_enabled = 1;
         	continue;
         }
 
         /* mshr enable */
-        if (!strcmp(argv[argi], "--no_blocking_store_enable"))
+        if (!strcmp(argv[argi], "--NBS-enable"))
         {
         	flag_no_blocking_store = 1;
     		continue;
