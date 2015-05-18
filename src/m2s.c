@@ -610,21 +610,19 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 		/*
 		 * General Options
 		 */
-
+		m2s_need_argument(argc, argv, argi);
 		if (!strcmp(argv[argi], "--saltar_l1"))
 		{
+			SALTAR_L1 = 1;
+			continue;
+		}
 
+
+
+		if(!strcmp(argv[argi],"--extra-reports"))
+		{
+			argi++;
 			m2s_need_argument(argc, argv, argi);
-			if(!strcmp(argv[++argi],"enable")){
-				SALTAR_L1 = 1;
-			}else{
-				SALTAR_L1 = 0;
-				
-			}
-						
-			m2s_need_argument(argc, argv, argi);
-	
-            argi++;
 			
 			char a[200]="";
 			
@@ -674,14 +672,14 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
         	continue;
         }
 
-        /* mshr enable */
+        /* GPU coalesce enable */
         if (!strcmp(argv[argi], "--coalesce-gpu-enable"))
         {
         	flag_coalesce_gpu_enabled = 1;
         	continue;
         }
 
-        /* mshr enable */
+        /* Non blocking stores enable */
         if (!strcmp(argv[argi], "--NBS-enable"))
         {
         	flag_no_blocking_store = 1;
