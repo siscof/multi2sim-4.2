@@ -18,7 +18,6 @@
  */
 
 #include <lib/mhandle/mhandle.h>
-#include <lib/util/debug.h>
 
 #include "basic-block.h"
 #include "node.h"

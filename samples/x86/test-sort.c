@@ -1,5 +1,3 @@
-#include <stdlib.h>
-#include <stdio.h>
 
 int compar(const void *e1, const void *e2)
 {

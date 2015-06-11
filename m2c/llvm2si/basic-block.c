@@ -18,20 +18,9 @@
  */
 
 
-#include <m2c/common/ctree.h>
-#include <m2c/si2bin/arg.h>
-#include <m2c/si2bin/inst.h>
 #include <lib/mhandle/mhandle.h>
-#include <lib/util/debug.h>
-#include <lib/util/linked-list.h>
-#include <lib/util/list.h>
-#include <lib/util/string.h>
 
 #include "basic-block.h"
-#include "function.h"
-#include "phi.h"
-#include "symbol.h"
-#include "symbol-table.h"
 
 
 /*

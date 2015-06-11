@@ -18,18 +18,9 @@
  */
 
 
-#include <m2c/common/ctree.h>
 #include <lib/mhandle/mhandle.h>
-#include <lib/util/debug.h>
-#include <lib/util/list.h>
-#include <llvm-c/BitReader.h>
 
-#include "basic-block.h"
-#include "function.h"
 #include "llvm2si.h"
-#include "phi.h"
-#include "symbol.h"
-#include "symbol-table.h"
 
 
 /*

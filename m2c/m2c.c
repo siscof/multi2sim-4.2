@@ -18,15 +18,11 @@
  */
 
 #include <getopt.h>
-#include <unistd.h>
 
 #include <m2c/amd/amd.h>
 #include <m2c/gl/gl.h>
-#include <m2c/cl2llvm/cl2llvm.h>
 #include <m2c/common/basic-block.h>
 #include <m2c/common/ctree.h>
-#include <m2c/frm2bin/frm2bin.h>
-#include <m2c/llvm2si/llvm2si.h>
 #include <m2c/si2bin/si2bin.h>
 #include <lib/mhandle/mhandle.h>
 #include <lib/util/misc.h>
