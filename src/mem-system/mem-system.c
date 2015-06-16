@@ -124,7 +124,7 @@ void mem_system_init(void)
 	if (mem_config_file_name && *mem_config_file_name && !count)
 		fatal("memory configuration file given, but no timing simulation.\n%s",
 				mem_err_timing);
-	
+
 	/* Create trace category. This needs to be done before reading the
 	 * memory configuration file with 'mem_config_read', since the latter
 	 * function generates the trace headers. */
@@ -143,9 +143,9 @@ void mem_system_init(void)
 	if (*mem_report_file_name && !file_can_open_for_write(mem_report_file_name))
 		fatal("%s: cannot open GPU cache report file",
 			mem_report_file_name);
-			
+
 	/* VI memory event-driven simulation*/
-	
+
 	EV_MOD_VI_LOAD = esim_register_event_with_name(mod_handler_vi_load,
 			mem_domain_index, "mod_vi_load");
 	EV_MOD_VI_LOAD_SEND = esim_register_event_with_name(mod_handler_vi_load,
@@ -181,7 +181,7 @@ void mem_system_init(void)
 			mem_domain_index, "mod_vi_store_unlock");
 	EV_MOD_VI_STORE_FINISH = esim_register_event_with_name(mod_handler_vi_store,
 			mem_domain_index, "mod_vi_store_finish");
-			
+
 	EV_MOD_VI_FIND_AND_LOCK = esim_register_event_with_name(mod_handler_vi_find_and_lock,
 			mem_domain_index, "mod_vi_find_and_lock");
 	EV_MOD_VI_FIND_AND_LOCK_PORT = esim_register_event_with_name(mod_handler_vi_find_and_lock,
@@ -224,7 +224,7 @@ void mem_system_init(void)
 			mem_domain_index, "mod_nmoesi_store_unlock");
 	EV_MOD_NMOESI_STORE_FINISH = esim_register_event_with_name(mod_handler_nmoesi_store,
 			mem_domain_index, "mod_nmoesi_store_finish");
-	
+
 	EV_MOD_NMOESI_NC_STORE = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
 			mem_domain_index, "mod_nmoesi_nc_store");
 	EV_MOD_NMOESI_NC_STORE_SEND = esim_register_event_with_name(mod_handler_nmoesi_nc_store,
@@ -448,7 +448,7 @@ void mem_system_dump_report(void)
 	f = file_open_for_write(mem_report_file_name);
 	if (!f)
 		return;
-	
+
 	/* Intro */
 	fprintf(f, "; Report for caches, TLBs, and main memory\n");
 	fprintf(f, ";    Accesses - Total number of accesses\n");
@@ -465,9 +465,9 @@ void mem_system_dump_report(void)
 	fprintf(f, ";    BlockingReads, BlockingWrites, BlockingNCWrites - Reads/writes coming from lower-level cache\n");
 	fprintf(f, ";    NonBlockingReads, NonBlockingWrites, NonBlockingNCWrites - Coming from upper-level cache\n");
 	fprintf(f, "\n\n");
-	
+
 	fprintf(f, "Directory type = %d\n\n",directory_type);
-	
+
 	/* Report for each cache */
 	for (i = 0; i < list_count(mem_system->mod_list); i++)
 	{
@@ -503,7 +503,7 @@ void mem_system_dump_report(void)
 		//FRAN
 		fprintf(f, "EvictionsWithSharers = %lld\n", mod->evictions_with_sharers);
 		fprintf(f, "EvictionsSharersInvalidation = %lld\n", mod->evictions_sharers_invalidation);
-		fprintf(f, "Retries = %lld\n", mod->read_retries + mod->write_retries + 
+		fprintf(f, "Retries = %lld\n", mod->read_retries + mod->write_retries +
 			mod->nc_write_retries);
 		fprintf(f,"\n");
 		fprintf(f,"Scalar_Load = %lld\n",mod->scalar_load);
@@ -565,7 +565,7 @@ void mem_system_dump_report(void)
 		net = list_get(mem_system->net_list, i);
 		net_dump_report(net, f);
 	}
-	
+
 	/* Done */
 	fclose(f);
 }
@@ -608,6 +608,8 @@ struct net_t *mem_system_get_net(char *net_name)
 	return NULL;
 }
 
+
+/*
 int temporizador_reinicio = 50;
 
 void mshr_control(int latencia, int opc)
@@ -620,8 +622,8 @@ void mshr_control(int latencia, int opc)
         {
                 mod = list_get(mem_system->mod_list, k);
 		if(mod->level == 1)
-         		break;       
-	}	
+         		break;
+	}
 
         //reinicio
 	temporizador_reinicio--;
@@ -640,7 +642,7 @@ void mshr_control(int latencia, int opc)
 		else
 			accion = 1;
 	}
-	
+
 	// dependiendo del OPC
 	if(accion == 0 && opc < (mod->mshr->ipc_anterior * 0.95))
 	{
@@ -657,8 +659,8 @@ void mshr_control(int latencia, int opc)
 				else
 					accion = 1;
 			}
-				
-		} 
+
+		}
 	}else if(accion == 0 && opc > (mod->mshr->ipc_anterior * 1.05)){
                 if(mod->mshr->size > mod->mshr->size_anterior)
                         accion = 1;
@@ -668,12 +670,12 @@ void mshr_control(int latencia, int opc)
 
 	//dependiendo de la latencia
 
-	/*(latencia > 1000)
-        {
-		accion = 1;
-	}else if(latencia <= 1000){
-		accion = 2;
-	}*/
+	//(latencia > 1000)
+  //      {
+	//accion = 1;
+	//}else if(latencia <= 1000){
+	//	accion = 2;
+	//}
 
 	//if(accion)
 	//{
@@ -725,6 +727,4 @@ void mshr_control(int latencia, int opc)
 			}
 		}
         }
-}
-
-
+}*/

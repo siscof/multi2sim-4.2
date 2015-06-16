@@ -73,7 +73,7 @@ void cache_update_waylist(struct cache_set_t *set,
 	{
 		assert(set->way_head == blk && set->way_tail == blk);
 		return;
-		
+
 	}
 	else if (!blk->way_prev)
 	{
@@ -82,7 +82,7 @@ void cache_update_waylist(struct cache_set_t *set,
 			return;
 		set->way_head = blk->way_next;
 		blk->way_next->way_prev = NULL;
-		
+
 	}
 	else if (!blk->way_next)
 	{
@@ -91,7 +91,7 @@ void cache_update_waylist(struct cache_set_t *set,
 			return;
 		set->way_tail = blk->way_prev;
 		blk->way_prev->way_next = NULL;
-		
+
 	}
 	else
 	{
@@ -146,7 +146,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 	assert(!(assoc & (assoc - 1)));
 	cache->log_block_size = log_base2(block_size);
 	cache->block_mask = block_size - 1;
-	
+
 	/* Initialize array of sets */
 	cache->sets = xcalloc(num_sets, sizeof(struct cache_set_t));
 	for (set = 0; set < num_sets; set++)
@@ -163,7 +163,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 			block->way_next = way < assoc - 1 ? &cache->sets[set].blocks[way + 1] : NULL;
 		}
 	}
-	
+
 	/* Return it */
 	return cache;
 }
@@ -184,7 +184,7 @@ void cache_free(struct cache_t *cache)
 
 
 /* Return {set, tag, offset} for a given address */
-void cache_decode_address(struct cache_t *cache, unsigned int addr, int *set_ptr, int *tag_ptr, 
+void cache_decode_address(struct cache_t *cache, unsigned int addr, int *set_ptr, int *tag_ptr,
 	unsigned int *offset_ptr)
 {
 	PTR_ASSIGN(set_ptr, (addr >> cache->log_block_size) % cache->num_sets);
@@ -196,7 +196,7 @@ void cache_decode_address(struct cache_t *cache, unsigned int addr, int *set_ptr
 /* Look for a block in the cache. If it is found and its state is other than 0,
  * the function returns 1 and the state and way of the block are also returned.
  * The set where the address would belong is returned anyways. */
-int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int *way_ptr, 
+int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int *way_ptr,
 	int *state_ptr)
 {
 	int set, tag, way;
@@ -209,11 +209,11 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 	for (way = 0; way < cache->assoc; way++)
 		if (cache->sets[set].blocks[way].tag == tag && cache->sets[set].blocks[way].state)
 			break;
-	
+
 	/* Block not found */
 	if (way == cache->assoc)
 		return 0;
-	
+
 	/* Block found */
 	PTR_ASSIGN(way_ptr, way);
 	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
@@ -259,7 +259,7 @@ void cache_get_block(struct cache_t *cache, int set, int way, int *tag_ptr, int 
 void cache_access_block(struct cache_t *cache, int set, int way)
 {
 	int move_to_head;
-	
+
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
 
@@ -284,7 +284,7 @@ int cache_replace_block(struct cache_t *cache, int set)
 	/* Try to find an invalid block. Do this in the LRU order, to avoid picking the
 	 * MRU while its state has not changed to valid yet. */
 	assert(set >= 0 && set < cache->num_sets);
-	
+
 	for (block = cache->sets[set].way_tail; block; block = block->way_prev)
 	{
 		if (!block->state)
@@ -301,12 +301,12 @@ int cache_replace_block(struct cache_t *cache, int set)
 		cache->policy == cache_policy_fifo)
 	{
 		int way = cache->sets[set].way_tail->way;
-		cache_update_waylist(&cache->sets[set], cache->sets[set].way_tail, 
+		cache_update_waylist(&cache->sets[set], cache->sets[set].way_tail,
 			cache_waylist_head);
 
 		return way;
 	}
-	
+
 	/* Random replacement */
 	assert(cache->policy == cache_policy_random);
 	return random() % cache->assoc;
@@ -337,7 +337,7 @@ unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
 	unsigned int dirty = 0;
 	unsigned int addr = -1;
 	int words = 0;
-	
+
 	assert(cache->sets[set].blocks[way].state);
 
 	if(mask)
@@ -348,11 +348,11 @@ unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
 			words++;
 		}
 		while(!dirty);
-		
+
 		addr = cache->sets[set].blocks[way].tag + ((words - 1) * 4);
 		cache->sets[set].blocks[way].dirty_mask &= (~dirty);
-		
-	} 
+
+	}
 	return addr;
 }
 
@@ -368,9 +368,9 @@ void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsig
 	unsigned int mask = 0;
 	if(words == 0)
 		words = 1;
-		
+
 	assert((tag + cache->block_size) >= (addr + words * 4));
-		
+
 	for(;words > 0 ; words--)
 	{
 		mask |= 1 << (shift + words - 1);
