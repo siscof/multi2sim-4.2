@@ -113,18 +113,18 @@ int temporizador_reinicio = 50;
 
 void mshr_control(int latencia, int opc)
 {
-        int flag = 1;
+  int flag = 1;
 	int accion = 0;
-        struct mod_t *mod;
+  struct mod_t *mod;
 
-        for (int k = 0; k < list_count(mem_system->mod_list); k++)
-        {
-                mod = list_get(mem_system->mod_list, k);
+  for (int k = 0; k < list_count(mem_system->mod_list); k++)
+  {
+    mod = list_get(mem_system->mod_list, k);
 		if(mod->level == 1)
-         		break;
+  		break;
 	}
 
-        //reinicio
+  //reinicio
 	temporizador_reinicio--;
 
 	if(temporizador_reinicio <= 0)
@@ -161,10 +161,10 @@ void mshr_control(int latencia, int opc)
 
 		}
 	}else if(accion == 0 && opc > (mod->mshr->ipc_anterior * 1.05)){
-                if(mod->mshr->size > mod->mshr->size_anterior)
-                        accion = 1;
-                else if(mod->mshr->size < mod->mshr->size_anterior)
-                        accion = 2;
+  	if(mod->mshr->size > mod->mshr->size_anterior)
+      accion = 1;
+    else if(mod->mshr->size < mod->mshr->size_anterior)
+      accion = 2;
 	}
 
 	//dependiendo de la latencia
@@ -178,14 +178,14 @@ void mshr_control(int latencia, int opc)
 
 	//if(accion)
 	//{
-        	mod->mshr->size_anterior = mod->mshr->size;
+    mod->mshr->size_anterior = mod->mshr->size;
 		mod->mshr->ipc_anterior = opc;
 		mod->mshr->latencia_anterior = latencia;
 	//}
 
-        for (int k = 0; k < list_count(mem_system->mod_list); k++)
-        {
-                mod = list_get(mem_system->mod_list, k);
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+  {
+    mod = list_get(mem_system->mod_list, k);
 
 		if(mod->level == 1)
 		{
@@ -225,5 +225,5 @@ void mshr_control(int latencia, int opc)
 				default : break;
 			}
 		}
-        }
+  }
 }

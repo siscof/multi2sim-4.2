@@ -48,7 +48,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 	int x;
 	int y;
 	int z;
-	
+
 	/* Calculate sizes */
 	assert(num_nodes > 0);
 	dir_entry_size = sizeof(struct dir_entry_t) + (num_nodes + 7) / 8;
@@ -244,7 +244,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 			/* Special case: queue is empty */
 			dir_lock->lock_queue = stack;
 		}
-		else 
+		else
 		{
 			lock_queue_iter = dir_lock->lock_queue;
 
@@ -284,12 +284,12 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 			/* ------------------------------------------------------------------------ */
 			}
 
-			if (!lock_queue_iter->dir_lock_next) 
+			if (!lock_queue_iter->dir_lock_next)
 			{
 				/* Stack goes at end of queue */
 				lock_queue_iter->dir_lock_next = stack;
 			}
-			else 
+			else
 			{
 				/* Stack goes in front or middle of queue */
 				stack->dir_lock_next = lock_queue_iter->dir_lock_next;
@@ -399,4 +399,3 @@ void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t 
 	dir_lock->stack_id = 0;
 	unlock_stack->dir_lock = NULL;
 }
-

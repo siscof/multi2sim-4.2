@@ -51,7 +51,7 @@ void SIEmuCreate(SIEmu *self)
 	self->video_mem_top = 0;
 	self->waiting_work_groups = list_create();
 	self->running_work_groups = list_create();
-	
+
 	/* Set global memory to video memory by default */
 	self->global_mem = self->video_mem;
 
@@ -117,7 +117,7 @@ int SIEmuRun(Emu *self)
 		list_enqueue(emu->running_work_groups, (void*)work_group_id);
 	}
 
-	/* For efficiency when no Southern Islands emulation is selected, 
+	/* For efficiency when no Southern Islands emulation is selected,
 	 * exit here if the list of existing ND-Ranges is empty. */
 	if (!list_count(emu->running_work_groups))
 		return FALSE;
@@ -250,18 +250,18 @@ void si_emu_disasm(char *path)
 			continue;
 
 		/* If symbol is '__OpenCL_XXX_kernel', it points to internal ELF */
-		if (str_prefix(symbol->name, "__OpenCL_") && 
+		if (str_prefix(symbol->name, "__OpenCL_") &&
 			str_suffix(symbol->name, "_kernel"))
 		{
 			/* Decode internal ELF */
-			str_substr(kernel_name, sizeof(kernel_name), 
+			str_substr(kernel_name, sizeof(kernel_name),
 				symbol->name, 9, strlen(symbol->name) - 16);
 			amd_bin = si_bin_file_create(
-				section->buffer.ptr + symbol->value, 
+				section->buffer.ptr + symbol->value,
 				symbol->size, kernel_name);
 
 			/* Get kernel name */
-			printf("**\n** Disassembly for '__kernel %s'\n**\n\n", 
+			printf("**\n** Disassembly for '__kernel %s'\n**\n\n",
 				kernel_name);
 			si_disasm_buffer(&amd_bin->
 				enc_dict_entry_southern_islands->
@@ -298,14 +298,14 @@ void si_emu_opengl_disasm(char *path, int opengl_shader_index)
 	if(!file_buffer)
 		fatal("%s:Invalid file!", path);
 
-	/* Analyze the file and initialize structure */	
+	/* Analyze the file and initialize structure */
 	si_program_bin = si_opengl_program_binary_create(file_buffer, file_size, path);
 	free_buffer(file_buffer);
 
 	/* Basic info of the shader binary */
-	printf("This shader binary contains %d shaders\n\n", 
+	printf("This shader binary contains %d shaders\n\n",
 		list_count(si_program_bin->shaders));
-	if (opengl_shader_index > list_count(si_program_bin->shaders) || 
+	if (opengl_shader_index > list_count(si_program_bin->shaders) ||
 		opengl_shader_index <= 0 )
 	{
 		fatal("Shader index out of range! Please choose <index> "
@@ -313,7 +313,7 @@ void si_emu_opengl_disasm(char *path, int opengl_shader_index)
 	}
 
 	/* Disassemble */
-	si_shader = list_get(si_program_bin->shaders, 
+	si_shader = list_get(si_program_bin->shaders,
 		opengl_shader_index - 1 );
 	printf("**\n** Disassembly for shader %d\n**\n\n", opengl_shader_index);
 	si_disasm_buffer(si_shader->shader_isa, stdout);
@@ -327,4 +327,3 @@ void si_emu_opengl_disasm(char *path, int opengl_shader_index)
 	mhandle_done();
 	exit(0);
 }
-

@@ -44,7 +44,7 @@ static struct bin_config_elem_t *bin_config_elem_create(struct bin_config_t *bin
 	elem->size = size;
 	elem->data = data;
 	elem->dup_data = dup_data;
-	
+
 	/* Return */
 	return elem;
 }
@@ -216,7 +216,7 @@ struct bin_config_t *bin_config_create(char *file_name)
 	/* Initialize fields */
 	bin_config = xcalloc(1, sizeof(struct bin_config_t));
 	bin_config->file_name = xstrdup(file_name);
-	
+
 	/* Return */
 	return bin_config;
 }
@@ -230,7 +230,7 @@ void bin_config_free(struct bin_config_t *bin_config)
 		bin_config_clear(bin_config);
 		hash_table_free(bin_config->elem_list);
 	}
-	
+
 	/* Free configuration object */
 	free(bin_config->file_name);
 	free(bin_config);
@@ -428,7 +428,7 @@ static struct hash_table_t *bin_config_load_elem_list(struct bin_config_t *bin_c
 	gzread(f, &num_elem, 4);
 	if (!num_elem)
 		return NULL;
-	
+
 	/* Create list */
 	elem_list = hash_table_create(num_elem, 0);
 
@@ -519,7 +519,7 @@ void bin_config_clear(struct bin_config_t *bin_config)
 	elem_list = bin_config->elem_list;
 	if (!elem_list)
 		return;
-	
+
 	/* Empty list */
 	while ((var = hash_table_find_first(elem_list, (void **) &elem)))
 	{
@@ -636,4 +636,3 @@ struct bin_config_elem_t *bin_config_find_next(struct bin_config_t *bin_config,
 	bin_config->error_code = BIN_CONFIG_ERR_OK;
 	return elem;
 }
-

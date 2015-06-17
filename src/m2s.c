@@ -623,28 +623,28 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 		{
 			argi++;
 			m2s_need_argument(argc, argv, argi);
-			
+
 			char a[200]="";
-			
+
 			strcpy(a,argv[argi]);
 			strcat(a, "_ipc");
 			fran_file_ipc = xmalloc(1000);
 			memcpy(fran_file_ipc,a,strlen(a)+1);
-			
+
 			fran_file_red = xmalloc(1000);
 			strcpy(fran_file_red,argv[argi]);
 			strcat(fran_file_red, "_red-l1-l2-latencia");
-			
+
 			strcpy(a,argv[argi]);
 			strcat(a, "_general");
 			fran_file_general = xmalloc(1000);
 			memcpy(fran_file_general,a,strlen(a)+1);
-			
+
 			strcpy(a,argv[argi]);
 			strcat(a, "_t10000k");
 			fran_file_t1000k = xmalloc(1000);
 			memcpy(fran_file_t1000k,a,strlen(a)+1);
-			
+
 			strcpy(a,argv[argi]);
 			strcat(a, "_hitRatio");
 			fran_file_hitRatio = xmalloc(1000);
@@ -1677,9 +1677,9 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 	if (*si_gpu_dump_default_config_file_name && argc > 3)
 		fatal("option '--si-dump-default-config' is incompatible with any other options.");
 	if (*evg_opengl_disasm_file_name && argc != 4)
-		fatal("option '--evg-disasm-opengl' is incompatible with any other options.");	
+		fatal("option '--evg-disasm-opengl' is incompatible with any other options.");
 	if (*si_opengl_disasm_file_name && argc != 4)
-		fatal("option '--si-disasm-opengl' is incompatible with any other options.");	
+		fatal("option '--si-disasm-opengl' is incompatible with any other options.");
 	if (*frm_disasm_file_name && argc > 3)
 		fatal("option '--frm-disasm' is incompatible with any other options.");
 	if (*x86_disasm_file_name && argc > 3)
@@ -2079,7 +2079,7 @@ int main(int argc, char **argv)
     fran_hitRatio = debug_new_category(fran_file_hitRatio);
 	fran_red = debug_new_category(fran_file_red);
 	report_cache_states_category = debug_new_category(report_cache_states);
-	
+
 	evg_opencl_debug_category = debug_new_category(evg_opencl_debug_file_name);
 	evg_isa_debug_category = debug_new_category(evg_isa_debug_file_name);
 	evg_stack_debug_category = debug_new_category(evg_stack_debug_file_name);  /* GPU-REL */

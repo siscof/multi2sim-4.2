@@ -62,13 +62,14 @@ enum mod_kind_t
 };
 
 /* Any info that clients (cpu/gpu) can pass
- * to the memory system when mod_access() 
+ * to the memory system when mod_access()
  * is called. */
 struct mod_client_info_t
 {
 	/* This field is for use by the prefetcher. It is set
 	 * to the PC of the instruction accessing the module */
 	unsigned int prefetcher_eip;
+	struct arch_t *arch;
 };
 
 /* Type of address range */
@@ -124,7 +125,7 @@ struct mod_t
 	struct mod_port_t *ports;
 	int num_ports;
 	int num_locked_ports;
-	
+
 	/* acceses coalesce list */
 	struct mod_stack_t *coalesce_list_head;
 	struct mod_stack_t *coalesce_list_tail;
@@ -207,7 +208,7 @@ struct mod_t
 	long long hits;
 	long long hits_aux;
 	//fran
-	long long loads;	
+	long long loads;
 	long long delayed_read_hit;
 	long long reads;
 	long long effective_reads;
@@ -225,7 +226,7 @@ struct mod_t
 	//FRAN
 	long long evictions_with_sharers;
 	long long evictions_sharers_invalidation;
-	
+
 	long long vector_write;
 	long long vector_write_nc;
 	long long vector_load;
@@ -264,19 +265,19 @@ void mod_dump(struct mod_t *mod, FILE *f);
 void mod_stack_set_reply(struct mod_stack_t *stack, int reply);
 struct mod_t *mod_stack_set_peer(struct mod_t *peer, int state);
 
-long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind, 
+long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	unsigned int addr, int *witness_ptr, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info);
-	
-long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, 
+
+long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct si_wavefront_t *wavefront, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info);
 
 int mod_can_access(struct mod_t *mod, unsigned int addr);
 
-int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr, int *way_ptr, 
+int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr, int *way_ptr,
 	int *tag_ptr, int *state_ptr);
-int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int dirty_mask, int *set_ptr, int *way_ptr, 
+int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int dirty_mask, int *set_ptr, int *way_ptr,
 	int *tag_ptr, int *state_ptr);
 
 void mod_block_set_prefetched(struct mod_t *mod, unsigned int addr, int val);
@@ -318,4 +319,3 @@ int mod_replace_block(struct mod_t *mod, int set);
 unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way);
 
 #endif
-
