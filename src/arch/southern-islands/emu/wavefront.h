@@ -35,12 +35,12 @@ struct si_wavefront_t
 
 	/* Work-group it belongs to */
 	struct si_work_group_t *work_group;
-	
+
 	//fran
 	long long *latencies_counters;
 	long long instruction_ready;
 	struct latenciometro *latencies;
-	
+
 	/* Program counter. Offset in 'inst_buffer' where we can find the next
 	 * instruction to be executed. */
 	unsigned int pc;
@@ -51,7 +51,7 @@ struct si_wavefront_t
 
 	/* Pointer to work_items */
 	struct si_work_item_t *scalar_work_item;
-	struct si_work_item_t **work_items;  
+	struct si_work_item_t **work_items;
 
 	/* Scalar registers */
 	union si_reg_t sreg[256];
@@ -105,23 +105,24 @@ void si_wavefront_dump(struct si_wavefront_t *wavefront, FILE *f);
 
 void si_wavefront_execute(struct si_wavefront_t *wavefront);
 
-int si_wavefront_work_item_active(struct si_wavefront_t *wavefront, 
+int si_wavefront_work_item_active(struct si_wavefront_t *wavefront,
 	int id_in_wavefront);
 
-void si_wavefront_init_sreg_with_value(struct si_wavefront_t *wavefront, 
+void si_wavefront_init_sreg_with_value(struct si_wavefront_t *wavefront,
 	int sreg, unsigned int value);
-void si_wavefront_init_sreg_with_cb(struct si_wavefront_t *wavefront, 
+void si_wavefront_init_sreg_with_cb(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs, int cb);
 void si_wavefront_init_sreg_with_cb_table(struct si_wavefront_t *wavefront,
         int first_reg, int num_regs);
-void si_wavefront_init_sreg_with_uav_table(struct si_wavefront_t *wavefront, 
+void si_wavefront_init_sreg_with_uav_table(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs);
 void si_wavefront_init_sreg_with_uav(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs, int uav);
-void si_wavefront_init_sreg_with_vertex_buffer_table(struct si_wavefront_t *wavefront, 
+void si_wavefront_init_sreg_with_vertex_buffer_table(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs);
-void si_wavefront_init_sreg_with_fetch_shader(struct si_wavefront_t *wavefront, 
+void si_wavefront_init_sreg_with_fetch_shader(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs);
+int si_wavefront_count_active_work_items(struct si_wavefront_t *wavefront);
 
 
 #endif

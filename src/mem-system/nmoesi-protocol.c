@@ -460,7 +460,6 @@ void mod_handler_nmoesi_load(int event, void *data)
 				load_finished = 0;
 				fran_debug_t1000k("%lld\n", ciclo);
 				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
-
 				ret_ciclo = ciclo;
 			}
 		}

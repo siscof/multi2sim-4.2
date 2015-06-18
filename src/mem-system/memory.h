@@ -104,4 +104,3 @@ void mem_load(struct mem_t *mem, char *filename, unsigned int start);
 
 void mem_clone(struct mem_t *dst_mem, struct mem_t *src_mem);
 #endif
-

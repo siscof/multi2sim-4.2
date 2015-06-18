@@ -147,7 +147,7 @@ struct _Object
 	/* Class information, first field */
 	struct class_info_t __info;
 
-	
+
 	/*** Virtual functions ***/
 
 	void (*Dump)(Object *self, FILE *f);
@@ -264,4 +264,3 @@ void class_dump(FILE *f);
 
 
 #endif
-

@@ -363,8 +363,11 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				}
 				else
 				{
+					//mod_client_info config
 					struct mod_client_info_t *client_info = xcalloc(1,sizeof(struct mod_client_info_t));
 					client_info->arch = arch_southern_islands;
+					//client_info->si_compute_unit = vector_mem->compute_unit;
+
 					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, uop->wavefront, NULL, NULL, client_info);
 					uop->global_mem_witness--;
 				}

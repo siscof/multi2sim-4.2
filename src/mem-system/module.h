@@ -70,6 +70,8 @@ struct mod_client_info_t
 	 * to the PC of the instruction accessing the module */
 	unsigned int prefetcher_eip;
 	struct arch_t *arch;
+
+
 };
 
 /* Type of address range */
@@ -97,6 +99,7 @@ struct mod_t
 	int mshr_count;
 	struct coherence_controller_t *coherence_controller;
 	struct mshr_t *mshr;
+	struct si_compute_unit_t *compute_unit;
 
 	/* Module level starting from entry points */
 	int level;

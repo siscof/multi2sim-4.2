@@ -50,7 +50,7 @@ struct si_compute_unit_t
 	/* IDs */
 	int id;
 	int subdevice_id;
-	long long uop_id_counter;  
+	long long uop_id_counter;
 
 	/* Entry points to memory hierarchy */
 	struct mod_t *scalar_cache;
@@ -73,6 +73,7 @@ struct si_compute_unit_t
 	long long mapped_work_groups;
 	long long wavefront_count;
 	long long inst_count; /* Total instructions */
+	long long oper_count;
 	long long branch_inst_count;
 	long long scalar_alu_inst_count;
 	long long scalar_mem_inst_count;
@@ -94,25 +95,26 @@ struct si_compute_unit_t
 	long long interval_cycle;
 	long long interval_mapped_work_groups;
 	long long interval_unmapped_work_groups;
+
 	long long interval_alu_issued;
-	long long interval_lds_issued ;
+	long long interval_lds_issued;
 	FILE * spatial_report_file;
 };
 
 struct si_compute_unit_t *si_compute_unit_create(void);
 void si_compute_unit_free(struct si_compute_unit_t *gpu_compute_unit);
-void si_compute_unit_map_work_group(struct si_compute_unit_t *compute_unit, 
+void si_compute_unit_map_work_group(struct si_compute_unit_t *compute_unit,
 	struct si_work_group_t *work_group);
-void si_compute_unit_unmap_work_group(struct si_compute_unit_t *compute_unit, 
+void si_compute_unit_unmap_work_group(struct si_compute_unit_t *compute_unit,
 	struct si_work_group_t *work_group);
 struct si_wavefront_t *si_compute_unit_schedule(struct si_compute_unit_t *compute_unit);
 void si_compute_unit_run(struct si_compute_unit_t *compute_unit);
 
 struct si_wavefront_pool_t *si_wavefront_pool_create();
 void si_wavefront_pool_free(struct si_wavefront_pool_t *wavefront_pool);
-void si_wavefront_pool_map_wavefronts(struct si_wavefront_pool_t *wavefront_pool, 
+void si_wavefront_pool_map_wavefronts(struct si_wavefront_pool_t *wavefront_pool,
 	struct si_work_group_t *work_group);
-void si_wavefront_pool_unmap_wavefronts(struct si_wavefront_pool_t *wavefront_pool, 
+void si_wavefront_pool_unmap_wavefronts(struct si_wavefront_pool_t *wavefront_pool,
 	struct si_work_group_t *work_group);
 
 #endif

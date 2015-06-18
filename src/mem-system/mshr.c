@@ -12,6 +12,7 @@
 #include "mem-system.h"
 #include "directory.h"
 #include <arch/southern-islands/timing/gpu.h>
+#include <arch/southern-islands/timing/compute-unit.h>
 #include <stdlib.h>
 
 void mshr_init(struct mshr_t *mshr, int size)
@@ -116,6 +117,7 @@ void mshr_control(int latencia, int opc)
   int flag = 1;
 	int accion = 0;
   struct mod_t *mod;
+	int mshr_size;
 
   for (int k = 0; k < list_count(mem_system->mod_list); k++)
   {
@@ -124,49 +126,55 @@ void mshr_control(int latencia, int opc)
   		break;
 	}
 
-  //reinicio
-	temporizador_reinicio--;
+	//finalizar test
+	if(mod->mshr->testing == 1){
+		mshr_size = mshr_evaluar_test();
+		accion = 4;
+	}else{
 
-	if(temporizador_reinicio <= 0)
-	{
-		temporizador_reinicio = 50;
-		accion = 3;
-	}
+	  //reinicio
+		temporizador_reinicio--;
 
-	// primera decision
-	if(!mod->mshr->size_anterior)
-	{
-		if(latencia > 1000)
-			accion = 2;
-		else
-			accion = 1;
-	}
-
-	// dependiendo del OPC
-	if(accion == 0 && opc < (mod->mshr->ipc_anterior * 0.95))
-	{
-		if((mod->mshr->latencia_anterior*1.05) < latencia)
+		if(temporizador_reinicio <= 0)
 		{
-			if(mod->mshr->size > mod->mshr->size_anterior)
-				accion = 2;
-			else if(mod->mshr->size < mod->mshr->size_anterior)
-				accion = 1;
-			else
-			{
-				if(mod->mshr->size == (mod->dir->ysize * mod->dir->xsize))
-					accion = 2;
-				else
-					accion = 1;
-			}
-
+			temporizador_reinicio = 50;
+			accion = 3;
 		}
-	}else if(accion == 0 && opc > (mod->mshr->ipc_anterior * 1.05)){
-  	if(mod->mshr->size > mod->mshr->size_anterior)
-      accion = 1;
-    else if(mod->mshr->size < mod->mshr->size_anterior)
-      accion = 2;
-	}
 
+		// primera decision
+		if(!mod->mshr->size_anterior)
+		{
+			if(latencia > 1000)
+				accion = 2;
+			else
+				accion = 1;
+		}
+
+		// dependiendo del OPC
+		if(accion == 0 && opc < (mod->mshr->ipc_anterior * 0.95))
+		{
+			if((mod->mshr->latencia_anterior*1.05) < latencia)
+			{
+				if(mod->mshr->size > mod->mshr->size_anterior)
+					accion = 2;
+				else if(mod->mshr->size < mod->mshr->size_anterior)
+					accion = 1;
+				else
+				{
+					if(mod->mshr->size == (mod->dir->ysize * mod->dir->xsize))
+						accion = 2;
+					else
+						accion = 1;
+				}
+
+			}
+		}else if(accion == 0 && opc > (mod->mshr->ipc_anterior * 1.05)){
+	  	if(mod->mshr->size > mod->mshr->size_anterior)
+	      accion = 1;
+	    else if(mod->mshr->size < mod->mshr->size_anterior)
+	      accion = 2;
+		}
+	}
 	//dependiendo de la latencia
 
 	/*(latencia > 1000)
@@ -218,12 +226,68 @@ void mshr_control(int latencia, int opc)
 					break;
 
 				case 3: mod->mshr->size_anterior = 0;
-					mod->mshr->size = 32;
-					mod->mshr_size = 32;
+					mshr_test_sizes();
 					break;
+
+				case 4: mod->mshr->size = mshr_size;
 
 				default : break;
 			}
 		}
   }
+}
+
+void mshr_test_sizes(){
+	struct mod_t *mod;
+	int testing_cu = 0;
+	int max_mshr_size;
+	int min_mshr_size = 4;
+
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+	{
+		mod = list_get(mem_system->mod_list, k);
+
+		if(mod->level == 1)
+		{
+			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
+			mod->mshr->testing = 1;
+			int testing_size = min_mshr_size * 2 * testing_cu;
+
+			if(testing_size > max_mshr_size)
+				break;
+
+			mod->mshr->size = testing_size;
+			testing_cu++;
+
+			mod->mshr->cycle = mod->compute_unit->cycle;
+			mod->mshr->oper_count = mod->compute_unit->oper_count;
+		}
+	}
+
+}
+
+int mshr_evaluar_test(){
+
+	int opc = 0;
+	int testing_cu = 0;
+	int best_mshr_size = 0;
+	struct mod_t *mod;
+
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+	{
+		mod = list_get(mem_system->mod_list, k);
+
+		if(mod->mshr->testing == 1)
+		{
+			mod->mshr->testing = 0;
+			if(opc < ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle))){
+				opc = ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle));
+				best_mshr_size = mod->mshr->size;
+			}
+
+		}
+	}
+
+	//return the best mshr size
+	return best_mshr_size;
 }
