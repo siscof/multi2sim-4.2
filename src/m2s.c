@@ -658,33 +658,33 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			continue;
 		}
 
-        /* mshr size control */
-        if (!strcmp(argv[argi], "--mshr-control"))
-        {
-        	mshr_control_enabled = 1;
-        	continue;
-        }
+    /* mshr size control */
+    if (!strcmp(argv[argi], "--mshr-control"))
+    {
+    	mshr_control_enabled = 1;
+    	continue;
+    }
 
-        /* mshr enable */
-        if (!strcmp(argv[argi], "--mshr-enable"))
-        {
-        	flag_mshr_enabled = 1;
-        	continue;
-        }
+    /* mshr enable */
+    if (!strcmp(argv[argi], "--mshr-enable"))
+    {
+    	flag_mshr_enabled = 1;
+    	continue;
+    }
 
-        /* GPU coalesce enable */
-        if (!strcmp(argv[argi], "--coalesce-gpu-enable"))
-        {
-        	flag_coalesce_gpu_enabled = 1;
-        	continue;
-        }
+    /* GPU coalesce enable */
+    if (!strcmp(argv[argi], "--coalesce-gpu-enable"))
+    {
+    	flag_coalesce_gpu_enabled = 1;
+    	continue;
+    }
 
-        /* Non blocking stores enable */
-        if (!strcmp(argv[argi], "--NBS-enable"))
-        {
-        	flag_no_blocking_store = 1;
-    		continue;
-        }
+    /* Non blocking stores enable */
+    if (!strcmp(argv[argi], "--NBS-enable"))
+    {
+    	flag_no_blocking_store = 1;
+			continue;
+    }
 
 		/* Context configuration file */
 		if (!strcmp(argv[argi], "--ctx-config"))

@@ -110,7 +110,7 @@ void *repos_create_object(struct repos_t *repos)
 {
 	void *obj, *next_obj;
 	struct objtail_t *objtail, *next_objtail;
-	
+
 	/* No unallocated object available. Create a new object.
 	 * Insert it into the unallocated list head. */
 	if (!repos->dealloc_head)
@@ -152,7 +152,7 @@ void repos_free_object(struct repos_t *repos, void *obj)
 {
 	struct objtail_t *objtail, *prev_objtail, *next_objtail;
 	void *prev_obj, *next_obj;
-	
+
 	/* Integrity */
 	if (!obj)
 		return;
@@ -177,7 +177,7 @@ void repos_free_object(struct repos_t *repos, void *obj)
 		next_objtail->prev = prev_obj;
 	if (repos->alloc_head == obj)
 		repos->alloc_head = next_obj;
-	
+
 	/* Insert object into unallocated list head */
 	next_obj = repos->dealloc_head;
 	next_objtail = obj + repos->object_size;

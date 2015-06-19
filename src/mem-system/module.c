@@ -655,7 +655,7 @@ void mod_access_start(struct mod_t *mod, struct mod_stack_t *stack,
 	/* estadisticas */
 	//add_access(mod->level);
 	if(stack->client_info && stack->client_info->arch)
-		stack->tiempo_acceso = asTiming(stack->client_info->arch)->cycle;
+		stack->tiempo_acceso = stack->client_info->arch->timing->cycle;
 }
 
 
@@ -1070,7 +1070,9 @@ struct mod_client_info_t *mod_client_info_create(struct mod_t *mod)
 
 void mod_client_info_free(struct mod_t *mod, struct mod_client_info_t *client_info)
 {
-	repos_free_object(mod->client_info_repos, client_info);
+	/*FIXME*/
+	free(client_info);
+	//repos_free_object(mod->client_info_repos, client_info);
 }
 
 //FRAN - este metodo sustituye a cache_replace_block()

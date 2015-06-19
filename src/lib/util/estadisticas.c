@@ -46,7 +46,7 @@ if(mshr_control_enabled && !(gpu_stats.total % 500000))
      	mem_stats.superintervalo_operacion = 0;
         mem_stats.superintervalo_ciclos = 0;
 }
-*/ 
+*/
 
 
 fran_debug_general("%lld %lld ",latency, contador);
@@ -143,7 +143,7 @@ fran_debug_general("%lld %lld\n",intervalo - intervalo_anterior , intervalo);
 intervalo_anterior = intervalo;
 
 }
-                       
+
 void mem_load_finish(long long lat)
 {
 	mem_stats.load_latency += lat;
@@ -175,7 +175,7 @@ void estadisticas(int hit, int lvl){
 
 
 void ini_estadisticas(){
-//estadis = xcalloc(10,sizeof(struct esta_t));/*  
+//estadis = xcalloc(10,sizeof(struct esta_t));/*
 estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 
 gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
@@ -222,7 +222,7 @@ fran_debug_ipc("queue_load lock_mshr_load lock_dir_load eviction_load retry_load
                 estadis[i].invalidations = 0;
                 estadis[i].delayed_read_hit= 0;
                 estadis[i].esim_cycle_anterior= 0;
-                estadis[i].media_latencia = 0; 
+                estadis[i].media_latencia = 0;
                 estadis[i].tiempo_acceso_latencia = 0;
                 estadis[i].latencia_red_acc = 0;
                 estadis[i].latencia_red_cont = 0;
@@ -280,10 +280,10 @@ long long add_si_inst(si_units unit)
 long long add_si_macroinst(si_units unit, struct si_uop_t *uop)
 {
 	gpu_stats.macroinst[unit]++;
-	
+
 	if(unit == simd_u)
 		add_uop_latencies(uop);
-	
+
     return gpu_stats.total;
 }
 
@@ -405,22 +405,22 @@ void add_uop_latencies(struct si_uop_t *uop)
 void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 {
 			struct si_inst_t inst = wf->inst;
-			
+
 			/* Only evaluate branch instructions */
-			if (inst.info->fmt == SI_FMT_SOPP && 
+			if (inst.info->fmt == SI_FMT_SOPP &&
 			(inst.micro_inst.sopp.op > 1 && inst.micro_inst.sopp.op < 10))
 			{
 				gpu_stats.dispatch_branch_instruction_infly++;
 				return;
 			}
-			
+
 			/* Only evaluate scalar instructions */
-			if ((inst.info->fmt == SI_FMT_SOPP && 
-			    (inst.micro_inst.sopp.op <= 1 || 
-				inst.micro_inst.sopp.op >= 10)) || 
-				inst.info->fmt == SI_FMT_SOP1 || 
-				inst.info->fmt == SI_FMT_SOP2 || 
-				inst.info->fmt == SI_FMT_SOPC || 
+			if ((inst.info->fmt == SI_FMT_SOPP &&
+			    (inst.micro_inst.sopp.op <= 1 ||
+				inst.micro_inst.sopp.op >= 10)) ||
+				inst.info->fmt == SI_FMT_SOP1 ||
+				inst.info->fmt == SI_FMT_SOP2 ||
+				inst.info->fmt == SI_FMT_SOPC ||
 				inst.info->fmt == SI_FMT_SOPK)
 			{
 
@@ -434,33 +434,33 @@ void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 				}
 				return;
 			}
-			
+
 			if(inst.info->fmt == SI_FMT_SMRD)
 			{
 				gpu_stats.dispatch_mem_scalar_instruction_infly++;
 				return;
 			}
 			/* Only evaluate SIMD instructions */
-			if (inst.info->fmt == SI_FMT_VOP2 || 
-				inst.info->fmt == SI_FMT_VOP1 || 
-				inst.info->fmt == SI_FMT_VOPC || 
-				inst.info->fmt == SI_FMT_VOP3a || 
+			if (inst.info->fmt == SI_FMT_VOP2 ||
+				inst.info->fmt == SI_FMT_VOP1 ||
+				inst.info->fmt == SI_FMT_VOPC ||
+				inst.info->fmt == SI_FMT_VOP3a ||
 				inst.info->fmt == SI_FMT_VOP3b)
-			{	
+			{
 				gpu_stats.dispatch_simd_instruction_infly++;
 				return;
 			}
-			
+
 			/* Only evaluate memory instructions */
 			if (inst.info->fmt == SI_FMT_MTBUF)
-			{	
+			{
 				gpu_stats.dispatch_v_mem_instruction_infly++;
 				return;
 			}
-			
+
 			/* Only evaluate LDS instructions */
 			if (inst.info->fmt == SI_FMT_DS)
-			{	
+			{
 				gpu_stats.dispatch_lds_instruction_infly++;
 				return;
 			}
@@ -533,17 +533,17 @@ void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active
 {
 	struct si_wavefront_pool_entry_t *wp_entry;
 	struct si_wavefront_t *wavefront;
-	
+
 	for (int i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 	{
 		wp_entry = wavefront_pool->entries[i];
 		wavefront = wp_entry->wavefront;
-		
+
 		if(!wp_entry->ready && wavefront){
-			
+
 			if(wavefront->inst.info->fmt)
 				analizeTypeInstructionInFly(wavefront);
-			
+
 			gpu_stats.dispatch_stall_instruction_infly++;
 		}else if(wp_entry->wait_for_mem){
 			gpu_stats.dispatch_stall_mem_access++;
@@ -559,7 +559,7 @@ void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active
 
 void add_simd_running_cycle()
 {
-	gpu_stats.cycles_simd_running++;	
+	gpu_stats.cycles_simd_running++;
 }
 
 void add_cycle_vmb_blocked(int compute_unit_id, int blocked_by_store)
@@ -574,7 +574,7 @@ void add_cycle_vmb_blocked(int compute_unit_id, int blocked_by_store)
 
 void ipc_instructions(long long cycle, si_units unit)
 {
-	
+
 	long long intervalo_instrucciones = 10000;
 
 	if(!(add_si_inst(unit) % intervalo_instrucciones))
@@ -588,7 +588,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
         struct dir_t *dir = mod->dir;
 //        struct cache_t *cache = mod->cache;
-	
+
 	if(mod->level == 1)
 	{
 		mshr[1] += mod->mshr->entradasOcupadas;
@@ -655,18 +655,18 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
     long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
- 
+
 	SIGpu *gpu = asSIGpu(arch_southern_islands->timing);
 
 	int compute_unit_id = 0;
 	int work_groups_running = 0;
 	SI_GPU_FOREACH_COMPUTE_UNIT(compute_unit_id)
 	{
-		work_groups_running += gpu->compute_units[compute_unit_id]->work_group_count; 
+		work_groups_running += gpu->compute_units[compute_unit_id]->work_group_count;
 	}
-			
+
     	float gpu_utilization = work_groups_running / (float)(si_gpu_num_compute_units *  gpu->compute_units[0]->num_wavefront_pools * si_gpu_max_work_groups_per_wavefront_pool);
-		      	
+
 	fran_debug_ipc("%f ",gpu_utilization);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_branch_instruction_infly);
 	fran_debug_ipc("%lld ",gpu_stats.dispatch_scalar_instruction_infly);
@@ -696,7 +696,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	fran_debug_ipc("%lld ",gpu_stats.fetch2complete - instrucciones_gpu_stats_anterior.fetch2complete);
 
 	fran_debug_ipc("%lld ",gpu_stats.v_mem_full - instrucciones_gpu_stats_anterior.v_mem_full);
-	
+
 	fran_debug_ipc("%lld ",gpu_stats.simd_idle[0] - instrucciones_gpu_stats_anterior.simd_idle[0]);
 	fran_debug_ipc("%lld ",gpu_stats.simd_idle[1] - instrucciones_gpu_stats_anterior.simd_idle[1]);
 	fran_debug_ipc("%lld ",gpu_stats.simd_idle[2] - instrucciones_gpu_stats_anterior.simd_idle[2]);
@@ -733,8 +733,8 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	fran_debug_ipc("%lld ",mshr_size[1]);
         fran_debug_ipc("%lld %lld ",mshr[1],mshr[2]);
-	fran_debug_ipc("%lld %lld ",locked[1],locked[2]);	
-	fran_debug_ipc("%lld ",mem_stats.mod_level[0].coalesce - instrucciones_mem_stats_anterior.mod_level[0].coalesce);	
+	fran_debug_ipc("%lld %lld ",locked[1],locked[2]);
+	fran_debug_ipc("%lld ",mem_stats.mod_level[0].coalesce - instrucciones_mem_stats_anterior.mod_level[0].coalesce);
 	fran_debug_ipc("%lld ",mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
 	fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
 	fran_debug_ipc("%lld ", mem_stats.mod_level[0].accesses - instrucciones_mem_stats_anterior.mod_level[0].accesses);
@@ -750,7 +750,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	fran_debug_ipc("%lld ", mem_stats.mod_level[1].hits - instrucciones_mem_stats_anterior.mod_level[1].hits);
         fran_debug_ipc("%lld ", mem_stats.mod_level[2].hits - instrucciones_mem_stats_anterior.mod_level[2].hits);
-                
+
 	fran_debug_ipc("%lld ", mem_stats.mod_level[1].coalesceMisses - instrucciones_mem_stats_anterior.mod_level[1].coalesceMisses);
 	fran_debug_ipc("%lld ", mem_stats.mod_level[2].coalesceMisses - instrucciones_mem_stats_anterior.mod_level[2].coalesceMisses);
 	fran_debug_ipc("%lld ", mem_stats.mod_level[1].coalesceHits - instrucciones_mem_stats_anterior.mod_level[1].coalesceHits);
@@ -773,7 +773,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
         //Latencia mem system
         latency = mem_stats.load_latency - instrucciones_mem_stats_anterior.load_latency;
-        contador = mem_stats.load_latency_count - instrucciones_mem_stats_anterior.load_latency_count;               	
+        contador = mem_stats.load_latency_count - instrucciones_mem_stats_anterior.load_latency_count;
 	fran_debug_ipc("%lld %lld ",latency, contador);
 /*
 		fran_debug_ipc("%lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld ", gpu_inst->unit[scalar_u] , gpu_inst->unit[simd_u] , gpu_inst->macroinst[simd_u], gpu_inst->unit[s_mem_u] , gpu_inst->unit[v_mem_u] , gpu_inst->macroinst[v_mem_u], gpu_inst->unit[branch_u] , gpu_inst->unit[lds_u] , gpu_inst->macroinst[lds_u], gpu_inst->total , gpu_stats.total );
@@ -815,7 +815,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 		fran_debug_ipc("0");
 	}
 	fran_debug_ipc("\n");
-		
+
 	//	free(estadisticas_ipc);
 	//	free(gpu_inst);
 	memcpy(&instrucciones_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
@@ -833,4 +833,3 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	}
 }
-

@@ -207,7 +207,7 @@ struct mod_t *mod_stack_set_peer(struct mod_t *peer, int state)
 	struct mod_t *ret = NULL;
 
 	if (state == cache_block_owned || mem_peer_transfers)
-		ret = peer;	
+		ret = peer;
 
 	return ret;
 }
@@ -231,18 +231,18 @@ void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int 
 	int tag = stack->addr & ~(stack->mod->sub_block_size - 1);
 	if(words == 0)
 		words = 1;
-	
+
 	stack->stack_size += 4*words;
-	
+
 	assert((tag + stack->mod->sub_block_size) >= (addr + words * 4));
 	for(;words > 0 ; words--)
 	{
 		assert(!(stack->dirty_mask & (shift + words - 1)));
 		stack->dirty_mask |= 1 << (shift + words - 1);
 		stack->valid_mask |= 1 << (shift + words - 1);
-		
+
 	}
-	
+
 }
 
 void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words)
@@ -251,9 +251,9 @@ void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words)
 	int tag = stack->addr & ~(stack->mod->sub_block_size - 1);
 	if(words == 0)
 		words = 1;
-		
+
 	stack->stack_size += 4*words;
-		
+
 	assert((tag + stack->mod->sub_block_size) >= (addr + words * 4));
 	for(;words > 0 ; words--)
 	{
@@ -263,4 +263,3 @@ void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words)
 	}
 	stack->stack_size += 4*words;
 }
-
