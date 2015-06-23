@@ -41,6 +41,7 @@
 #include <lib/util/class.h>
 #include "vi-protocol.h"
 #include <mem-system/mshr.h>
+#include <arch/southern-islands/timing/compute-unit.h>
 
 /* String map for access type */
 struct str_map_t mod_access_kind_map =
@@ -1136,4 +1137,13 @@ unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way)
 		return mod->block_size-1;
 	else
 		return mod->cache->sets[set].blocks[way].valid_mask;
+}
+
+bool mod_is_vector_cache(struct mod_t *mod)
+{
+
+	if(mod->compute_unit && mod->compute_unit->vector_cache == mod)
+		return true;
+	else
+		return false;
 }

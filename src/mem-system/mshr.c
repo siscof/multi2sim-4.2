@@ -247,11 +247,14 @@ void mshr_test_sizes(){
 	{
 		mod = list_get(mem_system->mod_list, k);
 
-		if(mod->level == 1)
+		if(mod_is_vector_cache(mod) && mod->level == 1)
 		{
+
 			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
 			mod->mshr->testing = 1;
-			int testing_size = min_mshr_size * 2 * testing_cu;
+
+			/*FIXME*/
+			int testing_size = min_mshr_size * 2 * (testing_cu + 1);
 
 			if(testing_size > max_mshr_size)
 				break;
@@ -277,7 +280,7 @@ int mshr_evaluar_test(){
 	{
 		mod = list_get(mem_system->mod_list, k);
 
-		if(mod->mshr->testing == 1)
+		if(mod_is_vector_cache(mod) && mod->mshr->testing == 1)
 		{
 			mod->mshr->testing = 0;
 			if(opc < ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle))){

@@ -21,6 +21,7 @@
 #define MEM_SYSTEM_MODULE_H
 
 #include <stdio.h>
+#include <stdbool.h>
 #include <arch/southern-islands/emu/wavefront.h>
 
 /* Port */
@@ -320,5 +321,6 @@ struct mod_client_info_t *mod_client_info_create(struct mod_t *mod);
 void mod_client_info_free(struct mod_t *mod, struct mod_client_info_t *client_info);
 int mod_replace_block(struct mod_t *mod, int set);
 unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way);
+bool mod_is_vector_cache(struct mod_t *mod);
 
 #endif

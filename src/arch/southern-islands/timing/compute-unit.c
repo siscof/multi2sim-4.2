@@ -550,7 +550,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 
 		instructions_processed++;
 		compute_unit->inst_count++;
-		compute_unit->oper_count = si_wavefront_count_active_work_items(wavefront);
+		compute_unit->oper_count += si_wavefront_count_active_work_items(wavefront);
 
 	}
 	if(instructions_processed)
