@@ -210,7 +210,7 @@ fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction
 
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
 fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 ");
-fran_debug_ipc("queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load gpu_queue_load gpu_lock_mshr_load gpu_lock_dir_load gpu_eviction_load gpu_retry_load gpu_miss_load gpu_finish_load gpu_latencia_total_load gpu_access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr\n");
+fran_debug_ipc("queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load gpu_queue_load gpu_lock_mshr_load gpu_lock_dir_load gpu_eviction_load gpu_retry_load gpu_miss_load gpu_finish_load gpu_latencia_total_load gpu_access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr esim_time\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -778,6 +778,14 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 /*
 		fran_debug_ipc("%lld %lld %lld %lld %lld %lld %lld %lld %lld %lld %lld ", gpu_inst->unit[scalar_u] , gpu_inst->unit[simd_u] , gpu_inst->macroinst[simd_u], gpu_inst->unit[s_mem_u] , gpu_inst->unit[v_mem_u] , gpu_inst->macroinst[v_mem_u], gpu_inst->unit[branch_u] , gpu_inst->unit[lds_u] , gpu_inst->macroinst[lds_u], gpu_inst->total , gpu_stats.total );
 */
+
+/*
+// workgroups counters
+fran_debug_ipc("%lld ",gpu_stats.total); //finished
+fran_debug_ipc("%lld ",gpu_stats.total); //started
+fran_debug_ipc("%lld ",gpu_stats.total); //active
+*/
+
 	fran_debug_ipc("%lld ",gpu_stats.unit[scalar_u] - instrucciones_gpu_stats_anterior.unit[scalar_u]);
         fran_debug_ipc("%lld ",gpu_stats.unit[simd_u] - instrucciones_gpu_stats_anterior.unit[simd_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[simd_u] - instrucciones_gpu_stats_anterior.macroinst[simd_u]);
@@ -802,18 +810,19 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
-        if(mshr_control_enabled && !(gpu_stats.total % 500000) /*&& (ciclo_ultimaI + lat_umbral) < cycle*/ )
-        {
+  if(mshr_control_enabled && !(mem_stats.superintervalo_ciclos > 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
+  {
 		ciclo_ultimaI = cycle;
-                mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);
-                mem_stats.superintervalo_latencia = 0;
-                mem_stats.superintervalo_contador = 0;
-	        mem_stats.superintervalo_operacion = 0;
+    mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);
+    mem_stats.superintervalo_latencia = 0;
+    mem_stats.superintervalo_contador = 0;
+	  mem_stats.superintervalo_operacion = 0;
 		mem_stats.superintervalo_ciclos = 0;
 		fran_debug_ipc("%lld",lat_umbral);
-        }else{
+  }else{
 		fran_debug_ipc("0");
 	}
+	fran_debug_ipc("%lld",esim_time);
 	fran_debug_ipc("\n");
 
 	//	free(estadisticas_ipc);
@@ -833,3 +842,12 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 	}
 }
+/*
+report_si_detailed(struct si_compute_unit_t *compute_unit){
+
+	for( ;;)
+	fran_debug_ipc("%lld ",compute_unit->interval_mapped_work_groups);
+	fran_debug_ipc("%lld ",compute_unit->interval_unmapped_work_groups);
+	fran_debug_ipc("%lld ",compute_unit->interval_mapped_work_groups);
+	printf(report_si_detailed_file,"",compute_unit->work_group_count,esim_time)
+}*/

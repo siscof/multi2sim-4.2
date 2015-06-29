@@ -26,6 +26,7 @@
 extern int si_spatial_report_active  ;
 
 
+
 void si_alu_report_new_inst(struct si_compute_unit_t *compute_unit);
 
 void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit);

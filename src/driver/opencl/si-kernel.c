@@ -51,7 +51,7 @@ static char *opencl_err_si_kernel_metadata =
 	"\tTo request support for this error, please email 'development@multi2sim.org'.\n";
 
 static void opencl_si_create_buffer_desc(unsigned int base_addr,
-	unsigned int size, int num_elems, 
+	unsigned int size, int num_elems,
 	enum si_arg_data_type_t data_type,
 	struct si_buffer_desc_t *buffer_desc);
 
@@ -186,7 +186,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 					token, &err);
 			if (err)
 				fatal("%s: invalid data type '%s'.\n%s",
-					__FUNCTION__, token, 
+					__FUNCTION__, token,
 					opencl_err_si_kernel_metadata);
 
 			/* Token 3 - Number of elements */
@@ -233,7 +233,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 
 			/* Token 1 - Name */
 			token = str_token_list_shift(token_list);
-			arg = si_arg_create(si_arg_pointer, 
+			arg = si_arg_create(si_arg_pointer,
 				token);
 
 			/* Token 2 - Data type */
@@ -242,11 +242,11 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 				&si_arg_data_type_map, token, &err);
 			if (err)
 				fatal("%s: invalid data type '%s'.\n%s",
-					__FUNCTION__, token, 
+					__FUNCTION__, token,
 					opencl_err_si_kernel_metadata);
 
 			/* Token 3 - Number of elements
-			 * Arrays of pointers not supported, 
+			 * Arrays of pointers not supported,
 			 * only "1" allowed. */
 			token = str_token_list_shift(token_list);
 			opencl_si_kernel_expect_int(kernel, token_list);
@@ -269,7 +269,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 				&si_arg_scope_map, token, &err);
 			if (err)
 				fatal("%s: invalid scope '%s'.\n%s",
-					__FUNCTION__, token, 
+					__FUNCTION__, token,
 					opencl_err_si_kernel_metadata);
 
 			/* Token 7 - Buffer number */
@@ -288,7 +288,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 				&si_arg_access_type_map, token, &err);
 			if (err)
 				fatal("%s: invalid access type '%s'.\n%s",
-					__FUNCTION__, token, 
+					__FUNCTION__, token,
 					opencl_err_si_kernel_metadata);
 
 			/* Token 10 - ??? */
@@ -299,7 +299,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 			token = str_token_list_shift(token_list);
 			opencl_si_kernel_expect(kernel, token_list, "0");
 
-			/* Data size inferred here is always 4, the size 
+			/* Data size inferred here is always 4, the size
 			 * of a pointer. */
 			arg->size = 4;
 
@@ -547,7 +547,7 @@ static void opencl_si_kernel_load_metadata_v3(struct opencl_si_kernel_t *kernel)
 			continue;
 		}
 
-		/* Uavid 
+		/* Uavid
 		 * ID of a raw UAV */
 		if (!strcmp(token, "uavid"))
 		{
@@ -725,11 +725,11 @@ void opencl_si_kernel_setup_ndrange_constant_buffers(
 	/* CB0 bytes 0:15 */
 
 	/* Global work size for the {x,y,z} dimensions */
-	si_ndrange_const_buf_write(ndrange, 0, 0, 
+	si_ndrange_const_buf_write(ndrange, 0, 0,
 		&ndrange->global_size3[0], 4);
-	si_ndrange_const_buf_write(ndrange, 0, 4, 
+	si_ndrange_const_buf_write(ndrange, 0, 4,
 		&ndrange->global_size3[1], 4);
-	si_ndrange_const_buf_write(ndrange, 0, 8, 
+	si_ndrange_const_buf_write(ndrange, 0, 8,
 		&ndrange->global_size3[2], 4);
 
 	/* Number of work dimensions */
@@ -738,11 +738,11 @@ void opencl_si_kernel_setup_ndrange_constant_buffers(
 	/* CB0 bytes 16:31 */
 
 	/* Local work size for the {x,y,z} dimensions */
-	si_ndrange_const_buf_write(ndrange, 0, 16, 
+	si_ndrange_const_buf_write(ndrange, 0, 16,
 		&ndrange->local_size3[0], 4);
-	si_ndrange_const_buf_write(ndrange, 0, 20, 
+	si_ndrange_const_buf_write(ndrange, 0, 20,
 		&ndrange->local_size3[1], 4);
-	si_ndrange_const_buf_write(ndrange, 0, 24, 
+	si_ndrange_const_buf_write(ndrange, 0, 24,
 		&ndrange->local_size3[2], 4);
 
 	/* 0  */
@@ -751,11 +751,11 @@ void opencl_si_kernel_setup_ndrange_constant_buffers(
 	/* CB0 bytes 32:47 */
 
 	/* Global work size {x,y,z} / local work size {x,y,z} */
-	si_ndrange_const_buf_write(ndrange, 0, 32, 
+	si_ndrange_const_buf_write(ndrange, 0, 32,
 		&ndrange->group_count3[0], 4);
-	si_ndrange_const_buf_write(ndrange, 0, 36, 
+	si_ndrange_const_buf_write(ndrange, 0, 36,
 		&ndrange->group_count3[1], 4);
-	si_ndrange_const_buf_write(ndrange, 0, 40, 
+	si_ndrange_const_buf_write(ndrange, 0, 40,
 		&ndrange->group_count3[2], 4);
 
 	/* 0  */
@@ -857,7 +857,7 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 	int zero = 0;
 
 	/* Initial top of local memory is determined by the static local memory
-	 * specified in the kernel binary. Number of vector and scalar 
+	 * specified in the kernel binary. Number of vector and scalar
 	 * registers used by the kernel recorded as well. */
 	ndrange->local_mem_top = kernel->mem_size_local;
 	ndrange->num_sgpr_used = kernel->bin_file->
@@ -902,7 +902,7 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 				/* Pointer in __local scope.
 				 * Argument value is always NULL, just assign
 				 * space for it. */
-				si_ndrange_const_buf_write(ndrange, 
+				si_ndrange_const_buf_write(ndrange,
 					arg->pointer.constant_buffer_num,
 					arg->pointer.constant_offset,
 					&ndrange->local_mem_top, 4);
@@ -931,7 +931,7 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 					arg->pointer.buffer_num);
 
 				/* Write 0 to CB1 */
-				si_ndrange_const_buf_write(ndrange, 
+				si_ndrange_const_buf_write(ndrange,
 					arg->pointer.constant_buffer_num,
 					arg->pointer.constant_offset,
 					&zero, 4);
@@ -948,7 +948,7 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 					arg->pointer.num_elems,
 					arg->pointer.data_type, &buffer_desc);
 
-				/* Data stored in hw constant memory 
+				/* Data stored in hw constant memory
 				 * uses a 4-byte stride */
 				buffer_desc.stride = 4;
 
@@ -958,7 +958,7 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 					arg->pointer.buffer_num);
 
 				/* Write 0 to CB1 */
-				si_ndrange_const_buf_write(ndrange, 
+				si_ndrange_const_buf_write(ndrange,
 					arg->pointer.constant_buffer_num,
 					arg->pointer.constant_offset,
 					&zero, 4);
@@ -981,7 +981,7 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 
 		case si_arg_sampler:
 
-			fatal("%s: type 'sampler' not implemented", 
+			fatal("%s: type 'sampler' not implemented",
 				__FUNCTION__);
 			break;
 
@@ -993,9 +993,9 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 		}
 	}
 
-	/* Add program-wide constant buffers to the ND-range. 
+	/* Add program-wide constant buffers to the ND-range.
 	 * Program-wide constant buffers start at number 2. */
-	for (index = 2; index < 25; index++) 
+	for (index = 2; index < 25; index++)
 	{
 		constant_buffer = list_get(
 			kernel->program->constant_buffer_list, index);
@@ -1010,18 +1010,18 @@ void opencl_si_kernel_setup_ndrange_args(struct opencl_si_kernel_t *kernel,
 			si_arg_float,
 			&buffer_desc);
 
-		/* Data stored in hw constant memory 
+		/* Data stored in hw constant memory
 		 * uses a 16-byte stride */
 		buffer_desc.stride = 16; // XXX Use or don't use?
 
 		/* Add to Constant Buffer table */
-		si_ndrange_insert_buffer_into_const_buf_table(ndrange, 
+		si_ndrange_insert_buffer_into_const_buf_table(ndrange,
 			&buffer_desc, index);
 	}
 }
 
 static void opencl_si_create_buffer_desc(unsigned int base_addr,
-	unsigned int size, int num_elems, 
+	unsigned int size, int num_elems,
 	enum si_arg_data_type_t data_type,
 	struct si_buffer_desc_t *buffer_desc)
 {
@@ -1171,8 +1171,8 @@ static void opencl_si_create_buffer_desc(unsigned int base_addr,
 	return;
 }
 
-void opencl_si_kernel_debug_ndrange_state(struct opencl_si_kernel_t *kernel, 
-	struct si_ndrange_t *ndrange) 
+void opencl_si_kernel_debug_ndrange_state(struct opencl_si_kernel_t *kernel,
+	struct si_ndrange_t *ndrange)
 {
         int i;
 
@@ -1296,7 +1296,7 @@ void opencl_si_kernel_debug_ndrange_state(struct opencl_si_kernel_t *kernel,
 
                 case SI_OPENCL_KERNEL_ARG_KIND_VALUE:
                 {
-                        /* Value copied directly into device constant 
+                        /* Value copied directly into device constant
                          * memory */
                         assert(arg->size);
                         si_isa_debug("\t| CB1[%2d] | %5d | %8d | %-10s |\n",
@@ -1358,14 +1358,14 @@ void opencl_si_kernel_debug_ndrange_state(struct opencl_si_kernel_t *kernel,
                 	continue;
 		}
 
-        	mem_read(si_emu->global_mem, 
-			ndrange->const_buf_table + 
-			i*SI_EMU_CONST_BUF_TABLE_ENTRY_SIZE, 
+        	mem_read(si_emu->global_mem,
+			ndrange->const_buf_table +
+			i*SI_EMU_CONST_BUF_TABLE_ENTRY_SIZE,
 			sizeof(buffer_desc), &buffer_desc);
 
         	si_isa_debug("\t| CB%-2d  | [%10llu:%10llu] |\n",
 			i, (long long unsigned int)buffer_desc.base_addr,
-			(long long unsigned int)buffer_desc.base_addr + 
+			(long long unsigned int)buffer_desc.base_addr +
 			(long long unsigned int)buffer_desc.num_records - 1);
 	}
 	si_isa_debug("\t-----------------------------------\n");
@@ -1383,13 +1383,13 @@ void opencl_si_kernel_debug_ndrange_state(struct opencl_si_kernel_t *kernel,
                 	continue;
 		}
 
-        	mem_read(si_emu->global_mem, 
-			ndrange->uav_table + i*SI_EMU_UAV_TABLE_ENTRY_SIZE, 
+        	mem_read(si_emu->global_mem,
+			ndrange->uav_table + i*SI_EMU_UAV_TABLE_ENTRY_SIZE,
 			sizeof(buffer_desc), &buffer_desc);
 
         	si_isa_debug("\t| UAV%-2d | [%10u:%10u] |\n",
 			i, (unsigned int)buffer_desc.base_addr,
-			(unsigned int)buffer_desc.base_addr + 
+			(unsigned int)buffer_desc.base_addr +
 			(unsigned int)buffer_desc.num_records - 1);
 	}
 	si_isa_debug("\t-----------------------------------\n");
@@ -1397,4 +1397,3 @@ void opencl_si_kernel_debug_ndrange_state(struct opencl_si_kernel_t *kernel,
         si_isa_debug("========================================================"
                 "\n");
 }
-

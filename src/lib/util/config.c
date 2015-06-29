@@ -53,7 +53,7 @@ struct config_t
 {
 	/* Text file name containing configuration */
 	char *file_name;
-	
+
 	/* Hash table containing present elements
  	 * The values for sections are (void *) 1, while the values for variables are the
 	 * actual value represented for that variable in the config file. */
@@ -212,7 +212,7 @@ static int config_insert_var(struct config_t *config, char *section, char *var, 
 struct config_t *config_create(char *filename)
 {
 	struct config_t *config;
-	
+
 	/* Initialize */
 	config = xcalloc(1, sizeof(struct config_t));
 	config->file_name = xstrdup(filename);
@@ -280,12 +280,12 @@ void config_load(struct config_t *config)
 	int line_num;
 	int length;
 	int err;
-	
+
 	/* Try to open file for reading */
 	f = fopen(config->file_name, "rt");
 	if (!f)
 		fatal("%s: cannot open configuration file", config->file_name);
-	
+
 	/* Read lines */
 	section[0] = '\0';
 	line_num = 0;
@@ -303,7 +303,7 @@ void config_load(struct config_t *config)
 		/* Comment or blank line */
 		if (!line_trim[0] || line_trim[0] == ';' || line_trim[0] == '#')
 			continue;
-		
+
 		/* New "[ <section> ]" entry */
 		length = strlen(line_trim);
 		if (line_trim[0] == '[' && line_trim[length - 1] == ']')
@@ -327,7 +327,7 @@ void config_load(struct config_t *config)
 		if (!section[0])
 			fatal("%s: line %d: section name expected.\n%s",
 				config->file_name, line_num, config_err_format);
-		
+
 		/* New "<var> = <value>" entry. */
 		err = get_var_value_from_item(line_trim, var, sizeof var, value, sizeof value);
 		if (err)
@@ -340,7 +340,7 @@ void config_load(struct config_t *config)
 			fatal("%s: line %d: duplicated variable '%s'.\n%s",
 				config->file_name, line_num, var, config_err_format);
 	}
-	
+
 	/* Close file */
 	fclose(f);
 }
@@ -351,12 +351,12 @@ void config_save(struct config_t *config)
 	char *section;
 	char *item, *value;
 	FILE *f;
-	
+
 	/* Try to open file for writing */
 	f = fopen(config->file_name, "wt");
 	if (!f)
 		fatal("%s: cannot save configuration file", config->file_name);
-	
+
 	/* Dump all variables for each section */
 	LINKED_LIST_FOR_EACH(config->section_list)
 	{
@@ -451,7 +451,7 @@ void config_write_string(struct config_t *config, char *section, char *var, char
 		hash_table_insert(config->allowed_items, section, ITEM_ALLOWED);
 	if (!hash_table_get(config->allowed_items, item))
 		hash_table_insert(config->allowed_items, item, ITEM_ALLOWED);
-	
+
 	/* Write value */
 	config_insert_section(config, section);
 	config_insert_var(config, section, var, value);
@@ -521,7 +521,7 @@ char *config_read_string(struct config_t *config, char *section, char *var, char
 		hash_table_insert(config->allowed_items, section, ITEM_ALLOWED);
 	if (!hash_table_get(config->allowed_items, item))
 		hash_table_insert(config->allowed_items, item, ITEM_ALLOWED);
-	
+
 	/* Read value */
 	value = hash_table_get(config->items, item);
 	return value ? value : def;
@@ -561,7 +561,7 @@ long long config_read_llint(struct config_t *config, char *section, char *var, l
 	result = config_read_string(config, section, var, NULL);
 	if (!result)
 		return def;
-	
+
 	/* Convert */
 	value = str_to_llint(result, &err);
 	if (err)
@@ -586,7 +586,7 @@ int config_read_bool(struct config_t *config, char *section, char *var, int def)
 	if (!strcasecmp(result, "t") || !strcasecmp(result, "True")
 		|| !strcasecmp(result, "On"))
 		return 1;
-	
+
 	/* False */
 	if (!strcasecmp(result, "f") || !strcasecmp(result, "False")
 		|| !strcasecmp(result, "Off"))
@@ -636,12 +636,12 @@ int config_read_enum(struct config_t *config, char *section, char *var, int def,
 	result = config_read_string(config, section, var, NULL);
 	if (!result)
 		return def;
-	
+
 	/* Translate */
 	for (i = 0; i < map_count; i++)
 		if (!strcasecmp(map[i], result))
 			return i;
-	
+
 	/* No match found with map */
 	fprintf(stderr, "%s: section '[ %s ]': variable '%s': invalid value ('%s')\n",
 		config->file_name, section, var, result);
@@ -740,7 +740,7 @@ void config_check(struct config_t *config)
 	for (item = hash_table_find_first(config->allowed_items, &property);
 		item; item = hash_table_find_next(config->allowed_items, &property))
 	{
-		
+
 		/* If this is an allowed (not mandatory) item, continue */
 		if (property == ITEM_ALLOWED)
 			continue;
@@ -755,7 +755,7 @@ void config_check(struct config_t *config)
 			fatal("%s: section [ %s ]: missing mandatory variable '%s'",
 				config->file_name, section, var);
 	}
-	
+
 	/* Go through all present sections/keys and check they are present in the
 	 * set of allowed/mandatory items. */
 	for (item = hash_table_find_first(config->items, NULL);
@@ -790,7 +790,7 @@ void config_section_check(struct config_t *config, char *section_ref)
 	for (item = hash_table_find_first(config->allowed_items, &property);
 		item; item = hash_table_find_next(config->allowed_items, &property))
 	{
-		
+
 		/* If this is an allowed (not mandatory) item, continue */
 		if (property == ITEM_ALLOWED)
 			continue;
@@ -806,7 +806,7 @@ void config_section_check(struct config_t *config, char *section_ref)
 			fatal("%s: section [ %s ]: missing mandatory variable '%s'",
 				config->file_name, section, var);
 	}
-	
+
 	/* Go through all present sections/keys and check they are present in the
 	 * set of allowed/mandatory items. */
 	for (item = hash_table_find_first(config->items, NULL);
@@ -824,4 +824,3 @@ void config_section_check(struct config_t *config, char *section_ref)
 				config->file_name, section, var);
 	}
 }
-

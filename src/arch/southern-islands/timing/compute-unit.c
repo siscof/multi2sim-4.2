@@ -290,6 +290,8 @@ void si_compute_unit_map_work_group(struct si_compute_unit_t *compute_unit,
 	compute_unit->mapped_work_groups++;
 	if (si_spatial_report_active)
 		si_report_mapped_work_group(compute_unit);
+
+	//add_workgroup_finish(compute_unit);
 }
 
 
@@ -341,6 +343,8 @@ void si_compute_unit_unmap_work_group(struct si_compute_unit_t *compute_unit,
 	if(si_spatial_report_active)
 		si_report_unmapped_work_group(compute_unit);
 
+
+	//add_workgroup_finish(compute_unit);
 	si_work_group_free(work_group);
 }
 

@@ -31,6 +31,7 @@
 int si_spatial_report_active = 0 ;
 
 static int spatial_profiling_interval = 10000;
+static int spatial_profiling_format = 0;
 static char *si_spatial_report_section_name = "SISpatialReport";
 static FILE *spatial_report_file;
 static char *spatial_report_filename = "report-cu-spatial";
@@ -51,6 +52,12 @@ void si_spatial_report_config_read(struct config_t *config)
 
 	/* Spatial reports are active */
 	si_spatial_report_active = 1;
+
+	/* output format */
+	config_var_enforce(config, section, "Format");
+	spatial_profiling_format = config_read_int(config, section,
+		"Format", spatial_profiling_format);
+
 
 	/* Interval */
 	config_var_enforce(config, section, "Interval");
@@ -89,16 +96,24 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 {
 	FILE *f = spatial_report_file;
 
-	fprintf(f,
-		"CU,%d,MemAcc,%lld,MappedWGs,%lld,UnmappedWGs,%lld,ALUIssued,%lld,LDSIssued,%lld,Cycles,%lld\n",
-		compute_unit->id,
-		compute_unit->vector_mem_unit.inflight_mem_accesses,
-		compute_unit->interval_mapped_work_groups,
-		compute_unit->interval_unmapped_work_groups,
-		compute_unit->interval_alu_issued,
-		compute_unit->interval_lds_issued,
-		asTiming(si_gpu)->cycle);
-
+	if(spatial_profiling_format == 0){
+		fprintf(f,
+			"CU,%d,MemAcc,%lld,MappedWGs,%lld,UnmappedWGs,%lld,ALUIssued,%lld,LDSIssued,%lld,Cycles,%lld\n",
+			compute_unit->id,
+			compute_unit->vector_mem_unit.inflight_mem_accesses,
+			compute_unit->interval_mapped_work_groups,
+			compute_unit->interval_unmapped_work_groups,
+			compute_unit->interval_alu_issued,
+			compute_unit->interval_lds_issued,
+			asTiming(si_gpu)->cycle);
+	}else{
+		fprintf(f,
+			"%lld,%lld,%lld,%lld\n",
+			compute_unit->interval_mapped_work_groups,
+			compute_unit->interval_unmapped_work_groups,
+			compute_unit->work_group_count,
+			asTiming(si_gpu)->cycle);
+	}
 
 }
 

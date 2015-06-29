@@ -199,7 +199,7 @@ void mshr_control(int latencia, int opc)
 		{
 			switch(accion)
 			{
-				case 1:	if(mod->mshr->size < (mod->dir->ysize * mod->dir->xsize))
+				case 1:	if((mod->mshr->size - 32) < (mod->dir->ysize * mod->dir->xsize))
 					{
 						if(mod->mshr->size >= 64)
 						{
