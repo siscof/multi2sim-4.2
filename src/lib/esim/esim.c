@@ -308,7 +308,7 @@ struct esim_event_t *esim_event_create(int id, void *data)
 	event = xcalloc(1, sizeof(struct esim_event_t));
 	event->id = id;
 	event->data = data;
-	
+
 	/* Return */
 	return event;
 }
@@ -385,7 +385,7 @@ void esim_init()
 	esim_event_info_list = list_create();
 	esim_event_heap = heap_create(20);
 	esim_end_event_list = linked_list_create();
-	
+
 	/* List of frequency domains */
 	esim_domain_list = list_create();
 	list_add(esim_domain_list, NULL);
@@ -534,13 +534,13 @@ void esim_schedule_event(int event_index, void *data, int cycles)
 	/* Schedule locked? */
 	if (esim_lock_schedule)
 		return;
-	
+
 	/* Integrity */
 	if (!event_index)
 		panic("%s: invalid event - forgot to register?", __FUNCTION__);
 	if (!IN_RANGE(event_index, 1, esim_event_info_list->count - 1))
 		panic("%s: invalid event index", __FUNCTION__);
-	
+
 	/* Special event to be ignored */
 	if (event_index == ESIM_EV_NONE)
 		return;
@@ -554,7 +554,7 @@ void esim_schedule_event(int event_index, void *data, int cycles)
 	 * time after which the event should be scheduled. */
 	when = esim_time / domain->cycle_time * domain->cycle_time;
 	when += domain->cycle_time * cycles;
-	
+
 	/* Create event and insert in heap */
 	event = esim_event_create(event_index, data);
 	heap_insert(esim_event_heap, when, event);
@@ -596,11 +596,11 @@ void esim_schedule_end_event(int id, void *data)
 void esim_execute_event(int id, void *data)
 {
 	struct esim_event_info_t *event_info;
-	
+
 	/* Schedule locked */
 	if (esim_lock_schedule)
 		return;
-		
+
 	/* Integrity */
 	if (id < 0 || id >= list_count(esim_event_info_list))
 		panic("%s: unkown event", __FUNCTION__);
@@ -608,7 +608,7 @@ void esim_execute_event(int id, void *data)
 		panic("%s: invalid event (forgot to call to 'esim_register_event'?)", __FUNCTION__);
 	if (id == ESIM_EV_NONE)
 		return;
-	
+
 	/* Execute event handler */
 	event_info = list_get(esim_event_info_list, id);
 	assert(event_info && event_info->handler);
@@ -622,7 +622,7 @@ void esim_process_events(int forward)
 
 	struct esim_event_t *event;
 	struct esim_event_info_t *event_info;
-	
+
 	/* Check if any action is actually needed. Events will be checked and
 	 * global time will be advanced only if argument 'forward' is set or
 	 * there are any pending events to process. */
@@ -639,11 +639,11 @@ void esim_process_events(int forward)
 		when = heap_peek(esim_event_heap, (void **) &event);
 		if (heap_error(esim_event_heap))
 			break;
-		
+
 		/* Stop when we find the first event that should run in the future. */
 		if (when > esim_time)
 			break;
-		
+
 		/* Process it */
 		heap_extract(esim_event_heap, NULL);
 		event_info = list_get(esim_event_info_list, event->id);
@@ -651,7 +651,7 @@ void esim_process_events(int forward)
 		event_info->handler(event->id, event->data);
 		esim_event_free(event);
 	}
-	
+
 	/* Next simulation cycle */
 	esim_time += esim_cycle_time;
 }
@@ -685,7 +685,7 @@ void esim_process_all_events(void)
 		event_info->handler(event->id, event->data);
 		esim_event_free(event);
 	}
-	
+
 	/* Drain heap again with new events */
 	esim_drain_heap();
 }
@@ -695,11 +695,11 @@ void esim_empty(void)
 {
 	struct esim_event_t *event;
 	struct esim_event_info_t *event_info;
-	
+
 	/* Lock event scheduling, so no event will be
 	 * inserted into the heap */
 	esim_lock_schedule = 1;
-	
+
 	/* Extract all elements from heap */
 	while (1)
 	{
@@ -707,14 +707,14 @@ void esim_empty(void)
 		heap_extract(esim_event_heap, (void **) &event);
 		if (heap_error(esim_event_heap))
 			break;
-		
+
 		/* Process it */
 		event_info = list_get(esim_event_info_list, event->id);
 		assert(event_info && event_info->handler);
 		event_info->handler(event->id, event->data);
 		esim_event_free(event);
 	}
-	
+
 	/* Unlock event scheduling */
 	esim_lock_schedule = 0;
 }

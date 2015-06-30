@@ -6,6 +6,7 @@
 #include <arch/southern-islands/timing/gpu.h>
 #include <arch/common/arch.h>
 #include <arch/southern-islands/timing/compute-unit.h>
+#include <lib/esim/esim.h>
 
 static long long intervalo_anterior = 0;
 //static long long ipc_anterior = 0;

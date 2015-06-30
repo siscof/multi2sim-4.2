@@ -26,6 +26,7 @@
 #include "cycle-interval-report.h"
 
 #include "compute-unit.h"
+#include <lib/esim/esim.h>
 
 
 int si_spatial_report_active = 0 ;
@@ -106,13 +107,13 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 			compute_unit->interval_alu_issued,
 			compute_unit->interval_lds_issued,
 			asTiming(si_gpu)->cycle);
-	}else{
+	}else if(spatial_profiling_format == 1){
 		fprintf(f,
-			"%lld,%lld,%lld,%lld\n",
+			"%lld,%lld,%lld,%lld,%lld\n",
 			compute_unit->interval_mapped_work_groups,
 			compute_unit->interval_unmapped_work_groups,
 			compute_unit->work_group_count,
-			asTiming(si_gpu)->cycle);
+			asTiming(si_gpu)->cycle,esim_time);
 	}
 
 }
