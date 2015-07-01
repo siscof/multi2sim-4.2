@@ -6,7 +6,8 @@
 #include "mod-stack.h"
 #include <stdio.h>
 
-extern int mshr_control_enabled;
+extern int flag_mshr_dynamic_enabled;
+extern int EV_MSHR_DYNAMIC_SIZE_EVAL;
 
 struct mshr_t
 {

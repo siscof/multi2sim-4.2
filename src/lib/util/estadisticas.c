@@ -427,7 +427,7 @@ void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 
 				struct si_scalar_unit_t scalar_unit = wf->wavefront_pool_entry->wavefront_pool->compute_unit->scalar_unit;
 				struct si_uop_t *uop = list_get(scalar_unit.read_buffer,0);
-				if(scalar_unit.inflight_mem_buffer == si_gpu_scalar_unit_max_inflight_mem_accesses && uop->scalar_mem_read )
+				if(list_count(scalar_unit.inflight_mem_buffer) == si_gpu_scalar_unit_max_inflight_mem_accesses && uop->scalar_mem_read )
 				{
 					gpu_stats.dispatch_mem_scalar_instruction_infly++;
 				}else{
@@ -811,7 +811,9 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
 
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
-  if(mshr_control_enabled && !(mem_stats.superintervalo_ciclos > 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
+
+	/* FIXME DEPRECATED FOR MNSHR_EVENT
+	if(flag_mshr_dynamic_enabled && !(mem_stats.superintervalo_ciclos > 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
   {
 		ciclo_ultimaI = cycle;
     mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);
@@ -821,13 +823,12 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
 		mem_stats.superintervalo_ciclos = 0;
 		fran_debug_ipc("%lld",lat_umbral);
   }else{
+	*/
 		fran_debug_ipc("0");
-	}
+	//}
 	fran_debug_ipc("%lld",esim_time);
 	fran_debug_ipc("\n");
 
-	//	free(estadisticas_ipc);
-	//	free(gpu_inst);
 	memcpy(&instrucciones_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
 	free(mem_stats.latencias_load);
 	free(mem_stats.latencias_nc_write);

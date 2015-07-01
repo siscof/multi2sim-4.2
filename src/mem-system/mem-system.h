@@ -85,4 +85,3 @@ struct net_t *mem_system_get_net(char *net_name);
 void mshr_control(int latencia, int opc);
 
 #endif
-
