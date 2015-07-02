@@ -22,7 +22,6 @@ void mshr_event_init(int interval)
 	EV_MSHR_DYNAMIC_SIZE_EVAL = esim_register_event_with_name(mshr_control,	mem_domain_index, "mshr_eval");
 
 	esim_schedule_event(EV_MSHR_DYNAMIC_SIZE_EVAL, NULL, interval);
-
 }
 
 void mshr_init(struct mshr_t *mshr, int size)

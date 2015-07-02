@@ -34,7 +34,7 @@
  * Public Functions
  */
 
-struct si_work_group_t *si_work_group_create(unsigned int work_group_id, 
+struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 	struct si_ndrange_t *ndrange)
 {
 	struct si_bin_enc_user_element_t *user_elements;
@@ -55,12 +55,12 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 	int work_item_gidz_start;
 
 	/* Number of in work-items in work-group */
-	unsigned int work_items_per_group = ndrange->local_size3[0] * 
+	unsigned int work_items_per_group = ndrange->local_size3[0] *
 		ndrange->local_size3[1] * ndrange->local_size3[2];
 	assert(work_items_per_group > 0);
 
 	/* Number of wavefronts in work-group */
-	unsigned int wavefronts_per_group = (work_items_per_group + 
+	unsigned int wavefronts_per_group = (work_items_per_group +
 		(si_emu_wavefront_size - 1)) / si_emu_wavefront_size;
 	assert(wavefronts_per_group > 0);
 
@@ -75,7 +75,7 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 
 	/* Allocate pointers for work-items (will actually be created when
 	 * wavefronts are created) */
-	work_group->work_items = xcalloc(si_emu_wavefront_size * 
+	work_group->work_items = xcalloc(si_emu_wavefront_size *
 		wavefronts_per_group, sizeof(void *));
 	work_group->wavefronts = xcalloc(wavefronts_per_group, sizeof(void *));
 	work_group->wavefront_count = wavefronts_per_group;
@@ -93,7 +93,7 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 		{
 			wavefront_offset = wavefront_id * si_emu_wavefront_size;
 
-			work_group->work_items[wavefront_offset+work_item_id] = 
+			work_group->work_items[wavefront_offset+work_item_id] =
 				wavefront->work_items[work_item_id];
 			work_group->work_items[wavefront_offset+work_item_id]->
 				work_group = work_group;
@@ -102,9 +102,9 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 
 	/* Initialize work-group and work-item metadata */
 	work_group->id_3d[0] = work_group_id % ndrange->group_count3[0];
-	work_group->id_3d[1] = (work_group_id / ndrange->group_count3[0]) % 
+	work_group->id_3d[1] = (work_group_id / ndrange->group_count3[0]) %
 		ndrange->group_count3[1];
-	work_group->id_3d[2] = work_group_id / (ndrange->group_count3[0] * 
+	work_group->id_3d[2] = work_group_id / (ndrange->group_count3[0] *
 		ndrange->group_count3[1]);
 	work_group->id = work_group_id;
 
@@ -129,11 +129,11 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 				work_item = work_group->work_items[lid];
 
 				/* Global IDs */
-				work_item->id_3d[0] = work_item_gidx_start + 
+				work_item->id_3d[0] = work_item_gidx_start +
 					lidx;
-				work_item->id_3d[1] = work_item_gidy_start + 
+				work_item->id_3d[1] = work_item_gidy_start +
 					lidy;
-				work_item->id_3d[2] = work_item_gidz_start + 
+				work_item->id_3d[2] = work_item_gidz_start +
 					lidz;
 				work_item->id = tid;
 
@@ -144,7 +144,7 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 				work_item->id_in_work_group = lid;
 
 
-				/* First, last, and number of work-items 
+				/* First, last, and number of work-items
 				 * in wavefront */
 				wavefront = work_item->wavefront;
 				if (!wavefront->work_item_count)
@@ -161,18 +161,18 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 				/* Initialize the execution mask */
 				if (work_item->id_in_wavefront < 32)
 				{
-					wavefront->sreg[SI_EXEC].as_uint |= 
+					wavefront->sreg[SI_EXEC].as_uint |=
 						1 << work_item->id_in_wavefront;
 				}
 				else if (work_item->id_in_wavefront < 64)
 				{
-					wavefront->sreg[SI_EXEC + 1].as_uint |= 
+					wavefront->sreg[SI_EXEC + 1].as_uint |=
 						1 << work_item->id_in_wavefront;
 				}
-				else 
+				else
 				{
 					fatal("%s: invalid work-item id (%d)",
-						__FUNCTION__, 
+						__FUNCTION__,
 						work_item->id_in_wavefront);
 				}
 			}
@@ -201,13 +201,13 @@ struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 			work_item = wavefront->work_items[work_item_id];
 
 			/* V0 */
-			work_item->vreg[0].as_int = 
-				work_item->id_in_work_group_3d[0];  
+			work_item->vreg[0].as_int =
+				work_item->id_in_work_group_3d[0];
 			/* V1 */
-			work_item->vreg[1].as_int = 
-				work_item->id_in_work_group_3d[1]; 
+			work_item->vreg[1].as_int =
+				work_item->id_in_work_group_3d[1];
 			/* V2 */
-			work_item->vreg[2].as_int = 
+			work_item->vreg[2].as_int =
 				work_item->id_in_work_group_3d[2];
 
 		}
@@ -303,7 +303,7 @@ void si_work_group_free(struct si_work_group_t *work_group)
 	struct si_wavefront_t *wavefront;
 
 	int wavefront_id;
-	int work_item_id; 
+	int work_item_id;
 
 	assert(work_group);
 

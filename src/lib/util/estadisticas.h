@@ -16,6 +16,8 @@
 #define cache_hit 1
 #define cache_accesses 0
 
+extern int EV_STATISTICS_BY_CYCLES;
+
 typedef enum
 {
 	scalar_u = 0,
@@ -131,7 +133,7 @@ struct si_gpu_unit_stats
 	long long loads_count;
 	long long simd_idle[4];
 	long long v_mem_full;
-	
+
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;
@@ -141,10 +143,10 @@ struct si_gpu_unit_stats
 	long long vmb_inst_counter;
 
 	//instruction latency
-	long long start2fetch;		
-	long long fetch2complete;  
-	
-	//stall causes in dispatch stage 
+	long long start2fetch;
+	long long fetch2complete;
+
+	//stall causes in dispatch stage
 	long long cycles_simd_running;
 	long long dispatch_no_stall;
 	long long dispatch_stall_instruction_infly;
@@ -152,7 +154,7 @@ struct si_gpu_unit_stats
 	long long dispatch_stall_mem_access;
 	long long dispatch_stall_no_wavefront;
 	long long dispatch_stall_others;
-	
+
 	//type instruction in fly on dispatch
 	long long dispatch_branch_instruction_infly;
 	long long dispatch_scalar_instruction_infly;
@@ -160,7 +162,7 @@ struct si_gpu_unit_stats
 	long long dispatch_simd_instruction_infly;
 	long long dispatch_v_mem_instruction_infly;
 	long long dispatch_lds_instruction_infly;
-	
+
 	//stall causes in fetch stage
 	long long no_stall;
 	long long stall_instruction_infly;
@@ -175,7 +177,7 @@ struct si_gpu_unit_stats
 	long long superintervalo_contador;
 	long long superintervalo_operacion;
 	long long superintervalo_ciclos;
-}; 
+};
 
 struct mem_system_stats
 {
@@ -215,7 +217,7 @@ struct mem_system_stats mem_stats, instrucciones_mem_stats_anterior, ciclos_mem_
 
 struct si_gpu_unit_stats *gpu_inst;
 struct esta_t estadis[10];
-struct si_gpu_unit_stats gpu_stats, instrucciones_gpu_stats_anterior; 
+struct si_gpu_unit_stats gpu_stats, instrucciones_gpu_stats_anterior;
 
 struct esta_t *estadisticas_ipc;
 
@@ -255,6 +257,9 @@ void add_retry_time_lost(struct mod_stack_t *stack);
 void accu_retry_time_lost(struct mod_stack_t *stack);
 void add_eviction(int level);
 void print_cache_states(long long *results);
+void statistics_event_init(int interval);
+void statistics_event();
+void statistics_continue();
+void statistics_pause();
 
 #endif
-
