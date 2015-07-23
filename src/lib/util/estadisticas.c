@@ -227,7 +227,7 @@ fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction
 
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
 fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 ");
-fran_debug_ipc("queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load gpu_queue_load gpu_lock_mshr_load gpu_lock_dir_load gpu_eviction_load gpu_retry_load gpu_miss_load gpu_finish_load gpu_latencia_total_load gpu_access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales latencia_mshr esim_time\n");
+fran_debug_ipc("queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load gpu_queue_load gpu_lock_mshr_load gpu_lock_dir_load gpu_eviction_load gpu_retry_load gpu_miss_load gpu_finish_load gpu_latencia_total_load gpu_access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem i_scalar i_simd mi_simd i_s_mem i_v_mem mi_v_mem i_branch i_lds mi_lds total_intervalo total_global ciclos_intervalo ciclos_totales esim_time\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -1109,7 +1109,7 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
 		fran_debug_ipc("%lld",lat_umbral);
   }else{
 	*/
-		fran_debug_ipc("0");
+		//fran_debug_ipc("0");
 	//}
 	fran_debug_ipc("%lld",esim_time);
 	fran_debug_ipc("\n");
