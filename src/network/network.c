@@ -36,7 +36,7 @@
 #include "command.h"
 
 
-/* 
+/*
  * Private Functions
  */
 
@@ -218,7 +218,7 @@ struct net_msg_t *net_msg_table_extract(struct net_t *net, long long id)
 
 
 
-/* 
+/*
  * Public Functions
  */
 
@@ -263,7 +263,7 @@ struct net_t *net_create_from_config(struct config_t *config, char *name)
 				"DefaultInputBufferSize", 0);
 		net->def_output_buffer_size = config_read_int(config, section,
 				"DefaultOutputBufferSize", 0);
-		def_bandwidth = config_read_int(config, section, 
+		def_bandwidth = config_read_int(config, section,
 				"DefaultBandwidth", 0);
 		if (!net->def_input_buffer_size)
 			fatal("%s:%s: DefaultInputBufferSize: invalid/missing value.\n%s",
@@ -459,7 +459,7 @@ struct net_t *net_create_from_config(struct config_t *config, char *name)
 				}
 			}
 			else
-				fatal("%s: %s: Unacceptable number of virtual channels \n %s", 
+				fatal("%s: %s: Unacceptable number of virtual channels \n %s",
 						name, section, net_err_config);
 		}
 		/* If is is a Bus Connection */
@@ -808,7 +808,7 @@ struct net_node_t *net_add_end_node(struct net_t *net,
 }
 
 
-struct net_node_t *net_add_bus(struct net_t *net, int bandwidth, char *name, int lanes)	
+struct net_node_t *net_add_bus(struct net_t *net, int bandwidth, char *name, int lanes)
 {
 	struct net_node_t *node;
 	/* Create node */
@@ -958,7 +958,7 @@ void net_add_bus_port(struct net_t *net, struct net_node_t *src_node,
 	if (src_node->kind == net_node_bus && dst_node->kind == net_node_bus)
 		fatal("network \"%s\" : BUS to BUS connection is not supported.", net->name);
 
-	/* Condition 2: In case source node is BUS, we add an input buffer to 
+	/* Condition 2: In case source node is BUS, we add an input buffer to
 	 * destination node and add it to the list of destination nodes in
 	 * BUS */
 	if (src_node->kind == net_node_bus && dst_node->kind != net_node_bus)
@@ -991,7 +991,7 @@ void net_add_bus_port(struct net_t *net, struct net_node_t *src_node,
 		buffer->bus = list_get(dst_node->bus_lane_list, 0);
 	}
 
-	/* We make the buffer as type port for clarification and use in event 
+	/* We make the buffer as type port for clarification and use in event
 	 * handler */
 	buffer->kind = net_buffer_bus;
 
@@ -1045,7 +1045,7 @@ int net_can_send(struct net_t *net, struct net_node_t *src_node,
 }
 
 
-/* Return TRUE if a message can be sent to the network. If it cannot be sent, 
+/* Return TRUE if a message can be sent to the network. If it cannot be sent,
  * return FALSE, and schedule 'retry_event' for the cycle when the check
  * should be performed again. This function should not be called if the
  * reason why a message cannot be sent is permanent (e.g., no route to
@@ -1109,10 +1109,10 @@ struct net_msg_t *net_send(struct net_t *net, struct net_node_t *src_node,
 }
 
 
-/* Send a message through network. The caller must make sure that the message 
+/* Send a message through network. The caller must make sure that the message
  * can be injected in the network, with a previous call to 'net_can_send'.
  * When the message reaches the head of the input buffer in 'dst_node', event
- * 'receive_event' will be scheduled, and object 'msg' will be accessible. The 
+ * 'receive_event' will be scheduled, and object 'msg' will be accessible. The
  * message needs to be removed by the caller with an additional call to
  * 'net_receive', which will invalidate and free the 'msg' object. */
 struct net_msg_t *net_send_ev(struct net_t *net, struct net_node_t *src_node,

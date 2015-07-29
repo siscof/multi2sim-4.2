@@ -1097,8 +1097,8 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
 
-	/* FIXME DEPRECATED FOR MNSHR_EVENT
-	if(flag_mshr_dynamic_enabled && !(mem_stats.superintervalo_ciclos > 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
+	/* FIXME DEPRECATED FOR MNSHR_EVENT */
+	if(flag_mshr_dynamic_enabled)
   {
 		ciclo_ultimaI = cycle;
     mshr_control(mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0,  mem_stats.superintervalo_operacion/mem_stats.superintervalo_ciclos);
@@ -1106,11 +1106,8 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
     mem_stats.superintervalo_contador = 0;
 	  mem_stats.superintervalo_operacion = 0;
 		mem_stats.superintervalo_ciclos = 0;
-		fran_debug_ipc("%lld",lat_umbral);
-  }else{
-	*/
-		//fran_debug_ipc("0");
-	//}
+	}
+
 	fran_debug_ipc("%lld",esim_time);
 	fran_debug_ipc("\n");
 
