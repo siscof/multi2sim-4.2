@@ -65,7 +65,7 @@ void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 	list_enqueue(mshr->waiting_list, stack);
 }
 
-void mshr_unlock(struct mshr_t *mshr)
+/*void mshr_unlock(struct mshr_t *mshr)
 {
 	assert(mshr->entradasOcupadas > 0);
 
@@ -78,25 +78,12 @@ void mshr_unlock(struct mshr_t *mshr)
 	}else{
 	        mshr->entradasOcupadas--;
 	}
-}
+}*/
 
-void mshr_unlock2(struct mod_t *mod)
+void mshr_unlock(struct mod_t *mod)
 {
 	struct mshr_t *mshr = mod->mshr;
 
-/*	assert(mshr->entradasOcupadas > 0);
-
-
-	mshr->entradasOcupadas--;
-
-	if(list_count(mshr->waiting_list))
-	{
-		struct mod_stack_t *stack_next = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
-		int event = stack_next->waiting_list_event;
-		stack_next->waiting_list_event = 0;
-		esim_schedule_event(event, stack_next, 0);
-	}
-*/
 	assert(mshr->entradasOcupadas > 0);
 
 	if(list_count(mshr->waiting_list))

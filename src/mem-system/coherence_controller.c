@@ -80,7 +80,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 
 		if(stack->find_and_lock_stack->mshr_locked)
 		{
-			mshr_unlock2(mod);
+			mshr_unlock(mod);
 			stack->find_and_lock_stack->mshr_locked = 0;
 		}
 
@@ -344,4 +344,3 @@ int cc_search_next_transaction(struct coherence_controller_t *cc, int set, int w
 	return -1;
 
 }
-
