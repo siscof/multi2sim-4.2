@@ -30,18 +30,22 @@
 
 
 int si_spatial_report_active = 0 ;
-
+int si_cu_spatial_report_active = 0 ;
+int si_device_spatial_report_active = 0 ;
 static int spatial_profiling_interval = 10000;
 static int spatial_profiling_format = 0;
 static char *si_spatial_report_section_name = "SISpatialReport";
 static FILE *spatial_report_file;
 static char *spatial_report_filename = "report-cu-spatial";
+static char *device_spatial_report_filename = "report-device-spatial";
+static FILE *device_spatial_report_file;
 
 
 void si_spatial_report_config_read(struct config_t *config)
 {
 	char *section;
-	char *file_name;
+	char *cu_file_name;
+	char *device_file_name;
 
 	/*Nothing if section or config is not present */
 	section = si_spatial_report_section_name;
@@ -65,24 +69,53 @@ void si_spatial_report_config_read(struct config_t *config)
 	spatial_profiling_interval = config_read_int(config, section,
 		"Interval", spatial_profiling_interval);
 
-	/* File name */
-	config_var_enforce(config, section, "File");
-	file_name = config_read_string(config, section, "File", NULL);
-	if (!file_name || !*file_name)
-		fatal("%s: %s: invalid or missing value for 'File'",
-			si_spatial_report_section_name, section);
-	spatial_report_filename = str_set(NULL, file_name);
+	/* Compute Unit File name */
+	//config_var_enforce(config, section, "cu_File");
+	cu_file_name = config_read_string(config, section, "cu_File", NULL);
+	if (cu_file_name && *cu_file_name){
+		si_cu_spatial_report_active = 1;
 
-	spatial_report_file = file_open_for_write(spatial_report_filename);
-	if (!spatial_report_file)
-		fatal("%s: could not open spatial report file",
-				spatial_report_filename);
+		spatial_report_filename = str_set(NULL, cu_file_name);
 
+		spatial_report_file = file_open_for_write(spatial_report_filename);
+		if (!spatial_report_file)
+			fatal("%s: could not open spatial report file",
+					spatial_report_filename);
+	}
+		//fatal("%s: %s: invalid or missing value for 'cu_File'",
+		//	si_spatial_report_section_name, section);
+
+	/* Device File name */
+	//config_var_enforce(config, section, "device_File");
+	device_file_name = config_read_string(config, section, "device_File", NULL);
+	if (device_file_name && *device_file_name)
+	{
+		si_device_spatial_report_active = 1;
+
+		spatial_report_filename = str_set(NULL, device_file_name);
+		device_spatial_report_file = file_open_for_write(spatial_report_filename);
+		if (!device_spatial_report_file)
+			fatal("%s: could not open spatial report file",
+					spatial_report_filename);
+	}
+
+	if(!si_device_spatial_report_active && !si_cu_spatial_report_active)
+		fatal("%s: %s: invalid or missing value for 'device_File' and %s: %s: invalid or missing value for 'cu_File'",
+			device_file_name, section,cu_file_name, section);
 }
 
 void si_cu_spatial_report_init()
 {
 
+}
+
+void si_spatial_report_done()
+{
+	if (si_cu_spatial_report_active)
+		si_cu_spatial_report_done();
+
+	if (si_device_spatial_report_active)
+		si_device_spatial_report_done();
 }
 
 void si_cu_spatial_report_done()
@@ -91,6 +124,11 @@ void si_cu_spatial_report_done()
 	fclose(spatial_report_file);
 	spatial_report_file = NULL;
 	str_free(spatial_report_filename);
+}
+
+void si_device_spatial_report_done()
+{
+	return;
 }
 
 void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
@@ -106,14 +144,15 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 			compute_unit->interval_unmapped_work_groups,
 			compute_unit->interval_alu_issued,
 			compute_unit->interval_lds_issued,
-			asTiming(si_gpu)->cycle);
+			compute_unit->interval_cycle);
 	}else if(spatial_profiling_format == 1){
 		fprintf(f,
 			"%lld,%lld,%lld,%lld,%lld\n",
 			compute_unit->interval_mapped_work_groups,
 			compute_unit->interval_unmapped_work_groups,
 			compute_unit->work_group_count,
-			asTiming(si_gpu)->cycle,esim_time);
+			asTiming(si_gpu)->cycle,
+			esim_time);
 	}
 
 }
@@ -166,7 +205,7 @@ void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 	/* If interval - reset the counters in all the engines */
 	compute_unit->interval_cycle ++;
 
-	if (!(asTiming(si_gpu)->cycle % spatial_profiling_interval))
+	if (si_cu_spatial_report_active && !(asTiming(si_gpu)->cycle % spatial_profiling_interval))
 	{
 		si_cu_spatial_report_dump(compute_unit);
 
@@ -181,4 +220,37 @@ void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 		compute_unit->interval_alu_issued = 0;
 		compute_unit->interval_lds_issued = 0;
 	}
+}
+
+void si_device_interval_update(SIGpu *device)
+{
+	/* If interval - reset the counters in all the engines */
+	//device->interval_cycle ++;
+
+	if (si_device_spatial_report_active && !(asTiming(device)->cycle % spatial_profiling_interval))
+	{
+		si_device_spatial_report_dump(device);
+
+		/*
+		 * This counter is not reset since memory accesses could still
+		 * be in flight in the hierarchy
+		 * compute_unit->inflight_mem_accesses = 0;
+		 */
+		/*device->interval_cycle = 0;
+		device->interval_mapped_work_groups = 0;
+		compute_unit->interval_unmapped_work_groups = 0;
+		compute_unit->interval_alu_issued = 0;
+		compute_unit->interval_lds_issued = 0;*/
+	}
+}
+
+void si_device_spatial_report_dump(SIGpu *device)
+{
+	FILE *f = device_spatial_report_file;
+
+	fprintf(f,
+		"%lld,%lld\n",
+		asTiming(device)->cycle,
+		esim_time);
+
 }

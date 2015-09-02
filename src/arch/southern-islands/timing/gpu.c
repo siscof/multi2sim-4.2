@@ -39,6 +39,7 @@
 
 #include "cycle-interval-report.h"
 
+int gpu_domain_index;
 int fran_l1_off;
 static char *si_err_stall =
 	"\tThe Southern Islands GPU has not completed execution of any in-flight\n"
@@ -1099,6 +1100,10 @@ void si_gpu_init(void)
 	/* Create GPU */
 	si_gpu = new(SIGpu);
 
+	/* Create frequency_domain*/
+	gpu_domain_index = esim_new_domain(si_gpu_frequency);
+
+
 	/* Initializations */
 	si_uop_init();
 
@@ -1118,8 +1123,7 @@ void si_gpu_done(void)
 	delete(si_gpu);
 
 	/* Spatial report */
-	if (si_spatial_report_active)
-		si_cu_spatial_report_done();
+	si_spatial_report_done();
 
 	/* Finalizations */
 	si_uop_done();
@@ -1276,6 +1280,7 @@ void SIGpuCreate(SIGpu *self)
 		compute_unit = si_compute_unit_create();
 		compute_unit->id = compute_unit_id;
 		self->compute_units[compute_unit_id] = compute_unit;
+		compute_unit->compute_device = self;
 		list_add(self->available_compute_units, compute_unit);
 	}
 
@@ -1335,11 +1340,11 @@ int SIGpuRun(Timing *self)
 	 * exit here if the list of existing ND-Ranges is empty. */
 	if (!list_count(si_emu->waiting_work_groups) &&
 			!list_count(si_emu->running_work_groups)){
-				statistics_pause();
+				//statistics_pause();
 				return FALSE;
 			}
 
-	statistics_continue();
+	//statistics_continue();
 
 	ndrange = si_emu->ndrange;
 	assert(ndrange);
@@ -1362,10 +1367,10 @@ int SIGpuRun(Timing *self)
 	}
 
 	/* One more cycle */
-	asTiming(si_gpu)->cycle++;
+	asTiming(gpu)->cycle++;
 
 	/* Stop if maximum number of GPU cycles exceeded */
-	if (si_emu_max_cycles && asTiming(si_gpu)->cycle >=
+	if (si_emu_max_cycles && asTiming(gpu)->cycle >=
 		si_emu_max_cycles)
 	{
 		esim_finish = esim_finish_si_max_cycles;
@@ -1379,7 +1384,7 @@ int SIGpuRun(Timing *self)
 	}
 
 	/* Stop if there was a simulation stall */
-	if ((asTiming(si_gpu)->cycle-gpu->last_complete_cycle) >
+	if ((asTiming(gpu)->cycle-gpu->last_complete_cycle) >
 		100000000)
 	{
 		warning("Southern Islands GPU simulation stalled.\n%s",
@@ -1403,6 +1408,8 @@ int SIGpuRun(Timing *self)
 		/* Run one cycle */
 		si_compute_unit_run(compute_unit);
 	}
+
+	si_device_interval_update(gpu);
 
 	/* Still running */
 	return TRUE;

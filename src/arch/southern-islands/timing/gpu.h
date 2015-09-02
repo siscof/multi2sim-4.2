@@ -31,6 +31,7 @@ extern int si_trace_category;
 
 //FRAN
 extern int fran_l1_off;
+extern int gpu_domain_index;
 
 extern char *si_gpu_config_help;
 extern char *si_gpu_config_file_name;
@@ -254,6 +255,8 @@ CLASS_BEGIN(SIGpu, Timing)
 
 	/* List of ready compute units accepting work-groups */
 	struct list_t *available_compute_units;
+
+	struct si_gpu_unit_stats *interval_statistics;
 
 	long long int last_complete_cycle;
 

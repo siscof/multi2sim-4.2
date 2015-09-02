@@ -16,19 +16,21 @@
 #include <stdlib.h>
 
 int EV_MSHR_DYNAMIC_SIZE_EVAL;
+int INTERVAL;
 
-void mshr_event_init(int interval)
+void mshr_event_init(int cycles)
 {
-	EV_MSHR_DYNAMIC_SIZE_EVAL = esim_register_event_with_name(mshr_control,	mem_domain_index, "mshr_eval");
+	EV_MSHR_DYNAMIC_SIZE_EVAL = esim_register_event_with_name(mshr_control,	gpu_domain_index, "mshr_eval");
 /* fixme */
-	//esim_schedule_event(EV_MSHR_DYNAMIC_SIZE_EVAL, NULL, interval);
+	INTERVAL = cycles;
+	//esim_schedule_event(EV_MSHR_DYNAMIC_SIZE_EVAL, NULL, INTERVAL);
 }
 
 void mshr_init(struct mshr_t *mshr, int size)
 {
 	mshr->size = size;
-	if(flag_mshr_dynamic_enabled && EV_MSHR_DYNAMIC_SIZE_EVAL == NULL)
-		mshr_event_init(10000);
+	//if(flag_mshr_dynamic_enabled && EV_MSHR_DYNAMIC_SIZE_EVAL == NULL)
+	//	mshr_event_init(10000);
 }
 
 struct mshr_t *mshr_create()
@@ -122,6 +124,8 @@ void mshr_control(int latencia, int opc)
 		if(mod->level == 1)
   		break;
 	}
+
+	//GPU running?
 
 	//finalizar test
 	if(mod->mshr->testing == 1){
@@ -232,6 +236,9 @@ void mshr_control(int latencia, int opc)
 			}
 		}
   }
+	//if(flag_mshr_dynamic_enabled)
+		//esim_schedule_event(EV_MSHR_DYNAMIC_SIZE_EVAL, NULL, INTERVAL);
+
 }
 
 void mshr_test_sizes(){

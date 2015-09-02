@@ -604,7 +604,6 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
         struct mod_t *mod = list_get(mem_system->mod_list, k);
 
         struct dir_t *dir = mod->dir;
-//        struct cache_t *cache = mod->cache;
 
 	if(mod->level == 1)
 	{
@@ -760,7 +759,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	fran_debug_ipc("%lld %lld ",efectivosL1, efectivosL2);
 
 		// MPKI
-		//fran_debug_ipc("%lld %lld ",(estadisticas_ipc + 1)->misses, (estadisticas_ipc + 2)->misses);
+
 	fran_debug_ipc("%lld ", mem_stats.mod_level[1].misses - instrucciones_mem_stats_anterior.mod_level[1].misses);
 	fran_debug_ipc("%lld ", mem_stats.mod_level[2].misses - instrucciones_mem_stats_anterior.mod_level[2].misses);
 
@@ -828,7 +827,7 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
 	int lat_umbral = mem_stats.superintervalo_contador ? mem_stats.superintervalo_latencia/mem_stats.superintervalo_contador : 0;
 	lat_umbral *= 1.5;
 
-	/* FIXME DEPRECATED FOR MNSHR_EVENT
+	/* FIXME DEPRECATED FOR MSHR_EVENT
 	if(flag_mshr_dynamic_enabled && !(mem_stats.superintervalo_ciclos > 500000) && (ciclo_ultimaI + lat_umbral) < cycle )
   {
 		ciclo_ultimaI = cycle;
@@ -1130,11 +1129,11 @@ fran_debug_ipc("%lld ",gpu_stats.total); //active
 
 }
 
-statistics_pause(){
+void statistics_pause(){
 	statistics_event_paused = true;
 }
 
-statistics_continue(){
+void statistics_continue(){
 	if(statistics_event_paused)
 	{
 		statistics_event_paused = false;

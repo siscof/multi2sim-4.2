@@ -24,6 +24,7 @@
 #include "lds-unit.h"
 #include "scalar-unit.h"
 #include "vector-mem-unit.h"
+#include "gpu.h"
 
 
 struct si_reg_file_t;
@@ -51,6 +52,9 @@ struct si_compute_unit_t
 	int id;
 	int subdevice_id;
 	long long uop_id_counter;
+
+  /* Device */
+	SIGpu *compute_device;
 
 	/* Entry points to memory hierarchy */
 	struct mod_t *scalar_cache;

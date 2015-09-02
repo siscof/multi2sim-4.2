@@ -24,7 +24,8 @@
  * Public variable
  */
 extern int si_spatial_report_active  ;
-
+extern int si_cu_spatial_report_active  ;
+extern int si_device_spatial_report_active  ;
 
 
 void si_alu_report_new_inst(struct si_compute_unit_t *compute_unit);
@@ -46,8 +47,14 @@ struct config_t;
 void si_spatial_report_config_read(struct config_t *config);
 
 void si_cu_interval_update(struct si_compute_unit_t *compute_unit);
+void si_device_interval_update(SIGpu *device);
 
+void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit);
+void si_device_spatial_report_dump(SIGpu *device);
+
+void si_spatial_report_done();
 void si_cu_spatial_report_done();
+void si_device_spatial_report_done();
 
 
 #endif

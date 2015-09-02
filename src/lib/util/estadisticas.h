@@ -84,17 +84,15 @@ int report_cache_states_category;
 
 struct esta_t
 {
-        /* Statistics */
-        long long coalesce;
-        long long coalesce_load;
-        long long coalesce_store;
-
-
-        long long accesses;
-        long long hits;
+  /* Statistics */
+  long long coalesce;
+  long long coalesce_load;
+  long long coalesce_store;
+  long long accesses;
+  long long hits;
 	long long misses;
-        long long loads;
-        long long invalidations;
+  long long loads;
+  long long invalidations;
 	long long evictions;
 
 	long long cache_state[cache_block_state_size];
@@ -106,18 +104,18 @@ struct esta_t
 	long long nc_store_miss_retry;
 
 	long long busy_cicles_in;
-        long long busy_cicles_out;
-        long long delayed_read_hit;
-        long long esim_cycle_anterior;
-        long long media_latencia;
-        long long media_latencia_contador;
-        long long tiempo_acceso_latencia;
+  long long busy_cicles_out;
+  long long delayed_read_hit;
+  long long esim_cycle_anterior;
+  long long media_latencia;
+  long long media_latencia_contador;
+  long long tiempo_acceso_latencia;
 	long long retry_time_lost;
 
 	long long latencia_red_acc;
-        long long latencia_red_cont;
-        long long blk_compartidos;
-        long long replicas_en_l1;
+  long long latencia_red_cont;
+  long long blk_compartidos;
+  long long replicas_en_l1;
 	long long entradas_bloqueadas;
 	long long coalesceHits;
 	long long coalesceMisses;
