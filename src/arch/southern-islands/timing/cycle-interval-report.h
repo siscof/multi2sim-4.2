@@ -56,5 +56,9 @@ void si_spatial_report_done();
 void si_cu_spatial_report_done();
 void si_device_spatial_report_done();
 
+void si_spatial_report_init();
+void si_cu_spatial_report_init();
+void si_device_spatial_report_init();
+
 
 #endif

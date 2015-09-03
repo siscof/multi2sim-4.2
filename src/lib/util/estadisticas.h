@@ -175,6 +175,10 @@ struct si_gpu_unit_stats
 	long long superintervalo_contador;
 	long long superintervalo_operacion;
 	long long superintervalo_ciclos;
+
+	// workgroups counter
+	long long interval_mapped_work_groups;
+	long long interval_unmapped_work_groups;
 };
 
 struct mem_system_stats

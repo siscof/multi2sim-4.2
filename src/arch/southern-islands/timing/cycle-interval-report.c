@@ -28,6 +28,8 @@
 #include "compute-unit.h"
 #include <lib/esim/esim.h>
 
+#include <lib/util/estadisticas.h>
+
 
 int si_spatial_report_active = 0 ;
 int si_cu_spatial_report_active = 0 ;
@@ -92,11 +94,11 @@ void si_spatial_report_config_read(struct config_t *config)
 	{
 		si_device_spatial_report_active = 1;
 
-		spatial_report_filename = str_set(NULL, device_file_name);
-		device_spatial_report_file = file_open_for_write(spatial_report_filename);
+		device_spatial_report_filename = str_set(NULL, device_file_name);
+		device_spatial_report_file = file_open_for_write(device_spatial_report_filename);
 		if (!device_spatial_report_file)
 			fatal("%s: could not open spatial report file",
-					spatial_report_filename);
+					device_spatial_report_filename);
 	}
 
 	if(!si_device_spatial_report_active && !si_cu_spatial_report_active)
@@ -104,9 +106,24 @@ void si_spatial_report_config_read(struct config_t *config)
 			device_file_name, section,cu_file_name, section);
 }
 
+void si_spatial_report_init()
+{
+	if(si_device_spatial_report_active)
+		si_device_spatial_report_init();
+
+	if(si_cu_spatial_report_active)
+		si_cu_spatial_report_init();
+}
+
 void si_cu_spatial_report_init()
 {
+	fprintf(spatial_report_file, "cycle esim_time\n");
+}
 
+void si_device_spatial_report_init(SIGpu *device)
+{
+	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
+	fprintf(device_spatial_report_file, "mappedWG unmappedWG cycle esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -128,7 +145,9 @@ void si_cu_spatial_report_done()
 
 void si_device_spatial_report_done()
 {
-	return;
+	fclose(device_spatial_report_file);
+	device_spatial_report_file = NULL;
+	str_free(device_spatial_report_filename);
 }
 
 void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
@@ -191,12 +210,14 @@ void si_report_mapped_work_group(struct si_compute_unit_t *compute_unit)
 {
 	/*TODO Add calculation here to change this to wavefront pool entries used */
 	compute_unit->interval_mapped_work_groups++;
+	compute_unit->compute_device->interval_statistics->interval_mapped_work_groups++;
 }
 
 void si_report_unmapped_work_group(struct si_compute_unit_t *compute_unit)
 {
 	/*TODO Add calculation here to change this to wavefront pool entries used */
 	compute_unit->interval_unmapped_work_groups++;
+	compute_unit->compute_device->interval_statistics->interval_unmapped_work_groups++;
 }
 
 
@@ -241,6 +262,7 @@ void si_device_interval_update(SIGpu *device)
 		compute_unit->interval_unmapped_work_groups = 0;
 		compute_unit->interval_alu_issued = 0;
 		compute_unit->interval_lds_issued = 0;*/
+		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
 	}
 }
 
@@ -248,9 +270,10 @@ void si_device_spatial_report_dump(SIGpu *device)
 {
 	FILE *f = device_spatial_report_file;
 
-	fprintf(f,
-		"%lld,%lld\n",
-		asTiming(device)->cycle,
-		esim_time);
+	fprintf(f, "%lld", device->interval_statistics->interval_mapped_work_groups);
+	fprintf(f, ",%lld", device->interval_statistics->interval_unmapped_work_groups);
+	fprintf(f,",%lld,%lld", asTiming(device)->cycle,	esim_time);
+
+	fprintf(f,"\n");
 
 }

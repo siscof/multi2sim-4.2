@@ -1111,6 +1111,9 @@ void si_gpu_init(void)
 	si_trace_header("si.init version=\"%d.%d\" num_compute_units=%d\n",
 		SI_TRACE_VERSION_MAJOR, SI_TRACE_VERSION_MINOR,
 		si_gpu_num_compute_units);
+
+	/* interval report init */
+	si_spatial_report_init(si_gpu);
 }
 
 
