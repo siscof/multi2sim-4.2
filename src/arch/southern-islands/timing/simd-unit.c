@@ -39,16 +39,16 @@ void si_simd_complete(struct si_simd_t *simd)
 	int list_entries;
 	int list_index = 0;
 	int i;
-        
+
     struct si_work_item_t *work_item;
     int work_item_id;
 
 
 	list_entries = list_count(simd->exec_buffer);
-	
+
 	if(list_entries == 0)
 		add_simd_idle_cycle(simd->id_in_compute_unit);
-		
+
 
 	assert(list_entries <= si_gpu_simd_exec_buffer_size);
 
@@ -71,7 +71,7 @@ void si_simd_complete(struct si_simd_t *simd)
 
 		/* Statistics */
 		simd->inst_count++;
-	
+
         si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
 		add_si_macroinst(simd_u, uop);
@@ -87,7 +87,7 @@ void si_simd_complete(struct si_simd_t *simd)
 				ipc_instructions(asTiming(si_gpu)->cycle, unit);
 			}
 		}
-		
+
 		/* Free uop */
 		si_uop_free(uop);
 	}
@@ -124,32 +124,32 @@ void si_simd_execute(struct si_simd_t *simd)
 		if (instructions_processed > si_gpu_simd_width)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-				"stg=\"s\"\n", uop->id_in_compute_unit, 
-				simd->compute_unit->id, uop->wavefront->id, 
+				"stg=\"s\"\n", uop->id_in_compute_unit,
+				simd->compute_unit->id, uop->wavefront->id,
 				uop->id_in_wavefront);
 			list_index++;
 			continue;
 		}
 
 		/* Sanity check exec buffer */
-		assert(list_count(simd->exec_buffer) <= 
+		assert(list_count(simd->exec_buffer) <=
 			si_gpu_simd_exec_buffer_size);
 
 		/* Stall if SIMD unit is full */
-		if (list_count(simd->exec_buffer) == 
+		if (list_count(simd->exec_buffer) ==
 			si_gpu_simd_exec_buffer_size)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-				"stg=\"s\"\n", uop->id_in_compute_unit, 
-				simd->compute_unit->id, uop->wavefront->id, 
+				"stg=\"s\"\n", uop->id_in_compute_unit,
+				simd->compute_unit->id, uop->wavefront->id,
 				uop->id_in_wavefront);
 			list_index++;
 			continue;
 		}
 
-		/* Includes time for pipelined read-exec-write of 
+		/* Includes time for pipelined read-exec-write of
 		 * all subwavefronts */
-		uop->execute_ready = asTiming(si_gpu)->cycle + 
+		uop->execute_ready = asTiming(si_gpu)->cycle +
 			si_gpu_simd_exec_latency;
 
 		/* Transfer the uop to the outstanding execution buffer */
@@ -159,8 +159,8 @@ void si_simd_execute(struct si_simd_t *simd)
 		uop->wavefront_pool_entry->ready_next_cycle = 1;
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-			"stg=\"simd-e\"\n", uop->id_in_compute_unit, 
-			simd->compute_unit->id, uop->wavefront->id, 
+			"stg=\"simd-e\"\n", uop->id_in_compute_unit,
+			simd->compute_unit->id, uop->wavefront->id,
 			uop->id_in_wavefront);
 	}
 }
@@ -196,24 +196,24 @@ void si_simd_decode(struct si_simd_t *simd)
 		if (instructions_processed > si_gpu_simd_width)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-				"stg=\"s\"\n", uop->id_in_compute_unit, 
-				simd->compute_unit->id, uop->wavefront->id, 
+				"stg=\"s\"\n", uop->id_in_compute_unit,
+				simd->compute_unit->id, uop->wavefront->id,
 				uop->id_in_wavefront);
 			list_index++;
 			continue;
 		}
 
 		/* Sanity check the decode buffer */
-		assert(list_count(simd->decode_buffer) <= 
+		assert(list_count(simd->decode_buffer) <=
 				si_gpu_simd_decode_buffer_size);
 
 		/* Stall if the decode buffer is full. */
-		if (list_count(simd->decode_buffer) == 
+		if (list_count(simd->decode_buffer) ==
 			si_gpu_simd_decode_buffer_size)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-				"stg=\"s\"\n", uop->id_in_compute_unit, 
-				simd->compute_unit->id, uop->wavefront->id, 
+				"stg=\"s\"\n", uop->id_in_compute_unit,
+				simd->compute_unit->id, uop->wavefront->id,
 				uop->id_in_wavefront);
 			list_index++;
 			continue;
@@ -224,11 +224,11 @@ void si_simd_decode(struct si_simd_t *simd)
 		list_enqueue(simd->decode_buffer, uop);
 
 		if (si_spatial_report_active)
-			si_alu_report_new_inst(simd->compute_unit);
+			si_simd_alu_report_new_inst(simd->compute_unit);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-			"stg=\"simd-d\"\n", uop->id_in_compute_unit, 
-			simd->compute_unit->id, uop->wavefront->id, 
+			"stg=\"simd-d\"\n", uop->id_in_compute_unit,
+			simd->compute_unit->id, uop->wavefront->id,
 			uop->id_in_wavefront);
 	}
 }

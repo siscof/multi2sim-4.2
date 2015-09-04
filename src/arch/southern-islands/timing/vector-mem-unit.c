@@ -43,6 +43,7 @@
 #include <arch/southern-islands/emu/work-group.h>
 
 #include <lib/util/estadisticas.h>
+#include <arch/southern-islands/timing/cycle-interval-report.h>
 
 void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 {
@@ -180,20 +181,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		 * inflight accesses for uop are done */
 		if(si_spatial_report_active)
 		{
-			if (uop->vector_mem_write)
-			{
-				si_report_global_mem_finish(uop->compute_unit,
-						uop->num_global_mem_write);
-			}
-			else if (uop->vector_mem_read)
-			{
-				si_report_global_mem_finish(uop->compute_unit,
-						uop->num_global_mem_read);
-			}
-			else
-			{
-				fatal("%s: invalid access kind", __FUNCTION__);
-			}
+			si_report_global_mem_finish(uop->compute_unit,
+						uop);
 		}
 
 		list_remove(vector_mem->mem_buffer, uop);
@@ -382,14 +371,14 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				uop->num_global_mem_write +=
 					uop->global_mem_witness;
 				si_report_global_mem_inflight(uop->compute_unit,
-						uop->num_global_mem_write);
+						uop);
 			}
 			else if (uop->vector_mem_read)
 			{
 				uop->num_global_mem_read +=
 					uop->global_mem_witness;
 				si_report_global_mem_inflight(uop->compute_unit,
-						uop->num_global_mem_read);
+						uop);
 			}
 			else
 				fatal("%s: invalid access kind", __FUNCTION__);
@@ -532,6 +521,9 @@ void si_vector_mem_decode(struct si_vector_mem_unit_t *vector_mem)
 
 		list_remove(vector_mem->issue_buffer, uop);
 		list_enqueue(vector_mem->decode_buffer, uop);
+
+		if (si_spatial_report_active)
+			si_vector_memory_report_new_inst(vector_mem->compute_unit);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"mem-d\"\n", uop->id_in_compute_unit,

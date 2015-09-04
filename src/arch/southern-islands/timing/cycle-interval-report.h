@@ -28,7 +28,8 @@ extern int si_cu_spatial_report_active  ;
 extern int si_device_spatial_report_active  ;
 
 
-void si_alu_report_new_inst(struct si_compute_unit_t *compute_unit);
+void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit);
+void si_simd_alu_report_new_inst(struct si_compute_unit_t *compute_unit);
 
 void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit);
 
@@ -38,9 +39,9 @@ void si_report_unmapped_work_group(struct si_compute_unit_t *compute_unit);
 
 
 /* Used in vector unit to keep track of num of mem accesses in flight */
-void si_report_global_mem_inflight( struct si_compute_unit_t *compute_unit, int long long pending_accesses);
+void si_report_global_mem_inflight( struct si_compute_unit_t *compute_unit, struct si_uop_t *uop);
 
-void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, int long long completed_accesses);
+void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct si_uop_t *uop);
 
 struct config_t;
 

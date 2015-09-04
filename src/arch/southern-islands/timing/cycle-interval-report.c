@@ -117,13 +117,15 @@ void si_spatial_report_init()
 
 void si_cu_spatial_report_init()
 {
-	fprintf(spatial_report_file, "cycle esim_time\n");
+	fprintf(spatial_report_file, "cycle, esim_time\n");
 }
 
 void si_device_spatial_report_init(SIGpu *device)
 {
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
-	fprintf(device_spatial_report_file, "mappedWG unmappedWG cycle esim_time\n");
+	fprintf(device_spatial_report_file, "mem_acc_start, mem_acc_end, mem_acc_lat, load_start, load_end, load_lat, write_start, write_end, write_lat");
+	fprintf(device_spatial_report_file, ", total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i");
+	fprintf(device_spatial_report_file, ", mappedWG, unmappedWG, cycle, esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -166,7 +168,8 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 			compute_unit->interval_cycle);
 	}else if(spatial_profiling_format == 1){
 		fprintf(f,
-			"%lld,%lld,%lld,%lld,%lld\n",
+			"%lld,%lld,%lld,%lld,%lld,%lld\n",
+			compute_unit->id,
 			compute_unit->interval_mapped_work_groups,
 			compute_unit->interval_unmapped_work_groups,
 			compute_unit->work_group_count,
@@ -176,33 +179,78 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 
 }
 
+void si_vector_memory_report_new_inst(struct si_compute_unit_t *compute_unit)
+{
+	compute_unit->compute_device->interval_statistics->macroinst[v_mem_u]++;
+	compute_unit->compute_device->interval_statistics->instructions_counter++;
+}
+
+void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit)
+{
+	compute_unit->compute_device->interval_statistics->macroinst[branch_u]++;
+	compute_unit->compute_device->interval_statistics->instructions_counter++;
+}
+
 void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit)
 {
-	compute_unit->interval_lds_issued = compute_unit->interval_lds_issued + 1;
+	compute_unit->interval_lds_issued++;
+	compute_unit->compute_device->interval_statistics->macroinst[lds_u]++;
+	compute_unit->compute_device->interval_statistics->instructions_counter++;
 }
 
-void si_alu_report_new_inst(struct si_compute_unit_t *compute_unit)
+
+void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit)
 {
-	compute_unit->interval_alu_issued ++ ;
-
+	compute_unit->interval_alu_issued++;
+	compute_unit->compute_device->interval_statistics->macroinst[scalar_u]++;
+	compute_unit->compute_device->interval_statistics->instructions_counter++;
 }
 
+void si_simd_alu_report_new_inst(struct si_compute_unit_t *compute_unit)
+{
+	compute_unit->compute_device->interval_statistics->macroinst[simd_u]++;
+	compute_unit->compute_device->interval_statistics->instructions_counter++;
+}
 
-void si_report_global_mem_inflight( struct si_compute_unit_t *compute_unit, int long long pending_accesses)
+void si_report_global_mem_inflight( struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
 	/* Read stage adds a negative number for accesses added
 	 * Write stage adds a positive number for accesses finished
 	 */
-	compute_unit->vector_mem_unit.inflight_mem_accesses += pending_accesses;
+	compute_unit->vector_mem_unit.inflight_mem_accesses += uop->active_work_items;
+	compute_unit->compute_device->interval_statistics->memory.accesses_started += uop->active_work_items;
+
+	//latency
+	if(uop->vector_mem_read)
+	{
+		compute_unit->compute_device->interval_statistics->memory.load_start += uop->active_work_items;
+	}
+	if(uop->vector_mem_write)
+	{
+		compute_unit->compute_device->interval_statistics->memory.write_start += uop->active_work_items;
+	}
 
 
 }
 
-void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, int long long completed_accesses)
+void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
 	/* Read stage adds a negative number for accesses added */
 	/* Write stage adds a positive number for accesses finished */
-	compute_unit->vector_mem_unit.inflight_mem_accesses -= completed_accesses;
+	compute_unit->vector_mem_unit.inflight_mem_accesses -= uop->active_work_items;
+	compute_unit->compute_device->interval_statistics->memory.accesses_finished += uop->active_work_items;
+	compute_unit->compute_device->interval_statistics->memory.accesses_latency += (asTiming(si_gpu)->cycle - uop->send_cycle) * uop->active_work_items;
+	//latency
+	if(uop->vector_mem_read)
+	{
+		compute_unit->compute_device->interval_statistics->memory.load_finish += uop->active_work_items;
+		compute_unit->compute_device->interval_statistics->memory.load_latency += (asTiming(si_gpu)->cycle - uop->send_cycle) * uop->active_work_items;
+	}
+	if(uop->vector_mem_write)
+	{
+		compute_unit->compute_device->interval_statistics->memory.write_finish += uop->active_work_items;
+		compute_unit->compute_device->interval_statistics->memory.write_latency += (asTiming(si_gpu)->cycle - uop->send_cycle) * uop->active_work_items;
+	}
 
 }
 
@@ -270,7 +318,26 @@ void si_device_spatial_report_dump(SIGpu *device)
 {
 	FILE *f = device_spatial_report_file;
 
-	fprintf(f, "%lld", device->interval_statistics->interval_mapped_work_groups);
+	// memory mem_acc_start mem_acc_end mem_acc_lat load_start load_end load_lat write_start write_end write_lat
+	fprintf(f, "%lld", device->interval_statistics->memory.accesses_started);
+	fprintf(f, ",%lld", device->interval_statistics->memory.accesses_finished);
+	fprintf(f, ",%lld", device->interval_statistics->memory.accesses_latency);
+	fprintf(f, ",%lld", device->interval_statistics->memory.load_start);
+	fprintf(f, ",%lld", device->interval_statistics->memory.load_finish);
+	fprintf(f, ",%lld", device->interval_statistics->memory.load_latency);
+	fprintf(f, ",%lld", device->interval_statistics->memory.write_start);
+	fprintf(f, ",%lld", device->interval_statistics->memory.write_finish);
+	fprintf(f, ",%lld", device->interval_statistics->memory.write_latency);
+
+	//instruction report total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i
+	fprintf(f, ",%lld", device->interval_statistics->instructions_counter);
+	fprintf(f, ",%lld", device->interval_statistics->macroinst[simd_u]);
+	fprintf(f, ",%lld", device->interval_statistics->macroinst[scalar_u]);
+	fprintf(f, ",%lld", device->interval_statistics->macroinst[v_mem_u]);
+	fprintf(f, ",%lld", device->interval_statistics->macroinst[s_mem_u]);
+	fprintf(f, ",%lld", device->interval_statistics->macroinst[lds_u]);
+
+	fprintf(f, ",%lld", device->interval_statistics->interval_mapped_work_groups);
 	fprintf(f, ",%lld", device->interval_statistics->interval_unmapped_work_groups);
 	fprintf(f,",%lld,%lld", asTiming(device)->cycle,	esim_time);
 

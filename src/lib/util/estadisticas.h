@@ -119,6 +119,16 @@ struct esta_t
 	long long entradas_bloqueadas;
 	long long coalesceHits;
 	long long coalesceMisses;
+
+	long long accesses_started;
+	long long accesses_finished;
+	long long accesses_latency;
+	long long load_start;
+	long long load_finish;
+	long long load_latency;
+	long long write_start;
+	long long write_finish;
+	long long write_latency;
 };
 
 struct si_gpu_unit_stats
@@ -126,7 +136,8 @@ struct si_gpu_unit_stats
 	long long unit[6];
 	//sustituir cuando se pueda "unit[6]" por "inst[6]" para que tenga mas sentido junto con macroinst[6]
 	long long macroinst[6];
-	long long total;
+	long long total; //deprecated
+	long long instructions_counter;
 	long long loads_latency;
 	long long loads_count;
 	long long simd_idle[4];
@@ -179,6 +190,11 @@ struct si_gpu_unit_stats
 	// workgroups counter
 	long long interval_mapped_work_groups;
 	long long interval_unmapped_work_groups;
+
+	//memory stats
+	struct esta_t memory;
+	long long v_load_latency;
+	long long v_write_latency;
 };
 
 struct mem_system_stats
