@@ -224,7 +224,7 @@ void si_simd_decode(struct si_simd_t *simd)
 		list_enqueue(simd->decode_buffer, uop);
 
 		if (si_spatial_report_active)
-			si_simd_alu_report_new_inst(simd->compute_unit);
+			si_simd_alu_report_new_inst(simd->compute_unit, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"simd-d\"\n", uop->id_in_compute_unit,

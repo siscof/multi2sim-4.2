@@ -109,7 +109,7 @@ void mshr_free(struct mshr_t *mshr)
 	free(mshr);
 }
 
-int temporizador_reinicio = 50;
+int temporizador_reinicio = 5;
 
 void mshr_control(int latencia, int opc)
 {
@@ -138,7 +138,7 @@ void mshr_control(int latencia, int opc)
 
 		if(temporizador_reinicio <= 0)
 		{
-			temporizador_reinicio = 50;
+			temporizador_reinicio = 5;
 			accion = 3;
 		}
 

@@ -523,7 +523,7 @@ void si_vector_mem_decode(struct si_vector_mem_unit_t *vector_mem)
 		list_enqueue(vector_mem->decode_buffer, uop);
 
 		if (si_spatial_report_active)
-			si_vector_memory_report_new_inst(vector_mem->compute_unit);
+			si_vector_memory_report_new_inst(vector_mem->compute_unit, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"mem-d\"\n", uop->id_in_compute_unit,

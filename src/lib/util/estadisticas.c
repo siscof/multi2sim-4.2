@@ -289,7 +289,7 @@ long long add_si_inst(si_units unit)
 {
 	//gpu_inst->unit[unit]++;
 	//gpu_inst->total++;
-	gpu_stats.unit[unit]++;
+	gpu_stats.op_counter[unit]++;
 	gpu_stats.total++;
 	return gpu_stats.total;
 }
@@ -802,14 +802,14 @@ fran_debug_ipc("%lld ",gpu_stats.total); //started
 fran_debug_ipc("%lld ",gpu_stats.total); //active
 */
 
-	fran_debug_ipc("%lld ",gpu_stats.unit[scalar_u] - instrucciones_gpu_stats_anterior.unit[scalar_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[simd_u] - instrucciones_gpu_stats_anterior.unit[simd_u]);
+	fran_debug_ipc("%lld ",gpu_stats.op_counter[scalar_u] - instrucciones_gpu_stats_anterior.op_counter[scalar_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[simd_u] - instrucciones_gpu_stats_anterior.op_counter[simd_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[simd_u] - instrucciones_gpu_stats_anterior.macroinst[simd_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[s_mem_u] - instrucciones_gpu_stats_anterior.unit[s_mem_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[v_mem_u] - instrucciones_gpu_stats_anterior.unit[v_mem_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[s_mem_u] - instrucciones_gpu_stats_anterior.op_counter[s_mem_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[v_mem_u] - instrucciones_gpu_stats_anterior.op_counter[v_mem_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[v_mem_u] - instrucciones_gpu_stats_anterior.macroinst[v_mem_u]);
-	fran_debug_ipc("%lld ",gpu_stats.unit[branch_u] - instrucciones_gpu_stats_anterior.unit[branch_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[lds_u] - instrucciones_gpu_stats_anterior.unit[lds_u]);
+	fran_debug_ipc("%lld ",gpu_stats.op_counter[branch_u] - instrucciones_gpu_stats_anterior.op_counter[branch_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[lds_u] - instrucciones_gpu_stats_anterior.op_counter[lds_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[lds_u] - instrucciones_gpu_stats_anterior.macroinst[lds_u]);
 	fran_debug_ipc("%lld ",gpu_stats.total - instrucciones_gpu_stats_anterior.total);
 	fran_debug_ipc("%lld ",gpu_stats.total);
@@ -1071,14 +1071,14 @@ fran_debug_ipc("%lld ",gpu_stats.total); //started
 fran_debug_ipc("%lld ",gpu_stats.total); //active
 */
 
-	fran_debug_ipc("%lld ",gpu_stats.unit[scalar_u] - instrucciones_gpu_stats_anterior.unit[scalar_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[simd_u] - instrucciones_gpu_stats_anterior.unit[simd_u]);
+	fran_debug_ipc("%lld ",gpu_stats.op_counter[scalar_u] - instrucciones_gpu_stats_anterior.op_counter[scalar_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[simd_u] - instrucciones_gpu_stats_anterior.op_counter[simd_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[simd_u] - instrucciones_gpu_stats_anterior.macroinst[simd_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[s_mem_u] - instrucciones_gpu_stats_anterior.unit[s_mem_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[v_mem_u] - instrucciones_gpu_stats_anterior.unit[v_mem_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[s_mem_u] - instrucciones_gpu_stats_anterior.op_counter[s_mem_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[v_mem_u] - instrucciones_gpu_stats_anterior.op_counter[v_mem_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[v_mem_u] - instrucciones_gpu_stats_anterior.macroinst[v_mem_u]);
-	fran_debug_ipc("%lld ",gpu_stats.unit[branch_u] - instrucciones_gpu_stats_anterior.unit[branch_u]);
-        fran_debug_ipc("%lld ",gpu_stats.unit[lds_u] - instrucciones_gpu_stats_anterior.unit[lds_u]);
+	fran_debug_ipc("%lld ",gpu_stats.op_counter[branch_u] - instrucciones_gpu_stats_anterior.op_counter[branch_u]);
+        fran_debug_ipc("%lld ",gpu_stats.op_counter[lds_u] - instrucciones_gpu_stats_anterior.op_counter[lds_u]);
         fran_debug_ipc("%lld ",gpu_stats.macroinst[lds_u] - instrucciones_gpu_stats_anterior.macroinst[lds_u]);
 	fran_debug_ipc("%lld ",gpu_stats.total - instrucciones_gpu_stats_anterior.total);
 	fran_debug_ipc("%lld ",gpu_stats.total);

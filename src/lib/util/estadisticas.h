@@ -133,8 +133,7 @@ struct esta_t
 
 struct si_gpu_unit_stats
 {
-	long long unit[6];
-	//sustituir cuando se pueda "unit[6]" por "inst[6]" para que tenga mas sentido junto con macroinst[6]
+	long long op_counter[6];
 	long long macroinst[6];
 	long long total; //deprecated
 	long long instructions_counter;
