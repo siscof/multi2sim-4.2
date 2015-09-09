@@ -126,10 +126,10 @@ void si_cu_spatial_report_init()
 void si_device_spatial_report_init(SIGpu *device)
 {
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
-	fprintf(device_spatial_report_file, "MSHR_size, ");
-	fprintf(device_spatial_report_file, "mem_acc_start, mem_acc_end, mem_acc_lat, load_start, load_end, load_lat, write_start, write_end, write_lat, ");
-	fprintf(device_spatial_report_file, "total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i");
-	fprintf(device_spatial_report_file, ", mappedWG, unmappedWG, cycle, esim_time\n");
+	fprintf(device_spatial_report_file, "MSHR_size,");
+	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
+	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op");
+	fprintf(device_spatial_report_file, ",mappedWG,unmappedWG,cycle,esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -350,10 +350,13 @@ void si_device_spatial_report_dump(SIGpu *device)
 	//instruction report total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i
 	fprintf(f, "%lld,", device->interval_statistics->instructions_counter);
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[simd_u]);
+	fprintf(f, "%lld,", device->interval_statistics->op_counter[simd_u]);
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[scalar_u]);
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[v_mem_u]);
+	fprintf(f, "%lld,", device->interval_statistics->op_counter[v_mem_u]);
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[s_mem_u]);
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[lds_u]);
+	fprintf(f, "%lld,", device->interval_statistics->op_counter[lds_u]);
 
 	fprintf(f, "%lld,", device->interval_statistics->interval_mapped_work_groups);
 	fprintf(f, "%lld,", device->interval_statistics->interval_unmapped_work_groups);
