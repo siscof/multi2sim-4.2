@@ -359,8 +359,10 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->op_counter[lds_u]);
 
 	fprintf(f, "%lld,", device->interval_statistics->interval_mapped_work_groups);
-	fprintf(f, "%lld,", device->interval_statistics->interval_unmapped_work_groups);
-	fprintf(f,"%lld,%lld", asTiming(device)->cycle,	esim_time);
+	fprintf(f, "%lld,",
+	device->interval_statistics->interval_unmapped_work_groups);
+  // fixme change spatial_profiling_interval for cycle_counter or device->interval_cycle
+	fprintf(f,"%lld,%lld", spatial_profiling_interval,	esim_time);
 
 	fprintf(f,"\n");
 
