@@ -282,8 +282,7 @@ void mshr_control2()
 		{
 			switch(accion)
 			{
-				case 3: mod->mshr->size_anterior = 0;
-					mshr_test_sizes();
+				case 3: mshr_test_sizes();
 					break;
 
 				case 4: mod->mshr->size = mshr_size;
