@@ -14,6 +14,7 @@
 #include <arch/southern-islands/timing/gpu.h>
 #include <arch/southern-islands/timing/compute-unit.h>
 #include <stdlib.h>
+#include <math.h>
 
 int EV_MSHR_DYNAMIC_SIZE_EVAL;
 int INTERVAL;
@@ -241,6 +242,61 @@ void mshr_control(int latencia, int opc)
 
 }
 
+void mshr_control2()
+{
+    int flag = 1;
+    int accion = 0;
+    struct mod_t *mod;
+    int mshr_size;
+
+    for (int k = 0; k < list_count(mem_system->mod_list); k++)
+    {
+        mod = list_get(mem_system->mod_list, k);
+            if(mod->level == 1 && mod_is_vector_cache(mod))
+                break;
+    }
+
+	//GPU running?
+
+	//finalizar test
+	if(mod->mshr->testing == 1){
+		mshr_size = mshr_evaluar_test();
+		accion = 4;
+	}else{
+
+	  //reinicio
+		temporizador_reinicio--;
+
+		if(temporizador_reinicio <= 0)
+		{
+			temporizador_reinicio = 5;
+			accion = 3;
+		}
+        }
+
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+  {
+    mod = list_get(mem_system->mod_list, k);
+
+		if(mod->level == 1 && mod_is_vector_cache(mod))
+		{
+			switch(accion)
+			{
+				case 3: mod->mshr->size_anterior = 0;
+					mshr_test_sizes();
+					break;
+
+				case 4: mod->mshr->size = mshr_size;
+
+				default : break;
+			}
+		}
+  }
+	//if(flag_mshr_dynamic_enabled)
+		//esim_schedule_event(EV_MSHR_DYNAMIC_SIZE_EVAL, NULL, INTERVAL);
+
+}
+
 void mshr_test_sizes(){
 	struct mod_t *mod;
 	int testing_cu = 0;
@@ -255,14 +311,15 @@ void mshr_test_sizes(){
 		{
 
 			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
-			mod->mshr->testing = 1;
+			
 
 			/*FIXME*/
-			int testing_size = min_mshr_size * 2 * (testing_cu + 1);
+			int testing_size = min_mshr_size * pow(2, (testing_cu + 1));
 
 			if(testing_size > max_mshr_size)
 				break;
-
+                        
+                        mod->mshr->testing = 1;
 			mod->mshr->size = testing_size;
 			testing_cu++;
 
@@ -277,7 +334,7 @@ int mshr_evaluar_test(){
 
 	int opc = 0;
 	int testing_cu = 0;
-	int best_mshr_size = 0;
+	int best_mshr_size = 4;
 	struct mod_t *mod;
 
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)

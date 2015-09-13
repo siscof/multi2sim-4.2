@@ -315,6 +315,7 @@ void si_device_interval_update(SIGpu *device)
 	if (si_device_spatial_report_active && !(asTiming(device)->cycle % spatial_profiling_interval))
 	{
 		si_device_spatial_report_dump(device);
+                memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
 
 		/*
 		 * This counter is not reset since memory accesses could still
@@ -326,7 +327,7 @@ void si_device_interval_update(SIGpu *device)
 		compute_unit->interval_unmapped_work_groups = 0;
 		compute_unit->interval_alu_issued = 0;
 		compute_unit->interval_lds_issued = 0;*/
-		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+                mshr_control2();
 	}
 }
 
@@ -334,7 +335,10 @@ void si_device_spatial_report_dump(SIGpu *device)
 {
 	FILE *f = device_spatial_report_file;
 
-	fprintf(f, "%lld,", device->compute_units[0]->vector_cache->mshr->size);
+        if(device->compute_units[0]->vector_cache->mshr->testing)
+            fprintf(f,"0,");
+        else
+            fprintf(f, "%lld,", device->compute_units[0]->vector_cache->mshr->size);
 
 	// memory mem_acc_start mem_acc_end mem_acc_lat load_start load_end load_lat write_start write_end write_lat
 	fprintf(f, "%lld,", device->interval_statistics->memory.accesses_started);

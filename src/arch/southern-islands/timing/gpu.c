@@ -1413,6 +1413,8 @@ int SIGpuRun(Timing *self)
 	}
 
 	si_device_interval_update(gpu);
+        
+        
 
 	/* Still running */
 	return TRUE;

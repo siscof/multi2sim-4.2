@@ -34,6 +34,7 @@ void mshr_unlock(struct mod_t *mod);
 struct mshr_t *mshr_create();
 void mshr_free(struct mshr_t *mshr);
 void mshr_control(int latencia, int opc);
+void mshr_control2();
 void mshr_test_sizes();
 int mshr_evaluar_test();
 #endif
