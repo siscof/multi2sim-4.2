@@ -38,6 +38,7 @@
 #include "uop.h"
 
 #include "cycle-interval-report.h"
+#include <mem-system/mshr.h>
 
 int gpu_domain_index;
 int fran_l1_off;
@@ -1354,7 +1355,8 @@ int SIGpuRun(Timing *self)
 	{
 		gpu->idle = FALSE;
 		si_report_gpu_idle(gpu);
-		mshr_test_sizes();
+		if(flag_mshr_dynamic_enabled)
+			mshr_test_sizes();
 	}
 
 	ndrange = si_emu->ndrange;

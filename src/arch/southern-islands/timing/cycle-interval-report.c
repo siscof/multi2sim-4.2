@@ -333,7 +333,8 @@ void si_device_interval_update(SIGpu *device)
 		compute_unit->interval_unmapped_work_groups = 0;
 		compute_unit->interval_alu_issued = 0;
 		compute_unit->interval_lds_issued = 0;*/
-                mshr_control2();
+		if(flag_mshr_dynamic_enabled)
+		  mshr_control2();
 	}
 }
 
