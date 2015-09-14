@@ -258,6 +258,7 @@ CLASS_BEGIN(SIGpu, Timing)
 
 	struct si_gpu_unit_stats *interval_statistics;
 
+	long long int idle;
 	long long int last_complete_cycle;
 
 CLASS_END(SIGpu)

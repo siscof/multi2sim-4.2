@@ -1344,10 +1344,17 @@ int SIGpuRun(Timing *self)
 	if (!list_count(si_emu->waiting_work_groups) &&
 			!list_count(si_emu->running_work_groups)){
 				//statistics_pause();
+				gpu->idle = TRUE;
+				si_device_interval_update_force(gpu);
 				return FALSE;
 			}
 
 	//statistics_continue();
+	if(gpu->idle)
+	{
+		gpu->idle = FALSE;
+		si_report_gpu_idle(gpu);
+	}
 
 	ndrange = si_emu->ndrange;
 	assert(ndrange);
@@ -1397,7 +1404,10 @@ int SIGpuRun(Timing *self)
 
 	/* Stop if any reason met */
 	if (esim_finish)
+	{
+		si_device_interval_update(gpu);
 		return TRUE;
+	}
 
 	/* If we're out of work, request more */
 	if (!list_count(si_emu->waiting_work_groups))

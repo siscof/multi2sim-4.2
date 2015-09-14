@@ -126,7 +126,7 @@ void si_cu_spatial_report_init()
 void si_device_spatial_report_init(SIGpu *device)
 {
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
-	fprintf(device_spatial_report_file, "MSHR_size,");
+	fprintf(device_spatial_report_file, "gpu_idle,MSHR_size,");
 	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op");
 	fprintf(device_spatial_report_file, ",mappedWG,unmappedWG,cycle,esim_time\n");
@@ -270,12 +270,18 @@ void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct
 
 }
 
+void si_report_gpu_idle(SIGpu *device)
+{
+	device->interval_statistics->gpu_idle = 1;
+}
+
 void si_report_mapped_work_group(struct si_compute_unit_t *compute_unit)
 {
 	/*TODO Add calculation here to change this to wavefront pool entries used */
 	compute_unit->interval_mapped_work_groups++;
 	compute_unit->compute_device->interval_statistics->interval_mapped_work_groups++;
 }
+
 
 void si_report_unmapped_work_group(struct si_compute_unit_t *compute_unit)
 {
@@ -310,9 +316,9 @@ void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 void si_device_interval_update(SIGpu *device)
 {
 	/* If interval - reset the counters in all the engines */
-	//device->interval_cycle ++;
+	device->interval_statistics->interval_cycles++;
 
-	if (si_device_spatial_report_active && !(asTiming(device)->cycle % spatial_profiling_interval))
+	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles >= spatial_profiling_interval))
 	{
 		si_device_spatial_report_dump(device);
 
@@ -330,10 +336,19 @@ void si_device_interval_update(SIGpu *device)
 	}
 }
 
+void si_device_interval_update_force(SIGpu *device)
+{
+	if(device->interval_statistics->interval_cycles)
+	{
+		si_device_spatial_report_dump(device);
+		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+	}
+}
+
 void si_device_spatial_report_dump(SIGpu *device)
 {
 	FILE *f = device_spatial_report_file;
-
+	fprintf(f, "%lld,", device->interval_statistics->gpu_idle);
 	fprintf(f, "%lld,", device->compute_units[0]->vector_cache->mshr->size);
 
 	// memory mem_acc_start mem_acc_end mem_acc_lat load_start load_end load_lat write_start write_end write_lat
@@ -362,7 +377,7 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,",
 	device->interval_statistics->interval_unmapped_work_groups);
   // fixme change spatial_profiling_interval for cycle_counter or device->interval_cycle
-	fprintf(f,"%lld,%lld", spatial_profiling_interval,	esim_time);
+	fprintf(f,"%lld,%lld", device->interval_statistics->interval_cycles,	esim_time);
 
 	fprintf(f,"\n");
 

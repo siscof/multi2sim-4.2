@@ -141,6 +141,8 @@ struct si_gpu_unit_stats
 	long long loads_count;
 	long long simd_idle[4];
 	long long v_mem_full;
+	long long interval_cycles;
+	long long gpu_idle;
 
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;

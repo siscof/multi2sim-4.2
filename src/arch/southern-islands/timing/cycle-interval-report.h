@@ -63,5 +63,7 @@ void si_spatial_report_init();
 void si_cu_spatial_report_init();
 void si_device_spatial_report_init();
 
+void si_report_gpu_idle(SIGpu *device);
+
 
 #endif
