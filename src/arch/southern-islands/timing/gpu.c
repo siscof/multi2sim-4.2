@@ -1354,6 +1354,7 @@ int SIGpuRun(Timing *self)
 	{
 		gpu->idle = FALSE;
 		si_report_gpu_idle(gpu);
+		mshr_test_sizes();
 	}
 
 	ndrange = si_emu->ndrange;
@@ -1423,8 +1424,8 @@ int SIGpuRun(Timing *self)
 	}
 
 	si_device_interval_update(gpu);
-        
-        
+
+
 
 	/* Still running */
 	return TRUE;

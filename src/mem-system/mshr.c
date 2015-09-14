@@ -261,6 +261,7 @@ void mshr_control2()
 	//finalizar test
 	if(mod->mshr->testing == 1){
 		mshr_size = mshr_evaluar_test();
+		temporizador_reinicio = 5;
 		accion = 4;
 	}else{
 
@@ -310,15 +311,15 @@ void mshr_test_sizes(){
 		{
 
 			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
-			
+
 
 			/*FIXME*/
 			int testing_size = min_mshr_size * pow(2, (testing_cu + 1));
 
 			if(testing_size > max_mshr_size)
 				break;
-                        
-                        mod->mshr->testing = 1;
+
+      mod->mshr->testing = 1;
 			mod->mshr->size = testing_size;
 			testing_cu++;
 
