@@ -1345,8 +1345,12 @@ int SIGpuRun(Timing *self)
 	if (!list_count(si_emu->waiting_work_groups) &&
 			!list_count(si_emu->running_work_groups)){
 				//statistics_pause();
-				gpu->idle = TRUE;
-				si_device_interval_update_force(gpu);
+				if(gpu->idle == FALSE)
+				{
+					si_report_gpu_idle(gpu);
+					si_device_interval_update_force(gpu);
+					gpu->idle = TRUE;
+				}
 				return FALSE;
 			}
 
@@ -1354,7 +1358,7 @@ int SIGpuRun(Timing *self)
 	if(gpu->idle)
 	{
 		gpu->idle = FALSE;
-		si_report_gpu_idle(gpu);
+
 		if(flag_mshr_dynamic_enabled)
 			mshr_test_sizes();
 	}

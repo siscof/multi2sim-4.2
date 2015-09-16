@@ -318,10 +318,10 @@ void si_device_interval_update(SIGpu *device)
 	/* If interval - reset the counters in all the engines */
 	device->interval_statistics->interval_cycles++;
 
-	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles >= spatial_profiling_interval))
+	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles > spatial_profiling_interval))
 	{
 		si_device_spatial_report_dump(device);
-                memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+    memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
 
 		/*
 		 * This counter is not reset since memory accesses could still
@@ -340,7 +340,7 @@ void si_device_interval_update(SIGpu *device)
 
 void si_device_interval_update_force(SIGpu *device)
 {
-	if(device->interval_statistics->interval_cycles)
+	if(device->interval_statistics->interval_cycles > 0)
 	{
 		si_device_spatial_report_dump(device);
 		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
