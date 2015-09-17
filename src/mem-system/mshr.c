@@ -301,7 +301,7 @@ void mshr_test_sizes(){
 	struct mod_t *mod;
 	int testing_cu = 0;
 	int max_mshr_size;
-	int min_mshr_size = 4;
+	int min_mshr_size = 4; 
 
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
@@ -312,16 +312,20 @@ void mshr_test_sizes(){
 
 			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
 
+		}
+	}
 
-			/*FIXME*/
-			int testing_size = min_mshr_size * pow(2, (testing_cu + 1));
+	int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
 
-			if(testing_size > max_mshr_size)
-				break;
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+	{
+		mod = list_get(mem_system->mod_list, k);
 
-      mod->mshr->testing = 1;
-			mod->mshr->size = testing_size;
+		if(mod_is_vector_cache(mod) && mod->level == 1)
+		{
 			testing_cu++;
+      mod->mshr->testing = 1;
+			mod->mshr->size = mshr_interval * testing_cu;
 
 			mod->mshr->cycle = mod->compute_unit->cycle;
 			mod->mshr->oper_count = mod->compute_unit->oper_count;
