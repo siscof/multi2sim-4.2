@@ -110,7 +110,7 @@ void mshr_free(struct mshr_t *mshr)
 	free(mshr);
 }
 
-int temporizador_reinicio = 5;
+int temporizador_reinicio = 3;
 
 void mshr_control(int latencia, int opc)
 {
@@ -261,7 +261,7 @@ void mshr_control2()
 	//finalizar test
 	if(mod->mshr->testing == 1){
 		mshr_size = mshr_evaluar_test();
-		temporizador_reinicio = 5;
+		temporizador_reinicio = 3;
 		accion = 4;
 	}else{
 
@@ -270,7 +270,7 @@ void mshr_control2()
 
 		if(temporizador_reinicio <= 0)
 		{
-			temporizador_reinicio = 5;
+			temporizador_reinicio = 3;
 			accion = 3;
 		}
         }
@@ -301,7 +301,8 @@ void mshr_test_sizes(){
 	struct mod_t *mod;
 	int testing_cu = 0;
 	int max_mshr_size;
-	int min_mshr_size = 4; 
+	int min_mshr_size = 4;
+	int size[] = {8, 16, 16, 16, 32, 32, 32,64,128,256};
 
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
@@ -325,7 +326,9 @@ void mshr_test_sizes(){
 		{
 			testing_cu++;
       mod->mshr->testing = 1;
-			mod->mshr->size = mshr_interval * testing_cu;
+			mod->mshr->size = size[testing_cu];
+			testing_cu++;
+			//mod->mshr->size = mshr_interval * testing_cu;
 
 			mod->mshr->cycle = mod->compute_unit->cycle;
 			mod->mshr->oper_count = mod->compute_unit->oper_count;
