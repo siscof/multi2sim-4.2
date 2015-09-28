@@ -316,7 +316,7 @@ void mshr_test_sizes(){
 			int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
 
 			mod->mshr->testing = 1;
-			mod->mshr->size = size[mod->compute_unit->id/10];
+			mod->mshr->size = size[mod->compute_unit->id%10];
 			//testing_cu++;
 			//mod->mshr->size = mshr_interval * testing_cu;
 
