@@ -313,12 +313,22 @@ void mshr_test_sizes(){
 
 			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
 
+			int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
+
+			mod->mshr->testing = 1;
+			mod->mshr->size = size[mod->compute_unit->id/10];
+			//testing_cu++;
+			//mod->mshr->size = mshr_interval * testing_cu;
+
+			mod->mshr->cycle = mod->compute_unit->cycle;
+			mod->mshr->oper_count = mod->compute_unit->oper_count;
+
 		}
 	}
 
-	int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
+	//int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
 
-	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+	/*for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod = list_get(mem_system->mod_list, k);
 
@@ -333,7 +343,7 @@ void mshr_test_sizes(){
 			mod->mshr->cycle = mod->compute_unit->cycle;
 			mod->mshr->oper_count = mod->compute_unit->oper_count;
 		}
-	}
+	}*/
 
 }
 
@@ -361,6 +371,9 @@ int mshr_evaluar_test(){
 
 		}
 	}
+
+	if(best_mshr_size < 1)
+		best_mshr_size = 2;
 
 	//return the best mshr size
 	return best_mshr_size;
