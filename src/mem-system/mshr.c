@@ -304,6 +304,18 @@ void mshr_test_sizes(){
 	int min_mshr_size = 4;
 	int size[] = {8, 16, 16, 16, 32, 32, 32,64,128,256};
 
+
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+	{
+		mod = list_get(mem_system->mod_list, k);
+
+		if(mod_is_vector_cache(mod) && mod->level == 1)
+		{
+			mod->compute_unit->device->opc ;
+			float opc_actual = mod->compute_unit->device->op / float(mod->compute_unit->device->cycles);
+		}
+	}
+
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod = list_get(mem_system->mod_list, k);
@@ -311,11 +323,13 @@ void mshr_test_sizes(){
 		if(mod_is_vector_cache(mod) && mod->level == 1)
 		{
 
+
 			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
 
 			int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
 
 			mod->mshr->testing = 1;
+			if()
 			mod->mshr->size = size[mod->compute_unit->id%10];
 			//testing_cu++;
 			//mod->mshr->size = mshr_interval * testing_cu;

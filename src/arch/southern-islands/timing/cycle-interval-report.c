@@ -128,7 +128,7 @@ void si_device_spatial_report_init(SIGpu *device)
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 	fprintf(device_spatial_report_file, "gpu_idle,MSHR_size,");
 	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
-	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op");
+	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i");
 	fprintf(device_spatial_report_file, ",mappedWG,unmappedWG,cycle,esim_time\n");
 }
 
@@ -321,7 +321,8 @@ void si_device_interval_update(SIGpu *device)
 	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles > spatial_profiling_interval))
 	{
 		si_device_spatial_report_dump(device);
-    memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+		device->op = device->interval_statistics->macroinst[scalar_u] + device->interval_statistics->op_counter[simd_u] + device->interval_statistics->op_counter[v_mem_u] + device->interval_statistics->macroinst[s_mem_u] + device->interval_statistics->op_counter[lds_u];
+		device->cycles = device->interval_statistics->interval_cycles;
 
 		/*
 		 * This counter is not reset since memory accesses could still
@@ -334,7 +335,11 @@ void si_device_interval_update(SIGpu *device)
 		compute_unit->interval_alu_issued = 0;
 		compute_unit->interval_lds_issued = 0;*/
 		if(flag_mshr_dynamic_enabled)
+		{
 		  mshr_control2();
+		}
+		
+		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
 	}
 }
 
@@ -378,6 +383,7 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[s_mem_u]);
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[lds_u]);
 	fprintf(f, "%lld,", device->interval_statistics->op_counter[lds_u]);
+	fprintf(f, "%lld,", device->interval_statistics->macroinst[branch_u]);
 
 	fprintf(f, "%lld,", device->interval_statistics->interval_mapped_work_groups);
 	fprintf(f, "%lld,",
