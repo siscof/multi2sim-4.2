@@ -1101,6 +1101,10 @@ void si_gpu_init(void)
 	/* Create GPU */
 	si_gpu = new(SIGpu);
 
+	si_gpu->op = 0;
+	si_gpu->cycles = 0;
+	si_gpu->opc = 0;
+
 	/* Create frequency_domain*/
 	gpu_domain_index = esim_new_domain(si_gpu_frequency);
 

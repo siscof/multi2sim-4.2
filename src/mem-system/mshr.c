@@ -311,8 +311,27 @@ void mshr_test_sizes(){
 
 		if(mod_is_vector_cache(mod) && mod->level == 1)
 		{
-			mod->compute_unit->device->opc ;
-			float opc_actual = mod->compute_unit->device->op / float(mod->compute_unit->device->cycles);
+			mod->compute_unit->compute_device->opc ;
+			float opc_actual = mod->compute_unit->compute_device->op / (float)mod->compute_unit->compute_device->cycles;
+			if ((mod->compute_unit->compute_device->opc * 0.95) < opc_actual)
+			{
+				size[0] = mod->mshr->size;
+				size[1] = mod->mshr->size;
+				size[2] = mod->mshr->size;
+				size[3] = mod->mshr->size;
+				size[4] = mod->mshr->size;
+				size[5] = 8;
+				size[6] = 16;
+				size[7] = 32;
+				size[8] = 64;
+				size[9] = 256;
+			}
+
+			// restart gpu counters
+			mod->compute_unit->compute_device->opc = 0;
+			mod->compute_unit->compute_device->op = 0;
+			mod->compute_unit->compute_device->cycles = 0;
+			break;
 		}
 	}
 
@@ -329,7 +348,6 @@ void mshr_test_sizes(){
 			int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
 
 			mod->mshr->testing = 1;
-			if()
 			mod->mshr->size = size[mod->compute_unit->id%10];
 			//testing_cu++;
 			//mod->mshr->size = mshr_interval * testing_cu;

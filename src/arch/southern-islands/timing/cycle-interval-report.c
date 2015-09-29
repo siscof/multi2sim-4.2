@@ -338,7 +338,7 @@ void si_device_interval_update(SIGpu *device)
 		{
 		  mshr_control2();
 		}
-		
+
 		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
 	}
 }
