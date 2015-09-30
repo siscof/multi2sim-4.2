@@ -273,24 +273,24 @@ void mshr_control2()
 			temporizador_reinicio = 3;
 			accion = 3;
 		}
-        }
+  }
 
-	for (int k = 0; k < list_count(mem_system->mod_list); k++)
-  {
-    mod = list_get(mem_system->mod_list, k);
+	switch(accion)
+	{
+		case 3: mshr_test_sizes();
+						break;
 
-		if(mod->level == 1 && mod_is_vector_cache(mod))
-		{
-			switch(accion)
-			{
-				case 3: mshr_test_sizes();
-					break;
+		case 4: for (int k = 0; k < list_count(mem_system->mod_list); k++)
+						{
+							mod = list_get(mem_system->mod_list, k);
+							if(mod->level == 1 && mod_is_vector_cache(mod))
+							{
+								mod->mshr->size = mshr_size;
+							}
+						}
+						break;
 
-				case 4: mod->mshr->size = mshr_size;
-
-				default : break;
-			}
-		}
+		default: break;
   }
 	//if(flag_mshr_dynamic_enabled)
 		//esim_schedule_event(EV_MSHR_DYNAMIC_SIZE_EVAL, NULL, INTERVAL);
@@ -328,7 +328,7 @@ void mshr_test_sizes(){
 			}
 
 			// restart gpu counters
-			mod->compute_unit->compute_device->opc = 0;
+			mod->compute_unit->compute_device->opc = opc_actual;
 			mod->compute_unit->compute_device->op = 0;
 			mod->compute_unit->compute_device->cycles = 0;
 			break;
