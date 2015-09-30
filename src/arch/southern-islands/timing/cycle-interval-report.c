@@ -358,7 +358,7 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->gpu_idle);
 
         if(device->compute_units[0]->vector_cache->mshr->testing)
-            fprintf(f,"0,");
+            fprintf(f,"nan,");
         else
             fprintf(f, "%lld,", device->compute_units[0]->vector_cache->mshr->size);
 

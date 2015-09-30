@@ -392,10 +392,10 @@ int mshr_evaluar_test(){
 
 		if(mod_is_vector_cache(mod) && mod->mshr->testing == 1)
 		{
+			mod->mshr->testing = 0;
 			if(mod->compute_unit->oper_count - mod->mshr->oper_count == 0)
 				continue;
 
-			mod->mshr->testing = 0;
 			if(opc < ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle))){
 				opc = ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle));
 				best_mshr_size = mod->mshr->size;
