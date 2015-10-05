@@ -144,6 +144,10 @@ struct si_gpu_unit_stats
 	long long interval_cycles;
 	long long gpu_idle;
 
+	long long predicted_opc_cycles;
+	long long predicted_opc_op;
+
+
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;

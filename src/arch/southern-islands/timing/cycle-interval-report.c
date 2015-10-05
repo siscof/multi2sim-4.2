@@ -126,7 +126,7 @@ void si_cu_spatial_report_init()
 void si_device_spatial_report_init(SIGpu *device)
 {
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
-	fprintf(device_spatial_report_file, "gpu_idle,MSHR_size,");
+	fprintf(device_spatial_report_file, "gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
 	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i");
 	fprintf(device_spatial_report_file, ",mappedWG,unmappedWG,cycle,esim_time\n");
@@ -318,7 +318,7 @@ void si_device_interval_update(SIGpu *device)
 	/* If interval - reset the counters in all the engines */
 	device->interval_statistics->interval_cycles++;
 
-	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles > spatial_profiling_interval))
+	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles >= spatial_profiling_interval))
 	{
 		si_device_spatial_report_dump(device);
 		device->op = device->interval_statistics->macroinst[scalar_u] + device->interval_statistics->op_counter[simd_u] + device->interval_statistics->op_counter[v_mem_u] + device->interval_statistics->macroinst[s_mem_u] + device->interval_statistics->op_counter[lds_u];
@@ -356,6 +356,9 @@ void si_device_spatial_report_dump(SIGpu *device)
 {
 	FILE *f = device_spatial_report_file;
 	fprintf(f, "%lld,", device->interval_statistics->gpu_idle);
+
+	fprintf(f, "%lld,", device->interval_statistics->predicted_opc_op);
+	fprintf(f, "%lld,", device->interval_statistics->predicted_opc_cycles);
 
         if(device->compute_units[0]->vector_cache->mshr->testing)
             fprintf(f,"nan,");

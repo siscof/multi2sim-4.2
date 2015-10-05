@@ -119,6 +119,8 @@ void mshr_control(int latencia, int opc)
   struct mod_t *mod;
 	int mshr_size;
 
+	printf("llamada a mshr_control()");
+
   for (int k = 0; k < list_count(mem_system->mod_list); k++)
   {
     mod = list_get(mem_system->mod_list, k);
@@ -249,6 +251,9 @@ void mshr_control2()
     struct mod_t *mod;
     int mshr_size;
 
+	if(flag_mshr_dynamic_enabled == 0)
+		return;
+
     for (int k = 0; k < list_count(mem_system->mod_list); k++)
     {
         mod = list_get(mem_system->mod_list, k);
@@ -303,7 +308,6 @@ void mshr_test_sizes(){
 	int max_mshr_size;
 	int min_mshr_size = 4;
 	int size[] = {8, 16, 16, 16, 32, 32, 32,64,128,256};
-
 
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
@@ -393,11 +397,16 @@ int mshr_evaluar_test(){
 		if(mod_is_vector_cache(mod) && mod->mshr->testing == 1)
 		{
 			mod->mshr->testing = 0;
-			if(mod->compute_unit->oper_count - mod->mshr->oper_count == 0)
+			long long op = mod->compute_unit->oper_count - mod->mshr->oper_count;
+			long long cycles = mod->compute_unit->cycle - mod->mshr->cycle;
+			if(op == 0)
 				continue;
 
-			if(opc < ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle))){
-				opc = ((mod->compute_unit->oper_count - mod->mshr->oper_count) / (mod->compute_unit->cycle - mod->mshr->cycle));
+			if(opc < (op / (float)cycles)){
+				opc = op / (float)cycles;
+				mod->compute_unit->compute_device->interval_statistics->predicted_opc_cycles = cycles;
+				mod->compute_unit->compute_device->interval_statistics->predicted_opc_op = op;
+
 				best_mshr_size = mod->mshr->size;
 			}
 
