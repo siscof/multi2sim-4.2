@@ -328,7 +328,7 @@ void mshr_test_sizes(){
 				size[6] = 16;
 				size[7] = 32;
 				size[8] = 64;
-				size[9] = 256;
+				size[9] = 128;
 			}
 
 			// restart gpu counters

@@ -128,8 +128,9 @@ void si_device_spatial_report_init(SIGpu *device)
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 	fprintf(device_spatial_report_file, "gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
 	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
-	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i");
-	fprintf(device_spatial_report_file, ",mappedWG,unmappedWG,cycle,esim_time\n");
+	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,");
+	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
+	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,cycle,esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -313,6 +314,8 @@ void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 	}
 }
 
+int contador_mshr = 20;
+
 void si_device_interval_update(SIGpu *device)
 {
 	/* If interval - reset the counters in all the engines */
@@ -334,9 +337,12 @@ void si_device_interval_update(SIGpu *device)
 		compute_unit->interval_unmapped_work_groups = 0;
 		compute_unit->interval_alu_issued = 0;
 		compute_unit->interval_lds_issued = 0;*/
-		if(flag_mshr_dynamic_enabled)
+		contador_mshr--;
+
+		if(flag_mshr_dynamic_enabled && contador_mshr == 0)
 		{
 		  mshr_control2();
+			contador_mshr=20;
 		}
 
 		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
@@ -375,6 +381,14 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->memory.write_start);
 	fprintf(f, "%lld,", device->interval_statistics->memory.write_finish);
 	fprintf(f, "%lld,", device->interval_statistics->memory.write_latency);
+
+
+	fprintf(f, "%lld,", device->interval_statistics->vcache_load_start);
+	fprintf(f, "%lld,", device->interval_statistics->vcache_load_finish);
+	fprintf(f, "%lld,", device->interval_statistics->scache_load_start);
+	fprintf(f, "%lld,", device->interval_statistics->scache_load_finish);
+	fprintf(f, "%lld,", device->interval_statistics->vcache_write_start);
+	fprintf(f, "%lld,", device->interval_statistics->vcache_write_finish);
 
 	//instruction report total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i
 	fprintf(f, "%lld,", device->interval_statistics->instructions_counter);

@@ -147,6 +147,13 @@ struct si_gpu_unit_stats
 	long long predicted_opc_cycles;
 	long long predicted_opc_op;
 
+	long long vcache_load_start;
+	long long vcache_load_finish;
+	long long scache_load_start;
+	long long scache_load_finish;
+	long long vcache_write_start;
+	long long vcache_write_finish;
+
 
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;

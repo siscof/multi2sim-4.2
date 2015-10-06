@@ -38,6 +38,7 @@
 #include <lib/util/misc.h>
 #include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/gpu.h>
+#include <arch/southern-islands/timing/compute-unit.h>
 #include <lib/util/class.h>
 /* Events */
 
@@ -190,7 +191,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 	 	mod->loads++;
-
+		if(mod == mod->compute_unit->vector_cache)
+			mod->compute_unit->compute_device->interval_statistics->vcache_load_start++;
+  	else
+			mod->compute_unit->compute_device->interval_statistics->scache_load_start++;
 		/* Next event */
 		esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, 0);
 		return;
@@ -466,6 +470,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		if(!stack->coalesced)
 		{
+
+			if(mod == mod->compute_unit->vector_cache)
+				mod->compute_unit->compute_device->interval_statistics->vcache_load_finish++;
+			else
+				mod->compute_unit->compute_device->interval_statistics->scache_load_finish++;
+
 			accu_retry_time_lost(stack);
 			if(stack->client_info && stack->client_info->arch){
 				stack->latencias.finish = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction - stack->latencias.miss;
@@ -552,6 +562,8 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 			return;
 		}
+
+		mod->compute_unit->compute_device->interval_statistics->vcache_write_start++;
 
 		/* Continue */
 		esim_schedule_event(EV_MOD_NMOESI_STORE_LOCK, stack, 0);
@@ -693,6 +705,9 @@ void mod_handler_nmoesi_store(int event, void *data)
 
 		/* Finish access */
 		mod_access_finish(mod, stack);
+
+		if(stack->coalesced == 0)
+			mod->compute_unit->compute_device->interval_statistics->vcache_write_start++;
 
 		/* Return */
 		mod_stack_return(stack);
