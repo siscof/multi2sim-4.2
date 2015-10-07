@@ -476,6 +476,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 			else
 				mod->compute_unit->compute_device->interval_statistics->scache_load_finish++;
 
+			if(stack->retry)
+			{
+				mod->compute_unit->compute_device->interval_statistics->cache_retry_lat += stack->latencias.retry;
+				mod->compute_unit->compute_device->interval_statistics->cache_retry_cont++;
+			}
+
 			accu_retry_time_lost(stack);
 			if(stack->client_info && stack->client_info->arch){
 				stack->latencias.finish = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction - stack->latencias.miss;

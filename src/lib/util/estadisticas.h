@@ -154,6 +154,8 @@ struct si_gpu_unit_stats
 	long long vcache_write_start;
 	long long vcache_write_finish;
 
+	long long cache_retry_lat;
+	long long cache_retry_cont;
 
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;
