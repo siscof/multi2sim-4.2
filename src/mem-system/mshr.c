@@ -328,7 +328,7 @@ void mshr_test_sizes(){
 				size[6] = 16;
 				size[7] = 32;
 				size[8] = 64;
-				size[9] = 128;
+				size[9] = 256;
 			}
 
 			// restart gpu counters
@@ -418,4 +418,6 @@ int mshr_evaluar_test(){
 
 	//return the best mshr size
 	return best_mshr_size;
+
+	//return 32;
 }
