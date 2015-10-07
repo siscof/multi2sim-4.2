@@ -358,9 +358,70 @@ void si_device_interval_update_force(SIGpu *device)
 	}
 }
 
+void analizar_wavefront(SIGpu *device)
+{
+	int i,j,w;
+	struct si_compute_unit_t *compute_unit;
+	struct si_wavefront_t *wavefront;
+
+	for(j = 0; j < si_gpu_num_compute_units; j++)
+	{
+		compute_unit = device->compute_units[j];
+		for(w = 0; w < si_gpu_num_wavefront_pools; w++)
+		{
+			for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
+			{
+				wavefront = compute_unit->wavefront_pools[w]->entries[i]->wavefront;
+
+				/* No wavefront */
+				if (!wavefront)
+					continue;
+
+				device->interval_statistics->active_wavefronts++;
+
+				/* If the wavefront finishes, there still may be outstanding
+				 * memory operations, so if the entry is marked finished
+				 * the wavefront must also be finished, but not vice-versa */
+				if (wavefront->wavefront_pool_entry->wavefront_finished)
+				{
+					continue;
+				}
+
+				/* Wavefront is finished but other wavefronts from workgroup
+				 * remain.  There may still be outstanding memory operations,
+				 * but no more instructions should be fetched. */
+				if (wavefront->finished)
+					continue;
+
+				/* Wavefront is ready but waiting on outstanding
+				 * memory instructions */
+				if (wavefront->wavefront_pool_entry->wait_for_mem)
+				{
+					if (wavefront->wavefront_pool_entry->lgkm_cnt ||
+						wavefront->wavefront_pool_entry->vm_cnt)
+					{
+						device->interval_statistics->wavefronts_waiting_mem++;
+						continue;
+					}
+				}
+
+				/* Wavefront is ready but waiting at barrier */
+				if (wavefront->wavefront_pool_entry->wait_for_barrier)
+				{
+					continue;
+				}
+
+			}
+		}
+	}
+}
+
 void si_device_spatial_report_dump(SIGpu *device)
 {
 	FILE *f = device_spatial_report_file;
+
+	analizar_wavefront(device);
+
 	fprintf(f, "%lld,", device->interval_statistics->gpu_idle);
 
 	fprintf(f, "%lld,", device->interval_statistics->predicted_opc_op);
@@ -391,6 +452,9 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->vcache_write_finish);
 	fprintf(f, "%lld,", device->interval_statistics->cache_retry_lat);
 	fprintf(f, "%lld,", device->interval_statistics->cache_retry_cont);
+
+	fprintf(f, "%lld,", device->interval_statistics->active_wavefronts);
+	fprintf(f, "%lld,", device->interval_statistics->wavefronts_waiting_mem);
 
 	//instruction report total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i
 	fprintf(f, "%lld,", device->interval_statistics->instructions_counter);

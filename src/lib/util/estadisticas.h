@@ -157,6 +157,9 @@ struct si_gpu_unit_stats
 	long long cache_retry_lat;
 	long long cache_retry_cont;
 
+	long long active_wavefronts;
+	long long wavefronts_waiting_mem;
+
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;
