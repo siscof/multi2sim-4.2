@@ -620,7 +620,8 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 
 		if (!strcmp(argv[argi], "--forzar_mshr_test"))
 		{
-		forzar_mshr_test = 1;
+			forzar_mshr_test = 1;
+			continue;
 		}
 
 
