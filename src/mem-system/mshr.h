@@ -8,6 +8,7 @@
 
 extern int flag_mshr_dynamic_enabled;
 extern int EV_MSHR_DYNAMIC_SIZE_EVAL;
+extern int forzar_mshr_test;
 
 struct mshr_t
 {

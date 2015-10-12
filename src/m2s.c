@@ -152,6 +152,7 @@ int flag_mshr_dynamic_enabled = 0;
 int flag_coalesce_gpu_enabled = 0;
 int flag_no_blocking_store = 0;
 long long ventana_muestreo = 10000;
+int forzar_mshr_test = 0;
 //int fran_latencia;
 //int fran_accesos;
 static char *net_debug_file_name = "";
@@ -617,6 +618,10 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			continue;
 		}
 
+		if (!strcmp(argv[argi], "--forzar_mshr_test"))
+		{
+		forzar_mshr_test = 1;
+		}
 
 
 		if(!strcmp(argv[argi],"--extra-reports"))

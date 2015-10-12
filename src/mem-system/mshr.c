@@ -302,6 +302,7 @@ void mshr_control2()
 
 }
 
+long long desplazamiento = 0;
 void mshr_test_sizes(){
 	struct mod_t *mod;
 	int testing_cu = 0;
@@ -319,17 +320,30 @@ void mshr_test_sizes(){
 			float opc_actual = mod->compute_unit->compute_device->op / (float)mod->compute_unit->compute_device->cycles;
 			if ((mod->compute_unit->compute_device->opc * 0.95) < opc_actual)
 			{
-				size[0] = mod->mshr->size;
-				size[1] = mod->mshr->size;
-				size[2] = mod->mshr->size;
-				size[3] = mod->mshr->size;
-				size[4] = mod->mshr->size;
-				size[5] = 8;
-				size[6] = 16;
-				size[7] = 32;
-				size[8] = 64;
-				size[9] = 256;
+				size[(0+desplazamiento)%10] = mod->mshr->size;
+				size[(1+desplazamiento)%10] = mod->mshr->size;
+				size[(2+desplazamiento)%10] = mod->mshr->size;
+				size[(3+desplazamiento)%10] = mod->mshr->size;
+				size[(4+desplazamiento)%10] = mod->mshr->size;
+				size[(5+desplazamiento)%10] = 8;
+				size[(6+desplazamiento)%10] = 16;
+				size[(7+desplazamiento)%10] = 32;
+				size[(8+desplazamiento)%10] = 64;
+				size[(9+desplazamiento)%10] = 256;
+			}else{
+				size[(0+desplazamiento)%10] = 8;
+				size[(1+desplazamiento)%10] = 16;
+				size[(2+desplazamiento)%10] = 16;
+				size[(3+desplazamiento)%10] = 16;
+				size[(4+desplazamiento)%10] = 32;
+				size[(5+desplazamiento)%10] = 32;
+				size[(6+desplazamiento)%10] = 32;
+				size[(7+desplazamiento)%10] = 64;
+				size[(8+desplazamiento)%10] = 128;
+				size[(9+desplazamiento)%10] = 256;
+
 			}
+			desplazamiento++;
 
 			// restart gpu counters
 			mod->compute_unit->compute_device->opc = opc_actual;
@@ -417,7 +431,8 @@ int mshr_evaluar_test(){
 		best_mshr_size = 2;
 
 	//return the best mshr size
-	return best_mshr_size;
-
-	//return 32;
+	if(forzar_mshr_test = 0)
+		return best_mshr_size;
+	else
+		return 32;
 }
