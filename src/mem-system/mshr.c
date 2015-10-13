@@ -431,7 +431,7 @@ int mshr_evaluar_test(){
 		best_mshr_size = 2;
 
 	//return the best mshr size
-	if(forzar_mshr_test = 0)
+	if(forzar_mshr_test == 0)
 		return best_mshr_size;
 	else
 		return 32;
