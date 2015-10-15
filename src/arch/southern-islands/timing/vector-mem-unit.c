@@ -92,19 +92,19 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
-		add_si_macroinst(v_mem_u, uop);
+		/*add_si_macroinst(v_mem_u, uop);
 
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
-        {
+    {
 			work_item = uop->wavefront->work_items[work_item_id];
 			//work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
-            if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-            {
+      if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+      {
 				si_units unit = v_mem_u;
-                ipc_instructions(asTiming(si_gpu)->cycle, unit);
+        ipc_instructions(asTiming(si_gpu)->cycle, unit);
 			}
-		}
+		}*/
 	}
 }
 

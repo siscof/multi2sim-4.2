@@ -257,7 +257,7 @@ struct si_gpu_unit_stats gpu_stats, instrucciones_gpu_stats_anterior;
 struct esta_t *estadisticas_ipc;
 
 void estadisticas_por_intervalos(long long intervalo);
-void ipc_instructions(long long cycle, si_units unit);
+//void ipc_instructions(long long cycle, si_units unit);
 
 void mem_load_finish(long long lat);
 void hrl2(int hit , struct mod_t *mod, int from_load);
@@ -294,7 +294,5 @@ void add_eviction(int level);
 void print_cache_states(long long *results);
 void statistics_event_init(int interval);
 void statistics_event();
-void statistics_continue();
-void statistics_pause();
 
 #endif

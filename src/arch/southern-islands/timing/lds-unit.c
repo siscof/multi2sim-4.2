@@ -79,19 +79,17 @@ void si_lds_complete(struct si_lds_t *lds)
 
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
 
-		add_si_macroinst(lds_u, uop);
+		//add_si_macroinst(lds_u, uop);
 
-                SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
-                {
-
+    /*SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+    {
 			work_item = uop->wavefront->work_items[work_item_id];
-	                if(si_wavefront_work_item_active(uop->wavefront,
-        	        work_item->id_in_wavefront))
-                	{
+	    if(si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+      {
 				si_units unit = lds_u;
-                        	ipc_instructions(asTiming(si_gpu)->cycle, unit);
+        ipc_instructions(asTiming(si_gpu)->cycle, unit);
 			}
-		}
+		}*/
 	}
 }
 

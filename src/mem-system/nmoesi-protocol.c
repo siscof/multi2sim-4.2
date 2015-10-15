@@ -486,10 +486,13 @@ void mod_handler_nmoesi_load(int event, void *data)
 			if(stack->client_info && stack->client_info->arch){
 				stack->latencias.finish = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction - stack->latencias.miss;
 			}
-			add_latencias_load(&(stack->latencias));
+			if(!stack->retry && stack->hit)
+			{
+				add_latencias_load(&(stack->latencias));
 
-			if(stack->client_info && stack->client_info->arch && stack->client_info->arch->name == "SouthernIslands")
-				copy_latencies_to_wavefront(&(stack->latencias),stack->wavefront);
+				if(stack->client_info && stack->client_info->arch && stack->client_info->arch->name == "SouthernIslands")
+					copy_latencies_to_wavefront(&(stack->latencias),stack->wavefront);
+			}
 		}
 
 		if(stack->state)
@@ -1090,7 +1093,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 				stack->latencias.finish = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction - stack->latencias.miss;
 			}
-			add_latencias_nc_write(&(stack->latencias));
+			if(!stack->retry && stack->hit)
+				add_latencias_nc_write(&(stack->latencias));
 		}
 
 		/* Increment witness variable */
@@ -1683,6 +1687,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* Return */
 		ret->err = 0;
+		ret->hit = stack->hit;
 		ret->dir_lock = stack->dir_lock;
 		ret->set = stack->set;
 		ret->way = stack->way;

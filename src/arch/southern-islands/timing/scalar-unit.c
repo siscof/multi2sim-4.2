@@ -185,7 +185,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 		/* Statistics */
 		scalar_unit->inst_count++;
 		si_gpu->last_complete_cycle = asTiming(si_gpu)->cycle;
-		ipc_instructions(asTiming(si_gpu)->cycle, unit);
+		//ipc_instructions(asTiming(si_gpu)->cycle, unit);
 	}
 }
 
