@@ -843,7 +843,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 void statistics_event()
 {
-struct mod_t *mod
+struct mod_t *mod;
 long long cycle = asTiming(si_gpu)->cycle;
 
 long long locked[5] = {0,0,0,0,0}, mshr[3] = {0,0,0}, mshr_size[3]={0,0,0};
@@ -860,7 +860,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 				if(k == list_count(mem_system->mod_list)-1)
 				{
-					return
+					return;
 				}
 
 			}
