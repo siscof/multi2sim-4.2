@@ -266,4 +266,3 @@ int log_base2(int x);
 
 
 #endif
-

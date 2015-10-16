@@ -593,7 +593,7 @@ void add_cycle_vmb_blocked(int compute_unit_id, int blocked_by_store)
 {
 
 	long long intervalo_instrucciones = 10000;
-  
+
 	if(!(add_si_inst(unit) % intervalo_instrucciones))
 	{
 
@@ -843,14 +843,31 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 
 void statistics_event()
 {
-
+struct mod_t *mod
 long long cycle = asTiming(si_gpu)->cycle;
 
 long long locked[5] = {0,0,0,0,0}, mshr[3] = {0,0,0}, mshr_size[3]={0,0,0};
 
 for (int k = 0; k < list_count(mem_system->mod_list); k++)
 {
-        struct mod_t *mod = list_get(mem_system->mod_list, k);
+        mod = list_get(mem_system->mod_list, k);
+
+				if(mod->level == 1)
+				{
+					if(mod->access_list_count != 0)
+						break;
+				}
+
+				if(k == list_count(mem_system->mod_list)-1)
+				{
+					return
+				}
+
+			}
+
+for (int k = 0; k < list_count(mem_system->mod_list); k++)
+{
+        mod = list_get(mem_system->mod_list, k);
 
         struct dir_t *dir = mod->dir;
 //        struct cache_t *cache = mod->cache;
@@ -860,19 +877,19 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 		mshr[1] += mod->mshr->entradasOcupadas;
 		mshr_size[1] = mod->mshr->size;
 	}
+
 	if(mod->level == 2)
 		mshr[2] += mod->mshr->entradasOcupadas;
 
-        for (int x = 0; x < dir->xsize; x++)
-        {
-                for (int y = 0; y < dir->ysize; y++)
-                {
-                        struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
-
-                        if(dir_lock->lock)
-                                locked[mod->level]++;
-                }
-        }
+    for (int x = 0; x < dir->xsize; x++)
+    {
+      for (int y = 0; y < dir->ysize; y++)
+      {
+        struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
+        if(dir_lock->lock)
+          locked[mod->level]++;
+      }
+    }
 }
 
 print_cache_states(mem_stats.mod_level[1].cache_state);

@@ -234,11 +234,11 @@ int linked_list_is_end(struct linked_list_t *list)
 void linked_list_insert(struct linked_list_t *list, void *data)
 {
 	struct linked_list_elem_t *elem;
-	
+
 	/* Create a new element */
 	elem = xcalloc(1, sizeof(struct linked_list_elem_t));
 	elem->data = data;
-	
+
 	/* Insert it */
 	if (!list->count)
 	{
@@ -268,9 +268,9 @@ void linked_list_insert(struct linked_list_t *list, void *data)
 		elem->next = list->current;
 		list->current->prev = elem;
 		elem->prev->next = elem;
-		
+
 	}
-	
+
 	/* Update state */
 	list->error_code = LINKED_LIST_ERR_OK;
 	list->count++;
@@ -291,14 +291,14 @@ void *linked_list_remove(struct linked_list_t *list)
 {
 	struct linked_list_elem_t *elem;
 	void *data;
-	
+
 	/* Check bounds */
 	if (list->current_index == list->count)
 	{
 		list->error_code = LINKED_LIST_ERR_BOUNDS;
 		return NULL;
 	}
-	
+
 	/* Remove current element */
 	elem = list->current;
 	data = elem->data;
@@ -322,7 +322,7 @@ void *linked_list_remove(struct linked_list_t *list)
 		elem->prev->next = elem->next;
 		elem->next->prev = elem->prev;
 	}
-	
+
 	/* Update list state */
 	assert(list->count > 0);
 	list->error_code = LINKED_LIST_ERR_OK;
@@ -337,7 +337,7 @@ void *linked_list_remove(struct linked_list_t *list)
 void linked_list_clear(struct linked_list_t *list)
 {
 	struct linked_list_elem_t *elem, *next;
-	
+
 	/* Free all elements */
 	elem = list->head;
 	while (elem)
@@ -346,7 +346,7 @@ void linked_list_clear(struct linked_list_t *list)
 		free(elem);
 		elem = next;
 	}
-	
+
 	/* Update list state */
 	list->error_code = LINKED_LIST_ERR_OK;
 	list->current_index = 0;
@@ -362,7 +362,7 @@ static void sort(struct linked_list_elem_t **array, int lo, int hi, int (*comp)(
 {
 	struct linked_list_elem_t *ptr, *tmp;
 	int i = lo, j = hi;
-	
+
 	ptr = array[(lo + hi) / 2];
 	do {
 		while (comp(array[i]->data, ptr->data) < 0)
@@ -387,12 +387,12 @@ void linked_list_sort(struct linked_list_t *list, int (*comp)(const void *, cons
 {
 	struct linked_list_elem_t **array;
 	int i;
-	
+
 	/* No need to sort an empty list */
 	list->error_code = LINKED_LIST_ERR_OK;
 	if (!list->count)
 		return;
-	
+
 	/* Convert linked list into array */
 	array = xcalloc(list->count, sizeof(struct linked_list_elem_t *));
 	list->current = list->head;
@@ -401,10 +401,10 @@ void linked_list_sort(struct linked_list_t *list, int (*comp)(const void *, cons
 		array[i] = list->current;
 		list->current = list->current->next;
 	}
-	
+
 	/* Sort array */
 	sort(array, 0, list->count - 1, comp);
-	
+
 	/* Rebuild linked list */
 	list->head = array[0];
 	list->tail = array[list->count - 1];
@@ -414,7 +414,7 @@ void linked_list_sort(struct linked_list_t *list, int (*comp)(const void *, cons
 		array[i]->next = i < list->count - 1 ? array[i + 1] : NULL;
 	}
 	free(array);
-	
+
 	/* Set the first element as current element */
 	list->current_index = 0;
 	list->current = list->head;
@@ -468,7 +468,7 @@ static void linked_list_iter_check_version(struct linked_list_iter_t *iter)
 	/* Check */
 	if (iter->version == iter->list->version)
 		return;
-	
+
 	/* Version mismatch */
 	panic("%s: version mismatch for linked list iterator.\n"
 		"\tAn iterator has been created to traverse a linked list, but the\n"
@@ -541,4 +541,3 @@ int linked_list_iter_find(struct linked_list_iter_t *iter, void *data)
 	/* Not found */
 	return 0;
 }
-
