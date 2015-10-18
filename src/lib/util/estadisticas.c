@@ -854,12 +854,13 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 				if(mod->level == 1)
 				{
-					if(mod->access_list_count != 0)
+					if(mod->access_list_count != 0 || mem_stats.latencias_load->access != 0 || mem_stats.latencias_nc_write->access != 0)
 						break;
 				}
 
 				if(k == list_count(mem_system->mod_list)-1)
 				{
+					esim_schedule_event(EV_STATISTICS_BY_CYCLES, NULL, statistics_event_interval);
 					return;
 				}
 
