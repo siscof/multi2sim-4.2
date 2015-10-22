@@ -491,7 +491,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 				add_latencias_load(&(stack->latencias));
 
 				if(stack->client_info && stack->client_info->arch && stack->client_info->arch->name == "SouthernIslands")
+				{
 					copy_latencies_to_wavefront(&(stack->latencias),stack->wavefront);
+				}
+
 			}
 		}
 
