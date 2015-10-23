@@ -1653,8 +1653,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			mod_stack_return(stack);
 			return;
 		}
-		if(stack->client_info && stack->client_info->arch){
-			stack->latencias.eviction = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir;
+		if(ret->client_info && ret->client_info->arch){
+			ret->latencias.eviction = ret->client_info->arch->timing->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr - ret->latencias.lock_dir;
 		}
 
 		/* Eviction */
