@@ -332,6 +332,12 @@ void gpu_load_finish(long long latencia, long long cantidad)
 void add_latencias_load(struct mod_stack_t *stack)
 {
 	struct latenciometro  *latencias = &(stack->latencias);
+
+	if(stack->mod == stack->mod->compute_unit->scalar_cache)
+		return;
+
+	assert(stack->mod == stack->mod->compute_unit->vector_cache);
+
 	if((*stack->witness_ptr) != -1){
 		if(!stack->retry && stack->hit){
 			mem_stats.latencias_load_hit->queue += latencias->queue;
