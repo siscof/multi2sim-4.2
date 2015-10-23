@@ -297,21 +297,21 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
 			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-		    {
+		  {
 				if (uop->vector_mem_write && !uop->glc)
-	            		{
+	      {
 					aux->vector_write_nc++;
-                		}
-                		else if (uop->vector_mem_write && uop->glc)
-                		{
+        }
+        else if (uop->vector_mem_write && uop->glc)
+        {
 					aux->vector_write++;
-                		}
-                		else if (uop->vector_mem_read && uop->glc)
-                		{
-                    			aux->vector_load++;
+        }
+        else if (uop->vector_mem_read && uop->glc)
+        {
+        	aux->vector_load++;
 				}
 				else if (uop->vector_mem_read && !uop->glc)
-                		{
+        {
 					aux->vector_load_nc++;
 				}
 

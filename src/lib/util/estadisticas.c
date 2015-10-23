@@ -196,7 +196,11 @@ statistics_event_init(10000);
 estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 
 gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
-mem_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+mem_stats.latencias_load_hit = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+mem_stats.latencias_load_miss = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+mem_stats.latencias_load_critical_hit = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+mem_stats.latencias_load_critical_miss = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+
 mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 gpu_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 gpu_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
@@ -220,14 +224,14 @@ for(int i = 0; i < 10; i++)
 fran_debug_ipc("gpu_coalesce_load gpu_coalesce_store mem_coalesce_load mem_coalesce_store ");
 
 fran_debug_ipc("evictions_L2 counter_load_action_retry cycles_load_action_retry counter_load_miss_retry cycles_load_miss_retry counter_nc_store_writeback_retry cycles_nc_store_writeback_retry counter_nc_store_action_retry cycles_nc_store_action_retry counter_nc_store_miss_retry cycles_nc_store_miss_retry accesses_with_retries invalidations ");
-
+/*
 fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_mem_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
 
 fran_debug_ipc("cycles_simd_running dispatch_no_stall dispatch_stall_instruction_infly dispatch_stall_barrier dispatch_stall_mem_access dispatch_stall_no_wavefront dispatch_stall_others ");
 
 fran_debug_ipc("no_stall stall_mem_access stall_barrier stall_instruction_infly stall_fetch_buffer_full stall_no_wavefront stall_others ");
-fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 ");
-fran_debug_ipc("queue_load lock_mshr_load lock_dir_load eviction_load retry_load miss_load finish_load access_load gpu_queue_load gpu_lock_mshr_load gpu_lock_dir_load gpu_eviction_load gpu_retry_load gpu_miss_load gpu_finish_load gpu_latencia_total_load gpu_access_load queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem ciclos_intervalo ciclos_totales esim_time\n");
+fran_debug_ipc("start2fetch fetch2complete v_mem_full simd_idle1 simd_idle2 simd_idle3 simd_idle4 ");*/
+fran_debug_ipc("queue_load_hit lock_mshr_load_hit lock_dir_load_hit eviction_load_hit retry_load_hit miss_load_hit finish_load_hit access_load_hit queue_load_miss lock_mshr_load_miss lock_dir_load_miss eviction_load_miss retry_load_miss miss_load_miss finish_load_miss access_load_miss queue_load_critical_hit lock_mshr_load_critical_hit lock_dir_load_critical_hit eviction_load_critical_hit retry_load_critical_hit miss_load_critical_hit finish_load_critical_hit access_load_critical_hit queue_load_critical_miss lock_mshr_load_critical_miss lock_dir_load_critical_miss eviction_load_critical_miss retry_load_critical_miss miss_load_critical_miss finish_load_critical_miss access_load_critical_miss queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem ciclos_intervalo ciclos_totales esim_time\n");
 
         for(int i = 0; i < 10; i++){
                 estadis[i].coalesce = 0;
@@ -304,6 +308,10 @@ long long add_si_macroinst(si_units unit, struct si_uop_t *uop)
     return gpu_stats.total;
 }
 
+void add_mem_access_finished(){
+	mem_stats.access_finished++;
+}
+
 void add_CoalesceHit(int level)
 {
 	mem_stats.mod_level[level].coalesceHits++;
@@ -321,16 +329,50 @@ void gpu_load_finish(long long latencia, long long cantidad)
 	gpu_stats.loads_count += cantidad;
 }
 
-void add_latencias_load(struct latenciometro *latencias)
+void add_latencias_load(struct mod_stack_t *stack)
 {
-	mem_stats.latencias_load->queue += latencias->queue;
-	mem_stats.latencias_load->lock_mshr += latencias->lock_mshr;
-	mem_stats.latencias_load->lock_dir += latencias->lock_dir;
-	mem_stats.latencias_load->eviction += latencias->eviction;
-	mem_stats.latencias_load->retry += latencias->retry;
-	mem_stats.latencias_load->miss += latencias->miss;
-	mem_stats.latencias_load->finish += latencias->finish;
-	mem_stats.latencias_load->access++;
+	struct latenciometro  *latencias = &(stack->latencias);
+	if((*stack->witness_ptr) != -1){
+		if(!stack->retry && stack->hit){
+			mem_stats.latencias_load_hit->queue += latencias->queue;
+			mem_stats.latencias_load_hit->lock_mshr += latencias->lock_mshr;
+			mem_stats.latencias_load_hit->lock_dir += latencias->lock_dir;
+			mem_stats.latencias_load_hit->eviction += latencias->eviction;
+			mem_stats.latencias_load_hit->retry += latencias->retry;
+			mem_stats.latencias_load_hit->miss += latencias->miss;
+			mem_stats.latencias_load_hit->finish += latencias->finish;
+			mem_stats.latencias_load_hit->access++;
+		}else{
+			mem_stats.latencias_load_miss->queue += latencias->queue;
+			mem_stats.latencias_load_miss->lock_mshr += latencias->lock_mshr;
+			mem_stats.latencias_load_miss->lock_dir += latencias->lock_dir;
+			mem_stats.latencias_load_miss->eviction += latencias->eviction;
+			mem_stats.latencias_load_miss->retry += latencias->retry;
+			mem_stats.latencias_load_miss->miss += latencias->miss;
+			mem_stats.latencias_load_miss->finish += latencias->finish;
+			mem_stats.latencias_load_miss->access++;
+		}
+	}else{
+		if(!stack->retry && stack->hit){
+			mem_stats.latencias_load_critical_hit->queue += latencias->queue;
+			mem_stats.latencias_load_critical_hit->lock_mshr += latencias->lock_mshr;
+			mem_stats.latencias_load_critical_hit->lock_dir += latencias->lock_dir;
+			mem_stats.latencias_load_critical_hit->eviction += latencias->eviction;
+			mem_stats.latencias_load_critical_hit->retry += latencias->retry;
+			mem_stats.latencias_load_critical_hit->miss += latencias->miss;
+			mem_stats.latencias_load_critical_hit->finish += latencias->finish;
+			mem_stats.latencias_load_critical_hit->access++;
+		}else{
+			mem_stats.latencias_load_critical_miss->queue += latencias->queue;
+			mem_stats.latencias_load_critical_miss->lock_mshr += latencias->lock_mshr;
+			mem_stats.latencias_load_critical_miss->lock_dir += latencias->lock_dir;
+			mem_stats.latencias_load_critical_miss->eviction += latencias->eviction;
+			mem_stats.latencias_load_critical_miss->retry += latencias->retry;
+			mem_stats.latencias_load_critical_miss->miss += latencias->miss;
+			mem_stats.latencias_load_critical_miss->finish += latencias->finish;
+			mem_stats.latencias_load_critical_miss->access++;
+		}
+	}
 }
 
 void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf)
@@ -602,7 +644,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 				if(mod->level == 1)
 				{
-					if(mod->access_list_count != 0 || mem_stats.latencias_load->access != 0 || mem_stats.latencias_nc_write->access != 0)
+					if(mod->access_list_count != 0 || mem_stats.access_finished != 0)
 						break;
 				}
 
@@ -689,7 +731,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
     long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
 
 	SIGpu *gpu = asSIGpu(arch_southern_islands->timing);
-
+/*
 	int compute_unit_id = 0;
 	int work_groups_running = 0;
 	SI_GPU_FOREACH_COMPUTE_UNIT(compute_unit_id)
@@ -734,24 +776,44 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	fran_debug_ipc("%lld ",gpu_stats.simd_idle[2] - instrucciones_gpu_stats_anterior.simd_idle[2]);
 	fran_debug_ipc("%lld ",gpu_stats.simd_idle[3] - instrucciones_gpu_stats_anterior.simd_idle[3]);
 
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->queue);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->lock_mshr);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->lock_dir);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->eviction);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->retry);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->miss);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->finish);
-	fran_debug_ipc("%lld ",mem_stats.latencias_load->access);
+	*/
 
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->queue);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->lock_mshr);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->lock_dir);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->eviction);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->retry);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->miss);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->finish);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->total);
-	fran_debug_ipc("%lld ",gpu_stats.latencias_load->access);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->queue);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->lock_mshr);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->lock_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->eviction);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->retry);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->miss);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->finish);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_hit->access);
+
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->queue);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->lock_mshr);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->lock_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->eviction);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->retry);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->miss);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->finish);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_miss->access);
+
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->queue);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->lock_mshr);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->lock_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->eviction);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->retry);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->miss);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->finish);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_hit->access);
+
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->queue);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->lock_mshr);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->lock_dir);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->eviction);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->retry);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->miss);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->finish);
+	fran_debug_ipc("%lld ",mem_stats.latencias_load_critical_miss->access);
+
 
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->queue);
 	fran_debug_ipc("%lld ",mem_stats.latencias_nc_write->lock_mshr);
@@ -826,10 +888,18 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	fran_debug_ipc("\n");
 
 	memcpy(&instrucciones_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
-	free(mem_stats.latencias_load);
+	free(mem_stats.latencias_load_hit);
+	free(mem_stats.latencias_load_miss);
+	free(mem_stats.latencias_load_critical_hit);
+	free(mem_stats.latencias_load_critical_miss);
 	free(mem_stats.latencias_nc_write);
 
-	mem_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+	mem_stats.access_finished = 0;
+
+	mem_stats.latencias_load_hit = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+	mem_stats.latencias_load_miss = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+	mem_stats.latencias_load_critical_hit = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
+	mem_stats.latencias_load_critical_miss = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 	mem_stats.latencias_nc_write = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 	gpu_stats.latencias_load = (struct latenciometro *) calloc(1, sizeof(struct latenciometro));
 

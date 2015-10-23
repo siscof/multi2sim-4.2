@@ -219,8 +219,13 @@ struct mem_system_stats
 	struct esta_t mod_level[5];
 	long long load_latency;
 	long long load_latency_count;
-	struct latenciometro *latencias_load;
+	struct latenciometro *latencias_load_hit;
+	struct latenciometro *latencias_load_miss;
+	struct latenciometro *latencias_load_critical_hit;
+	struct latenciometro *latencias_load_critical_miss;
 	struct latenciometro *latencias_nc_write;
+
+	long long access_finished;
 
 	//coalesce
 
@@ -276,7 +281,7 @@ void gpu_load_finish(long long latencia, long long cantidad);
 void add_latencias(struct latenciometro *latencias);
 void add_simd_idle_cycle(int simd_id);
 void add_cu_mem_full();
-void add_latencias_load(struct latenciometro *latencias);
+void add_latencias_load(struct mod_stack_t *stack);
 void add_latencias_nc_write(struct latenciometro *latencias);
 void add_simd_running_cycle();
 void analizarCausaBloqueo(struct si_wavefront_pool_t *wavefront_pool, int active_fb);
@@ -294,5 +299,6 @@ void add_eviction(int level);
 void print_cache_states(long long *results);
 void statistics_event_init(int interval);
 void statistics_event();
+void add_mem_access_finished();
 
 #endif

@@ -682,7 +682,7 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
 		assert(mod->access_list_coalesced_count > 0);
 		mod->access_list_coalesced_count--;
 	}
-
+	add_mem_access_finished();
 	//fran
 	stack->finished = 1;
 }
