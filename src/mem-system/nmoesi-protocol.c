@@ -1609,8 +1609,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		/* Release port */
 		mod_unlock_port(mod, port, stack);
 		ret->port_locked = 0;
-		if(stack->client_info && stack->client_info->arch){
-			ret->latencias.lock_dir = stack->client_info->arch->timing->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
+		if(ret->client_info && ret->client_info->arch){
+			ret->latencias.lock_dir = ret->client_info->arch->timing->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
 		}
 		/* On miss, evict if victim is a valid block. */
 		if (!stack->hit && stack->state)
