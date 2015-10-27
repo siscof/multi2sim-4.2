@@ -495,7 +495,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			}
 		}
 
-		if(stack->state)
+		if(stack->hit && !(stack->latencias.queue + stack->latencias.lock_mshr + stack->latencias.lock_dir + stack->latencias.eviction + stack->latencias.miss))
 		{
 			add_CoalesceHit(mod->level);
 		}
