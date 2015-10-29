@@ -104,6 +104,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * outstanding memory accesses, set the wavefront to
 			 * waiting */
 			uop->wavefront_pool_entry->wait_for_mem = 1;
+			uop->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
 		}
 
 		/* Check for "barrier" instruction */

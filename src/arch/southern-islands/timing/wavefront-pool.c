@@ -33,12 +33,12 @@ struct si_wavefront_pool_t *si_wavefront_pool_create()
 	/* Initialize */
 	wavefront_pool = xcalloc(1, sizeof(struct si_wavefront_pool_t));
 	wavefront_pool->entries = xcalloc(
-		si_gpu_max_wavefronts_per_wavefront_pool, 
+		si_gpu_max_wavefronts_per_wavefront_pool,
 		sizeof(struct si_wavefront_pool_entry_t*));
 
-	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++) 
+	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 	{
-		wavefront_pool->entries[i] = xcalloc(1, 
+		wavefront_pool->entries[i] = xcalloc(1,
 			sizeof(struct si_wavefront_pool_entry_t));
 		wavefront_pool->entries[i]->id_in_wavefront_pool = i;
 		wavefront_pool->entries[i]->wavefront_pool = wavefront_pool;
@@ -52,7 +52,7 @@ void si_wavefront_pool_free(struct si_wavefront_pool_t *wavefront_pool)
 {
 	int i;
 
-	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++) 
+	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 		free(wavefront_pool->entries[i]);
 
 	free(wavefront_pool->entries);
@@ -76,7 +76,7 @@ void si_wavefront_pool_entry_clear(
 }
 
 void si_wavefront_pool_map_wavefronts(
-	struct si_wavefront_pool_t *wavefront_pool, 
+	struct si_wavefront_pool_t *wavefront_pool,
 	struct si_work_group_t *work_group)
 {
 	struct si_wavefront_t *wavefront;
@@ -90,10 +90,10 @@ void si_wavefront_pool_map_wavefronts(
 	first_entry = wg_id_in_wfp * work_group->wavefront_count;
 
 	/* Assign wavefronts a slot in the instruction buffer */
-	for (i = 0; i < work_group->wavefront_count; i++) 
+	for (i = 0; i < work_group->wavefront_count; i++)
 	{
 		wavefront = work_group->wavefronts[i];
-		wavefront->wavefront_pool_entry = 
+		wavefront->wavefront_pool_entry =
 			wavefront_pool->entries[first_entry + i];
 
 		assert(wavefront->wavefront_pool_entry);
@@ -108,7 +108,7 @@ void si_wavefront_pool_map_wavefronts(
 	}
 }
 
-void si_wavefront_pool_unmap_wavefronts(struct si_wavefront_pool_t 
+void si_wavefront_pool_unmap_wavefronts(struct si_wavefront_pool_t
 	*wavefront_pool, struct si_work_group_t *work_group)
 {
 	struct si_wavefront_t *wavefront;
@@ -116,18 +116,18 @@ void si_wavefront_pool_unmap_wavefronts(struct si_wavefront_pool_t
 	int i;
 
 	/* Reset mapped wavefronts */
-	assert(wavefront_pool->wavefront_count >= 
+	assert(wavefront_pool->wavefront_count >=
 		work_group->wavefront_count);
 
-	for (i = 0; i < work_group->wavefront_count; i++) 
+	for (i = 0; i < work_group->wavefront_count; i++)
 	{
 		wavefront = work_group->wavefronts[i];
-		wf_id_in_wfp = 
+		wf_id_in_wfp =
 			wavefront->wavefront_pool_entry->id_in_wavefront_pool;
 
 		assert(wavefront_pool->entries[wf_id_in_wfp]->wavefront);
 		assert(wavefront_pool->entries[wf_id_in_wfp]->valid);
-		assert(wavefront_pool->entries[wf_id_in_wfp]->wavefront->id == 
+		assert(wavefront_pool->entries[wf_id_in_wfp]->wavefront->id ==
 			wavefront->id);
 
 		/* Clear wavefront pool entry */

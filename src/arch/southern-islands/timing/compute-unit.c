@@ -434,8 +434,11 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 			if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
 				!wavefront->wavefront_pool_entry->vm_cnt)
 			{
+				add_wait_for_mem_latency(compute_unit, asTiming(si_gpu)->cycle -
+				 	wavefront->wavefront_pool_entry->wait_for_mem_cycle);
 				wavefront->wavefront_pool_entry->wait_for_mem =
 					0;
+				wavefront->wavefront_pool_entry->wait_for_mem_cycle = 0;
 			}
 			else
 			{

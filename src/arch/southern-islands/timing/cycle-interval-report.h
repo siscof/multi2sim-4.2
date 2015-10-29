@@ -63,6 +63,8 @@ void si_spatial_report_init();
 void si_cu_spatial_report_init();
 void si_device_spatial_report_init();
 
+void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long cycles);
+
 void si_report_gpu_idle(SIGpu *device);
 
 

@@ -144,6 +144,9 @@ struct si_gpu_unit_stats
 	long long interval_cycles;
 	long long gpu_idle;
 
+	long long wait_for_mem_time;
+	long long wait_for_mem_counter;
+
 	long long predicted_opc_cycles;
 	long long predicted_opc_op;
 

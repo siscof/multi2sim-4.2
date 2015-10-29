@@ -21,7 +21,7 @@
 #define SOUTHERN_ISLANDS_WAVEFRONT_POOL_H
 
 
-struct si_wavefront_pool_entry_t 
+struct si_wavefront_pool_entry_t
 {
 	unsigned int valid : 1; /* Valid if wavefront assigned to entry */
 
@@ -36,6 +36,7 @@ struct si_wavefront_pool_entry_t
 	unsigned int ready_next_cycle : 1; /* Will be ready next cycle */
 	/* TOOD Break wait_for_mem into waiting for each memory type */
 	unsigned int wait_for_mem : 1;     /* Waiting for memory instructions */
+	long long wait_for_mem_cycle;
 	unsigned int wait_for_barrier : 1; /* Waiting at barrier */
 	unsigned int wavefront_finished : 1; /* Wavefront executed last inst */
 

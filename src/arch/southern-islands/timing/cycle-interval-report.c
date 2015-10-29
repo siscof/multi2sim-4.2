@@ -126,7 +126,7 @@ void si_cu_spatial_report_init()
 void si_device_spatial_report_init(SIGpu *device)
 {
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
-	fprintf(device_spatial_report_file, "gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
+	fprintf(device_spatial_report_file, "wait_for_mem_time,wait_for_mem_counter,gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
 	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
@@ -156,6 +156,12 @@ void si_device_spatial_report_done()
 	fclose(device_spatial_report_file);
 	device_spatial_report_file = NULL;
 	str_free(device_spatial_report_filename);
+}
+
+void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long cycles)
+{
+	compute_unit->compute_device->interval_statistics->wait_for_mem_time += cycles;
+	compute_unit->compute_device->interval_statistics->wait_for_mem_counter++;
 }
 
 void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
@@ -422,6 +428,8 @@ void si_device_spatial_report_dump(SIGpu *device)
 	FILE *f = device_spatial_report_file;
 
 	analizar_wavefront(device);
+	fprintf(f, "%lld,", device->interval_statistics->wait_for_mem_time);
+	fprintf(f, "%lld,", device->interval_statistics->wait_for_mem_counter);
 
 	fprintf(f, "%lld,", device->interval_statistics->gpu_idle);
 
