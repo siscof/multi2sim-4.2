@@ -27,6 +27,7 @@ struct dir_lock_t
 {
 	int lock;
 	long long stack_id;
+	struct mod_stack_t *stack;
 	struct mod_stack_t *lock_queue;
 };
 
@@ -91,4 +92,3 @@ void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t 
 
 
 #endif
-

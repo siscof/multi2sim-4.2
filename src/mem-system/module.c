@@ -736,6 +736,27 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	return NULL;
 }
 
+struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
+	struct mod_stack_t *stack)
+{
+	struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
+	struct mod_stack_t *aux_stack = mod_stack_create(stack->id, target_mod,
+		stack->addr, 0, NULL);
+
+	aux_stack->hit = mod_find_block(target_mod, aux_stack->addr, &aux_stack->set,
+		&aux_stack->way, &aux_stack->tag, &aux_stack->state);
+
+	if(aux_stack->hit)
+	{
+		free(aux_stack);
+		struct dir_lock_t *dir_lock = dir_lock_get(target_mod->dir, aux_stack->set, aux_stack->way);
+		return dir_lock->stack;
+	}else{
+		free(aux_stack);
+		return NULL;
+	}
+}
+
 
 /* Return the youngest in-flight write older than 'older_than_stack'. If 'older_than_stack'
  * is NULL, return the youngest in-flight write. Return NULL if there is no in-flight write.

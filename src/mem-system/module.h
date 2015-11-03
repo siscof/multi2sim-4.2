@@ -322,5 +322,6 @@ void mod_client_info_free(struct mod_t *mod, struct mod_client_info_t *client_in
 int mod_replace_block(struct mod_t *mod, int set);
 unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way);
 bool mod_is_vector_cache(struct mod_t *mod);
+struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod, struct mod_stack_t *current_stack);
 
 #endif
