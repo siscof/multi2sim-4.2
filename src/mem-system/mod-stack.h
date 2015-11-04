@@ -129,7 +129,7 @@ struct mod_stack_t
 	//FRAN
 	int finished : 1;
 	int invalided : 1;
-	
+
 	int hit : 1;
 	int err : 1;
 	int shared : 1;
@@ -201,4 +201,3 @@ void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask);
 void mod_stack_wakeup_mod_head(struct mod_t *mod);
 
 #endif
-

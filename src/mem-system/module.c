@@ -750,7 +750,9 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	{
 		free(aux_stack);
 		struct dir_lock_t *dir_lock = dir_lock_get(target_mod->dir, aux_stack->set, aux_stack->way);
-		return dir_lock->stack;
+		struct mod_stack_t *ret_stack;
+		for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
+		return ret_stack;
 	}else{
 		free(aux_stack);
 		return NULL;
