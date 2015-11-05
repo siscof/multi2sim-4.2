@@ -781,7 +781,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size && ret_stack->dir_lock && ret_stack->dir_lock->stack == ret_stack)
 			{
 				free(aux_stack);
-				return stack;
+				return ret_stack;
 			}
 		}
 	}
