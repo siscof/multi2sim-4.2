@@ -308,8 +308,8 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 	/* Lock entry */
 	dir_lock->lock = 1;
 	dir_lock->stack_id = stack->id;
-	dir_lock->stack = stack;
-	stack->dir_lock = dir_lock;
+	dir_lock->stack = stack->ret_stack;
+	stack->ret_stack->dir_lock = dir_lock;
 	return 1;
 }
 

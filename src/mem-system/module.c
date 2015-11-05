@@ -739,6 +739,7 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	struct mod_stack_t *stack)
 {
+	struct mod_stack_t *ret_stack = NULL;
 	struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
 	struct mod_stack_t *aux_stack = mod_stack_create(stack->id, target_mod,
 		stack->addr, 0, NULL);
@@ -748,15 +749,13 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 
 	if(aux_stack->hit)
 	{
-		free(aux_stack);
 		struct dir_lock_t *dir_lock = dir_lock_get(target_mod->dir, aux_stack->set, aux_stack->way);
-		struct mod_stack_t *ret_stack;
-		for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
-		return ret_stack;
-	}else{
-		free(aux_stack);
-		return NULL;
+		if(dir_lock->lock)
+			for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
 	}
+		free(aux_stack);
+		return ret_stack;
+
 }
 
 

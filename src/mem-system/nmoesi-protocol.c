@@ -172,7 +172,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Coalesce access */
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
-		if (!flag_coalesce_gpu_enabled && master_stack)
+		if (!flag_coalesce_gpu_enabled && master_stack || (stack->mod->compute_unit->scalar_cache == mod) && master_stack)
 		{
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
@@ -293,7 +293,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		older_stack = mod_global_in_flight_address(mod, stack);
 		if (older_stack)
 		{
-			mem_debug("    %lld wait for access %lld\n",
+			mem_debug("    %lld wait for avoid retry %lld\n",
 				stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
 			return;
