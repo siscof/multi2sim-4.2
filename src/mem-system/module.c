@@ -769,7 +769,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod_in_conflict = list_get(mem_system->mod_list, k);
-		if(mod_in_conflict->level != 1)
+		if(mod_in_conflict->level != 1 || mod_in_conflict == mod)
 			continue;
 
 		index = (stack->addr >> mod_in_conflict->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
