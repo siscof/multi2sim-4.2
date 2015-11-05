@@ -740,13 +740,16 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	struct mod_stack_t *stack)
 {
 	struct mod_stack_t *ret_stack = NULL;
-	struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
+	struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag),*mod_in_conflict;
 	struct mod_stack_t *aux_stack = mod_stack_create(stack->id, target_mod,
 		stack->addr, 0, NULL);
 
 	if(mod_find_block(mod, stack->addr, &aux_stack->set,
 		&aux_stack->way, &aux_stack->tag, &aux_stack->state) && !dir_lock_get(target_mod->dir, aux_stack->set, aux_stack->way)->lock)
-		return NULL;
+	{
+			free(aux_stack);
+			return NULL;
+	}
 
 	aux_stack->hit = mod_find_block(target_mod, aux_stack->addr, &aux_stack->set,
 		&aux_stack->way, &aux_stack->tag, &aux_stack->state);
@@ -756,10 +759,35 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		struct dir_lock_t *dir_lock = dir_lock_get(target_mod->dir, aux_stack->set, aux_stack->way);
 		if(dir_lock->lock)
 			for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
-	}
+
 		free(aux_stack);
 		return ret_stack;
+	}
 
+	int index;
+
+	for (int k = 0; k < list_count(mem_system->mod_list); k++)
+	{
+		mod_in_conflict = list_get(mem_system->mod_list, k);
+		if(mod_in_conflict->level != 1)
+			continue;
+
+		index = (stack->addr >> mod_in_conflict->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+		for (ret_stack = mod_in_conflict->access_hash_table[index].bucket_list_head; ret_stack;
+		ret_stack = ret_stack->bucket_list_next)
+		{
+
+			/* Address matches */
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size && ret_stack->dir_lock && ret_stack->dir_lock->stack == ret_stack)
+			{
+				free(aux_stack);
+				return stack;
+			}
+		}
+	}
+
+	free(aux_stack);
+	return NULL;
 }
 
 
