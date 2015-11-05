@@ -741,6 +741,10 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 {
 	struct mod_stack_t *ret_stack = NULL;
 	struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
+
+	if(mod_find_block(mod, stack->addr, NULL, NULL, NULL, NULL))
+		return NULL;
+
 	struct mod_stack_t *aux_stack = mod_stack_create(stack->id, target_mod,
 		stack->addr, 0, NULL);
 
