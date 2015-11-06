@@ -746,7 +746,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	struct dir_lock_t *dir_lock;
 
 	if(mod_find_block(mod, stack->addr, &aux_stack->set,
-		&aux_stack->way, &aux_stack->tag, &aux_stack->state)
+		&aux_stack->way, &aux_stack->tag, &aux_stack->state))
 	{
 			free(aux_stack);
 
