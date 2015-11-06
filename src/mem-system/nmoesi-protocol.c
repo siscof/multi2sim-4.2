@@ -1662,6 +1662,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			assert(stack->eviction);
 			ret->err = 1;
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
+			ret->find_and_lock_stack = NULL;
 			mod_stack_return(stack);
 			return;
 		}
@@ -1706,6 +1707,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		ret->state = stack->state;
 		ret->tag = stack->tag;
 		ret->mshr_locked = stack->mshr_locked;
+		ret->find_and_lock_stack = NULL;
 		mod_stack_return(stack);
 		return;
 	}
