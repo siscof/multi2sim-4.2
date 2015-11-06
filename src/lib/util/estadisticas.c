@@ -343,7 +343,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 	assert(stack->mod == stack->mod->compute_unit->vector_cache);
 
 	if((*stack->witness_ptr) != -1){
-		if((latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0 && stack->hit){
+		if(/*(latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0 &&*/ !stack->retry && stack->hit){
 			mem_stats.latencias_load_hit->queue += latencias->queue;
 			mem_stats.latencias_load_hit->lock_mshr += latencias->lock_mshr;
 			mem_stats.latencias_load_hit->lock_dir += latencias->lock_dir;
@@ -363,7 +363,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 			mem_stats.latencias_load_miss->access++;
 		}
 	}else{
-		if((latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0 && stack->hit){
+		if(/*(latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0*/ !stack->retry && stack->hit){
 			mem_stats.latencias_load_critical_hit->queue += latencias->queue;
 			mem_stats.latencias_load_critical_hit->lock_mshr += latencias->lock_mshr;
 			mem_stats.latencias_load_critical_hit->lock_dir += latencias->lock_dir;
