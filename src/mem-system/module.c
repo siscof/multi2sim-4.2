@@ -782,9 +782,8 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		for (ret_stack = mod_in_conflict->access_hash_table[index].bucket_list_head; ret_stack;
 		ret_stack = ret_stack->bucket_list_next)
 		{
-
 			/* Address matches */
-			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size /*&& ret_stack->find_and_lock_stack != NULL*/)
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size && (ret_stack->find_and_lock_stack != NULL || (ret_stack->dir_lock && ret_stack->dir_lock->lock)))
 			{
 				free(aux_stack);
 				return ret_stack;
