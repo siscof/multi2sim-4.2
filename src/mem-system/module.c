@@ -745,7 +745,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		stack->addr, 0, NULL);
 	struct dir_lock_t *dir_lock;
 
-	if(mod_find_block(mod, stack->addr, &aux_stack->set,
+	/*if(mod_find_block(mod, stack->addr, &aux_stack->set,
 		&aux_stack->way, &aux_stack->tag, &aux_stack->state))
 	{
 			free(aux_stack);
@@ -755,7 +755,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 				for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
 
 			return ret_stack;
-	}
+	}*/
 
 	/*aux_stack->hit = mod_find_block(target_mod, aux_stack->addr, &aux_stack->set,
 		&aux_stack->way, &aux_stack->tag, &aux_stack->state);
@@ -784,7 +784,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		{
 
 			/* Address matches */
-			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size && ret_stack->find_and_lock_stack != NULL)
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size /*&& ret_stack->find_and_lock_stack != NULL*/)
 			{
 				free(aux_stack);
 				return ret_stack;
