@@ -173,6 +173,9 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 	//fran
 	master_stack->coalesced_count = 0;
 
+	//evitar_retry
+	struct mod_stack_t *avoid_retry_stack = NULL;
+
 	/* Wake up all coalesced accesses */
 	while (master_stack->waiting_list_head)
 	{
@@ -181,6 +184,16 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
         stack->state = master_stack->state;
+
+		if(avoid_retry_stack)
+		{
+			mod_stack_wait_in_stack(stack, avoid_retry_stack, event);
+			mem_debug(" {%lld stacking in %lld}", stack->id,avoid_retry_stack->id);
+			continue;
+		}
+		else if(master_stack->mod != stack->mod)
+			avoid_retry_stack = stack;
+
 		esim_schedule_event(event, stack, 0);
 		mem_debug(" %lld", stack->id);
 	}

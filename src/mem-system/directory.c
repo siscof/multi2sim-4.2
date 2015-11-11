@@ -216,7 +216,7 @@ struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y)
 
 	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	dir_lock = &dir->dir_lock[x * dir->ysize + y];
-	mem_debug("  dir_lock retrieve\n");
+	//mem_debug("  dir_lock retrieve\n");
 	return dir_lock;
 }
 
@@ -355,6 +355,7 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 	/* Unlock entry */
 	dir_lock->lock = 0;
 	dir_lock->stack_id = 0;
+	dir_lock->stack->dir_lock = NULL;
 	dir_lock->stack = NULL;
 }
 
