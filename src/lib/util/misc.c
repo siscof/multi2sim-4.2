@@ -27,6 +27,41 @@
 #include "string.h"
 
 
+void DOUBLE_LINKED_LIST_INSERT_BY_ID(struct mod_stack_t *CONT, struct mod_stack_t *ELEM) {
+	assert(!ELEM->waiting_list_next && !ELEM->waiting_list_prev);
+
+	if (!CONT->waiting_list_head && !CONT->waiting_list_tail){
+		CONT->waiting_list_head = ELEM;
+		CONT->waiting_list_tail = ELEM;
+	}else{
+		struct mod_stack_t *aux = CONT->waiting_list_head;
+		while(aux && aux->id < ELEM->id)
+			aux = aux->waiting_list_next;
+
+		if(!aux)
+		{
+			CONT->waiting_list_tail->waiting_list_next = ELEM;
+			ELEM->waiting_list_prev = CONT->waiting_list_tail;
+			CONT->waiting_list_tail = ELEM;
+		}
+		else if(!aux->waiting_list_prev)
+		{
+			CONT->waiting_list_head = ELEM;
+			aux->waiting_list_prev = ELEM;
+			ELEM->waiting_list_next = aux;
+		}
+		else
+		{
+			aux->waiting_list_prev->waiting_list_next = ELEM;
+			ELEM->waiting_list_next = aux;
+			ELEM->waiting_list_prev = aux->waiting_list_prev;
+			aux->waiting_list_prev = ELEM;
+		}
+	}
+	CONT->waiting_list_count++;
+	CONT->waiting_list_max = MAX(CONT->waiting_list_max, CONT->waiting_list_count);
+}
+
 /*
  * Numeric functions
  */

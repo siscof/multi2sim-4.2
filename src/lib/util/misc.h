@@ -22,6 +22,8 @@
 
 #include <stdio.h>
 
+#include "mem-system/mod-stack.h"
+
 /* Boolean constants */
 #ifndef TRUE
 #define TRUE (1)
@@ -201,6 +203,8 @@
 	(CONT)->NAME##_list_count++; \
 	(CONT)->NAME##_list_max = MAX((CONT)->NAME##_list_max, (CONT)->NAME##_list_count); \
 }
+
+void DOUBLE_LINKED_LIST_INSERT_BY_ID(struct mod_stack_t *CONT, struct mod_stack_t *ELEM);
 
 #define DOUBLE_LINKED_LIST_MEMBER(CONT, NAME, ELEM) \
 	((CONT)->NAME##_list_head == (ELEM) || (ELEM)->NAME##_list_prev || (ELEM)->NAME##_list_next)

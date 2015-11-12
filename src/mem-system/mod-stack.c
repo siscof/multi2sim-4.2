@@ -152,7 +152,8 @@ void mod_stack_wait_in_stack(struct mod_stack_t *stack,
 	assert(!DOUBLE_LINKED_LIST_MEMBER(master_stack, waiting, stack));
 
 	stack->waiting_list_event = event;
-	DOUBLE_LINKED_LIST_INSERT_TAIL(master_stack, waiting, stack);
+	DOUBLE_LINKED_LIST_INSERT_BY_ID(master_stack,  stack);
+	//DOUBLE_LINKED_LIST_INSERT_TAIL(master_stack, waiting, stack);
 }
 
 
