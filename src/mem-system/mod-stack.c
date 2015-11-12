@@ -185,14 +185,26 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
         stack->state = master_stack->state;
 
-		if(avoid_retry_stack)
+		/*if(avoid_retry_stack && (master_stack->mod != stack->mod))
 		{
 			mod_stack_wait_in_stack(stack, avoid_retry_stack, event);
 			mem_debug(" {%lld stacking in %lld}", stack->id,avoid_retry_stack->id);
 			continue;
 		}
 		else if(master_stack->mod != stack->mod)
-			avoid_retry_stack = stack;
+			avoid_retry_stack = stack;*/
+
+		if(master_stack->mod != stack->mod)
+		{
+			if(!avoid_retry_stack)
+				avoid_retry_stack = stack;
+			else
+			{
+				mod_stack_wait_in_stack(stack, avoid_retry_stack, event);
+				mem_debug(" {%lld stacking in %lld}", stack->id,avoid_retry_stack->id);
+				continue;
+			}
+		}
 
 		esim_schedule_event(event, stack, 0);
 		mem_debug(" %lld", stack->id);
