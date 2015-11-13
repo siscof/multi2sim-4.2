@@ -233,11 +233,15 @@ void cache_set_block(struct cache_t *cache, int set, int way, int tag, int state
 			cache->name, set, way, tag,
 			str_map_value(&cache_block_state_map, state));
 
-	if (cache->policy == cache_policy_fifo
+	/*if (cache->policy == cache_policy_fifo
 		&& cache->sets[set].blocks[way].tag != tag)
 		cache_update_waylist(&cache->sets[set],
 			&cache->sets[set].blocks[way],
-			cache_waylist_head);
+			cache_waylist_head);*/
+
+	if(tag == cache->sets[set].blocks[way].transient_tag)
+		cache->sets[set].blocks[way].transient_tag = 0;
+
 	cache->sets[set].blocks[way].tag = tag;
 	cache->sets[set].blocks[way].state = state;
 	cache->sets[set].blocks[way].dirty_mask = 0;
@@ -287,7 +291,7 @@ int cache_replace_block(struct cache_t *cache, int set)
 
 	for (block = cache->sets[set].way_tail; block; block = block->way_prev)
 	{
-		if (!block->state)
+		if (!block->state && block->transient_tag == 0)
 		{
 			cache_update_waylist(&cache->sets[set], block,
 				cache_waylist_head);
