@@ -76,7 +76,8 @@
 #include <lib/util/estadisticas.h>
 #include <lib/esim/esim.h>
 #include <mem-system/mshr.h>
-
+#include <stdbool.h>
+#include <mem-system/nmoesi-protocol.h>
 long long ciclo_anterior = 0;
 
 static char *visual_file_name = "";
@@ -155,6 +156,7 @@ long long ventana_muestreo = 10000;
 int forzar_mshr_test = 0;
 //int fran_latencia;
 //int fran_accesos;
+
 static char *net_debug_file_name = "";
 
 static char *dram_debug_file_name = "";
@@ -624,6 +626,11 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			continue;
 		}
 
+		if(!strcmp(argv[argi],"--avoid-retries"))
+		{
+			AVOID_RETRIES = true;
+			continue;
+		}
 
 		if(!strcmp(argv[argi],"--extra-reports"))
 		{

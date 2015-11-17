@@ -136,6 +136,7 @@ int t1000k = 0;
 long long tiempo_medio = 0;
 long long ciclo_acceso = 0;
 int acumulado = 0;
+bool AVOID_RETRIES = false;
 
 
 int FRAN = 0;
@@ -290,13 +291,16 @@ void mod_handler_nmoesi_load(int event, void *data)
 			return;
 		}
 
-		older_stack = mod_global_in_flight_address(mod, stack);
-		if (older_stack)
+		if(AVOID_RETRIES)
 		{
-			mem_debug("    %lld wait for avoid retry %lld\n",
-				stack->id, older_stack->id);
-			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
-			return;
+			older_stack = mod_global_in_flight_address(mod, stack);
+			if (older_stack)
+			{
+				mem_debug("    %lld wait for avoid retry %lld\n",
+					stack->id, older_stack->id);
+				mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
+				return;
+			}
 		}
 
 		if(stack->client_info && stack->client_info->arch){
@@ -876,13 +880,16 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			return;
 		}
 
-		older_stack = mod_global_in_flight_address(mod, stack);
-		if (older_stack)
+		if(AVOID_RETRIES)
 		{
-			mem_debug("    %lld wait for avoid retry %lld\n",
-				stack->id, older_stack->id);
-			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
-			return;
+			older_stack = mod_global_in_flight_address(mod, stack);
+			if (older_stack)
+			{
+				mem_debug("    %lld wait for avoid retry %lld\n",
+					stack->id, older_stack->id);
+				mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
+				return;
+			}
 		}
 
 		if(stack->client_info && stack->client_info->arch){

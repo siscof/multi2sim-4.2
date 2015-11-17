@@ -20,7 +20,7 @@
 #ifndef MEM_SYSTEM_NMOESI_PROTOCOL_H
 #define MEM_SYSTEM_NMOESI_PROTOCOL_H
 
-
+#include <stdbool.h>
 
 /* NMOESI Event-Driven Simulation */
 
@@ -119,6 +119,7 @@ extern int EV_MOD_NMOESI_MESSAGE_ACTION;
 extern int EV_MOD_NMOESI_MESSAGE_REPLY;
 extern int EV_MOD_NMOESI_MESSAGE_FINISH;
 
+extern bool AVOID_RETRIES;
 
 void mod_handler_nmoesi_find_and_lock(int event, void *data);
 void mod_handler_nmoesi_load(int event, void *data);
