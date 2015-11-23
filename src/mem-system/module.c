@@ -778,11 +778,12 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	}*/
 
 	int index;
-
+	struct mod_stack_t *stack_array[20] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+	stack_array[mod->compute_unit->id] = stack;
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod_in_conflict = list_get(mem_system->mod_list, k);
-		if(mod_in_conflict->level != 1 || mod_in_conflict == mod)
+		if(mod_in_conflict->level != 1 || mod_in_conflict == mod || mod_in_conflict->compute_unit->id == stack->mod->compute_unit->id)
 			continue;
 
 		index = (stack->addr >> mod_in_conflict->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
@@ -790,16 +791,72 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		ret_stack = ret_stack->bucket_list_next)
 		{
 			/* Address matches */
-			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size && (ret_stack->find_and_lock_stack != NULL || (ret_stack->dir_lock && ret_stack->dir_lock->lock)))
-			{
-				free(aux_stack);
-				return ret_stack;
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size){
+
+
+
+				if(ret_stack->waiting_list_master)
+				{
+					struct mod_stack_t *master = ret_stack->waiting_list_master;
+					while(master->waiting_list_master)
+						master = master->waiting_list_master;
+
+					free(aux_stack);
+					if(master == stack)
+						return NULL;
+					else
+						return master;
+				}
+
+				if(ret_stack->waiting_list_head)
+				{
+					free(aux_stack);
+					return ret_stack;
+				}
+
+				if(ret_stack->tiempo_acceso < stack->tiempo_acceso)
+				{
+					free(aux_stack);
+					return ret_stack;
+				}
+
+				if(ret_stack->tiempo_acceso == stack->tiempo_acceso)
+				{
+					if(mod_in_conflict->compute_unit->scalar_cache == mod_in_conflict)
+						stack_array[ret_stack->mod->compute_unit->id+10] = ret_stack;
+					else
+						stack_array[ret_stack->mod->compute_unit->id] = ret_stack;
+						break;
+				}
+				/*if((ret_stack->find_and_lock_stack != NULL || (ret_stack->dir_lock && ret_stack->dir_lock->lock)))
+				{
+					free(aux_stack);
+					return ret_stack;
+				}*/
 			}
 		}
 	}
+	long long mod_priority = asTiming(si_gpu)->cycle;
+	long long i = 0;
+	ret_stack = NULL;
+
+	while(!ret_stack && i < 20)
+	{
+		if(stack_array[mod_priority%20] != stack)
+			ret_stack = stack_array[mod_priority%20];
+		mod_priority++;
+		i++;
+	}
+
+	/*if(ret_stack != stack)
+	{
+		free(aux_stack);
+		return ret_stack;
+	}*/
+
 
 	free(aux_stack);
-	return NULL;
+	return ret_stack;
 }
 
 

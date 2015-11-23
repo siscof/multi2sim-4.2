@@ -29,6 +29,7 @@
 
 void DOUBLE_LINKED_LIST_INSERT_BY_ID(struct mod_stack_t *CONT, struct mod_stack_t *ELEM) {
 	assert(!ELEM->waiting_list_next && !ELEM->waiting_list_prev);
+	ELEM->waiting_list_master = CONT;
 
 	if (!CONT->waiting_list_head && !CONT->waiting_list_tail){
 		CONT->waiting_list_head = ELEM;

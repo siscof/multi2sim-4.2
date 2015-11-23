@@ -151,6 +151,7 @@ struct mod_stack_t
 	int waiting_list_event;  /* Event to schedule when stack is waken up */
 	struct mod_stack_t *waiting_list_prev;
 	struct mod_stack_t *waiting_list_next;
+	struct mod_stack_t *waiting_list_master;
 
 	/* Waiting list for locking a port. */
 	int port_waiting_list_event;
