@@ -745,36 +745,11 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		stack->addr, 0, NULL);
 	struct dir_lock_t *dir_lock;
 
-	if(mod_find_block(mod, stack->addr, &aux_stack->set,
+	/*if(mod_find_block(mod, stack->addr, &aux_stack->set,
 		&aux_stack->way, &aux_stack->tag, &aux_stack->state))
 		{
 		free(aux_stack);
 		return NULL;
-	}
-
-	/*if(mod_find_block(mod, stack->addr, &aux_stack->set,
-		&aux_stack->way, &aux_stack->tag, &aux_stack->state))
-	{
-			free(aux_stack);
-
-			struct dir_lock_t *dir_lock = dir_lock_get(mod->dir, aux_stack->set, aux_stack->way);
-			if(dir_lock->lock)
-				for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
-
-			return ret_stack;
-	}*/
-
-	/*aux_stack->hit = mod_find_block(target_mod, aux_stack->addr, &aux_stack->set,
-		&aux_stack->way, &aux_stack->tag, &aux_stack->state);
-
-	if(aux_stack->hit)
-	{
-		struct dir_lock_t *dir_lock = dir_lock_get(target_mod->dir, aux_stack->set, aux_stack->way);
-		if(dir_lock->lock)
-			for(ret_stack = dir_lock->stack;ret_stack->ret_stack;ret_stack = ret_stack->ret_stack);
-
-		free(aux_stack);
-		return ret_stack;
 	}*/
 
 	int index;
@@ -783,7 +758,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod_in_conflict = list_get(mem_system->mod_list, k);
-		if(mod_in_conflict->level != 1 || mod_in_conflict == mod || mod_in_conflict->compute_unit->id == stack->mod->compute_unit->id)
+		if(mod_in_conflict->level != 1 || mod_in_conflict == mod || mod_in_conflict->compute_unit->id == stack->mod->compute_unit->id || mod_in_conflict == stack->mod->compute_unit->scalar_cache)
 			continue;
 
 		index = (stack->addr >> mod_in_conflict->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
@@ -791,42 +766,40 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		ret_stack = ret_stack->bucket_list_next)
 		{
 			/* Address matches */
-			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> mod_in_conflict->log_block_size){
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size && ret_stack->waiting_list_event == 0 && stack!=ret_stack)
+			{
 
-
-
-				if(ret_stack->waiting_list_master)
+				/*if(ret_stack->waiting_list_event)
 				{
 					struct mod_stack_t *master = ret_stack->waiting_list_master;
-					while(master->waiting_list_master)
-						master = master->waiting_list_master;
 
-					free(aux_stack);
-					if(master == stack)
-						return NULL;
-					else
+					if(master->addr >> master->mod->log_block_size == stack->addr >> stack->mod->log_block_size && master != stack && master->waiting_list_event)
+					{
+						free(aux_stack);
 						return master;
-				}
+					}
+					continue;
+				}*/
 
-				if(ret_stack->waiting_list_head)
+				/*if(ret_stack->waiting_list_head)
+				{
+					free(aux_stack);
+					return ret_stack;
+				}*/
+
+				if(ret_stack->latencias.start < stack->latencias.start )
 				{
 					free(aux_stack);
 					return ret_stack;
 				}
 
-				if(ret_stack->tiempo_acceso < stack->tiempo_acceso)
-				{
-					free(aux_stack);
-					return ret_stack;
-				}
-
-				if(ret_stack->tiempo_acceso == stack->tiempo_acceso)
+				if(ret_stack->latencias.start == stack->latencias.start)
 				{
 					if(mod_in_conflict->compute_unit->scalar_cache == mod_in_conflict)
 						stack_array[ret_stack->mod->compute_unit->id+10] = ret_stack;
 					else
 						stack_array[ret_stack->mod->compute_unit->id] = ret_stack;
-						break;
+					break;
 				}
 				/*if((ret_stack->find_and_lock_stack != NULL || (ret_stack->dir_lock && ret_stack->dir_lock->lock)))
 				{
@@ -847,13 +820,6 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		mod_priority++;
 		i++;
 	}
-
-	/*if(ret_stack != stack)
-	{
-		free(aux_stack);
-		return ret_stack;
-	}*/
-
 
 	free(aux_stack);
 	return ret_stack;
