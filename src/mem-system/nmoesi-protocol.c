@@ -887,7 +887,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			{
 				mem_debug("    %lld wait for avoid retry %lld\n",
 					stack->id, older_stack->id);
-				mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
+				mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 				return;
 			}
 		}
@@ -1548,13 +1548,13 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					ret->port_locked = 0;
 					ret->mshr_locked = 0;
 
-					if(!stack->blocking)
-					{
-						ret->err = 1;
-						mod_stack_return(stack);
-					}else{
+					//if(!stack->blocking)
+					//{
+					//	ret->err = 1;
+					//	mod_stack_return(stack);
+					//}else{
 						mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
-					}
+					//}
 					return;
 				}
 
