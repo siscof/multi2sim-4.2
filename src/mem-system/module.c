@@ -787,6 +787,10 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 					return ret_stack;
 				}*/
 
+				if(ret_stack->access_kind != stack->access_kind){
+					continue;
+				}
+
 				if(ret_stack->latencias.start < stack->latencias.start )
 				{
 					free(aux_stack);
