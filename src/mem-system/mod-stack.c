@@ -84,7 +84,9 @@ void mod_stack_return(struct mod_stack_t *stack)
 	assert(aux == -1);
 
 	free(stack);
-	esim_schedule_event(ret_event, ret_stack, 0);
+	ret_stack->event = ret_event;
+	esim_schedule_mod_stack_event(ret_stack, 0);
+	//esim_schedule_event(ret_event, ret_stack, 0);
 }
 
 

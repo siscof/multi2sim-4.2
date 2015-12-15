@@ -1674,7 +1674,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		cache_access_block(mod->cache, stack->set, stack->way);
 
 		/* Access latency */
-		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
+		esim_schedule_mod_stack_event(stack, mod->dir_latency);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
 		return;
 	}
 
@@ -1702,12 +1704,16 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				EV_MOD_NMOESI_FIND_AND_LOCK_FINISH, stack);
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
-			esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
+			new_stack->event = EV_MOD_NMOESI_EVICT;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
 			return;
 		}
 
 		/* Continue */
-		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_FINISH, stack, 0);
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_FINISH;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_FINISH, stack, 0);
 		return;
 	}
 
