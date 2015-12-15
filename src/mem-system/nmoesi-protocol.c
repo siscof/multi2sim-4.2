@@ -197,7 +197,9 @@ void mod_handler_nmoesi_load(int event, void *data)
   	else
 			mod->compute_unit->compute_device->interval_statistics->scache_load_start++;
 		/* Next event */
-		esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, 0);
+		stack->event = EV_MOD_NMOESI_LOAD_LOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, 0);
 		return;
 	}
 
@@ -316,7 +318,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		new_stack->tiempo_acceso = stack->tiempo_acceso;
 		new_stack->retry = stack->retry;
 		stack->find_and_lock_stack = new_stack;
-		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
+
+		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		esim_schedule_mod_stack_event(new_stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
 
@@ -347,14 +352,19 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
-			esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
+
+			stack->event = EV_MOD_NMOESI_LOAD_LOCK;
+			esim_schedule_mod_stack_event(stack, retry_lat);
+			//esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
 			return;
 		}
 
 		/* Hit */
 		if (stack->state)
 		{
-			esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
+			stack->event = EV_MOD_NMOESI_LOAD_UNLOCK;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
 			estadisticas(1, 0);
 			mod->hits_aux++;
 			/* The prefetcher may have prefetched this earlier and hence
@@ -374,7 +384,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 		new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 		new_stack->request_dir = mod_request_up_down;
-		esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+
+		new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+		esim_schedule_mod_stack_event(new_stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
 
 		/* The prefetcher may be interested in this miss */
 		//prefetcher_access_miss(stack, mod);
@@ -412,7 +425,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
-			esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
+
+			stack->event = EV_MOD_NMOESI_LOAD_LOCK;
+			esim_schedule_mod_stack_event(stack, retry_lat);
+			//esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
 			return;
 		}
 		if(stack->client_info && stack->client_info->arch){
@@ -426,7 +442,9 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->shared ? cache_block_shared : cache_block_exclusive);
 
 		/* Continue */
-		esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
+		stack->event = EV_MOD_NMOESI_LOAD_UNLOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
 		return;
 	}
 
@@ -447,8 +465,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 		/* Impose the access latency before continuing */
-		esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack,
-			mod->latency);
+
+		stack->event = EV_MOD_NMOESI_LOAD_FINISH;
+		esim_schedule_mod_stack_event(stack, mod->latency);
+		//esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack, mod->latency);
 		return;
 	}
 
@@ -795,7 +815,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		add_access(mod->level);
 
 		/* Next event */
-		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, 0);
+		stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, 0);
 		return;
 	}
 
@@ -902,7 +924,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
 		new_stack->retry = stack->retry;
-		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
+
+		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		esim_schedule_mod_stack_event(new_stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
 
@@ -934,7 +959,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
-			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
+
+			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
+			esim_schedule_mod_stack_event(stack, retry_lat);
+			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
 			return;
 		}
 
@@ -947,11 +975,16 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				EV_MOD_NMOESI_NC_STORE_ACTION, stack);
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
-			esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
+
+			new_stack->event = EV_MOD_NMOESI_EVICT;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
 			return;
 		}
 
-		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_ACTION, stack, 0);
+		stack->event = EV_MOD_NMOESI_NC_STORE_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_ACTION, stack, 0);
 		return;
 	}
 
@@ -985,7 +1018,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
-			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
+
+			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
+			esim_schedule_mod_stack_event(stack, retry_lat);
+			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
 			return;
 		}
 
@@ -1000,14 +1036,19 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			 * the lower-level module so it can update its owner field.
 			 * These messages should not be sent if the module is a main
 			 * memory module. */
-			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
+
+			stack->event = EV_MOD_NMOESI_NC_STORE_UNLOCK;
+ 			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
 			return;
 		}
 
 		/* N/S are hit */
 		if (stack->state == cache_block_shared || stack->state == cache_block_noncoherent)
 		{
-			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
+			stack->event = EV_MOD_NMOESI_NC_STORE_UNLOCK;
+ 			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
 		}
 		/* E state must tell the lower-level module to remove this module as an owner */
 		else if (stack->state == cache_block_exclusive)
@@ -1016,7 +1057,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
 			new_stack->message = message_clear_owner;
 			new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
-			esim_schedule_event(EV_MOD_NMOESI_MESSAGE, new_stack, 0);
+			new_stack->event = EV_MOD_NMOESI_MESSAGE;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_MESSAGE, new_stack, 0);
 		}
 		/* Modified and Owned states need to call read request because we've already
 		 * evicted the block so that the lower-level cache will have the latest value
@@ -1029,7 +1072,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			new_stack->nc_write = 1;
 			new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 			new_stack->request_dir = mod_request_up_down;
-			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+			new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
 		}
 
 		return;
@@ -1066,14 +1111,19 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
-			esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
+
+			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
+			esim_schedule_mod_stack_event(stack, retry_lat);
+			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
 			return;
 		}
 
 		stack->latencias.miss = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction;
 
 		/* Continue */
-		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
+		stack->event = EV_MOD_NMOESI_NC_STORE_UNLOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
 		return;
 	}
 
@@ -1099,8 +1149,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 		/* Impose the access latency before continuing */
-		esim_schedule_event(EV_MOD_NMOESI_NC_STORE_FINISH, stack,
-			mod->latency);
+		stack->event = EV_MOD_NMOESI_NC_STORE_FINISH;
+		esim_schedule_mod_stack_event(stack, mod->latency);
+		//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_FINISH, stack,	mod->latency);
 		return;
 	}
 

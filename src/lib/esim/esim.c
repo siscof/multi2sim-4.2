@@ -27,6 +27,7 @@
 #include <lib/util/misc.h>
 #include <lib/util/string.h>
 #include <lib/util/timer.h>
+#include <mem-system/mod-stack.h>
 
 #include "esim.h"
 
@@ -566,6 +567,11 @@ void esim_schedule_event(int event_index, void *data, int cycles)
 		warning("%s: number of in-flight events exceeds %d.\n%s",
 			__FUNCTION__, ESIM_OVERLOAD_EVENTS, esim_err_overload);
 	}
+}
+
+void esim_schedule_mod_stack_event(void *data, int after)
+{
+	esim_schedule_event(((struct mod_stack_t *)data)->event, data, after);
 }
 
 

@@ -174,6 +174,7 @@ struct mod_stack_t
 	int dir_lock_event;
 	struct mod_stack_t *dir_lock_next;
 
+	int event;
 	/* Return stack */
 	struct mod_stack_t *ret_stack;
 	int ret_event;

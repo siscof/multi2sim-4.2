@@ -134,6 +134,8 @@ int esim_register_event_with_name(esim_event_handler_t handler,
  * scheduled. */
 void esim_schedule_event(int event, void *data, int after);
 
+void esim_schedule_mod_stack_event(void *data, int after);
+
 /* Schedule an event for the end of the simulation. This event will be executed
  * during the call to 'esim_process_all_events' at the end of the program. */
 void esim_schedule_end_event(int event, void *data);

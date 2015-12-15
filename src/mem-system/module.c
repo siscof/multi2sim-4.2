@@ -766,7 +766,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		ret_stack = ret_stack->bucket_list_next)
 		{
 			/* Address matches */
-			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size && ret_stack->waiting_list_event == 0 && stack!=ret_stack)
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size && (ret_stack->event == EV_MOD_NMOESI_LOAD_LOCK || ret_stack->event == EV_MOD_NMOESI_NC_STORE_LOCK)&& ret_stack->waiting_list_event == 0 && stack!=ret_stack)
 			{
 
 				/*if(ret_stack->waiting_list_event)
