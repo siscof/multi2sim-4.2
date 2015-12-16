@@ -1974,8 +1974,8 @@ static void m2s_loop(void)
 		 * The argument 'num_timing_active' is interpreted as a flag TRUE/FALSE. */
 		esim_process_events(num_timing_active);
 
-		if(si_gpu != NULL)
-			estadisticas_por_intervalos(asTiming(si_gpu)->cycle);
+		//if(si_gpu != NULL)
+		//	estadisticas_por_intervalos(asTiming(si_gpu)->cycle);
 
 		/* If neither functional nor timing simulation was performed for any architecture,
 		 * it means that all guest contexts finished execution - simulation can end. */
@@ -1995,9 +1995,8 @@ static void m2s_loop(void)
 			m2s_signal_process();
 	}
 
-
-        if(si_gpu != NULL)
-	        estadisticas_por_intervalos(asTiming(si_gpu)->cycle + ventana_muestreo);
+  //if(si_gpu != NULL)
+  //  estadisticas_por_intervalos(asTiming(si_gpu)->cycle + ventana_muestreo);
 
 	/* Restore default signal handlers */
 	signal(SIGABRT, SIG_DFL);

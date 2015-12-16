@@ -37,6 +37,8 @@
 #include "mshr.h"
 //fran
 #include <lib/util/estadisticas.h>
+#include <stdbool.h>
+#include <lib/util/misc.h>
 //#include "directory.h"
 
 /*
@@ -439,6 +441,7 @@ void mem_system_dump_report(void)
 	struct net_t *net;
 	struct mod_t *mod;
 	struct cache_t *cache;
+	bool report_access_lists = false;
 
 	FILE *f;
 
@@ -472,6 +475,10 @@ void mem_system_dump_report(void)
 	for (i = 0; i < list_count(mem_system->mod_list); i++)
 	{
 		mod = list_get(mem_system->mod_list, i);
+
+		if(mod->access_list_count != 0)
+			report_access_lists = true;
+
 		cache = mod->cache;
 		fprintf(f, "[ %s ]\n", mod->name);
 		fprintf(f, "\n");
@@ -559,6 +566,29 @@ void mem_system_dump_report(void)
 		fprintf(f, "\n\n");
 	}
 
+	if(report_access_lists)
+	{
+		fprintf(f,"STALLS REPORTS\n\n");
+		for (i = 0; i < list_count(mem_system->mod_list); i++)
+		{
+			mod = list_get(mem_system->mod_list, i);
+			while(mod->access_list_count)
+			{
+				struct mod_stack_t *stack = mod->access_list_head;
+				fprintf(f,"Stack %lld : \n",stack->id);
+				fprintf(f,"Master_stack = %lld \n",stack->master_stack);
+				fprintf(f,"waiting_list ->");
+
+				while (stack->waiting_list_head)
+				{
+					fprintf(f," %lld",stack->waiting_list_head->id);
+					DOUBLE_LINKED_LIST_REMOVE(stack, waiting, stack->waiting_list_head);
+				}
+				fprintf(f,"\n");
+				DOUBLE_LINKED_LIST_REMOVE(mod, access, mod->access_list_head);
+			}
+		}
+	}
 	/* Dump report for networks */
 	for (i = 0; i < list_count(mem_system->net_list); i++)
 	{

@@ -1417,7 +1417,7 @@ int SIGpuRun(Timing *self)
 	if (esim_finish)
 	{
 		si_device_interval_update(gpu);
-		return TRUE;
+		return FALSE;
 	}
 
 	/* If we're out of work, request more */
