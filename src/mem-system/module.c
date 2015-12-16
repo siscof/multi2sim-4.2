@@ -768,7 +768,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 			/* Address matches */
 			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size && stack != ret_stack)
 			{
-			 	if(ret_stack->event == EV_MOD_NMOESI_LOAD_LOCK || ret_stack->event == EV_MOD_NMOESI_NC_STORE_LOCK || ret_stack->waiting_list_event != 0)
+			 	if(((ret_stack->event == EV_MOD_NMOESI_LOAD_LOCK || ret_stack->event == EV_MOD_NMOESI_NC_STORE_LOCK) && ret_stack->find_and_lock_stack == NULL) || ret_stack->waiting_list_event != 0)
 				{
 					continue;
 				}
@@ -795,11 +795,11 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 					continue;
 				}*/
 
-				if(ret_stack->latencias.start <= stack->latencias.start )
-				{
+				//if(ret_stack->latencias.start <= stack->latencias.start )
+				//{
 					free(aux_stack);
 					return ret_stack;
-				}
+				//}
 
 				/*if(ret_stack->latencias.start == stack->latencias.start)
 				{
