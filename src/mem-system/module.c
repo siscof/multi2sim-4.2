@@ -766,8 +766,12 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		ret_stack = ret_stack->bucket_list_next)
 		{
 			/* Address matches */
-			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size && (ret_stack->event != EV_MOD_NMOESI_LOAD_LOCK && ret_stack->event != EV_MOD_NMOESI_NC_STORE_LOCK) && ret_stack->waiting_list_event == 0 && stack!=ret_stack)
+			if (ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size && stack != ret_stack)
 			{
+			 	if(ret_stack->event == EV_MOD_NMOESI_LOAD_LOCK || ret_stack->event == EV_MOD_NMOESI_NC_STORE_LOCK || ret_stack->waiting_list_event != 0)
+				{
+					continue;
+				}
 
 				/*if(ret_stack->waiting_list_event)
 				{
@@ -787,29 +791,30 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 					return ret_stack;
 				}*/
 
-				if(ret_stack->access_kind != stack->access_kind){
+				/*if(ret_stack->access_kind != stack->access_kind){
 					continue;
-				}
+				}*/
 
-				if(ret_stack->latencias.start < stack->latencias.start )
+				if(ret_stack->latencias.start <= stack->latencias.start )
 				{
 					free(aux_stack);
 					return ret_stack;
 				}
 
-				if(ret_stack->latencias.start == stack->latencias.start)
+				/*if(ret_stack->latencias.start == stack->latencias.start)
 				{
 					if(mod_in_conflict->compute_unit->scalar_cache == mod_in_conflict)
 						stack_array[ret_stack->mod->compute_unit->id+10] = ret_stack;
 					else
 						stack_array[ret_stack->mod->compute_unit->id] = ret_stack;
 					break;
-				}
+				}*/
 				/*if((ret_stack->find_and_lock_stack != NULL || (ret_stack->dir_lock && ret_stack->dir_lock->lock)))
 				{
 					free(aux_stack);
 					return ret_stack;
 				}*/
+
 			}
 		}
 	}
@@ -817,13 +822,13 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	long long i = 0;
 	ret_stack = NULL;
 
-	while(!ret_stack && i < 20)
+	/*while(!ret_stack && i < 20)
 	{
 		if(stack_array[mod_priority%20] != stack)
 			ret_stack = stack_array[mod_priority%20];
 		mod_priority++;
 		i++;
-	}
+	}*/
 
 	free(aux_stack);
 	return ret_stack;
