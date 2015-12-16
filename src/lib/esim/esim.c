@@ -629,6 +629,10 @@ void esim_process_events(int forward)
 	struct esim_event_t *event;
 	struct esim_event_info_t *event_info;
 
+	struct list_t *list;
+
+	int index;
+
 	/* Check if any action is actually needed. Events will be checked and
 	 * global time will be advanced only if argument 'forward' is set or
 	 * there are any pending events to process. */
@@ -637,6 +641,8 @@ void esim_process_events(int forward)
 		esim_no_forward_cycles++;
 		return;
 	}
+
+ 	list = list_create_with_size(1);
 
 	/* Process events scheduled for this cycle */
 	while (1)
@@ -650,14 +656,25 @@ void esim_process_events(int forward)
 		if (when > esim_time)
 			break;
 
-		/* Process it */
 		heap_extract(esim_event_heap, NULL);
+		list_add(list, event);
+
+	}
+
+	while(list_count(list))
+	{
+		/* extract random event */
+		//random
+		index = rand() % list_count(list);
+		event = list_remove_at(list, index);
+
+		/* Process it */
 		event_info = list_get(esim_event_info_list, event->id);
 		assert(event_info && event_info->handler);
 		event_info->handler(event->id, event->data);
 		esim_event_free(event);
 	}
-
+	list_free(list);
 	/* Next simulation cycle */
 	esim_time += esim_cycle_time;
 }
