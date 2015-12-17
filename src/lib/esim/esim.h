@@ -22,6 +22,7 @@
 
 #include <stdint.h>
 #include <stdio.h>
+#include <stdbool.h>
 
 
 /*
@@ -87,6 +88,8 @@ extern long long esim_no_forward_cycles;
 
 /* Empty event. When this event is scheduled, it will be ignored */
 extern int ESIM_EV_NONE;
+
+extern bool ESIM_PROCESS_EV_IN_ORDER;
 
 /* Procedure to handle an event */
 typedef void (*esim_event_handler_t)(int event, void *data);

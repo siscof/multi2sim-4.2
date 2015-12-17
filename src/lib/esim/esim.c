@@ -665,9 +665,13 @@ void esim_process_events(int forward)
 	{
 		/* extract random event */
 		//random
-		index = rand() % list_count(list);
-		event = list_remove_at(list, index);
-
+		if(ESIM_PROCESS_EV_IN_ORDER)
+		{
+			event = list_dequeue(list);
+		}else{
+			index = rand() % list_count(list);
+			event = list_remove_at(list, index);
+		}
 		/* Process it */
 		event_info = list_get(esim_event_info_list, event->id);
 		assert(event_info && event_info->handler);

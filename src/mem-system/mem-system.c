@@ -575,17 +575,23 @@ void mem_system_dump_report(void)
 			while(mod->access_list_count)
 			{
 				struct mod_stack_t *stack = mod->access_list_head;
+				struct mod_stack_t *aux_stack;
 				fprintf(f,"Stack %lld : \n",stack->id);
-				fprintf(f,"Master_stack = %lld \n",stack->master_stack);
+
+				if(stack->master_stack){
+					fprintf(f,"Master_stack = %lld \n",stack->master_stack->id);
+				}
+
 				fprintf(f,"waiting_list ->");
 
-				while (stack->waiting_list_head)
+				while (stack->waiting_list_count)
 				{
 					fprintf(f," %lld",stack->waiting_list_head->id);
-					DOUBLE_LINKED_LIST_REMOVE(stack, waiting, stack->waiting_list_head);
+					aux_stack = stack->waiting_list_head;
+					DOUBLE_LINKED_LIST_REMOVE(stack, waiting, aux_stack);
 				}
-				fprintf(f,"\n");
-				DOUBLE_LINKED_LIST_REMOVE(mod, access, mod->access_list_head);
+				fprintf(f,"\n\n");
+				DOUBLE_LINKED_LIST_REMOVE(mod, access, stack);
 			}
 		}
 	}

@@ -78,6 +78,8 @@
 #include <mem-system/mshr.h>
 #include <stdbool.h>
 #include <mem-system/nmoesi-protocol.h>
+#include <stdbool.h>
+
 long long ciclo_anterior = 0;
 
 static char *visual_file_name = "";
@@ -154,6 +156,7 @@ int flag_coalesce_gpu_enabled = 0;
 int flag_no_blocking_store = 0;
 long long ventana_muestreo = 10000;
 int forzar_mshr_test = 0;
+bool ESIM_PROCESS_EV_IN_ORDER = true;
 //int fran_latencia;
 //int fran_accesos;
 
@@ -675,6 +678,13 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
     if (!strcmp(argv[argi], "--mshr-control"))
     {
     	flag_mshr_dynamic_enabled = 1;
+    	continue;
+    }
+
+		/* Generate events in random order */
+    if (!strcmp(argv[argi], "--esim-ev-random"))
+    {
+    	ESIM_PROCESS_EV_IN_ORDER = false;
     	continue;
     }
 
