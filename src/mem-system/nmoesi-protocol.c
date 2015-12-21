@@ -46,6 +46,7 @@ int EV_MOD_NMOESI_LOAD;
 int EV_MOD_NMOESI_LOAD_SEND;
 int EV_MOD_NMOESI_LOAD_RECEIVE;
 int EV_MOD_NMOESI_LOAD_LOCK;
+int EV_MOD_NMOESI_LOAD_LOCK2;
 int EV_MOD_NMOESI_LOAD_ACTION;
 int EV_MOD_NMOESI_LOAD_MISS;
 int EV_MOD_NMOESI_LOAD_UNLOCK;
@@ -70,6 +71,7 @@ int EV_MOD_NMOESI_NC_STORE;
 int EV_MOD_NMOESI_NC_STORE_SEND;
 int EV_MOD_NMOESI_NC_STORE_RECEIVE;
 int EV_MOD_NMOESI_NC_STORE_LOCK;
+int EV_MOD_NMOESI_NC_STORE_LOCK2;
 int EV_MOD_NMOESI_NC_STORE_WRITEBACK;
 int EV_MOD_NMOESI_NC_STORE_ACTION;
 int EV_MOD_NMOESI_NC_STORE_MISS;
@@ -292,6 +294,22 @@ void mod_handler_nmoesi_load(int event, void *data)
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
 			return;
 		}
+
+		stack->event = EV_MOD_NMOESI_LOAD_LOCK2;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK2, new_stack, 0);
+		return;
+	}
+
+	if (event == EV_MOD_NMOESI_LOAD_LOCK2)
+	{
+		struct mod_stack_t *older_stack;
+
+		mem_debug("  %lld %lld 0x%x %s load lock2\n", esim_time, stack->id,
+			stack->addr, mod->name);
+		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_lock2\"\n",
+			stack->id, mod->name);
+
 
 		if(AVOID_RETRIES)
 		{
@@ -901,6 +919,21 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
 		}
+
+		stack->event = EV_MOD_NMOESI_NC_STORE_LOCK2;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK2, stack, 0);
+		return;
+		}
+
+		if (event == EV_MOD_NMOESI_NC_STORE_LOCK2)
+		{
+			struct mod_stack_t *older_stack;
+
+			mem_debug("  %lld %lld 0x%x %s nc store lock2\n", esim_time, stack->id,
+				stack->addr, mod->name);
+			mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_lock2\"\n",
+				stack->id, mod->name);
 
 		if(AVOID_RETRIES)
 		{
