@@ -39,9 +39,9 @@ struct si_work_group_t
 	/* Pointers to wavefronts and work-items */
 	int work_item_count;
 	int wavefront_count;
-	struct si_work_item_t **work_items;  /* Pointer to first work_item in 
+	struct si_work_item_t **work_items;  /* Pointer to first work_item in
 						'kernel->work_items' */
-	struct si_wavefront_t **wavefronts;  /* Pointer to first wavefront in 
+	struct si_wavefront_t **wavefronts;  /* Pointer to first wavefront in
 						'kernel->wavefronts' */
 	struct si_wavefront_pool_t *wavefront_pool;
 
@@ -52,13 +52,16 @@ struct si_work_group_t
 	struct mem_t *lds_module;
 
 	/* Statistics */
+	long long op_counter;
+	long long start_cycle;
+	long long end_cycle;
 	long long int sreg_read_count;
 	long long int sreg_write_count;
 	long long int vreg_read_count;
 	long long int vreg_write_count;
 };
 
-struct si_work_group_t *si_work_group_create(unsigned int work_group_id, 
+struct si_work_group_t *si_work_group_create(unsigned int work_group_id,
 	struct si_ndrange_t *ndrange);
 void si_work_group_free(struct si_work_group_t *work_group);
 void si_work_group_dump(struct si_work_group_t *work_group, FILE *f);

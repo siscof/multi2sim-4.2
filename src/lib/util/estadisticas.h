@@ -143,6 +143,7 @@ struct si_gpu_unit_stats
 	long long v_mem_full;
 	long long interval_cycles;
 	long long gpu_idle;
+	long long work_group_op_counter;
 
 	long long wait_for_mem_time;
 	long long wait_for_mem_counter;

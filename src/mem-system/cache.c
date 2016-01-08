@@ -143,7 +143,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 	/* Derived fields */
 	assert(!(num_sets & (num_sets - 1)));
 	assert(!(block_size & (block_size - 1)));
-	assert(!(assoc & (assoc - 1)));
+	//assert(!(assoc & (assoc - 1)));
 	cache->log_block_size = log_base2(block_size);
 	cache->block_mask = block_size - 1;
 

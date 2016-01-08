@@ -28,8 +28,8 @@ extern int si_cu_spatial_report_active  ;
 extern int si_device_spatial_report_active  ;
 
 
-void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit);
-void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit);
+void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop);
+void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit,struct si_uop_t *uop);
 void si_vector_memory_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop);
 void si_simd_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop);
 

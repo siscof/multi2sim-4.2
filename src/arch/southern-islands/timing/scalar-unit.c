@@ -615,7 +615,7 @@ void si_scalar_unit_decode(struct si_scalar_unit_t *scalar_unit)
 		list_enqueue(scalar_unit->decode_buffer, uop);
 
 		if (si_spatial_report_active)
-			si_scalar_alu_report_new_inst(scalar_unit->compute_unit);
+			si_scalar_alu_report_new_inst(scalar_unit->compute_unit, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"su-d\"\n", uop->id_in_compute_unit,

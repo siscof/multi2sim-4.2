@@ -289,6 +289,7 @@ void si_compute_unit_map_work_group(struct si_compute_unit_t *compute_unit,
 
 	/* Stats */
 	compute_unit->mapped_work_groups++;
+	work_group->start_cycle = asTiming(compute_unit->compute_device)->cycle;
 	if (si_spatial_report_active)
 		si_report_mapped_work_group(compute_unit);
 
@@ -300,6 +301,7 @@ void si_compute_unit_unmap_work_group(struct si_compute_unit_t *compute_unit,
 	struct si_work_group_t *work_group)
 {
 	long work_group_id;
+	si_work_group_report(work_group);
 
 	/* Add work group register access statistics to compute unit */
 	compute_unit->sreg_read_count += work_group->sreg_read_count;

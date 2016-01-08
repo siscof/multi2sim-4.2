@@ -83,10 +83,19 @@ int str_map_string_err_msg(struct str_map_t *map, char *s, char *err_msg)
 	value = str_map_string_err(map, s, &err);
 	if (!err)
 		return value;
-	
+
 	/* On error, dump fatal message */
 	str_map_fatal(map, err_msg);
 	return 0;
+}
+
+char* str_concat(char *s1, char *s2)
+{
+    char *result = xmalloc(strlen(s1)+strlen(s2)+1);//+1 for the zero-terminator
+    //in real code you would check for errors in malloc here
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
 }
 
 
@@ -125,7 +134,7 @@ int str_map_string_case_err_msg(struct str_map_t *map, char *s, char *err_msg)
 	value = str_map_string_case_err(map, s, &err);
 	if (!err)
 		return value;
-	
+
 	/* On error, dump fatal message */
 	str_map_fatal(map, err_msg);
 	return 0;
@@ -256,7 +265,7 @@ char *str_token_list_first(struct list_t *token_list)
 	/* No token, return empty string */
 	if (!list_count(token_list))
 		return "";
-	
+
 	/* Return first token */
 	return (char *) list_get(token_list, 0);
 }
@@ -327,7 +336,7 @@ static struct str_map_t str_error_map =
 /* Return the error message associated with an error code. */
 char *str_error(int err)
 {
-	
+
 	return str_map_value(&str_error_map, err);
 }
 
@@ -348,7 +357,7 @@ void str_single_spaces(char *dest, int size, char *src)
 	/* Remove initial spaces */
 	while (isspace(*src))
 		src++;
-	
+
 	/* Remove duplicated and final spaces */
 	prev_space = 0;
 	while (*src && size > 1)
@@ -462,7 +471,7 @@ void str_trim(char *dest, int size, char *src)
 	right_trim = 0;
 	for (i = len - 1; i >= 0 && isspace(src[i]); i--)
 		right_trim++;
-	
+
 	/* Entire string is empty */
 	assert(right_trim <= len);
 	if (right_trim == len)
@@ -475,7 +484,7 @@ void str_trim(char *dest, int size, char *src)
 	left_trim = 0;
 	for (i = 0; i < len && isspace(src[i]); i++)
 		left_trim++;
-	
+
 	/* New string length */
 	new_len = len - left_trim - right_trim;
 	assert(new_len > 0);
@@ -920,7 +929,7 @@ void str_int_to_alnum(char *str, int size, unsigned int value)
 	/* Nothing if no room in output string */
 	if (!size)
 		return;
-	
+
 	/* Parse value */
 	while (value && len < size - 1)
 	{
@@ -1077,4 +1086,3 @@ char *str_free(char *str)
 	/* Return new value for string, always NULL */
 	return NULL;
 }
-

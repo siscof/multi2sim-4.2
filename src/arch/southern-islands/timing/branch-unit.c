@@ -343,7 +343,7 @@ void si_branch_unit_decode(struct si_branch_unit_t *branch_unit)
 		list_enqueue(branch_unit->decode_buffer, uop);
 
 		if (si_spatial_report_active)
-			si_branch_report_new_inst(branch_unit->compute_unit);
+			si_branch_report_new_inst(branch_unit->compute_unit, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"bu-d\"\n", uop->id_in_compute_unit,

@@ -49,7 +49,7 @@ void str_map_value_buf(struct str_map_t *map, int value, char *buf, int size);
 
 void str_map_flags(struct str_map_t *map, int flags, char *out, int length);
 
-
+char* str_concat(char *s1, char *s2);
 
 
 /*
@@ -150,4 +150,3 @@ char *str_free(char *str);
 
 
 #endif
-
