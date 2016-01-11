@@ -128,7 +128,7 @@ void si_cu_spatial_report_init()
 
 void si_device_spatial_report_init(SIGpu *device)
 {
-	fprintf(device_spatial_report_file,"op_counter,interval_cycles,esim_time\n");
+	fprintf(device_spatial_report_file_wg,"op_counter,interval_cycles,esim_time\n");
 
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 
