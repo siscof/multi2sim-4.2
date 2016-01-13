@@ -20,6 +20,7 @@
 #include <arch/southern-islands/emu/emu.h>
 #include <lib/util/list.h>
 #include <lib/util/repos.h>
+#include <stdlib.h>
 
 #include "uop.h"
 

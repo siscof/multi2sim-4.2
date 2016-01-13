@@ -20,6 +20,10 @@
 #ifndef ARCH_SOUTHERN_ISLANDS_SPATIAL_REPORT_H
 #define ARCH_SOUTHERN_ISLANDS_SPATIAL_REPORT_H
 
+
+#include <arch/southern-islands/emu/work-group.h>
+#include "gpu.h"
+
 /*
  * Public variable
  */
@@ -55,6 +59,8 @@ void si_device_interval_update(SIGpu *device);
 void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit);
 void si_device_spatial_report_dump(SIGpu *device);
 
+void si_work_group_report(struct si_work_group_t *wg);
+
 void si_spatial_report_done();
 void si_cu_spatial_report_done();
 void si_device_spatial_report_done();
@@ -66,6 +72,7 @@ void si_device_spatial_report_init();
 void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long cycles);
 
 void si_report_gpu_idle(SIGpu *device);
+void si_device_interval_update_force(SIGpu *device);
 
 
 #endif

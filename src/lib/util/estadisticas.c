@@ -740,7 +740,7 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	long long efectivosL1 = (mem_stats.mod_level[1].accesses - instrucciones_mem_stats_anterior.mod_level[1].accesses) - (mem_stats.mod_level[1].coalesce - instrucciones_mem_stats_anterior.mod_level[1].coalesce);
     long long efectivosL2 = (mem_stats.mod_level[2].accesses - instrucciones_mem_stats_anterior.mod_level[2].accesses) - (mem_stats.mod_level[2].coalesce - instrucciones_mem_stats_anterior.mod_level[2].coalesce);
 
-	SIGpu *gpu = asSIGpu(arch_southern_islands->timing);
+	//SIGpu *gpu = asSIGpu(arch_southern_islands->timing);
 /*
 	int compute_unit_id = 0;
 	int work_groups_running = 0;

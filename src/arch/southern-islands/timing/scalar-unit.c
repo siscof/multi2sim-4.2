@@ -41,7 +41,6 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 	int list_index = 0;
 	unsigned int barrier_complete;
 	int wavefront_id;
-	si_units unit;
 
 	/* Process completed instructions */
 	list_entries = list_count(scalar_unit->write_buffer);
@@ -83,7 +82,6 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			assert(uop->wavefront_pool_entry->lgkm_cnt > 0);
 			uop->wavefront_pool_entry->lgkm_cnt--;
 			gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);
-			unit = s_mem_u;
 		}
 
 		/* Access complete, remove the uop from the queue */
@@ -94,7 +92,6 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 		if (!uop->scalar_mem_read)
 		{
 			uop->wavefront_pool_entry->ready = 1;
-			unit = scalar_u;
 		}
 
 		/* Check for "wait" instruction */

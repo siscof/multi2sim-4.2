@@ -40,10 +40,6 @@ void si_simd_complete(struct si_simd_t *simd)
 	int list_index = 0;
 	int i;
 
-    struct si_work_item_t *work_item;
-    int work_item_id;
-
-
 	list_entries = list_count(simd->exec_buffer);
 
 	if(list_entries == 0)

@@ -304,5 +304,13 @@ void print_cache_states(long long *results);
 void statistics_event_init(int interval);
 void statistics_event();
 void add_mem_access_finished();
+void add_wavefront_scalar_latencias_load(struct si_wavefront_t *wf);
+void add_cycle_vmb_blocked(int compute_unit_id, int blocked_by_store);
+void add_wavefront_latencias_load(struct si_wavefront_t *wf);
+void add_inst_to_vmb();
+void add_inst_to_vmb();
+void add_coalesce_load(int level);
+void add_coalesce_store(int level);
+
 
 #endif

@@ -40,10 +40,6 @@ void si_lds_complete(struct si_lds_t *lds)
 	int i;
 	int list_index = 0;
 
-        struct si_work_item_t *work_item;
-        int work_item_id;
-
-
 	/* Process completed memory instructions */
 	list_entries = list_count(lds->write_buffer);
 

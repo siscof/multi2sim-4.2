@@ -48,11 +48,6 @@
 void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 {
 	struct si_uop_t *uop = NULL;
-
-        //struct si_work_item_uop_t *work_item_uop;
-        struct si_work_item_t *work_item;
-        int work_item_id;
-
 	int list_entries;
 	int i;
 	int list_index = 0;
@@ -329,7 +324,6 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				if (flag_coalesce_gpu_enabled && master_stack)
 				{
 					unsigned int shift = (addr & (mod->sub_block_size - 1));
-					int tag = addr & ~(mod->sub_block_size - 1);
 					long long mask = 0;
 					if(bytes == 0)
 						bytes = 64;

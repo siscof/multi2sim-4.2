@@ -21,8 +21,8 @@
 #include <lib/util/debug.h>
 #include <lib/util/file.h>
 #include <lib/util/string.h>
+#include <string.h>
 
-#include "gpu.h"
 #include "cycle-interval-report.h"
 #include "uop.h"
 
@@ -31,9 +31,6 @@
 
 #include <lib/util/estadisticas.h>
 #include <mem-system/mshr.h>
-#include <arch/southern-islands/emu/work-group.h>
-
-
 
 int si_spatial_report_active = 0 ;
 int si_cu_spatial_report_active = 0 ;
@@ -186,7 +183,7 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 			compute_unit->interval_cycle);
 	}else if(spatial_profiling_format == 1){
 		fprintf(f,
-			"%lld,%lld,%lld,%lld,%lld,%lld\n",
+			"%d,%lld,%lld,%d,%lld,%lld\n",
 			compute_unit->id,
 			compute_unit->interval_mapped_work_groups,
 			compute_unit->interval_unmapped_work_groups,
@@ -464,7 +461,7 @@ void si_device_spatial_report_dump(SIGpu *device)
         if(device->compute_units[0]->vector_cache->mshr->testing)
             fprintf(f,"nan,");
         else
-            fprintf(f, "%lld,", device->compute_units[0]->vector_cache->mshr->size);
+            fprintf(f, "%d,", device->compute_units[0]->vector_cache->mshr->size);
 
 	// memory mem_acc_start mem_acc_end mem_acc_lat load_start load_end load_lat write_start write_end write_lat
 	fprintf(f, "%lld,", device->interval_statistics->memory.accesses_started);
