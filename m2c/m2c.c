@@ -18,6 +18,7 @@
  */
 
 #include <getopt.h>
+#include <unistd.h>
 
 #include <m2c/amd/amd.h>
 #include <m2c/gl/gl.h>
@@ -29,6 +30,9 @@
 #include <lib/util/list.h>
 #include <lib/util/string.h>
 
+#include "cl2llvm/cl2llvm.h"
+#include "llvm2si/llvm2si.h"
+#include "frm2bin/frm2bin.h"
 
 
 /*
@@ -172,7 +176,7 @@ static void m2c_process_option(const char *option, char *optarg)
 	/*
 	 * Native AMD related options
 	 */
-	
+
 	if (!strcmp(option, "amd"))
 	{
 		m2c_amd_run = 1;
@@ -256,7 +260,7 @@ static void m2c_process_option(const char *option, char *optarg)
 		gl_geo_shader = optarg;
 		return;
 	}
-	
+
 	if (!strcmp(option, "help") || !strcmp(option, "h"))
 	{
 		printf("%s", syntax);
@@ -343,7 +347,7 @@ static void m2c_read_command_line(int argc, char **argv)
 		{ "si2bin", no_argument, 0, 0 },
 		{ 0, 0, 0, 0 }
 	};
-	
+
 	/* No arguments given */
 	if (argc == 1)
 	{
@@ -353,7 +357,7 @@ static void m2c_read_command_line(int argc, char **argv)
 		printf("\n");
 		exit(0);
 	}
-	
+
 	/* Process options */
 	while ((opt = getopt_long(argc, argv, "ho:D:EO:m:", long_options,
 			&option_index)) != -1)
@@ -746,4 +750,3 @@ out:
 	mhandle_done();
 	return 0;
 }
-

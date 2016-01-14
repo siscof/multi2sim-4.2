@@ -22,7 +22,7 @@
 #include "basic-block.h"
 #include "node.h"
 
-
+#include <lib/util/debug.h>
 /*
  * Class 'BasicBlock'
  */
@@ -46,4 +46,3 @@ void BasicBlockCreate(BasicBlock *self, LeafNode *node)
 void BasicBlockDestroy(BasicBlock *self)
 {
 }
-

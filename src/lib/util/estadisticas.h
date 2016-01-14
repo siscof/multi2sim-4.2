@@ -298,6 +298,7 @@ void add_nc_store_writeback_retry(int level);
 void add_nc_store_action_retry(int level);
 void add_nc_store_miss_retry(int level);
 void add_retry_time_lost(struct mod_stack_t *stack);
+void add_retry(struct mod_stack_t *stack, retries_kinds_t retry_type);
 void accu_retry_time_lost(struct mod_stack_t *stack);
 void add_eviction(int level);
 void print_cache_states(long long *results);
@@ -311,6 +312,8 @@ void add_inst_to_vmb();
 void add_inst_to_vmb();
 void add_coalesce_load(int level);
 void add_coalesce_store(int level);
+void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf);
+void add_cache_states(int state, int level);
 
 
 #endif

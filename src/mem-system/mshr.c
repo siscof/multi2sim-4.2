@@ -112,9 +112,12 @@ void mshr_free(struct mshr_t *mshr)
 
 int temporizador_reinicio = 3;
 
-void mshr_control(int latencia, int opc)
+void mshr_control(int event, void *data)
 {
-  int flag = 1;
+/* fixme latencia and opc dont do anything */
+	int latencia = 0, opc = 0;
+
+	fatal("mshr_control is broken");
 	int accion = 0;
   struct mod_t *mod;
 	int mshr_size;
@@ -246,7 +249,6 @@ void mshr_control(int latencia, int opc)
 
 void mshr_control2()
 {
-    int flag = 1;
     int accion = 0;
     struct mod_t *mod;
     int mshr_size;
@@ -305,9 +307,9 @@ void mshr_control2()
 long long desplazamiento = 0;
 void mshr_test_sizes(){
 	struct mod_t *mod;
-	int testing_cu = 0;
-	int max_mshr_size;
-	int min_mshr_size = 4;
+	//int testing_cu = 0;
+	//int max_mshr_size;
+	//int min_mshr_size = 4;
 	int size[] = {8, 16, 16, 16, 32, 32, 32,64,128,256};
 
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
@@ -316,7 +318,7 @@ void mshr_test_sizes(){
 
 		if(mod_is_vector_cache(mod) && mod->level == 1)
 		{
-			mod->compute_unit->compute_device->opc ;
+			//mod->compute_unit->compute_device->opc ;
 			float opc_actual = mod->compute_unit->compute_device->op / (float)mod->compute_unit->compute_device->cycles;
 			if ((mod->compute_unit->compute_device->opc * 0.95) < opc_actual)
 			{
@@ -361,9 +363,9 @@ void mshr_test_sizes(){
 		{
 
 
-			max_mshr_size = mod->dir->ysize * mod->dir->xsize;
+			//max_mshr_size = mod->dir->ysize * mod->dir->xsize;
 
-			int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
+			//int mshr_interval = max_mshr_size / si_gpu_num_compute_units;
 
 			mod->mshr->testing = 1;
 			mod->mshr->size = size[mod->compute_unit->id%10];
@@ -400,7 +402,7 @@ void mshr_test_sizes(){
 int mshr_evaluar_test(){
 
 	int opc = 0;
-	int testing_cu = 0;
+	//int testing_cu = 0;
 	int best_mshr_size = 4;
 	struct mod_t *mod;
 

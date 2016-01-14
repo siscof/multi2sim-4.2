@@ -63,7 +63,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 				stack_locked = stack_locked->ret_stack;
 			//transaction is blocked
 			stack_locked->transaction_blocked = 1;
-			stack_locked->stack_superior == stack;
+			stack_locked->stack_superior = stack;
 
 		}else if(stack->mod->level != 1){
 			//else down-up
@@ -73,7 +73,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 			stack_locked->transaction_blocking = 1;
 			//stack->high_priority_transaction = 1;
 			dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
-			printf("stack_id = %d  |  mod_level = %d  |  mod = %d  |  blocking = %d\n",stack->id,stack->mod->level, mod->level, stack->find_and_lock_stack->blocking);
+			printf("stack_id = %lld  |  mod_level = %d  |  mod = %d  |  blocking = %d\n",stack->id,stack->mod->level, mod->level, stack->find_and_lock_stack->blocking);
 			stack->transaction_idle = 0;
 			stack->find_and_lock_stack->transaction_idle = 0;
 		}
@@ -97,7 +97,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 		if(stack_locked && stack_locked->transaction_blocked && stack_locked->transaction_blocking)
 		//if(!stack->find_and_lock_stack->blocking)
 		{
-			printf("REMOVING -> stack_id = %d  |  mod_level = %d  |  mod = %d",stack_locked->id,stack_locked->mod->level, mod->level);
+			printf("REMOVING -> stack_id = %lld  |  mod_level = %d  |  mod = %d",stack_locked->id,stack_locked->mod->level, mod->level);
 			if(stack_locked->find_and_lock_stack)
 				printf("  |  blocking = %d", stack_locked->find_and_lock_stack->blocking);
 			printf("\n");
@@ -187,7 +187,7 @@ void cc_resume_transaction()
 
 }
 
-void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *stack)
+/*void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *stack)
 {
 	int colision_detected = -1;
 
@@ -205,7 +205,7 @@ void cc_search_colisions(struct coherence_controller_t *cc, struct mod_stack_t *
 		}
 	}
 	//añadir tareas a la stack principal. esto deberia incrementar el memory level parallelism
-}
+}*/
 
 // este metodo debe liberar el directorio
 int cc_finish_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack)

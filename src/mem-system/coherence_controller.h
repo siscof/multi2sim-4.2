@@ -29,5 +29,6 @@ struct mod_stack_t *cc_search_transaction(struct coherence_controller_t *cc,int 
 void cc_resume_transaction();
 void cc_pause_transaction();
 void cc_remove_stack(struct coherence_controller_t *cc, struct mod_stack_t *stack);
+int cc_search_transaction_index(struct coherence_controller_t *cc,int stack_id);
 
 #endif /* MEM_SYSTEM_COHERENCE_CONTROLLER_H */

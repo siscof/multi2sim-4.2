@@ -24,6 +24,7 @@
 #include <lib/util/linked-list.h>
 #include <lib/util/list.h>
 #include <lib/util/string.h>
+#include <lib/util/hash-table.h>
 
 #include "ctree.h"
 
@@ -77,7 +78,7 @@ static void ctree_process_command(char *string)
 	command = list_get(token_list, 0);
 	if (!command)
 		fatal("%s: empty command", __FUNCTION__);
-	
+
 	/* Process command */
 	if (!strcasecmp(command, "LoadCTree"))
 	{
@@ -97,7 +98,7 @@ static void ctree_process_command(char *string)
 		/* Open control tree INI file */
 		ctree_config = config_create(file_name);
 		config_load(ctree_config);
-		
+
 		/* Load control tree */
 		ctree = new(CTree, ctree_name);
 		CTreeReadFromConfig(ctree, ctree_config, ctree_name);
@@ -208,7 +209,7 @@ static void ctree_process_command(char *string)
 	}
 	else
 		fatal("%s: invalid command: %s", __FUNCTION__, command);
-	
+
 	/* Free tokens */
 	str_token_list_free(token_list);
 }
@@ -245,7 +246,7 @@ static void ctree_read_config(void)
 		/* Process command */
 		ctree_process_command(value);
 	}
-	
+
 	/* Close configuration file */
 	config_check(config);
 	config_free(config);
@@ -890,7 +891,7 @@ static AbstractNodeRegion CTreeRegion(CTree *self, Node *node,
 	}
 
 
-	
+
 	/*
 	 * Cyclic regions
 	 */
@@ -899,7 +900,7 @@ static AbstractNodeRegion CTreeRegion(CTree *self, Node *node,
 	CTreeReachUnder(self, node, node_list);
 	if (!node_list->count)
 		return AbstractNodeRegionInvalid;
-	
+
 
 	/*** 1. While-loop ***/
 	if (node_list->count == 2 && node->succ_list->count == 2)
@@ -965,7 +966,7 @@ static AbstractNodeRegion CTreeRegion(CTree *self, Node *node,
 		}
 	}
 
-	
+
 	/* Nothing identified */
 	linked_list_clear(node_list);
 	return AbstractNodeRegionInvalid;
@@ -1040,7 +1041,7 @@ void CTreeDump(Object *self, FILE *f)
 	ctree = asCTree(self);
 	fprintf(f, "\nControl tree (edges: +forward, -back, *cross, "
 			"|tree, =>entry)\n");
-	
+
 	/* Dump all nodes */
 	iter = linked_list_iter_create(ctree->node_list);
 	LINKED_LIST_ITER_FOR_EACH(iter)
@@ -1401,7 +1402,7 @@ void CTreeReadFromConfig(CTree *self, struct config_t *config, char *name)
 	char *node_name;
 	char *kind_str;
 	char *region_str;
-	
+
 	enum node_kind_t kind;
 	AbstractNodeRegion region;
 
@@ -1430,7 +1431,7 @@ void CTreeReadFromConfig(CTree *self, struct config_t *config, char *name)
 			str_token_list_free(token_list);
 			continue;
 		}
-		
+
 		/* Get node properties */
 		node_name = list_get(token_list, 3);
 		kind_str = config_read_string(config, section, "Kind", "Leaf");
@@ -1541,7 +1542,7 @@ void CTreeCompare(CTree *self, CTree *ctree2)
 	if (strcmp(self->entry_node->name, ctree2->entry_node->name))
 		fatal("'%s' vs '%s': entry nodes differ", self->name,
 				ctree2->name);
-	
+
 	/* Check that all nodes in tree 1 are in tree 2 */
 	LINKED_LIST_FOR_EACH(self->node_list)
 	{
@@ -1591,4 +1592,3 @@ void ctree_done(void)
 		delete(linked_list_get(ctree_list));
 	linked_list_free(ctree_list);
 }
-

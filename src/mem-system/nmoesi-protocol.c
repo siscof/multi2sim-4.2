@@ -40,6 +40,7 @@
 #include <arch/southern-islands/timing/gpu.h>
 #include <arch/southern-islands/timing/compute-unit.h>
 #include <lib/util/class.h>
+#include <string.h>
 /* Events */
 
 int EV_MOD_NMOESI_LOAD;
@@ -157,7 +158,6 @@ void mod_handler_nmoesi_load(int event, void *data)
 	struct net_node_t *src_node;
 	struct net_node_t *dst_node;
 	int return_event;
-	int retry_lat;
 
 	if (event == EV_MOD_NMOESI_LOAD)
 	{
@@ -175,7 +175,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Coalesce access */
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
-		if (!flag_coalesce_gpu_enabled && master_stack || (stack->mod->compute_unit->scalar_cache == mod) && master_stack)
+		if ((!flag_coalesce_gpu_enabled && master_stack) || ((stack->mod->compute_unit->scalar_cache == mod) && master_stack))
 		{
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
@@ -544,7 +544,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 			add_latencias_load(stack);
 
-			if(stack->client_info && stack->client_info->arch && stack->client_info->arch->name == "SouthernIslands")
+			if(stack->client_info && stack->client_info->arch && strcmp(stack->client_info->arch->name, "SouthernIslands") == 0)
 			{
 				copy_latencies_to_wavefront(&(stack->latencias),stack->wavefront);
 			}
@@ -788,11 +788,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 	struct mod_t *mod = stack->mod;
 
-    struct net_t *net;
-    struct net_node_t *src_node;
-    struct net_node_t *dst_node;
-    int return_event;
-	int retry_lat;
+  struct net_t *net;
+  struct net_node_t *src_node;
+  struct net_node_t *dst_node;
+  int return_event;
 
 	if (event == EV_MOD_NMOESI_NC_STORE)
 	{

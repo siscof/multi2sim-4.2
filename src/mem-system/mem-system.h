@@ -82,6 +82,6 @@ void mem_system_dump_report(void);
 struct mod_t *mem_system_get_mod(char *mod_name);
 struct net_t *mem_system_get_net(char *net_name);
 
-void mshr_control(int latencia, int opc);
+//void mshr_control(int latencia, int opc);
 
 #endif

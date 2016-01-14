@@ -34,6 +34,7 @@
 #include "mem-system.h"
 #include "mod-stack.h"
 #include "nmoesi-protocol.h"
+#include "coherence_controller.h"
 
 //fran
 #include <lib/util/estadisticas.h>
@@ -468,7 +469,7 @@ int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int valid
 {
 	struct cache_t *cache = mod->cache;
 	struct cache_block_t *blk;
-	struct dir_lock_t *dir_lock;
+	//struct dir_lock_t *dir_lock;
 
 	int set;
 	int way;
@@ -743,7 +744,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag),*mod_in_conflict;
 	struct mod_stack_t *aux_stack = mod_stack_create(stack->id, target_mod,
 		stack->addr, 0, NULL);
-	struct dir_lock_t *dir_lock;
+	//struct dir_lock_t *dir_lock;
 
 	/*if(mod_find_block(mod, stack->addr, &aux_stack->set,
 		&aux_stack->way, &aux_stack->tag, &aux_stack->state))
@@ -753,8 +754,8 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	}*/
 
 	int index;
-	struct mod_stack_t *stack_array[20] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
-	stack_array[mod->compute_unit->id] = stack;
+	//struct mod_stack_t *stack_array[20] = {NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL};
+	//stack_array[mod->compute_unit->id] = stack;
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod_in_conflict = list_get(mem_system->mod_list, k);
@@ -818,8 +819,8 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 			}
 		}
 	}
-	long long mod_priority = asTiming(si_gpu)->cycle;
-	long long i = 0;
+	//long long mod_priority = asTiming(si_gpu)->cycle;
+	//long long i = 0;
 	ret_stack = NULL;
 
 	/*while(!ret_stack && i < 20)
