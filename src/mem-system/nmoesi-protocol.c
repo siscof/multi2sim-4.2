@@ -2014,6 +2014,36 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		}
 		else if (stack->reply == reply_ack_data)
 		{
+			if(target_mod->kind == mod_kind_main_memory &&
+        target_mod->dram_system)
+      {
+        struct dram_system_t *ds = target_mod->dram_system;
+        struct x86_ctx_t *ctx = stack->client_info->ctx;
+        assert(ds);
+        assert(ctx);
+
+        /* Retry if memory controller cannot accept transaction */
+        if (!dram_system_will_accept_trans(ds->handler, stack->tag))
+        {
+          stack->err = 1;
+          ret->err = 1;
+          ret->retry |= 1 << target_mod->level;
+
+          dir = target_mod->dir;
+          dir_entry_unlock(dir, stack->set, stack->way);
+
+          mem_debug("    %lld 0x%x %s mc queue full, retrying write...\n", stack->id, stack->tag, target_mod->name);
+
+          esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
+          return;
+        }
+
+        /* Access main memory system */
+        dram_system_add_write_trans(ds->handler, stack->tag, stack->client_info->core, stack->client_info->thread);
+
+        /* Ctx main memory stats */
+        ctx->mm_write_accesses++;
+    	}
 			if (stack->state == cache_block_exclusive)
 			{
 				cache_set_block(target_mod->cache, stack->set, stack->way,
@@ -2070,8 +2100,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		dir_entry_unlock(dir, stack->set, stack->way);
 
 		stack->event = EV_MOD_NMOESI_EVICT_REPLY;
-		esim_schedule_mod_stack_event(stack, target_mod->latency);
+		/* If the access is to main memory then return inmediately, because the transaction is already
+		 * inserted and will be processed in background if using a memory controller or ignored if using a fixed latency main memory */
+		esim_schedule_mod_stack_event(stack, target_mod->kind == mod_kind_main_memory ? 0 : target_mod->latency);
 		//esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, target_mod->latency);
+
 		return;
 	}
 
@@ -2102,6 +2135,38 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		/* If data was received, set the block to modified */
 		if (stack->reply == reply_ack_data)
 		{
+
+			if(target_mod->kind == mod_kind_main_memory &&
+				target_mod->dram_system)
+			{
+				struct dram_system_t *ds = target_mod->dram_system;
+				struct x86_ctx_t *ctx = stack->client_info->ctx;
+				assert(ds);
+				assert(ctx);
+
+				/* Retry if memory controller cannot accept transaction */
+				if (!dram_system_will_accept_trans(ds->handler, stack->tag))
+				{
+					stack->err = 1;
+					ret->err = 1;
+					ret->retry |= 1 << target_mod->level;
+
+					dir = target_mod->dir;
+					dir_entry_unlock(dir, stack->set, stack->way);
+
+					mem_debug("    %lld 0x%x %s mc queue full, retrying write...\n", stack->id, stack->tag, target_mod->name);
+
+					esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
+					return;
+				}
+
+				/* Access main memory system */
+				dram_system_add_write_trans(ds->handler, stack->tag, stack->client_info->core, stack->client_info->thread);
+
+				/* Ctx main memory stats */
+				ctx->mm_write_accesses++;
+			}
+
 			if (stack->state == cache_block_exclusive)
 			{
 				cache_set_block(target_mod->cache, stack->set, stack->way,
@@ -2165,7 +2230,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		dir_entry_unlock(dir, stack->set, stack->way);
 
 		stack->event = EV_MOD_NMOESI_EVICT_REPLY;
-		esim_schedule_mod_stack_event(stack, target_mod->latency);
+		esim_schedule_mod_stack_event(stack, target_mod->kind == mod_kind_main_memory ? 0 : target_mod->latency);
 		//esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, target_mod->latency);
 		return;
 	}
@@ -2538,6 +2603,46 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		}
 
 		dir = target_mod->dir;
+
+		/* If another module has not given the block, access main memory */
+    if (target_mod->kind == mod_kind_main_memory &&
+        target_mod->dram_system &&
+        stack->request_dir == mod_request_up_down &&
+        !stack->main_memory_accessed &&
+        stack->reply != reply_ack_data_sent_to_peer)
+    {
+      struct dram_system_t *ds = target_mod->dram_system;
+      struct x86_ctx_t *ctx = stack->client_info->ctx;
+      assert(ctx);
+      assert(ds);
+
+      if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+      {
+        stack->err = 1;
+        ret->err = 1;
+        ret->retry |= 1 << target_mod->level;
+        mod_stack_set_reply(ret, reply_ack_error);
+        stack->reply_size = 8;
+        dir_entry_unlock(dir, stack->set, stack->way);
+
+        mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, target_mod->name);
+
+        esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+
+        return;
+      }
+
+      /* Access main memory system */
+      mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
+      linked_list_add(ds->pending_reads, stack);
+      dram_system_add_read_trans(ds->handler, stack->addr, stack->client_info->core, stack->client_info->thread);
+
+      /* Ctx main memory stats */
+      ctx->mm_read_accesses++;
+      //if (stack->prefetch)
+      //    ctx->mm_pref_accesses++;
+      return;
+    }
 
 		shared = 0;
 		/* With the Owned state, the directory entry may remain owned by the sender */
@@ -3156,6 +3261,48 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 0);
 			return;
 		}
+
+		/* If another module has not given the block,
+			 access main memory */
+		if (target_mod->kind == mod_kind_main_memory &&
+		 	target_mod->dram_system &&
+			stack->request_dir == mod_request_up_down &&
+			!stack->main_memory_accessed &&
+			stack->reply != reply_ack_data_sent_to_peer)
+		{
+			struct dram_system_t *ds = target_mod->dram_system;
+			struct x86_ctx_t *ctx = stack->client_info->ctx;
+			assert(ds);
+			assert(ctx);
+
+			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+			{
+				stack->err = 1;
+				ret->err = 1;
+				ret->retry |= 1 << target_mod->level;
+
+				mod_stack_set_reply(ret, reply_ack_error);
+				stack->reply_size = 8;
+
+				dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+
+				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, target_mod->name);
+
+				esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 0);
+				return;
+			}
+
+			/* Access main memory system */
+			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
+			linked_list_add(ds->pending_reads, stack);
+			dram_system_add_read_trans(ds->handler, stack->addr, stack->client_info->core, stack->client_info->thread);
+
+			/* Ctx main memory stats */
+			assert(!stack->prefetch);
+			ctx->mm_read_accesses++;
+
+			return;
+		 }
 
 		/* Check that addr is a multiple of mod.block_size.
 		 * Set mod as sharer and owner. */
