@@ -20,6 +20,7 @@
 #ifndef MEM_SYSTEM_MEM_SYSTEM_H
 #define MEM_SYSTEM_MEM_SYSTEM_H
 
+#include <dramsim/bindings-c.h>
 
 /*
  * Memory System Object
@@ -30,10 +31,21 @@ struct mem_system_t
 	/* List of modules and networks */
 	struct list_t *mod_list;
 	struct list_t *net_list;
+	/* Main memory modules */
+	struct list_t *mm_mod_list;
+
+	/* Main memory systems */
+	struct hash_table_t *dram_systems;
 };
 
-
-
+struct dram_system_t
+{
+	char *name;
+	struct dram_system_handler_t *handler; /* Handler for dramsim */
+	int dram_domain_index;
+	struct linked_list_t *pending_reads; /* We only track pending read requests because writes are enqueue-and-forget */
+	int num_mcs; /* Number of memory controllers in this dram system */
+};
 
 /*
  * Global Variables
@@ -67,7 +79,8 @@ extern int flag_mshr_enabled;
 extern int flag_coalesce_gpu_enabled;
 extern int flag_no_blocking_store;
 
-
+/* Event for dramsim clock tics */
+extern int EV_MAIN_MEMORY_TIC;
 
 /*
  * Public Functions
@@ -81,6 +94,8 @@ void mem_system_dump_report(void);
 
 struct mod_t *mem_system_get_mod(char *mod_name);
 struct net_t *mem_system_get_net(char *net_name);
+
+void main_memory_tic_handler(int event, void *data);
 
 //void mshr_control(int latencia, int opc);
 

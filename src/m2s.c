@@ -68,7 +68,6 @@
 #include <mem-system/mem-system.h>
 #include <mem-system/mmu.h>
 #include <network/net-system.h>
-#include <dram/dram-system.h>
 #include <sys/time.h>
 #include <visual/common/visual.h>
 
@@ -608,8 +607,6 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 	int err;
 
 	char *net_sim_last_option = NULL;
-
-	char *dram_sim_last_option = NULL;
 
 	for (argi = 1; argi < argc; argi++)
 	{
@@ -1564,59 +1561,6 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			continue;
 		}
 
-		/* DRAM configuration file */
-		if (!strcmp(argv[argi], "--dram-config"))
-		{
-			m2s_need_argument(argc, argv, argi);
-			dram_config_file_name = argv[++argi];
-			continue;
-		}
-
-		/* Help for DRAM configuration file */
-		if (!strcmp(argv[argi], "--dram-help"))
-		{
-			fprintf(stderr, "%s", dram_config_help);
-			continue;
-		}
-
-		/* Cycles for DRAM simulation */
-		if (!strcmp(argv[argi], "--dram-max-cycles"))
-		{
-			m2s_need_argument(argc, argv, argi);
-			dram_sim_last_option = argv[argi];
-			dram_system_max_cycles = str_to_llint(argv[argi + 1], &err);
-			if (err)
-				fatal("option %s, value '%s': %s", argv[argi],
-						argv[argi + 1], str_error(err));
-			argi++;
-			continue;
-		}
-
-		/* DRAM report file */
-		if (!strcmp(argv[argi], "--dram-report"))
-		{
-			m2s_need_argument(argc, argv, argi);
-			dram_report_file_name = argv[++argi];
-			continue;
-		}
-
-		/* DRAM request file */
-		if (!strcmp(argv[argi], "--dram-request"))
-		{
-			m2s_need_argument(argc, argv, argi);
-			dram_sim_last_option = argv[argi];
-			dram_request_file_name = argv[++argi];
-			continue;
-		}
-
-		/* Network simulation */
-		if (!strcmp(argv[argi], "--dram-sim"))
-		{
-			m2s_need_argument(argc, argv, argi);
-			dram_sim_system_name = argv[++argi];
-			continue;
-		}
-
 		/*
 		 * Rest
 		 */
@@ -1711,8 +1655,6 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 		fatal("option '%s' requires '--net-sim'", net_sim_last_option);
 	if (*net_sim_network_name && !*net_config_file_name)
 		fatal("option '--net-sim' requires '--net-config'");
-	if(!*dram_sim_system_name && dram_sim_last_option)
-		fatal("option '%s' requires '--dram-sim'", dram_sim_last_option);
 
 	/* Discard arguments used as options */
 	arg_discard = argi - 1;
@@ -2068,10 +2010,6 @@ int main(int argc, char **argv)
 	if (*net_sim_network_name)
 		net_sim(net_debug_file_name);
 
-	/* DRAM simulation Tool*/
-	if (*dram_sim_system_name)
-		dram_system_sim(dram_debug_file_name);
-
 	/* Southern Islands dump config file */
 	if (*si_gpu_dump_default_config_file_name)
 		si_gpu_dump_default_config(si_gpu_dump_default_config_file_name);
@@ -2080,7 +2018,6 @@ int main(int argc, char **argv)
 	debug_init();
 	elf_debug_category = debug_new_category(elf_debug_file_name);
 	net_debug_category = debug_new_category(net_debug_file_name);
-	dram_debug_category = debug_new_category(dram_debug_file_name);
 	glu_debug_category = debug_new_category(glu_debug_file_name);
 	glut_debug_category = debug_new_category(glut_debug_file_name);
 	glew_debug_category = debug_new_category(glew_debug_file_name);

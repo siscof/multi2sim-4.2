@@ -16,6 +16,7 @@
  *  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <stdint.h>
 #include <arch/common/arch.h>
 #include <lib/esim/esim.h>
 #include <lib/esim/trace.h>
@@ -28,6 +29,7 @@
 
 #include "cache.h"
 #include "config.h"
+#include "command.h"
 #include "local-mem-protocol.h"
 #include "mem-system.h"
 #include "module.h"
@@ -39,6 +41,8 @@
 #include <lib/util/estadisticas.h>
 #include <stdbool.h>
 #include <lib/util/misc.h>
+#include <lib/util/linked-list.h>
+#include <lib/util/hash-table.h>
 //#include "directory.h"
 
 /*
@@ -49,6 +53,7 @@ int mem_debug_category;
 int mem_trace_category;
 int mem_peer_transfers;
 int fran_category;
+int EV_MAIN_MEMORY_TIC;
 
 /* Frequency domain, as returned by function 'esim_new_domain'. */
 int mem_frequency = 1000;
@@ -73,6 +78,9 @@ struct mem_system_t *mem_system_create(void)
 	mem_system = xcalloc(1, sizeof(struct mem_system_t));
 	mem_system->net_list = list_create();
 	mem_system->mod_list = list_create();
+	mem_system->mm_mod_list = list_create();
+	mem_system->dram_systems = hash_table_create(0, 0); /* Dram systems, if any */
+
 
 	/* Return */
 	return mem_system;
@@ -81,15 +89,30 @@ struct mem_system_t *mem_system_create(void)
 
 void mem_system_free(struct mem_system_t *mem_system)
 {
+	char *key;
+	struct dram_system_t *dram_system;
+
 	/* Free memory modules */
 	while (list_count(mem_system->mod_list))
 		mod_free(list_pop(mem_system->mod_list));
 	list_free(mem_system->mod_list);
+	list_free(mem_system->mm_mod_list);
 
 	/* Free networks */
 	while (list_count(mem_system->net_list))
 		net_free(list_pop(mem_system->net_list));
 	list_free(mem_system->net_list);
+
+	/* Free dram_systems */
+	HASH_TABLE_FOR_EACH(mem_system->dram_systems, key, dram_system)
+	{
+		free(dram_system->name);
+		assert(linked_list_count(dram_system->pending_reads) == 0);
+		linked_list_free(dram_system->pending_reads);
+		dram_system_free(dram_system->handler);
+		free(dram_system);
+	}
+	hash_table_free(mem_system->dram_systems);
 
 	/* Free memory system */
 	free(mem_system);
@@ -145,6 +168,13 @@ void mem_system_init(void)
 	if (*mem_report_file_name && !file_can_open_for_write(mem_report_file_name))
 		fatal("%s: cannot open GPU cache report file",
 			mem_report_file_name);
+
+	/* Event handler for memory hierarchy commands */
+	EV_MEM_SYSTEM_COMMAND = esim_register_event_with_name(mem_system_command_handler,
+			mem_domain_index, "mem_system_command");
+	EV_MEM_SYSTEM_END_COMMAND = esim_register_event_with_name(mem_system_end_command_handler,
+			mem_domain_index, "mem_system_end_command");
+
 
 	/* VI memory event-driven simulation*/
 
@@ -608,6 +638,84 @@ void mem_system_dump_report(void)
 
 	/* Done */
 	fclose(f);
+}
+
+void main_memory_power_callback(double a, double b, double c, double d)
+{
+}
+
+
+void main_memory_read_callback(void *payload, unsigned int id, uint64_t address, uint64_t interthread_penalty)
+{
+	int found = 0;
+	//int cpu_freq; /* In MHz */
+	//int dram_freq; /* In MHz */
+	//struct x86_uop_t *uop;
+	struct mod_stack_t *stack = NULL;
+	struct dram_system_t *dram_system = (struct dram_system_t *) payload;
+
+	/* You cannnot use LINKED_LIST_FOR_EACH if you plan to remove elements */
+	linked_list_head(dram_system->pending_reads);
+	while(!linked_list_is_end(dram_system->pending_reads))
+	{
+		stack = linked_list_get(dram_system->pending_reads);
+		if (stack->addr == address)
+		{
+			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
+			stack->main_memory_accessed = 1;
+			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_UPDOWN_LATENCY, stack, 0);
+			linked_list_remove(dram_system->pending_reads);
+			found++;
+		}
+		else
+			linked_list_next(dram_system->pending_reads);
+	}
+	assert(found == 1);
+/*
+	cpu_freq = arch_x86->frequency;
+	dram_freq = esim_domain_frequency(dram_system->dram_domain_index);
+
+	uop = stack->event_queue_item;
+	if (uop)
+		uop->uinst->dram_interthread_penalty_cycles += interthread_penalty * cpu_freq / dram_freq;
+	assert(uop || stack->client_info->instr_fetch || stack->prefetch);
+	*//* If there isn't a uop, then it must be a instruction fetch access or a prefetch */
+}
+
+
+void main_memory_write_callback(void *payload, unsigned int id, uint64_t address, uint64_t clock_cycle)
+{
+}
+
+
+/* Schedules an event to notify dramsim that a main memory cycle has passed */
+void main_memory_tic_scheduler(struct dram_system_t *ds)
+{
+	//int cpu_freq = arch_x86->frequency; /* In MHz */
+	int dram_freq = dram_system_get_dram_freq(ds->handler) / 1000000; /* In MHz */
+
+	//assert(cpu_freq >= dram_freq);
+
+	/* New domain and event for dramsim clock tics */
+	ds->dram_domain_index = esim_new_domain(dram_freq);
+	EV_MAIN_MEMORY_TIC = esim_register_event_with_name(main_memory_tic_handler, ds->dram_domain_index, "dram_system_tic");
+
+	esim_schedule_event(EV_MAIN_MEMORY_TIC, ds, 1);
+}
+
+
+/* Notifies dramsim that a main memory cycle has passed */
+void main_memory_tic_handler(int event, void *data)
+{
+	struct dram_system_t *ds = (struct dram_system_t*) data;
+
+	/* If simulation has ended and dram system has no more petitions, no more
+	 * events to schedule. */
+	if (esim_finish && !linked_list_count(ds->pending_reads) && !esim_event_count())
+		return;
+
+	dram_system_dram_tick(ds->handler);
+	esim_schedule_event(event, ds, 1);
 }
 
 

@@ -60,6 +60,7 @@ struct mod_stack_t
 	int *witness_ptr;
 
 	//FRAN
+	int main_memory_accessed;
 	int mshr_locked;
 	long long tiempo_acceso;
 	long long retry_time_lost;

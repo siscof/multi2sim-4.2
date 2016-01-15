@@ -97,6 +97,8 @@ struct mod_t
 	int dir_latency;
 	int mshr_size;
 	//FRAN
+
+	struct dram_system_t *dram_system;
 	int mshr_count;
 	struct coherence_controller_t *coherence_controller;
 	struct mshr_t *mshr;

@@ -1,6 +1,5 @@
 SUBDIRS = \
 	arch \
-	dram \
 	driver \
 	lib \
 	mem-system \
@@ -51,7 +50,6 @@ LDADD = \
 	\
 	$(top_builddir)/src/arch/common/libcommon.a \
 	\
-	$(top_builddir)/src/dram/libdram.a \
 	$(top_builddir)/src/mem-system/libmemsystem.a \
 	$(top_builddir)/src/network/libnetwork.a \
 	\
