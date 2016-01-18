@@ -41,6 +41,7 @@
 #include <arch/southern-islands/timing/compute-unit.h>
 #include <lib/util/class.h>
 #include <string.h>
+#include <dramsim/bindings-c.h>
 /* Events */
 
 int EV_MOD_NMOESI_LOAD;
@@ -2018,9 +2019,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
         target_mod->dram_system)
       {
         struct dram_system_t *ds = target_mod->dram_system;
-        struct x86_ctx_t *ctx = stack->client_info->ctx;
+        //struct x86_ctx_t *ctx = stack->client_info->ctx;
         assert(ds);
-        assert(ctx);
+        //assert(ctx);
 
         /* Retry if memory controller cannot accept transaction */
         if (!dram_system_will_accept_trans(ds->handler, stack->tag))
@@ -2039,10 +2040,10 @@ void mod_handler_nmoesi_evict(int event, void *data)
         }
 
         /* Access main memory system */
-        dram_system_add_write_trans(ds->handler, stack->tag, stack->client_info->core, stack->client_info->thread);
+        dram_system_add_write_trans(ds->handler, stack->tag, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
 
         /* Ctx main memory stats */
-        ctx->mm_write_accesses++;
+        //ctx->mm_write_accesses++;
     	}
 			if (stack->state == cache_block_exclusive)
 			{
@@ -2140,9 +2141,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
 				target_mod->dram_system)
 			{
 				struct dram_system_t *ds = target_mod->dram_system;
-				struct x86_ctx_t *ctx = stack->client_info->ctx;
+				//struct x86_ctx_t *ctx = stack->client_info->ctx;
 				assert(ds);
-				assert(ctx);
+				//assert(ctx);
 
 				/* Retry if memory controller cannot accept transaction */
 				if (!dram_system_will_accept_trans(ds->handler, stack->tag))
@@ -2161,10 +2162,10 @@ void mod_handler_nmoesi_evict(int event, void *data)
 				}
 
 				/* Access main memory system */
-				dram_system_add_write_trans(ds->handler, stack->tag, stack->client_info->core, stack->client_info->thread);
+				dram_system_add_write_trans(ds->handler, stack->tag, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
 
 				/* Ctx main memory stats */
-				ctx->mm_write_accesses++;
+				//ctx->mm_write_accesses++;
 			}
 
 			if (stack->state == cache_block_exclusive)
@@ -2612,8 +2613,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
         stack->reply != reply_ack_data_sent_to_peer)
     {
       struct dram_system_t *ds = target_mod->dram_system;
-      struct x86_ctx_t *ctx = stack->client_info->ctx;
-      assert(ctx);
+      //struct x86_ctx_t *ctx = stack->client_info->ctx;
+      //assert(ctx);
       assert(ds);
 
       if (!dram_system_will_accept_trans(ds->handler, stack->addr))
@@ -2635,10 +2636,10 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       /* Access main memory system */
       mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
       linked_list_add(ds->pending_reads, stack);
-      dram_system_add_read_trans(ds->handler, stack->addr, stack->client_info->core, stack->client_info->thread);
+      dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
 
       /* Ctx main memory stats */
-      ctx->mm_read_accesses++;
+      //ctx->mm_read_accesses++;
       //if (stack->prefetch)
       //    ctx->mm_pref_accesses++;
       return;
@@ -3271,9 +3272,9 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			stack->reply != reply_ack_data_sent_to_peer)
 		{
 			struct dram_system_t *ds = target_mod->dram_system;
-			struct x86_ctx_t *ctx = stack->client_info->ctx;
+			//struct x86_ctx_t *ctx = stack->client_info->ctx;
 			assert(ds);
-			assert(ctx);
+			//assert(ctx);
 
 			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
 			{
@@ -3295,11 +3296,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			/* Access main memory system */
 			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 			linked_list_add(ds->pending_reads, stack);
-			dram_system_add_read_trans(ds->handler, stack->addr, stack->client_info->core, stack->client_info->thread);
+			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
 
 			/* Ctx main memory stats */
 			assert(!stack->prefetch);
-			ctx->mm_read_accesses++;
+			//ctx->mm_read_accesses++;
 
 			return;
 		 }

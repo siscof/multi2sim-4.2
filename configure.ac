@@ -104,7 +104,7 @@ AC_ARG_ENABLE(debug,
 	case "${enableval}" in
 	yes)
 		debug=true
-		
+
 		# Add flag '-Wno-error=deprecated-declarations' only if it is supported.
 		# This flag prevents warnings caused by newer GTK versions that would cause with -Werror
 		saved_flags="-msse2 -Wall -Werror -DMHANDLE -g -O0 -std=gnu99"
@@ -206,7 +206,7 @@ AC_LINK_IFELSE(
 	[
 		AC_MSG_RESULT(no)
 		AC_MSG_ERROR([
-	
+
 	The math library (libmath) is not present in your system. Please make
 	sure that your linker supports the -lm flag.]
 		)
@@ -285,7 +285,7 @@ AC_MSG_RESULT($have_zlib)
 if test x$have_zlib == xno
 then
 	AC_MSG_ERROR([
-	
+
 	The 'zlib' library development package is missing in your system.
 	Please install the package and then retry. In Ubuntu, the following
 	command is suggested:
@@ -470,7 +470,7 @@ fi
 if test "x$have_opencl" = "xno" -a "x$enable_opencl" = "xyes"
 then
 	AC_MSG_WARN([
-	
+
 	The AMD OpenCL SDK is not presently installed in your system, as
 	detected by the absence of the AMDAPPSDKROOT environment variable. The
 	headers and libraries provided by this package are needed to build the
@@ -561,7 +561,7 @@ else
 	if test "x$have_opengl" = "xno"
 	then
 		AC_MSG_WARN([
-	
+
 	Your system lacks at least one of the graphics libraries required to
 	compile some features of Multi2Sim. These libraries are OpenGL, GLU,
 	GLUT, and GLEW. Please make sure that your linker supports flags
@@ -766,7 +766,7 @@ then
 	The C++ compiler g++ is not installed in your system. This compiler is
 	needed to build LLVM-based modules on Multi2Sim. Please install g++, and
 	recompile. In an Ubuntu distribution, you can run
-	
+
 		sudo apt-get install g++]
 	)
 else
@@ -799,7 +799,7 @@ ifdef([AM_PATH_GTK_3_0], [AM_PATH_GTK_3_0([3.0.0], have_gtk=yes, )], [have_gtk_t
 if test x$have_gtk_test = xno
 then
 	AC_MSG_WARN([
-	
+
 	The 'autoconf' tool could not interpret the macro checking for the
 	presence of the GTK development library (libgtk-3-dev) in your system.
 	Multi2Sim will be permanently compiled without support for GTK.
@@ -876,7 +876,7 @@ AC_SUBST(M2S_INCLUDES)
 
 AC_CONFIG_FILES([
 		Makefile
-		 
+
 		runtime/Makefile
 		runtime/cuda/Makefile
 		runtime/glew/Makefile
@@ -894,7 +894,7 @@ AC_CONFIG_FILES([
 		src/lib/Makefile
 		src/mem-system/Makefile
 		src/network/Makefile
-		src/dram/Makefile
+		src/dramsim/Makefile
 
 		src/visual/Makefile
 		src/visual/common/Makefile

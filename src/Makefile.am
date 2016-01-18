@@ -4,14 +4,16 @@ SUBDIRS = \
 	lib \
 	mem-system \
 	network \
-	visual
+	visual \
+	dramsim
 
 bin_PROGRAMS = $(top_builddir)/bin/m2s
 
 __top_builddir__bin_m2s_SOURCES = m2s.c
 
 AM_LIBTOOLFLAGS = --preserve-dup-deps
-INCLUDES = @M2S_INCLUDES@
+AM_CPPFLAGS = @M2S_INCLUDES@
+CCLD = $(CXX)
 
 LDADD = \
 	$(top_builddir)/src/driver/cuda/libcuda.a \
@@ -62,7 +64,8 @@ LDADD = \
 	\
 	$(top_builddir)/src/lib/mhandle/libmhandle.a \
 	$(top_builddir)/src/lib/esim/libesim.a \
-	$(top_builddir)/src/lib/util/libutil.a
+	$(top_builddir)/src/lib/util/libutil.a \
+	$(top_builddir)/src/dramsim/libdramsim.a
 
 if HAVE_GTK
 AM_CFLAGS = @GTK_CFLAGS@

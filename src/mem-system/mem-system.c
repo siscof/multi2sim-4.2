@@ -43,6 +43,7 @@
 #include <lib/util/misc.h>
 #include <lib/util/linked-list.h>
 #include <lib/util/hash-table.h>
+#include <dramsim/bindings-c.h>
 //#include "directory.h"
 
 /*
@@ -663,7 +664,7 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 		{
 			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
 			stack->main_memory_accessed = 1;
-			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_UPDOWN_LATENCY, stack, 0);
+			esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
 			linked_list_remove(dram_system->pending_reads);
 			found++;
 		}
