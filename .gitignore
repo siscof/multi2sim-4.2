@@ -34,5 +34,4 @@ ltmain.sh
 /.settings/
 /.pydevproject
 /compile
-src/dramsim
 lib
