@@ -19,13 +19,17 @@
 
 #include <arch/common/arch.h>
 #include <arch/southern-islands/timing/gpu.h>
+#include <dramsim/bindings-c.h>
 #include <lib/esim/esim.h>
 #include <lib/esim/trace.h>
 #include <lib/mhandle/mhandle.h>
 #include <lib/util/debug.h>
+#include <lib/util/file.h>
+#include <lib/util/hash-table.h>
 #include <lib/util/linked-list.h>
 #include <lib/util/list.h>
 #include <lib/util/misc.h>
+#include <lib/util/stats.h>
 #include <lib/util/string.h>
 #include <network/net-system.h>
 #include <network/network.h>
@@ -692,6 +696,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	int dir_assoc;
 	int mshr_size;
 
+	char *dram_system_name;
 	char *net_name;
 	char *net_node_name;
 
@@ -709,6 +714,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	dir_size = config_read_int(config, section, "DirectorySize", 1024);
 	dir_assoc = config_read_int(config, section, "DirectoryAssoc", 8);
 	mshr_size = config_read_int(config, section, "MSHR", 16384);
+	dram_system_name = config_read_string(config, section, "DRAMSystem", "");
 
 	/* Check parameters */
 	if (block_size < 1 || (block_size & (block_size - 1)))
@@ -755,6 +761,13 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	/* Create cache and directory */
 	mod->cache = cache_create(mod->name, dir_size / dir_assoc, block_size,
 		dir_assoc, cache_policy_lru);
+
+	/* Connect to specified main mem system, if any */
+	mod->dram_system = hash_table_get(mem_system->dram_systems, dram_system_name);
+	if (mod->dram_system)
+		mod->mc_id = mod->dram_system->num_mcs++; /* Asign an ID and increment the number of memory controllers in the dram system */
+
+	list_add(mem_system->mm_mod_list, mod);
 
 	/* Return */
 	return mod;
@@ -889,6 +902,75 @@ invalid_format:
 
 	fatal("%s: %s: invalid format for 'AddressRange'.\n%s",
 		mem_config_file_name, mod->name, mem_err_config_note);
+}
+
+
+static void mem_config_read_dram_systems(struct config_t *config)
+{
+	struct dram_system_handler_t *handler;
+	struct dram_system_t *dram_system;
+
+	char *section;
+	char *device_config_str; /* Path to INI file */
+	char *system_config_str; /* Path to INI file */
+	char *report_file_str;
+
+	char dram_system_name[MAX_STRING_SIZE];
+	char dram_system_intrep_file[MAX_PATH_SIZE];
+
+	double dram_system_freq;
+
+	int megabytes; /* Total size */
+	int ret;
+
+	/* Create main memory systems */
+	mem_debug("Creating main memory systems:\n");
+	for (section = config_section_first(config); section;
+		section = config_section_next(config))
+	{
+		/* Section for a main memory system */
+		if (strncasecmp(section, "DRAMSystem ", 11))
+			continue;
+
+		/* Read config parameters */
+		str_token(dram_system_name, sizeof dram_system_name, section, 1, " ");
+		device_config_str = config_read_string(config, section, "DeviceDescription", "ini/DDR2_micron_16M_8b_x8_sg3E.ini");
+		system_config_str = config_read_string(config, section, "SystemDescription", "system.ini");
+
+		ret = snprintf(dram_system_intrep_file, MAX_PATH_SIZE, "%s/%s.csv", dram_interval_reports_dir, dram_system_name);
+		if (ret < 0 || ret >= MAX_PATH_SIZE)
+			fatal("%s: string too long", dram_system_intrep_file);
+
+		report_file_str = config_read_string(config, section, "ReportFile", dram_system_intrep_file);
+		megabytes = config_read_int(config, section, "MB", 4096);
+
+		/* Create a handler to the underlying dramsim c++ objects */
+		handler = dram_system_create(device_config_str, system_config_str, megabytes, report_file_str);
+
+		/* Create a wrapper to store multi2sim related data and dramsim handler */
+		dram_system = xcalloc(1, sizeof(struct dram_system_t));
+		dram_system->name = xstrdup(dram_system_name);
+		dram_system->handler = handler;
+		dram_system->pending_reads = linked_list_create();
+
+		/* Configure dramsim using the handler */
+		dram_system_set_cpu_freq(handler, (long long) asTiming(si_gpu)->frequency * 1000000); /* Freq must be in Hz */
+		dram_system_freq = dram_system_get_dram_freq(handler) / 1000000; /* Convert freq. to MHz */
+		assert(dram_system_freq);
+
+		dram_system_set_epoch_length(handler, epoch_length * (dram_system_freq / esim_frequency)); /* Epoch length for dram in dram cycles */
+		dram_system_register_payloaded_callbacks(handler, dram_system, main_memory_read_callback, main_memory_write_callback, main_memory_power_callback);
+
+		/* Add dram system to hash table */
+		hash_table_insert(mem_system->dram_systems, dram_system_name, dram_system);
+		mem_debug("\t%s\n", dram_system_name);
+
+		/* Schedule an event to notify dramsim that a cycle has passed */
+		main_memory_tic_scheduler(dram_system);
+	}
+
+	/* Debug */
+	mem_debug("\n");
 }
 
 

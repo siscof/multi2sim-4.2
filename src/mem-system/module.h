@@ -98,6 +98,16 @@ struct mod_t
 	int mshr_size;
 	//FRAN
 
+	/* Main memory module */
+	struct reg_rank_t *regs_rank; // ranks which this channels connects with
+	int num_regs_rank;
+	int num_req_input_buffer;
+
+	/* Mem controller associated to mm */
+	struct mem_controller_t *mem_controller; /* DEPRECATED */
+
+	/* Dramsim */
+	int mc_id; /* If dramsim enabled, in main memory modules this field stores the id of the memory controller attached */
 	struct dram_system_t *dram_system;
 	int mshr_count;
 	struct coherence_controller_t *coherence_controller;
