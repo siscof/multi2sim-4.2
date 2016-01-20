@@ -35,3 +35,6 @@ ltmain.sh
 /.pydevproject
 /compile
 lib
+depcomp
+missing
+src/dramsim
