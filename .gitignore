@@ -36,3 +36,5 @@ ltmain.sh
 /compile
 src/dramsim
 lib
+depcomp
+missing
