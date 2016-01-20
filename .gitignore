@@ -34,7 +34,8 @@ ltmain.sh
 /.settings/
 /.pydevproject
 /compile
-lib
 depcomp
 missing
 src/dramsim
+status
+tags
