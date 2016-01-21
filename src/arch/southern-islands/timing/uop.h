@@ -22,6 +22,7 @@
 
 #include <arch/southern-islands/emu/work-item.h>
 #include <mem-system/module.h>
+#include <lib/util/list.h>
 
 
 #define INST_NOT_FETCHED LLONG_MAX

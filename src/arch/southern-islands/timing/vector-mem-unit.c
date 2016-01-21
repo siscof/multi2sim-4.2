@@ -288,7 +288,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
 
-            work_item = uop->wavefront->work_items[work_item_id];
+      work_item = uop->wavefront->work_items[work_item_id];
 			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
 			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))

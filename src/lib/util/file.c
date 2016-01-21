@@ -18,11 +18,15 @@
  */
 
 #include <assert.h>
+#include <errno.h>
+#include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 #include <unistd.h>
 
 #include "debug.h"
 #include "file.h"
+#include "misc.h"
 #include "string.h"
 
 
@@ -170,3 +174,31 @@ void file_full_path(char *file_name, char *default_path, char *full_path, int si
 	snprintf(full_path, size, "%s/%s", default_path, file_name);
 }
 
+
+/* Creates a dir and stores the resulting path in the provided variable */
+void filesystem_dir_create_and_store(char *result, int result_size, char *parent, char *child)
+{
+	int ret;
+	mode_t urwx_grx = S_IRUSR | S_IWUSR | S_IXUSR | S_IRGRP | S_IWGRP;
+
+	result_size = MIN(result_size, MAX_PATH_SIZE);
+
+	if (!parent || !strlen(parent))
+		ret = snprintf(result, result_size, "%s/", child);
+	else
+		ret = snprintf(result, result_size, "%s/%s/", parent, child);
+
+	if (ret < 0 || ret >= result_size)
+		fatal("%s: string too long", result);
+
+	ret = mkdir(result, urwx_grx);
+	if (ret && errno != EEXIST)
+		warning("cannot create dir %s", result);
+}
+
+
+void filesystem_dir_create(char *parent, char *child)
+{
+	char tmp[MAX_PATH_SIZE];
+	filesystem_dir_create_and_store(tmp, MAX_PATH_SIZE, parent, child);
+}

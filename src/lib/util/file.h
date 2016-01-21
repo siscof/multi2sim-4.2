@@ -35,5 +35,7 @@ FILE *file_create_temp(char *ret_path, int ret_path_size);
 
 void file_full_path(char *file_name, char *default_path, char *full_path, int size);
 
-#endif
+void filesystem_dir_create_and_store(char *result, int result_size, char *parent, char *child);
+void filesystem_dir_create(char *parent, char *child);
 
+#endif

@@ -1643,6 +1643,9 @@ void mem_config_read(void)
 	/* Read networks */
 	mem_config_read_networks(config);
 
+	/* Read main memory systems */
+	mem_config_read_dram_systems(config);
+
 	/* Read modules */
 	mem_config_read_modules(config);
 

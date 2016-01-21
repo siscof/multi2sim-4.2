@@ -18,6 +18,8 @@
  */
 
 #include <signal.h>
+#include <stdlib.h>
+#include <stdbool.h>
 
 #include <arch/arm/emu/context.h>
 #include <arch/arm/emu/isa.h>
@@ -63,6 +65,7 @@
 #include <lib/util/debug.h>
 #include <lib/util/file.h>
 #include <lib/util/misc.h>
+#include <lib/util/stats.h>
 #include <lib/util/string.h>
 #include <mem-system/config.h>
 #include <mem-system/mem-system.h>
@@ -156,6 +159,7 @@ int flag_no_blocking_store = 0;
 long long ventana_muestreo = 10000;
 int forzar_mshr_test = 0;
 bool ESIM_PROCESS_EV_IN_ORDER = true;
+void m2s_create_report_dirs(void);
 //int fran_latencia;
 //int fran_accesos;
 
@@ -761,6 +765,14 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 		{
 			m2s_need_argument(argc, argv, argi);
 			visual_file_name = argv[++argi];
+			continue;
+		}
+
+		/* Results directory */
+		if (!strcmp(argv[argi], "--reports-dir"))
+		{
+			m2s_need_argument(argc, argv, argi);
+			reports_dir = argv[++argi];
 			continue;
 		}
 
@@ -1957,6 +1969,36 @@ static void m2s_loop(void)
 	signal(SIGUSR2, SIG_DFL);
 }
 
+
+void m2s_create_report_dirs(void)
+{
+	/* Reports dir */
+	filesystem_dir_create("", reports_dir);
+
+	/* Global reports */
+	//filesystem_dir_create_and_store(global_reports_dir, MAX_PATH_SIZE, reports_dir, "global_reports");
+
+	/* Interval reports */
+	filesystem_dir_create_and_store(interval_reports_dir, MAX_PATH_SIZE, reports_dir, "interval_reports");
+
+	/* Int. rep. x86_ctx */
+	//filesystem_dir_create_and_store(x86_ctx_interval_reports_dir, MAX_PATH_SIZE, interval_reports_dir, "x86_ctx");
+
+	/* Int. rep. mod */
+	//filesystem_dir_create_and_store(mod_interval_reports_dir, MAX_PATH_SIZE, interval_reports_dir, "mod");
+
+	/* Int. rep. dram */
+	filesystem_dir_create_and_store(dram_interval_reports_dir, MAX_PATH_SIZE, interval_reports_dir, "dram");
+
+	/* Int. rep. x86_thread */
+	//filesystem_dir_create_and_store(x86_thread_interval_reports_dir, MAX_PATH_SIZE, interval_reports_dir, "x86_thread");
+
+	/* Reports when and what is mapped to x86_threads */
+	//filesystem_dir_create_and_store(x86_thread_mappings_reports_dir, MAX_PATH_SIZE, interval_reports_dir, "x86_thread_mappings");
+
+	/* Reports when and where x86_ctxs are mapped to */
+	//filesystem_dir_create_and_store(x86_ctx_mappings_reports_dir, MAX_PATH_SIZE, interval_reports_dir, "x86_ctx_mappings");
+}
 
 int main(int argc, char **argv)
 {

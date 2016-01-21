@@ -332,6 +332,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_LOAD_ACTION, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->blocking = 1;
 		new_stack->read = 1;
 		new_stack->tiempo_acceso = stack->tiempo_acceso;
@@ -403,7 +405,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 		//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 		new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 		new_stack->request_dir = mod_request_up_down;
-
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
 		esim_schedule_mod_stack_event(new_stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
@@ -658,6 +661,8 @@ void mod_handler_nmoesi_store(int event, void *data)
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_STORE_ACTION, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->blocking = 1;
 		new_stack->write = 1;
 		new_stack->retry = stack->retry;
@@ -708,6 +713,8 @@ void mod_handler_nmoesi_store(int event, void *data)
 		/* Miss - state=O/S/I/N */
 		new_stack = mod_stack_create(stack->id, mod, stack->tag,
 			EV_MOD_NMOESI_STORE_UNLOCK, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 		new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 		new_stack->request_dir = mod_request_up_down;
@@ -954,6 +961,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_NC_STORE_WRITEBACK, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
 		new_stack->retry = stack->retry;
@@ -1006,6 +1015,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			stack->eviction = 1;
 			new_stack = mod_stack_create(stack->id, mod, 0,
 				EV_MOD_NMOESI_NC_STORE_ACTION, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
 
@@ -1088,6 +1099,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		{
 			new_stack = mod_stack_create(stack->id, mod, stack->tag,
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			new_stack->message = message_clear_owner;
 			new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 			new_stack->event = EV_MOD_NMOESI_MESSAGE;
@@ -1101,6 +1114,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		{
 			new_stack = mod_stack_create(stack->id, mod, stack->tag,
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 			new_stack->nc_write = 1;
 			new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
@@ -1302,6 +1317,8 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 		/* Call find and lock */
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_PREFETCH_ACTION, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->blocking = 0;
 		new_stack->prefetch = 1;
 		new_stack->retry = 0;
@@ -1357,6 +1374,8 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 		/* Miss */
 		new_stack = mod_stack_create(stack->id, mod, stack->tag,
 			EV_MOD_NMOESI_PREFETCH_MISS, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 		new_stack->target_mod = mod_get_low_mod(mod, stack->tag);
 		new_stack->request_dir = mod_request_up_down;
@@ -1735,6 +1754,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->eviction = 1;
 			new_stack = mod_stack_create(stack->id, mod, 0,
 				EV_MOD_NMOESI_FIND_AND_LOCK_FINISH, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
 			new_stack->event = EV_MOD_NMOESI_EVICT;
@@ -1863,6 +1884,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 		/* Send write request to all sharers */
 		new_stack = mod_stack_create(stack->id, mod, 0, EV_MOD_NMOESI_EVICT_INVALID, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->except_mod = NULL;
 		new_stack->set = stack->set;
 		new_stack->way = stack->way;
@@ -1966,12 +1989,16 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		{
 			new_stack = mod_stack_create(stack->id, target_mod, stack->src_tag,
 				EV_MOD_NMOESI_EVICT_PROCESS_NONCOHERENT, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			new_stack->nc_write = 1;
 		}
 		else
 		{
 			new_stack = mod_stack_create(stack->id, target_mod, stack->src_tag,
 				EV_MOD_NMOESI_EVICT_PROCESS, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			new_stack->write = 1;
 		}
 
@@ -2023,6 +2050,12 @@ void mod_handler_nmoesi_evict(int event, void *data)
         assert(ds);
         //assert(ctx);
 
+				if (stack->mshr_locked != 0)
+				{
+					mshr_unlock(target_mod);
+					stack->mshr_locked = 0;
+				}
+
         /* Retry if memory controller cannot accept transaction */
         if (!dram_system_will_accept_trans(ds->handler, stack->tag))
         {
@@ -2040,7 +2073,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
         }
 
         /* Access main memory system */
-        dram_system_add_write_trans(ds->handler, stack->tag, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
+        dram_system_add_write_trans(ds->handler, stack->tag, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
         /* Ctx main memory stats */
         //ctx->mm_write_accesses++;
@@ -2145,6 +2178,12 @@ void mod_handler_nmoesi_evict(int event, void *data)
 				assert(ds);
 				//assert(ctx);
 
+				if (stack->mshr_locked != 0)
+				{
+					mshr_unlock(target_mod);
+					stack->mshr_locked = 0;
+				}
+
 				/* Retry if memory controller cannot accept transaction */
 				if (!dram_system_will_accept_trans(ds->handler, stack->tag))
 				{
@@ -2162,7 +2201,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 				}
 
 				/* Access main memory system */
-				dram_system_add_write_trans(ds->handler, stack->tag, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
+				dram_system_add_write_trans(ds->handler, stack->tag, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
 				/* Ctx main memory stats */
 				//ctx->mm_write_accesses++;
@@ -2362,6 +2401,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		/* Find and lock */
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
 			EV_MOD_NMOESI_READ_REQUEST_ACTION, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->blocking = stack->request_dir == mod_request_down_up;
 		new_stack->read = 1;
 		new_stack->retry = 0;
@@ -2476,6 +2517,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				stack->pending++;
 				new_stack = mod_stack_create(stack->id, target_mod, dir_entry_tag,
 					EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH, stack);
+				new_stack->wavefront = stack->wavefront;
+				new_stack->uop = stack->uop;
 				/* Only set peer if its a subblock that was requested */
 				/*if (dir_entry_tag >= stack->addr &&
 					dir_entry_tag < stack->addr + mod->block_size)
@@ -2514,6 +2557,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				stack->set, stack->way));
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag,
 				EV_MOD_NMOESI_READ_REQUEST_UPDOWN_MISS, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			/* Peer is NULL since we keep going up-down */
 			new_stack->target_mod = mod_get_low_mod(target_mod, stack->tag);
 			new_stack->request_dir = mod_request_up_down;
@@ -2617,6 +2662,12 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       //assert(ctx);
       assert(ds);
 
+			if (stack->mshr_locked != 0)
+			{
+				mshr_unlock(target_mod);
+				stack->mshr_locked = 0;
+			}
+
       if (!dram_system_will_accept_trans(ds->handler, stack->addr))
       {
         stack->err = 1;
@@ -2636,7 +2687,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       /* Access main memory system */
       mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
       linked_list_add(ds->pending_reads, stack);
-      dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
+      dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
       /* Ctx main memory stats */
       //ctx->mm_read_accesses++;
@@ -2754,6 +2805,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->pending++;
 			new_stack = mod_stack_create(stack->id, target_mod, dir_entry_tag,
 				EV_MOD_NMOESI_READ_REQUEST_DOWNUP_WAIT_FOR_REQS, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			new_stack->target_mod = owner;
 			new_stack->request_dir = mod_request_down_up;
 			new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
@@ -3116,6 +3169,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		/* Find and lock */
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
 			EV_MOD_NMOESI_WRITE_REQUEST_ACTION, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->blocking = stack->request_dir == mod_request_down_up;
 		new_stack->write = 1;
 		new_stack->retry = 0;
@@ -3154,6 +3209,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		/* Invalidate the rest of upper level sharers */
 		new_stack = mod_stack_create(stack->id, target_mod, 0,
 			EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->except_mod = mod;
 		new_stack->set = stack->set;
 		new_stack->way = stack->way;
@@ -3204,6 +3261,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		{
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag,
 				EV_MOD_NMOESI_WRITE_REQUEST_UPDOWN_FINISH, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
 			//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 			new_stack->target_mod = mod_get_low_mod(target_mod, stack->tag);
 			new_stack->request_dir = mod_request_up_down;
@@ -3276,6 +3335,12 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			assert(ds);
 			//assert(ctx);
 
+			if (stack->mshr_locked != 0)
+			{
+				mshr_unlock(target_mod);
+				stack->mshr_locked = 0;
+			}
+
 			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
 			{
 				stack->err = 1;
@@ -3296,7 +3361,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			/* Access main memory system */
 			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 			linked_list_add(ds->pending_reads, stack);
-			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->uop->wavefront->id);
+			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
 			/* Ctx main memory stats */
 			assert(!stack->prefetch);
@@ -3650,6 +3715,8 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 
 				new_stack = mod_stack_create(stack->id, mod, dir_entry_tag,
 					EV_MOD_NMOESI_INVALIDATE_FINISH, stack);
+				new_stack->wavefront = stack->wavefront;
+				new_stack->uop = stack->uop;
 				new_stack->target_mod = sharer;
 				new_stack->request_dir = mod_request_down_up;
 
@@ -3745,6 +3812,8 @@ void mod_handler_nmoesi_message(int event, void *data)
 		/* Find and lock */
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
 			EV_MOD_NMOESI_MESSAGE_ACTION, stack);
+		new_stack->wavefront = stack->wavefront;
+		new_stack->uop = stack->uop;
 		new_stack->message = stack->message;
 		new_stack->blocking = 0;
 		new_stack->retry = 0;

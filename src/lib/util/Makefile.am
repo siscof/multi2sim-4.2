@@ -53,6 +53,9 @@ libutil_a_SOURCES = \
 	repos.c \
 	repos.h \
 	\
+	stats.c \
+	stats.h \
+	\
 	string.c \
 	string.h \
 	\
