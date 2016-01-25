@@ -537,7 +537,7 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 				if(wavefront->id == 1)
 					op1 = wavefront->op_count;
 				if(wavefront->id == 2)
-					op0 = wavefront->op_count;
+					op2 = wavefront->op_count;
 				if(wavefront->id == 3)
 					op3 = wavefront->op_count;
 				if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
