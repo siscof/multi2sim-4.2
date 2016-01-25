@@ -530,6 +530,8 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 			for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 			{
 				wavefront = compute_unit->wavefront_pools[w]->entries[i]->wavefront;
+				if(!wavefront)
+					continue;
 				if(wavefront->id == 0)
 					op0 = wavefront->op_count;
 				if(wavefront->id == 1)
