@@ -657,6 +657,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 				uop->id_in_wavefront);
 
 			compute_unit->branch_inst_count++;
+			uop->wavefront->op_count++;
 		}
 	}
 
@@ -746,6 +747,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 				 * instruction can be fetched */
 				compute_unit->scalar_alu_inst_count++;
 			}
+			uop->wavefront->op_count++;
 		}
 	}
 
@@ -813,6 +815,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 				uop->id_in_wavefront);
 
 			compute_unit->simd_inst_count++;
+			uop->wavefront->op_count++;
 
 		}
 
@@ -891,6 +894,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 
 			compute_unit->vector_mem_inst_count++;
 			uop->wavefront_pool_entry->lgkm_cnt++;
+			uop->wavefront->op_count++;
 		}
 	}
 
@@ -955,6 +959,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 
 			compute_unit->lds_inst_count++;
 			uop->wavefront_pool_entry->lgkm_cnt++;
+			uop->wavefront->op_count++;
 		}
 	}
 

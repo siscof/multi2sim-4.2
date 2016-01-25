@@ -73,6 +73,7 @@ void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long 
 
 void si_report_gpu_idle(SIGpu *device);
 void si_device_interval_update_force(SIGpu *device);
+void si_device_4wavefronts_spatial_report_dump(SIGpu *device);
 
 
 #endif

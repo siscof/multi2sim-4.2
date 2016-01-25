@@ -134,7 +134,7 @@ void si_device_spatial_report_init(SIGpu *device)
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
-	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,cycle,esim_time\n");
+	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,wfop0,wfop1,wfop2,wfop3,cycle,esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -502,9 +502,51 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->interval_mapped_work_groups);
 	fprintf(f, "%lld,",
 	device->interval_statistics->interval_unmapped_work_groups);
+
+	si_device_4wavefronts_spatial_report_dump(device);
   // fixme change spatial_profiling_interval for cycle_counter or device->interval_cycle
 	fprintf(f,"%lld,%lld", device->interval_statistics->interval_cycles,	esim_time);
 
 	fprintf(f,"\n");
+
+}
+
+void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
+
+	int i,j,w;
+	struct si_compute_unit_t *compute_unit;
+	struct si_wavefront_t *wavefront;
+	long long op0 = -1;
+	long long op1 = -1;
+	long long op2 = -1;
+	long long op3 = -1;
+	FILE *f = device_spatial_report_file;
+
+	for(j = 0; j < si_gpu_num_compute_units; j++)
+	{
+		compute_unit = device->compute_units[j];
+		for(w = 0; w < si_gpu_num_wavefront_pools; w++)
+		{
+			for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
+			{
+				wavefront = compute_unit->wavefront_pools[w]->entries[i]->wavefront;
+				if(wavefront->id == 0)
+					op0 = wavefront->op_count;
+				if(wavefront->id == 1)
+					op1 = wavefront->op_count;
+				if(wavefront->id == 2)
+					op0 = wavefront->op_count;
+				if(wavefront->id == 3)
+					op3 = wavefront->op_count;
+				if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
+					break;
+			}
+			if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
+				break;
+		}
+		if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
+			break;
+	}
+	fprintf(f, "%lld,%lld,%lld,%lld,", op0,op1,op2,op3);
 
 }
