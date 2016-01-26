@@ -587,6 +587,8 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 {
 	struct si_uop_t *uop;
 	struct si_uop_t *oldest_uop;
+	struct si_work_item_t *work_item;
+	int work_item_id;
 	int list_index;
 	int list_entries;
 	int i;
@@ -815,10 +817,16 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 				uop->id_in_wavefront);
 
 			compute_unit->simd_inst_count++;
-			uop->wavefront->op_count++;
+			SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+			{
+				work_item = uop->wavefront->work_items[work_item_id];
 
+				if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+		  	{
+					uop->wavefront->op_count++;
+				}
+			}
 		}
-
 	}
 
 	//fran
@@ -894,7 +902,15 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 
 			compute_unit->vector_mem_inst_count++;
 			uop->wavefront_pool_entry->lgkm_cnt++;
-			uop->wavefront->op_count++;
+			SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+			{
+				work_item = uop->wavefront->work_items[work_item_id];
+
+				if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+				{
+					uop->wavefront->op_count++;
+				}
+			}
 		}
 	}
 
@@ -959,7 +975,15 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 
 			compute_unit->lds_inst_count++;
 			uop->wavefront_pool_entry->lgkm_cnt++;
-			uop->wavefront->op_count++;
+			SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
+			{
+				work_item = uop->wavefront->work_items[work_item_id];
+
+				if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+				{
+					uop->wavefront->op_count++;
+				}
+			}
 		}
 	}
 
