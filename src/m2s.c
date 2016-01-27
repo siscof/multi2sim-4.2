@@ -145,6 +145,7 @@ static char *mem_debug_file_name = "";
 //FRAN
 //static char *fran_file_latencia = "";
 //static char *fran_file_accesos = "";
+char *dramsim_report;
 char *fran_file_ipc;
 char *fran_file_general;
 char *report_cache_states;
@@ -681,6 +682,15 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
     	flag_mshr_dynamic_enabled = 1;
     	continue;
     }
+
+		/* dramsim_report file */
+		if (!strcmp(argv[argi], "--dramsim-report"))
+		{
+			argi++;
+			m2s_need_argument(argc, argv, argi);
+		 	dramsim_report= argv[argi];
+			continue;
+		}
 
 		/* Generate events in random order */
     if (!strcmp(argv[argi], "--esim-ev-random"))

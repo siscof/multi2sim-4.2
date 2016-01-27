@@ -22,6 +22,7 @@
 
 extern char *mem_config_file_name;
 extern char *mem_config_help;
+extern char *dramsim_report;
 
 /* Parse memory hierarchy configuration file, or generate default if user
  * didn't pass '--mem-config' command-line option. */

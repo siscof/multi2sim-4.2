@@ -36,6 +36,7 @@
 #include <network/node.h>
 #include <network/routing-table.h>
 
+#include "config.h"
 #include "cache.h"
 #include "command.h"
 #include "directory.h"
@@ -941,7 +942,10 @@ static void mem_config_read_dram_systems(struct config_t *config)
 		if (ret < 0 || ret >= MAX_PATH_SIZE)
 			fatal("%s: string too long", dram_system_intrep_file);
 
-		report_file_str = config_read_string(config, section, "ReportFile", dram_system_intrep_file);
+		if(!dramsim_report)
+			report_file_str = config_read_string(config, section, "ReportFile", dram_system_intrep_file);
+		else
+			report_file_str = dramsim_report;
 		megabytes = config_read_int(config, section, "MB", 4096);
 
 		/* Create a handler to the underlying dramsim c++ objects */
