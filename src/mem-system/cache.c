@@ -159,6 +159,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 		{
 			block = &cache->sets[set].blocks[way];
 			block->way = way;
+			block->transient_tag = -1;
 			block->way_prev = way ? &cache->sets[set].blocks[way - 1] : NULL;
 			block->way_next = way < assoc - 1 ? &cache->sets[set].blocks[way + 1] : NULL;
 		}
