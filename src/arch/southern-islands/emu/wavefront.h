@@ -91,6 +91,7 @@ struct si_wavefront_t
 	long long lds_inst_count;
 	long long export_inst_count;
 	long long op_count;
+	long long vector_mem_op_count;
 };
 
 #define SI_FOREACH_WAVEFRONT_IN_WORK_GROUP(WORK_GROUP, WAVEFRONT_ID) \

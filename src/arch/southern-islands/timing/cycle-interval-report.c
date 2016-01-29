@@ -134,7 +134,7 @@ void si_device_spatial_report_init(SIGpu *device)
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
-	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,wfop0,wfop1,wfop2,wfop3,cycle,esim_time\n");
+	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,wfop0,wfvmop0,wfop1,wfvmop1,wfop2,wfvmop2,wfop3,wfvmop3,cycle,esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -512,9 +512,13 @@ void si_device_spatial_report_dump(SIGpu *device)
 }
 
 long long op0_anterior = 0;
+long long vmop0_anterior = 0;
 long long op1_anterior = 0;
+long long vmop1_anterior = 0;
 long long op2_anterior = 0;
+long long vmop2_anterior = 0;
 long long op3_anterior = 0;
+long long vmop3_anterior = 0;
 
 void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 
@@ -522,9 +526,14 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 	struct si_compute_unit_t *compute_unit;
 	struct si_wavefront_t *wavefront;
 	long long op0 = -1;
+	long long vmop0 = -1;
 	long long op1 = -1;
+	long long vmop1 = -1;
 	long long op2 = -1;
+	long long vmop2 = -1;
 	long long op3 = -1;
+	long long vmop3 = -1;
+
 	FILE *f = device_spatial_report_file;
 
 	for(j = 0; j < si_gpu_num_compute_units; j++)
@@ -538,20 +547,28 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 				if(!wavefront)
 					continue;
 				if(wavefront->id == 0){
-					op0 = wavefront->op_count - op0_anterior ;
+					op0 = wavefront->op_count - op0_anterior;
+					vmop0 = wavefront->vector_mem_op_count - vmop0_anterior;
 					op0_anterior = wavefront->op_count;
+					vmop0_anterior = wavefront->vector_mem_op_count;
 				}
 				if(wavefront->id == 1){
-					op1 = wavefront->op_count - op1_anterior ;
+					op1 = wavefront->op_count - op1_anterior;
+					vmop1 = wavefront->vector_mem_op_count - vmop1_anterior;
 					op1_anterior = wavefront->op_count;
+					vmop1_anterior = wavefront->vector_mem_op_count;
 				}
 				if(wavefront->id == 2){
-					op2 = wavefront->op_count - op2_anterior ;
+					op2 = wavefront->op_count - op2_anterior;
+					vmop2 = wavefront->vector_mem_op_count - vmop2_anterior;
 					op2_anterior = wavefront->op_count;
+					vmop2_anterior = wavefront->vector_mem_op_count;
 				}
 				if(wavefront->id == 3){
-					op3 = wavefront->op_count - op3_anterior ;
+					op3 = wavefront->op_count - op3_anterior;
+					vmop3 = wavefront->vector_mem_op_count - vmop3_anterior;
 					op3_anterior = wavefront->op_count;
+					vmop3_anterior = wavefront->vector_mem_op_count;
 				}
 				if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
 					break;
@@ -562,6 +579,6 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 		if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
 			break;
 	}
-	fprintf(f, "%lld,%lld,%lld,%lld,", op0,op1,op2,op3);
+	fprintf(f, "%lld,%lld,%lld,%lld,%lld,%lld,%lld,%lld,", op0,vmop0,op1,vmop1,op2,vmop2,op3,vmop3);
 
 }
