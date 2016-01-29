@@ -895,6 +895,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 			compute_unit->vector_mem_inst_count++;
 			uop->wavefront_pool_entry->lgkm_cnt++;
 			uop->wavefront->op_count++;
+			uop->wavefront->vector_mem_op_count++;
 		}
 	}
 
