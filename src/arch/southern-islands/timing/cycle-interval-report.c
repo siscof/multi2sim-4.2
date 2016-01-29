@@ -511,6 +511,11 @@ void si_device_spatial_report_dump(SIGpu *device)
 
 }
 
+long long op0_anterior = 0;
+long long op1_anterior = 0;
+long long op2_anterior = 0;
+long long op3_anterior = 0;
+
 void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 
 	int i,j,w;
@@ -532,14 +537,22 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 				wavefront = compute_unit->wavefront_pools[w]->entries[i]->wavefront;
 				if(!wavefront)
 					continue;
-				if(wavefront->id == 0)
-					op0 = wavefront->op_count;
-				if(wavefront->id == 1)
-					op1 = wavefront->op_count;
-				if(wavefront->id == 2)
-					op2 = wavefront->op_count;
-				if(wavefront->id == 3)
-					op3 = wavefront->op_count;
+				if(wavefront->id == 0){
+					op0 = wavefront->op_count - op0_anterior ;
+					op0_anterior = wavefront->op_count;
+				}
+				if(wavefront->id == 1){
+					op1 = wavefront->op_count - op1_anterior ;
+					op1_anterior = wavefront->op_count;
+				}
+				if(wavefront->id == 2){
+					op2 = wavefront->op_count - op2_anterior ;
+					op2_anterior = wavefront->op_count;
+				}
+				if(wavefront->id == 3){
+					op3 = wavefront->op_count - op3_anterior ;
+					op3_anterior = wavefront->op_count;
+				}
 				if(op0 >= 0 && op1 >= 1 && op2 >= 2 && op3 >= 3)
 					break;
 			}
