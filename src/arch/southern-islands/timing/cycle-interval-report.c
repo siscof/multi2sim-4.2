@@ -31,6 +31,8 @@
 
 #include <lib/util/estadisticas.h>
 #include <mem-system/mshr.h>
+#include <arch/southern-islands/emu/work-group.h>
+#include <arch/southern-islands/emu/ndrange.h>
 
 int si_spatial_report_active = 0 ;
 int si_cu_spatial_report_active = 0 ;
@@ -544,7 +546,7 @@ void si_device_4wavefronts_spatial_report_dump(SIGpu *device){
 			for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 			{
 				wavefront = compute_unit->wavefront_pools[w]->entries[i]->wavefront;
-				if(!wavefront)
+				if(!wavefront || wavefront->work_group->id != 0 || wavefront->work_group->ndrange->id != 0)
 					continue;
 				if(wavefront->id == 0){
 					op0 = wavefront->op_count - op0_anterior;
