@@ -642,42 +642,48 @@ void esim_process_events(int forward)
 		return;
 	}
 
- 	list = list_create_with_size(1);
-
-	/* Process events scheduled for this cycle */
-	while (1)
-	{
-		/* Extract event from heap */
-		when = heap_peek(esim_event_heap, (void **) &event);
-		if (heap_error(esim_event_heap))
-			break;
-
-		/* Stop when we find the first event that should run in the future. */
-		if (when > esim_time)
-			break;
-
-		heap_extract(esim_event_heap, NULL);
-		list_add(list, event);
-
-	}
-
-	while(list_count(list))
-	{
-		/* extract random event */
-		//random
-		if(ESIM_PROCESS_EV_IN_ORDER)
+	 list = list_create_with_size(1);
+	 while(1)
+	 {
+		/* Process events scheduled for this cycle */
+		while (1)
 		{
-			event = list_dequeue(list);
-		}else{
-			index = rand() % list_count(list);
-			event = list_remove_at(list, index);
+			/* Extract event from heap */
+			when = heap_peek(esim_event_heap, (void **) &event);
+			if (heap_error(esim_event_heap))
+				break;
+
+			/* Stop when we find the first event that should run in the future. */
+			if (when > esim_time)
+				break;
+
+			heap_extract(esim_event_heap, NULL);
+			list_add(list, event);
+
 		}
-		/* Process it */
-		event_info = list_get(esim_event_info_list, event->id);
-		assert(event_info && event_info->handler);
-		event_info->handler(event->id, event->data);
-		esim_event_free(event);
+
+		if(list_count(list))
+			break;
+
+		while(list_count(list))
+		{
+			/* extract random event */
+			//random
+			if(ESIM_PROCESS_EV_IN_ORDER)
+			{
+				event = list_dequeue(list);
+			}else{
+				index = rand() % list_count(list);
+				event = list_remove_at(list, index);
+			}
+			/* Process it */
+			event_info = list_get(esim_event_info_list, event->id);
+			assert(event_info && event_info->handler);
+			event_info->handler(event->id, event->data);
+			esim_event_free(event);
+		}
 	}
+
 	list_free(list);
 	/* Next simulation cycle */
 	esim_time += esim_cycle_time;
