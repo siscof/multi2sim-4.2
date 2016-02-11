@@ -662,7 +662,7 @@ void esim_process_events(int forward)
 
 		}
 
-		if(list_count(list))
+		if(!list_count(list))
 			break;
 
 		while(list_count(list))
