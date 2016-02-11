@@ -163,6 +163,8 @@ bool ESIM_PROCESS_EV_IN_ORDER = true;
 void m2s_create_report_dirs(void);
 //int fran_latencia;
 //int fran_accesos;
+char *device_config_str = NULL; /* Path to INI file */
+char *system_config_str = NULL;
 
 static char *net_debug_file_name = "";
 
@@ -673,6 +675,22 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
 			report_cache_states = xmalloc(1000);
 			memcpy(report_cache_states,a,strlen(a)+1);
 
+			continue;
+		}
+
+		/* DRAMSIM_MC configuration file */
+		if (!strcmp(argv[argi], "--dramsim-system"))
+		{
+			m2s_need_argument(argc, argv, argi);
+			system_config_str = argv[++argi];
+			continue;
+		}
+
+		/* DRAMSIM_DIMM configuration file */
+		if (!strcmp(argv[argi], "--dramsim-device"))
+		{
+			m2s_need_argument(argc, argv, argi);
+			device_config_str = argv[++argi];
 			continue;
 		}
 

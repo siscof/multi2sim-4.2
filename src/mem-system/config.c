@@ -912,8 +912,8 @@ static void mem_config_read_dram_systems(struct config_t *config)
 	struct dram_system_t *dram_system;
 
 	char *section;
-	char *device_config_str; /* Path to INI file */
-	char *system_config_str; /* Path to INI file */
+	//char *device_config_str; /* Path to INI file */
+	//char *system_config_str; /* Path to INI file */
 	char *report_file_str;
 
 	char dram_system_name[MAX_STRING_SIZE];
@@ -935,8 +935,10 @@ static void mem_config_read_dram_systems(struct config_t *config)
 
 		/* Read config parameters */
 		str_token(dram_system_name, sizeof dram_system_name, section, 1, " ");
-		device_config_str = config_read_string(config, section, "DeviceDescription", "ini/DDR2_micron_16M_8b_x8_sg3E.ini");
-		system_config_str = config_read_string(config, section, "SystemDescription", "system.ini");
+		if(!device_config_str)
+			device_config_str = config_read_string(config, section, "DeviceDescription", "ini/DDR2_micron_16M_8b_x8_sg3E.ini");
+		if(!system_config_str)
+			system_config_str = config_read_string(config, section, "SystemDescription", "system.ini");
 
 		ret = snprintf(dram_system_intrep_file, MAX_PATH_SIZE, "%s/%s.csv", dram_interval_reports_dir, dram_system_name);
 		if (ret < 0 || ret >= MAX_PATH_SIZE)

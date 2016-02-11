@@ -23,6 +23,8 @@
 extern char *mem_config_file_name;
 extern char *mem_config_help;
 extern char *dramsim_report;
+extern char *device_config_str; /* Path to INI file */
+extern char *system_config_str; /* Path to INI file */
 
 /* Parse memory hierarchy configuration file, or generate default if user
  * didn't pass '--mem-config' command-line option. */
