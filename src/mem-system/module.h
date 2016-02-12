@@ -39,6 +39,7 @@ struct mod_port_t
 	int waiting_list_max;
 };
 
+
 /* String map for access type */
 extern struct str_map_t mod_access_kind_map;
 
@@ -285,7 +286,8 @@ long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	unsigned int addr, int *witness_ptr, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info);
 
-long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct si_wavefront_t *wavefront, struct linked_list_t *event_queue, void *event_queue_item, struct mod_client_info_t *client_info);
+
+long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind, unsigned int addr, int *witness_ptr, int bytes, int wg_id, void *uop, struct linked_list_t *event_queue, void *event_queue_item, struct mod_client_info_t *client_info);
 
 int mod_can_access(struct mod_t *mod, unsigned int addr);
 

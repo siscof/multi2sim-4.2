@@ -571,6 +571,9 @@ void mod_handler_nmoesi_load(int event, void *data)
 		if (stack->witness_ptr)
 			(*stack->witness_ptr)++;
 
+		if((*stack->witness_ptr) == 0 && stack->client_info)
+			stack->uop->mem_access_finish_cycle = stack->client_info->arch->timing->cycle;
+
 		/* Return event queue element into event queue */
 		if (stack->event_queue && stack->event_queue_item)
 			linked_list_add(stack->event_queue, stack->event_queue_item);
@@ -2702,6 +2705,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       linked_list_add(ds->pending_reads, stack);
       dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
+			stack->dramsim_mm_start = asTiming(si_gpu)->cycle;
+
       /* Ctx main memory stats */
       //ctx->mm_read_accesses++;
       //if (stack->prefetch)
@@ -2766,7 +2771,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		}
 
 		dir_entry_unlock(dir, stack->set, stack->way);
-
+		stack->dramsim_mm_start = asTiming(si_gpu)->cycle;
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
 		stack->event = EV_MOD_NMOESI_READ_REQUEST_REPLY;
@@ -3061,6 +3066,13 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		assert(stack->request_dir);
 		assert(mod_get_low_mod(mod, stack->addr) == target_mod ||
 			mod_get_low_mod(target_mod, stack->addr) == mod);
+
+		if(stack->main_memory_accessed != 1)
+		{
+			stack->main_memory_accessed = 1;
+			stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
+			stack->uop->mem_mm_accesses++;
+		}
 
 		/* Get network and nodes */
 		if (stack->request_dir == mod_request_up_down)
@@ -3379,6 +3391,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			linked_list_add(ds->pending_reads, stack);
 			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
+			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 			/* Ctx main memory stats */
 			assert(!stack->prefetch);
 			//ctx->mm_read_accesses++;
@@ -3430,6 +3443,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 
 		/* Unlock, reply_size is the data of the size of the requester's block. */
 		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+
+		stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
@@ -3545,6 +3560,14 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		assert(stack->reply_size);
 		assert(mod_get_low_mod(mod, stack->addr) == target_mod ||
 			mod_get_low_mod(target_mod, stack->addr) == mod);
+
+
+		if(stack->main_memory_accessed != 1)
+		{
+			stack->main_memory_accessed = 1;
+			stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
+			stack->uop->mem_mm_accesses++;
+		}
 
 		/* Get network and nodes */
 		if (stack->request_dir == mod_request_up_down)

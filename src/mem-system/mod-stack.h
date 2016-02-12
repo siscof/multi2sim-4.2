@@ -70,6 +70,7 @@ struct mod_stack_t
 	int transaction_blocking;
 	int high_priority_transaction;
 	int transaction_idle;
+	long long dramsim_mm_start;
 
 	struct latenciometro latencias;
 	struct si_wavefront_t *wavefront;

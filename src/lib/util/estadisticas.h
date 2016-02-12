@@ -95,6 +95,11 @@ struct esta_t
   long long invalidations;
 	long long evictions;
 
+  long long uop_load_finish;
+	long long uop_load_latency;
+	long long uop_load_vmb_latency;
+	long long uop_load_mm_latency;
+
 	long long cache_state[cache_block_state_size];
 
 	long long load_action_retry;

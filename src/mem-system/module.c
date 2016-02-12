@@ -43,21 +43,21 @@
 #include "vi-protocol.h"
 #include <mem-system/mshr.h>
 #include <arch/southern-islands/timing/compute-unit.h>
-
-/* String map for access type */
-struct str_map_t mod_access_kind_map =
-{
-	3, {
-		{ "Load", mod_access_load },
-		{ "Store", mod_access_store },
-		{ "NCStore", mod_access_nc_store },
-		{ "Prefetch", mod_access_prefetch }
-	}
-};
+#include <arch/southern-islands/timing/uop.h>
 
 /*
  * Public Functions
  */
+ /* String map for access type */
+ struct str_map_t mod_access_kind_map =
+ {
+ 	3, {
+ 		{ "Load", mod_access_load },
+ 		{ "Store", mod_access_store },
+ 		{ "NCStore", mod_access_nc_store },
+ 		{ "Prefetch", mod_access_prefetch }
+ 	}
+ };
 
 struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	int block_size, int latency)
@@ -119,7 +119,7 @@ void mod_dump(struct mod_t *mod, FILE *f)
 }
 
 long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
-	unsigned int addr, int *witness_ptr, int bytes, int wg_id, struct si_wavefront_t *wavefront, struct linked_list_t *event_queue,
+	unsigned int addr, int *witness_ptr, int bytes, int wg_id, void *uop, struct linked_list_t *event_queue,
 	void *event_queue_item, struct mod_client_info_t *client_info)
 {
 	struct mod_stack_t *stack;
@@ -133,9 +133,9 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	stack->stack_size = bytes;
 
 	// uop reference
-	//stack->uop = uop;
+	stack->uop = (struct si_uop_t *)uop;
 
-	stack->wavefront = wavefront;
+	stack->wavefront = stack->uop->wavefront;
 
 	stack->work_group_id_in_cu = wg_id;
 

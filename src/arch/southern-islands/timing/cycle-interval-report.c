@@ -130,7 +130,7 @@ void si_device_spatial_report_init(SIGpu *device)
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 
 	fprintf(device_spatial_report_file, "wait_for_mem_time,wait_for_mem_counter,gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
-	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,write_start,write_end,write_lat,");
+	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,uop_load_end,uop_load_lat,uop_load_vmb_lat,uop_load_mm_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
@@ -291,6 +291,11 @@ void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct
 	{
 		compute_unit->compute_device->interval_statistics->memory.load_finish += uop->active_work_items;
 		compute_unit->compute_device->interval_statistics->memory.load_latency += (asTiming(si_gpu)->cycle - uop->send_cycle) * uop->active_work_items;
+		compute_unit->compute_device->interval_statistics->memory.uop_load_finish++;
+		compute_unit->compute_device->interval_statistics->memory.uop_load_latency += asTiming(si_gpu)->cycle - uop->send_cycle;
+		compute_unit->compute_device->interval_statistics->memory.uop_load_vmb_latency += asTiming(si_gpu)->cycle - uop->mem_access_finish_cycle;
+		if(uop->mem_mm_accesses)
+			compute_unit->compute_device->interval_statistics->memory.uop_load_mm_latency += uop->mem_mm_latency / uop->mem_mm_accesses;
 	}
 	if(uop->vector_mem_write)
 	{
@@ -470,6 +475,10 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->memory.load_start);
 	fprintf(f, "%lld,", device->interval_statistics->memory.load_finish);
 	fprintf(f, "%lld,", device->interval_statistics->memory.load_latency);
+	fprintf(f, "%lld,", device->interval_statistics->memory.uop_load_finish);
+	fprintf(f, "%lld,", device->interval_statistics->memory.uop_load_latency);
+	fprintf(f, "%lld,", device->interval_statistics->memory.uop_load_vmb_latency);
+	fprintf(f, "%lld,", device->interval_statistics->memory.uop_load_mm_latency);
 	fprintf(f, "%lld,", device->interval_statistics->memory.write_start);
 	fprintf(f, "%lld,", device->interval_statistics->memory.write_finish);
 	fprintf(f, "%lld,", device->interval_statistics->memory.write_latency);

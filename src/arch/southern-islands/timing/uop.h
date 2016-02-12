@@ -104,6 +104,9 @@ struct si_uop_t
 	/* estadisticas fran*/
 	long long active_work_items ;
 	long long send_cycle;
+	long long mem_mm_accesses;
+	long long mem_mm_latency;
+	long long mem_access_finish_cycle;
 
 	/* Last scalar memory accesses */
 	unsigned int global_mem_access_addr;
