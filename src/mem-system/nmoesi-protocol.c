@@ -144,7 +144,7 @@ bool AVOID_RETRIES = false;
 
 
 int FRAN = 0;
-int load_finished = 0;
+//int load_finished = 0;
 long long ret_ciclo = 0;
 
 /* NMOESI Protocol */
@@ -172,7 +172,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_load);
-		add_access(mod->level);
+		//add_access(mod->level);
 		/* Coalesce access */
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
@@ -194,6 +194,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		if(stack->client_info && stack->client_info->arch)
 			stack->latencias.start = stack->client_info->arch->timing->cycle;
 
+		add_access(mod->level);
 	 	mod->loads++;
 		if(mod == mod->compute_unit->vector_cache)
 			mod->compute_unit->compute_device->interval_statistics->vcache_load_start++;
@@ -242,20 +243,20 @@ void mod_handler_nmoesi_load(int event, void *data)
 	}
 	if(event == EV_MOD_NMOESI_LOAD_RECEIVE)
 	{
-		  if(stack->request_dir == mod_request_up_down)
-                {
+		if(stack->request_dir == mod_request_up_down)
+    {
 			net_receive(mod->high_net, mod->high_net_node, stack->msg);
-                        esim_schedule_event(EV_MOD_NMOESI_LOAD, stack, 0);
-                }
-                else if(stack->request_dir == mod_request_down_up)
-                {
-		net_receive(mod->low_net, mod->low_net_node, stack->msg);
+      esim_schedule_event(EV_MOD_NMOESI_LOAD, stack, 0);
+    }
+    else if(stack->request_dir == mod_request_down_up)
+    {
+			net_receive(mod->low_net, mod->low_net_node, stack->msg);
 			esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack, 0);
-                }
+    }
 		else
-                {
-                        fatal("Invalid request_dir in EV_MOD_NMOESI_LOAD_RECEIVE");
-                }
+    {
+      fatal("Invalid request_dir in EV_MOD_NMOESI_LOAD_RECEIVE");
+    }
 
 		return;
 
@@ -518,14 +519,14 @@ void mod_handler_nmoesi_load(int event, void *data)
 				estadis[0].media_latencia_contador++;
 			}
 
-			load_finished++;
-			if( (load_finished % 10000) == 0 )
+			//load_finished++;
+			/*if( (load_finished % 10000) == 0 )
 			{
 				load_finished = 0;
 				fran_debug_t1000k("%lld\n", ciclo);
 				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
 				ret_ciclo = ciclo;
-			}
+			}*/
 		}
 
 		if(!stack->coalesced)
@@ -564,8 +565,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 			add_CoalesceMiss(mod->level);
 		}
 
-		if(stack->ret_stack)
-			stack->ret_stack->state = stack->state;
+		//if(stack->ret_stack)
+		//	stack->ret_stack->state = stack->state;
 
 		/* Increment witness variable */
 		if (stack->witness_ptr)
@@ -911,7 +912,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 		if(stack->latencias.start == 0)
 			if(stack->client_info && stack->client_info->arch)
-			stack->latencias.start = stack->client_info->arch->timing->cycle;
+				stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 		/* If there is any older write, wait for it */
 		older_stack = mod_in_flight_write(mod, stack);
@@ -1650,13 +1651,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 				stack->way = cache_replace_block(mod->cache, stack->set);
 			}
-			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 /*&& mod->level == 1*/)
+			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && mod->kind != mod_kind_main_memory)
 			{
-
-
 				if(!mshr_lock(mod->mshr, stack))
 				{
-
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
 					ret->mshr_locked = 0;
@@ -1701,8 +1699,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		/* Lock directory entry. If lock fails, port needs to be released to prevent
 		 * deadlock.  When the directory entry is released, locking port and
 		 * directory entry will be retried. */
-		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK,
-			stack))
+		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
