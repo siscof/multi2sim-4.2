@@ -252,6 +252,9 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		stack->request_dir = mod_request_down_up;
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
        	new_stack->reply_size = 8;
+				new_stack->target_mod = new_stack->mod;
+				new_stack->wavefront = stack->wavefront;
+				new_stack->uop = stack->uop;
        	new_stack->request_dir= mod_request_up_down;
        	new_stack->valid_mask = stack->valid_mask;
 
@@ -270,6 +273,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		EV_MOD_VI_LOAD_ACTION, stack);
 	new_stack->wavefront = stack->wavefront;
 	new_stack->uop = stack->uop;
+	new_stack->target_mod = new_stack->mod;
 	new_stack->blocking = 1;
 	new_stack->read = 1;
 	new_stack->valid_mask = stack->valid_mask;
@@ -341,6 +345,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		new_stack->reply_size = 8;
 		new_stack->valid_mask = stack->valid_mask;
 		stack->reply_size = 8 + mod->block_size;
+		new_stack->target_mod = new_stack->mod;
 		stack->request_dir = mod_request_down_up;
 		new_stack->request_dir = mod_request_up_down;
 		new_stack->wavefront = stack->wavefront;
@@ -378,6 +383,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			ESIM_EV_NONE, NULL);
 			new_stack->src_mod = mod;
 			new_stack->reply_size = 8 + mod->block_size;
+			new_stack->target_mod = new_stack->mod;
 			new_stack->request_dir = mod_request_up_down;
 			new_stack->wavefront = stack->wavefront;
 			new_stack->uop = stack->uop;
@@ -391,6 +397,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			EV_MOD_VI_LOAD_SEND, stack);
 		new_stack->reply_size = 8;
 		stack->reply_size = 8 + mod->block_size;
+		new_stack->target_mod = new_stack->mod;
 		stack->request_dir = mod_request_down_up;
 		new_stack->request_dir = mod_request_up_down;
 		new_stack->wavefront = stack->wavefront;
@@ -464,6 +471,58 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			stack->id, mod->name);
 		assert(!stack->err);
 		//mem_stats.mod_level[mod->level].entradas_bloqueadas--;
+
+		if (mod->kind == mod_kind_main_memory &&
+		 	mod->dram_system &&
+			stack->request_dir == mod_request_up_down &&
+			!stack->main_memory_accessed &&
+			stack->reply != reply_ack_data_sent_to_peer)
+		{
+			struct dram_system_t *ds = mod->dram_system;
+			//struct x86_ctx_t *ctx = stack->client_info->ctx;
+			assert(ds);
+			//assert(ctx);
+
+			if (stack->mshr_locked != 0)
+			{
+				mshr_unlock(mod);
+				stack->mshr_locked = 0;
+			}
+
+			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+			{
+				//stack->err = 1;
+				//ret->err = 1;
+				//ret->retry |= 1 << target_mod->level;
+
+				//mod_stack_set_reply(ret, reply_ack_error);
+				//stack->reply_size = 8;
+
+				//dir_entry_unlock(mod->dir, stack->set, stack->way);
+
+				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
+
+				esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 5);
+				return;
+			}
+
+			/* Access main memory system */
+			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->mod->dram_system->name);
+			stack->event = EV_MOD_VI_LOAD_FINISH;
+			linked_list_add(ds->pending_reads, stack);
+			//if (stack->wavefront) {
+			//	dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+			//}else{
+				dram_system_add_read_trans(ds->handler, stack->addr, 0, 0);
+			//}
+
+			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
+			/* Ctx main memory stats */
+			assert(!stack->prefetch);
+			//ctx->mm_read_accesses++;
+
+			return;
+		}
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(mod);
@@ -744,6 +803,9 @@ void mod_handler_vi_store(int event, void *data)
 		{
 			stack->request_dir = mod_request_down_up;
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_STORE_SEND, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
+			new_stack->target_mod = new_stack->mod;
 			new_stack->request_dir= mod_request_up_down;
 			new_stack->src_mod = mod;
 			new_stack->dirty_mask = stack->dirty_mask;
@@ -767,6 +829,7 @@ void mod_handler_vi_store(int event, void *data)
 			EV_MOD_VI_STORE_ACTION, stack);
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
+		new_stack->target_mod = new_stack->mod;
 		new_stack->retry = stack->retry;
 		new_stack->wavefront = stack->wavefront;
 		new_stack->uop = stack->uop;
@@ -794,6 +857,9 @@ void mod_handler_vi_store(int event, void *data)
 			struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag, ESIM_EV_NONE, NULL);
 			new_stack->src_mod = mod;
+			new_stack->wavefront = stack->wavefront;
+			new_stack->target_mod = new_stack->mod;
+			new_stack->uop = stack->uop;
 			new_stack->dirty_mask = stack->dirty_mask;
 			new_stack->request_dir = mod_request_up_down;
 			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
@@ -836,6 +902,7 @@ void mod_handler_vi_store(int event, void *data)
 					cache_get_block(mod->cache, stack->set, stack->way, &tag, NULL);
 					new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, tag), tag, ESIM_EV_NONE, NULL);
 					new_stack->src_mod = mod;
+					new_stack->target_mod = new_stack->mod;
 					new_stack->dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
 					new_stack->reply_size = 8 + mod->block_size;
 					new_stack->wavefront = stack->wavefront;
@@ -923,9 +990,13 @@ void mod_handler_vi_store(int event, void *data)
 
 			/* Access main memory system */
 			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->mod->dram_system->name);
+			stack->event = EV_MOD_VI_STORE_FINISH;
 			linked_list_add(ds->pending_reads, stack);
-			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
-
+			//if (stack->wavefront->id > 0) {
+			//	dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+			//}else{
+				dram_system_add_read_trans(ds->handler, stack->addr, 0, 0);
+			//}
 			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 			/* Ctx main memory stats */
 			assert(!stack->prefetch);
