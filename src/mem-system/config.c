@@ -321,6 +321,7 @@ static void mem_config_read_general(struct config_t *config)
 {
 	char *section;
 	char *dir_type;
+	char *coalescing_model;
 
 	/* Section with general parameters */
 	section = "General";
@@ -360,6 +361,9 @@ static void mem_config_read_general(struct config_t *config)
 		fatal("%s: directory type: %s : isn't a valid directory type (nmoesi, vi)\n",
 				mem_config_file_name, dir_type);
 	}
+
+	/* CoalescingModel = merge_rw | coalesce_rw | si  */
+	coalescing_model = config_read_string(config, section, "CoalescingModel", "nmoesi");
 }
 
 
