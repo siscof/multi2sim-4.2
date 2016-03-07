@@ -968,6 +968,26 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 	/* For efficiency, first check in the hash table of accesses
 	 * whether there is an access in flight to the same block. */
 	assert(access_kind);
+
+  switch(coalescing_model)
+  {
+    case merge_rw:
+      break;
+
+    case coalesce_rw:
+      return NULL;
+
+    case si:
+    {
+      if(access_kind == mod_access_load)
+        return NULL;
+      break;
+    }
+
+    default:
+      fatal("in mod_can_coalesce(): coalescing_model invalid");
+  }
+
 	if (!mod_in_flight_address(mod, addr, older_than_stack))
 		return NULL;
 

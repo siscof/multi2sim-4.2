@@ -109,7 +109,7 @@ void mod_handler_vi_load(int event, void *data)
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
 
-		if ((stack->mod->level == 1 && ((!flag_coalesce_gpu_enabled && master_stack) || ((stack->mod->compute_unit->scalar_cache == mod) && master_stack))) || (stack->mod->level != 1 && master_stack))
+		if (master_stack)
 		{
 			mod_access_start(mod, stack, mod_access_load);
 			mod->hits_aux++;
@@ -686,7 +686,7 @@ void mod_handler_vi_store(int event, void *data)
 
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
 		//mod_access_start(mod, stack, mod_access_store);
-		if ((stack->mod->level == 1 && !flag_coalesce_gpu_enabled && master_stack) || (stack->mod->level != 1 && master_stack))
+		if (master_stack)
 		{
 			mod_access_start(mod, stack, mod_access_store);
 			assert(master_stack->addr == stack->addr);

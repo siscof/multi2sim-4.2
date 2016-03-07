@@ -60,6 +60,7 @@ int EV_MAIN_MEMORY_TIC;
 /* Frequency domain, as returned by function 'esim_new_domain'. */
 int mem_frequency = 1000;
 enum dir_type_t directory_type = dir_type_nmoesi;
+enum mem_coalescing_model_t coalescing_model;
 int mem_domain_index;
 
 struct mem_system_t *mem_system;
