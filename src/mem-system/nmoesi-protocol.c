@@ -2703,6 +2703,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
 			stack->dramsim_mm_start = asTiming(si_gpu)->cycle;
+			stack->event = EV_MOD_NMOESI_READ_REQUEST_REPLY;
 
       /* Ctx main memory stats */
       //ctx->mm_read_accesses++;
@@ -3041,6 +3042,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
 
+		stack->uop->mem_mm_latency += latency;
+		stack->uop->mem_mm_accesses++;
+
 		stack->event = EV_MOD_NMOESI_READ_REQUEST_REPLY;
 		esim_schedule_mod_stack_event(stack, latency);
 		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, latency);
@@ -3064,12 +3068,12 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		assert(mod_get_low_mod(mod, stack->addr) == target_mod ||
 			mod_get_low_mod(target_mod, stack->addr) == mod);
 
-		if(stack->main_memory_accessed != 1)
+		/*if(stack->main_memory_accessed != 1)
 		{
 			stack->main_memory_accessed = 1;
 			stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
 			stack->uop->mem_mm_accesses++;
-		}
+		}*/
 
 		/* Get network and nodes */
 		if (stack->request_dir == mod_request_up_down)
@@ -3388,6 +3392,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			linked_list_add(ds->pending_reads, stack);
 			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
+			stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
 			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 			/* Ctx main memory stats */
 			assert(!stack->prefetch);
@@ -3536,6 +3541,10 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 
 		//int latency = ret->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
+
+		stack->uop->mem_mm_latency += latency;
+		stack->uop->mem_mm_accesses++;
+
 		stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
 		esim_schedule_mod_stack_event(stack, latency);
 		//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, latency);
@@ -3559,12 +3568,12 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			mod_get_low_mod(target_mod, stack->addr) == mod);
 
 
-		if(stack->main_memory_accessed != 1)
+		/*if(stack->main_memory_accessed != 1)
 		{
 			stack->main_memory_accessed = 1;
 			stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
 			stack->uop->mem_mm_accesses++;
-		}
+		}*/
 
 		/* Get network and nodes */
 		if (stack->request_dir == mod_request_up_down)
@@ -3789,6 +3798,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 		stack->pending--;
 		if (stack->pending)
 			return;
+
 		mod_stack_return(stack);
 		return;
 	}

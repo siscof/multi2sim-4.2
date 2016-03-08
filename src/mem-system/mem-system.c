@@ -667,6 +667,7 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
 			stack->main_memory_accessed = 1;
 
+			assert(stack->dramsim_mm_start);
 			stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
 			stack->uop->mem_mm_accesses++;
 
