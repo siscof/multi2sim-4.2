@@ -323,7 +323,7 @@ int mod_get_retry_latency(struct mod_t *mod);
 struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 	enum mod_access_kind_t access_kind, unsigned int addr,
 	struct mod_stack_t *older_than_stack);
-struct mod_stack_t *mod_can_coalesce_fran(struct mod_t *mod,
+struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 	enum mod_access_kind_t access_kind, unsigned int addr,
 	int *global_mem_witness);
 void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,

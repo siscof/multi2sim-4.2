@@ -316,12 +316,12 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				//hacer coalesce
 				unsigned int addr = work_item_uop->global_mem_access_addr;
 				int bytes = work_item->global_mem_access_size;
-				struct mod_stack_t *master_stack = mod_can_coalesce_fran(mod, access_kind, addr, &uop->global_mem_witness);
+				struct mod_stack_t *master_stack = mod_can_coalesce_si(mod, access_kind, addr, &uop->global_mem_witness);
 
 				add_access(0);
 
 				//instruccion coalesce
-				if (flag_coalesce_gpu_enabled && master_stack)
+				if (master_stack)
 				{
 					unsigned int shift = (addr & (mod->sub_block_size - 1));
 					long long mask = 0;
