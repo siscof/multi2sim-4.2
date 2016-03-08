@@ -531,6 +531,8 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Unlock directory entry */
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
+		stack->uop->mem_mm_latency += mod->latency;
+		stack->uop->mem_mm_accesses++;
 
 		/* Impose the access latency before continuing */
 
@@ -1014,8 +1016,10 @@ void mod_handler_vi_store(int event, void *data)
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 		int latency = mod->latency;
-		if(mod->dram_system)
-			latency = 0;
+		assert(!mod->dram_system);
+
+		stack->uop->mem_mm_latency += latency;
+		stack->uop->mem_mm_accesses++;
 
 		/* Impose the access latency before continuing */
 		esim_schedule_event(EV_MOD_VI_STORE_FINISH, stack, latency);
