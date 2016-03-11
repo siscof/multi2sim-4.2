@@ -2769,9 +2769,20 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		}
 
 		dir_entry_unlock(dir, stack->set, stack->way);
-		stack->dramsim_mm_start = asTiming(si_gpu)->cycle;
+
+		// dramsim must return here
+		if(target_mod->kind == mod_kind_main_memory &&
+        target_mod->dram_system &&
+        stack->request_dir == mod_request_up_down)
+			return;
+
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
+		if (target_mod->kind == mod_kind_main_memory)
+		{
+			stack->uop->mem_mm_latency += latency;
+			stack->uop->mem_mm_accesses++;
+		}
 		stack->event = EV_MOD_NMOESI_READ_REQUEST_REPLY;
 		esim_schedule_mod_stack_event(stack, latency);
 		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, latency);
@@ -3398,7 +3409,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			assert(!stack->prefetch);
 			//ctx->mm_read_accesses++;
 
-			return;
+			//return;
 		 }
 
 		/* Check that addr is a multiple of mod.block_size.
@@ -3446,10 +3457,19 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		/* Unlock, reply_size is the data of the size of the requester's block. */
 		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 
-		stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
+		// dramsim must return here
+		if(target_mod->kind == mod_kind_main_memory &&
+		 	target_mod->dram_system &&
+			stack->request_dir == mod_request_up_down)
+			return;
 
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
+		if (target_mod->kind == mod_kind_main_memory)
+		{
+			stack->uop->mem_mm_latency += latency;
+			stack->uop->mem_mm_accesses++;
+		}
 		stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
 		esim_schedule_mod_stack_event(stack, latency);
 		//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, latency);
@@ -3542,9 +3562,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		//int latency = ret->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
 
-		stack->uop->mem_mm_latency += latency;
-		stack->uop->mem_mm_accesses++;
-
+		if (target_mod->kind == mod_kind_main_memory)
+		{
+			stack->uop->mem_mm_latency += latency;
+			stack->uop->mem_mm_accesses++;
+		}
 		stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
 		esim_schedule_mod_stack_event(stack, latency);
 		//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, latency);
