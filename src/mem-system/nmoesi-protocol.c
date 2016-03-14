@@ -2709,7 +2709,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       //ctx->mm_read_accesses++;
       //if (stack->prefetch)
       //    ctx->mm_pref_accesses++;
-      return;
+      //return;
     }
 
 		shared = 0;
@@ -2773,7 +2773,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		// dramsim must return here
 		if(target_mod->kind == mod_kind_main_memory &&
         target_mod->dram_system &&
-        stack->request_dir == mod_request_up_down)
+        stack->request_dir == mod_request_up_down &&
+        stack->reply != reply_ack_data_sent_to_peer)
 			return;
 
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
