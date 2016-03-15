@@ -339,7 +339,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 					mod_stack_merge_dirty_mask(master_stack, mask);
 					mod_stack_merge_valid_mask(master_stack, mask);
 					add_coalesce(0);
-					if(uop->vector_mem_write)
+					if(!uop->vector_mem_write)
 						add_coalesce_load(0);
 					else
 						add_coalesce_store(0);
