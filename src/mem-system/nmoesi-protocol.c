@@ -838,6 +838,12 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod_coalesce(mod, master_stack, stack);
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_NMOESI_NC_STORE_FINISH);
 
+			if(stack->witness_ptr)
+			{
+				(*stack->witness_ptr)++;
+				stack->witness_ptr = NULL;
+			}
+
 			add_coalesce(mod->level);
 			add_coalesce_store(mod->level);
 			return;
