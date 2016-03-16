@@ -178,10 +178,16 @@ void mod_handler_vi_load(int event, void *data)
 		{
 			fatal("Invalid request_dir in EV_MOD_VI_LOAD_SEND");
 		}
+
+		mem_debug("%lld %lld 0x%x %s load send from %s to %s\n", esim_time, stack->id,
+			stack->addr, mod->name, src_node->name, dst_node->name);
+
 		return;
 	}
 	if(event == EV_MOD_VI_LOAD_RECEIVE)
 	{
+		mem_debug("%lld %lld 0x%x %s load receive\n", esim_time, stack->id,
+			stack->addr, mod->name);
 		if(stack->request_dir == mod_request_up_down)
     {
 			net_receive(mod->high_net, mod->high_net_node, stack->msg);
@@ -199,6 +205,8 @@ void mod_handler_vi_load(int event, void *data)
     {
 			fatal("Invalid request_dir in EV_MOD_VI_LOAD_RECEIVE");
     }
+
+
 		return;
 	}
 if (event == EV_MOD_VI_LOAD_LOCK)

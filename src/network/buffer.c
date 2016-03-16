@@ -31,7 +31,7 @@
 #include "node.h"
 
 
-/* 
+/*
  * Public Functions
  */
 
@@ -192,13 +192,17 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
 void net_buffer_wakeup(struct net_buffer_t *buffer)
 {
 	struct net_buffer_wakeup_t *wakeup;
+	int i = 0;
 
-	while (linked_list_count(buffer->wakeup_list))
+	while (linked_list_count(buffer->wakeup_list) && i < 10)
 	{
 		/* Get event/stack */
 		linked_list_head(buffer->wakeup_list);
 		wakeup = linked_list_get(buffer->wakeup_list);
 		linked_list_remove(buffer->wakeup_list);
+
+		/* optimization */
+		i++;
 
 		/* Schedule event */
 		esim_schedule_event(wakeup->event, wakeup->stack, 0);
