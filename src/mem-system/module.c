@@ -979,7 +979,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
     case si:
     {
-      if(access_kind == mod_access_load)
+      if(access_kind == mod_access_load || access_kind == mod_access_nc_load)
         return NULL;
       break;
     }
@@ -1107,7 +1107,7 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 
     case si:
     {
-      if(access_kind != mod_access_load)
+      if(access_kind != mod_access_load && access_kind != mod_access_nc_load)
         return NULL;
       break;
     }
