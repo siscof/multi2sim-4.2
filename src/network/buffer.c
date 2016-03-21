@@ -199,12 +199,11 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 	{
 		/* Get event/stack */
 		linked_list_head(buffer->wakeup_list);
+		wakeup = linked_list_get(buffer->wakeup_list);
 		if (buffer->count + ((struct mod_stack_t *)wakeup->stack)->msg_size > buffer->size)
 		{
 			break;
 		}
-
-		wakeup = linked_list_get(buffer->wakeup_list);
 		linked_list_remove(buffer->wakeup_list);
 
 		/* Schedule event */
