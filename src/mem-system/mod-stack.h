@@ -148,6 +148,7 @@ struct mod_stack_t
 
 	/* Message sent through interconnect */
 	struct net_msg_t *msg;
+	int msg_size;
 
 	/* Linked list for waiting events */
 	int waiting_list_event;  /* Event to schedule when stack is waken up */

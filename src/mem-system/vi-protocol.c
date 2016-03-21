@@ -141,15 +141,15 @@ void mod_handler_vi_load(int event, void *data)
 
 	if(event == EV_MOD_VI_LOAD_SEND)
 	{
-		int msg_size;
+		//int msg_size;
 		if(stack->request_dir == mod_request_up_down)
 		{
 			//new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_FINISH, stack);
 
 			if(stack->reply_size)
-				msg_size = stack->reply_size;
+				stack->msg_size = stack->reply_size;
 			else
-				msg_size = 8;
+				stack->msg_size = 8;
 
 			//stack->request_dir = mod_request_up_down;
 
@@ -157,7 +157,7 @@ void mod_handler_vi_load(int event, void *data)
 			src_node = stack->ret_stack->mod->low_net_node;
 			dst_node = mod->high_net_node;
 			return_event = EV_MOD_VI_LOAD_RECEIVE;
-			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
+			stack->msg = net_try_send_ev(net, src_node, dst_node, stack->msg_size,
 				return_event, stack, event, stack);
 		}
 		else if(stack->request_dir == mod_request_down_up)
@@ -165,13 +165,13 @@ void mod_handler_vi_load(int event, void *data)
 			//if(stack->reply_size)
 			//	msg_size = stack->reply_size;
 			//else
-			msg_size = 72;
+			stack->msg_size = 72;
 
 			net = mod->low_net;
       src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
       dst_node = mod->low_net_node;
 			return_event = EV_MOD_VI_LOAD_RECEIVE;
-			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
+			stack->msg = net_try_send_ev(net, src_node, dst_node, stack->msg_size,
 				return_event, stack, event, stack);
 		}
 		else
