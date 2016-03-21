@@ -24,8 +24,6 @@
 #include <lib/util/debug.h>
 #include <lib/util/linked-list.h>
 #include <lib/util/list.h>
-#include <mem-system/mod-stack.h>
-
 
 #include "buffer.h"
 #include "net-system.h"
@@ -194,13 +192,15 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
 void net_buffer_wakeup(struct net_buffer_t *buffer)
 {
 	struct net_buffer_wakeup_t *wakeup;
+	struct net_stack_t *stack;
 
 	while (linked_list_count(buffer->wakeup_list))
 	{
 		/* Get event/stack */
 		linked_list_head(buffer->wakeup_list);
 		wakeup = linked_list_get(buffer->wakeup_list);
-		if (buffer->count + ((struct mod_stack_t *)wakeup->stack)->msg_size > buffer->size)
+		stack = wakeup->stack;
+		if (buffer->count + stack->msg->size > buffer->size)
 		{
 			break;
 		}
