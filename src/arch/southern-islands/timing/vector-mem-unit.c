@@ -270,10 +270,10 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		}
 		else if (uop->vector_mem_read)
 		{
-        	if ((directory_type == dir_type_nmoesi) || uop->glc)
-            	access_kind = mod_access_load;
-            else
-        		access_kind = mod_access_nc_load;
+        	//if ((directory_type == dir_type_nmoesi) || uop->glc)
+            access_kind = mod_access_load;
+          //  else
+        	//	access_kind = mod_access_nc_load;
 		}
 		else
 			fatal("%s: invalid access kind", __FUNCTION__);

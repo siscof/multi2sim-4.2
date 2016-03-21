@@ -986,6 +986,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
     default:
       fatal("in mod_can_coalesce(): coalescing_model invalid");
+      break;
   }
 
 	if (!mod_in_flight_address(mod, addr, older_than_stack))
@@ -1107,7 +1108,7 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 
     case si:
     {
-      if(access_kind != mod_access_load && access_kind != mod_access_nc_load)
+      if(access_kind == mod_access_store || access_kind == mod_access_nc_store)
         return NULL;
       break;
     }
