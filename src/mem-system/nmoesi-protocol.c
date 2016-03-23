@@ -1664,14 +1664,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
 					ret->mshr_locked = 0;
-
-					//if(!stack->blocking)
-					//{
-					//	ret->err = 1;
-					//	mod_stack_return(stack);
-					//}else{
-						mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
-					//}
+					mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
 					return;
 				}
 
