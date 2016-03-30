@@ -601,7 +601,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 void mod_handler_vi_store(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
-	struct mod_stack_t *new_stack, *older_stack, *master_stack;
+	struct mod_stack_t *new_stack, *master_stack, *older_stack;
 
 	struct mod_t *mod = stack->mod;
 

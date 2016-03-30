@@ -1088,7 +1088,7 @@ int net_can_send_ev(struct net_t *net, struct net_node_t *src_node,
 	/* Message does not fit in output buffer */
 	if (output_buffer->count + size > output_buffer->size)
 	{
-		net_buffer_wait(output_buffer, retry_event, retry_stack);
+		net_buffer_wait(output_buffer, retry_event, retry_stack, size);
 		return 0;
 	}
 

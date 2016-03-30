@@ -169,7 +169,7 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 
 
 /* Schedule an event to be called when the buffer releases some space. */
-void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
+void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack, int size)
 {
 	struct net_buffer_wakeup_t *wakeup;
 
@@ -184,6 +184,7 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
 	/* Add it to wakeup list */
 	wakeup->event = event;
 	wakeup->stack = stack;
+	wakeup->size = size;
 	linked_list_add(buffer->wakeup_list, wakeup);
 }
 
@@ -193,24 +194,25 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 {
 	struct net_buffer_wakeup_t *wakeup;
 	//struct net_stack_t *stack;
-	//int bytes = 0;
+	int bytes = 0;
 
 	while (linked_list_count(buffer->wakeup_list))
 	{
 		/* Get event/stack */
-		linked_list_head(buffer->wakeup_list);
+		//linked_list_head(buffer->wakeup_list);
 		wakeup = linked_list_get(buffer->wakeup_list);
-		//stack = wakeup->stack;
-		//if (buffer->count + bytes + stack->msg->size > buffer->size)
-		//{
-		//	break;
-		//}
-		//bytes += stack->msg->size;
+		assert(wakeup);
+		bytes += wakeup->size;
 
-		linked_list_remove(buffer->wakeup_list);
-		/* Schedule event */
-		esim_schedule_event(wakeup->event, wakeup->stack, 0);
-		free(wakeup);
+		if(buffer->count + bytes < buffer->size)
+		{
+			linked_list_remove(buffer->wakeup_list);
+			/* Schedule event */
+			esim_schedule_event(wakeup->event, wakeup->stack, 0);
+			free(wakeup);
+		}else{
+			break;
+		}
 	}
 }
 
