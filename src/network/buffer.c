@@ -214,15 +214,18 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 		assert(wakeup);
 		bytes += wakeup->size;
 
-		if(buffer->count + bytes <= buffer->size)
-		{
-			linked_list_remove(buffer->wakeup_list);
-
-			esim_schedule_event(wakeup->event, wakeup->stack, 0);
-			free(wakeup);
-		}else{
+		if(buffer->count + bytes > buffer->size)
 			break;
-		}
+
+		//if(buffer->count + bytes <= buffer->size)
+//		{
+		linked_list_remove(buffer->wakeup_list);
+		esim_schedule_event(wakeup->event, wakeup->stack, 0);
+		free(wakeup);
+	//	}else{
+	//	if(buffer->count + bytes >= buffer->size)
+	//		break;
+		//}
 	}
 //	printf("bytes ocupados en el Buffer: %d \t bytes wakeuped: %d \t waitting list count: %d\n",buffer->count,bytes,linked_list_count(buffer->wakeup_list));
 }
