@@ -124,13 +124,14 @@ void net_event_handler(int event, void *data)
 		struct net_buffer_t *output_buffer;
 
 		/* Debug */
-		net_debug("msg "
+		net_debug("%lld - msg "
 				"a=\"send\" "
 				"net=\"%s\" "
 				"msg=%lld "
 				"size=%d "
 				"src=\"%s\" "
 				"dst=\"%s\"\n",
+				esim_time,
 				net->name,
 				msg->id,
 				msg->size,
@@ -176,12 +177,13 @@ void net_event_handler(int event, void *data)
 		int lat;
 
 		/* Debug */
-		net_debug("msg "
+		net_debug("%lld - msg "
 				"a=\"obuf\" "
 				"net=\"%s\" "
 				"msg=%lld "
 				"node=\"%s\" "
 				"buf=\"%s\"\n",
+				esim_time,
 				net->name,
 				msg->id,
 				node->name,
@@ -450,12 +452,13 @@ void net_event_handler(int event, void *data)
 		int lat;
 
 		/* Debug */
-		net_debug("msg "
+		net_debug("%lld - msg "
 			"a=\"ibuf\" "
 			"net=\"%s\" "
 			"msg=%lld "
 			"node=\"%s\" "
 			"buf=\"%s\"\n",
+			esim_time,
 			net->name,
 			msg->id,
 			node->name,
@@ -575,11 +578,12 @@ void net_event_handler(int event, void *data)
 	else if (event == EV_NET_RECEIVE)
 	{
 		/* Debug */
-		net_debug("msg "
+		net_debug("%lld - msg "
 			"a=\"receive\" "
 			"net=\"%s\" "
 			"msg=%lld "
 			"node=\"%s\"\n",
+			esim_time,
 			net->name,
 			msg->id,
 			dst_node->name);

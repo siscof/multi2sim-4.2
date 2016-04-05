@@ -54,6 +54,7 @@ struct net_buffer_t
 	/* Cycle until a read/write operation on buffer lasts */
 	long long read_busy;
 	long long write_busy;
+	long long write_busy_scheduled;
 
 	/* Link connected to buffer */
 	struct net_link_t *link;

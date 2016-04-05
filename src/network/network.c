@@ -1080,8 +1080,12 @@ int net_can_send_ev(struct net_t *net, struct net_node_t *src_node,
 	/* Output buffer is busy */
 	if (output_buffer->write_busy >= cycle)
 	{
+		if(output_buffer->write_busy_scheduled < output_buffer->write_busy)
+			output_buffer->write_busy_scheduled = output_buffer->write_busy;
+			
 		esim_schedule_event(retry_event, retry_stack,
-				output_buffer->write_busy - cycle + 1);
+				output_buffer->write_busy_scheduled - cycle + 1);
+		output_buffer->write_busy_scheduled++;
 		return 0;
 	}
 
@@ -1136,6 +1140,7 @@ struct net_msg_t *net_send_ev(struct net_t *net, struct net_node_t *src_node,
 	/* Start event-driven simulation */
 	stack = net_stack_create(net, ESIM_EV_NONE, NULL);
 	stack->msg = msg;
+	msg->stack = receive_stack;
 	stack->ret_event = receive_event;
 	stack->ret_stack = receive_stack;
 	esim_execute_event(EV_NET_SEND, stack);
