@@ -210,7 +210,7 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 
 	linked_list_head(buffer->wakeup_list);
 
-	while (linked_list_is_end(buffer->wakeup_list))
+	while (!linked_list_is_end(buffer->wakeup_list))
 	{
 		wakeup = linked_list_get(buffer->wakeup_list);
 		assert(wakeup);
