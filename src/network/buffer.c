@@ -29,6 +29,7 @@
 #include "net-system.h"
 #include "network.h"
 #include "node.h"
+#include "link.h"
 
 
 /*
@@ -196,38 +197,37 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 	//struct net_stack_t *stack;
 	int bytes = 0;
 
-//	while (linked_list_count(buffer->wakeup_list))
-//	{
+	//while (linked_list_count(buffer->wakeup_list))
+	//{
 		/* Get event/stack */
-//		linked_list_head(buffer->wakeup_list);
-//		wakeup = linked_list_get(buffer->wakeup_list);
-//		linked_list_remove(buffer->wakeup_list);
+	//	linked_list_head(buffer->wakeup_list);
+	//	wakeup = linked_list_get(buffer->wakeup_list);
+	//	linked_list_remove(buffer->wakeup_list);
 		/* Schedule event */
-//		esim_schedule_event(wakeup->event, wakeup->stack, 0);
-//		free(wakeup);
-//	}
+	//	esim_schedule_event(wakeup->event, wakeup->stack, 0);
+	//	free(wakeup);
+	//}
 
-	while (linked_list_count(buffer->wakeup_list))
+	linked_list_head(buffer->wakeup_list);
+
+	while (linked_list_is_end(buffer->wakeup_list))
 	{
-		linked_list_head(buffer->wakeup_list);
 		wakeup = linked_list_get(buffer->wakeup_list);
 		assert(wakeup);
-		bytes += wakeup->size;
 
-		if(buffer->count + bytes > buffer->size)
-			break;
+		if(buffer->count + bytes + wakeup->size > buffer->size)
+		{
+			bytes += wakeup->size;
+			linked_list_remove(buffer->wakeup_list);
+			esim_schedule_event(wakeup->event, wakeup->stack, 0);
+			free(wakeup);
+			continue;
+		}
 
-		//if(buffer->count + bytes <= buffer->size)
-//		{
-		linked_list_remove(buffer->wakeup_list);
-		esim_schedule_event(wakeup->event, wakeup->stack, 0);
-		free(wakeup);
-	//	}else{
-	//	if(buffer->count + bytes >= buffer->size)
-	//		break;
-		//}
+		linked_list_next(buffer->wakeup_list);
+
 	}
-//	printf("bytes ocupados en el Buffer: %d \t bytes wakeuped: %d \t waitting list count: %d\n",buffer->count,bytes,linked_list_count(buffer->wakeup_list));
+	//printf("%s: %d \t bytes wakeuped: %d \t waiting list count: %d\n",buffer->link->name, buffer->count,bytes,linked_list_count(buffer->wakeup_list));
 }
 
 
