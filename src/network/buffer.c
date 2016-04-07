@@ -215,7 +215,7 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 		wakeup = linked_list_get(buffer->wakeup_list);
 		assert(wakeup);
 
-		if(buffer->count + bytes + wakeup->size > buffer->size)
+		if(buffer->count + bytes + wakeup->size <= buffer->size)
 		{
 			bytes += wakeup->size;
 			linked_list_remove(buffer->wakeup_list);
