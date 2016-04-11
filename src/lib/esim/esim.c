@@ -621,7 +621,7 @@ void esim_execute_event(int id, void *data)
 	event_info->handler(id, data);
 }
 
-
+int report_event_status = 1;
 void esim_process_events(int forward)
 {
 	long long when;
@@ -643,6 +643,22 @@ void esim_process_events(int forward)
 	}
 
 	 list = list_create_with_size(1);
+
+	if(report_event_status && esim_time%100000 == 0)
+	{
+		printf("esim_events %d: ",esim_event_heap->count);
+		int i = 0;
+	 struct esim_event_t *event_aux;
+	 heap_first(esim_event_heap, (void **) &event_aux);
+	 	while(esim_event_heap->count > i)
+	 	{
+		 	i++;
+		 	printf("%d, ", event_aux->id);
+			heap_next(esim_event_heap, (void **) &event_aux);
+	 	}
+		printf("\n");
+	}
+
 	 while(1)
 	 {
 		/* Process events scheduled for this cycle */
