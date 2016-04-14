@@ -24,7 +24,8 @@
 
 
 /* Initial size for hash table */
-#define MHANDLE_HASH_TABLE_SIZE  1000
+#define MHANDLE_HASH_TABLE_SIZE  10000
+#define MHANDLE_HASH_TABLE_SIZE_2  10
 
 /* Corruption detection extra bytes */
 #define MHANDLE_MARK_END		0xa5
@@ -39,11 +40,18 @@ struct mhandle_item_t
 	void *ptr;
 	unsigned long size;
 	char *at;
-	
+
 	/* hash table fields */
 	unsigned int removed : 1;
 	unsigned int active : 1;
 	unsigned int corrupt_info : 1;
+};
+
+struct mhandle_array_t
+{
+	/* item fields */
+	struct mhandle_item_t *array;
+	unsigned long size;
 };
 
 
@@ -51,7 +59,7 @@ static int mhandle_initialized = 0;
 static unsigned long mhandle_mem_used = 0;
 
 /* Hash table of current allocated pointers */
-static struct mhandle_item_t *mhandle_hash_table;  /* Linear hash table */
+static struct mhandle_array_t **mhandle_hash_table;  /* Linear hash table */
 static int mhandle_hash_table_size;  /* Allocated size for hash table */
 static int mhandle_hash_table_count;  /* Number of elements */
 
@@ -78,31 +86,45 @@ static void mhandle_init(void)
 	if (mhandle_initialized)
 		return;
 	mhandle_initialized = 1;
-	
+
 	/* Initialize hash table */
-	mhandle_hash_table = calloc(MHANDLE_HASH_TABLE_SIZE, sizeof(struct mhandle_item_t));
+	mhandle_hash_table = calloc(MHANDLE_HASH_TABLE_SIZE, sizeof(struct mhandle_array_t *));
 	mhandle_hash_table_size = MHANDLE_HASH_TABLE_SIZE;
+
+	for(int i = 0; i < mhandle_hash_table_size; i++)
+	{
+		mhandle_hash_table[i] = calloc(MHANDLE_HASH_TABLE_SIZE, sizeof(struct mhandle_array_t));
+		mhandle_hash_table[i]->size = MHANDLE_HASH_TABLE_SIZE_2;
+		mhandle_hash_table[i]->array = calloc(MHANDLE_HASH_TABLE_SIZE_2, sizeof(struct mhandle_item_t *));
+	}
 	mhandle_hash_table_count = 0;
 	if (!mhandle_hash_table)
 		mhandle_out_of_memory("mhandle_init");
 }
 
 
-static void mhandle_hash_table_grow(void)
+/*static void mhandle_hash_table_grow(void)
 {
-	int old_size, i;
-	struct mhandle_item_t *old_ht;
-	
+	int old_size, i=0;
+	struct mhandle_array_t *old_ht;
+*/
 	/* create new hash table */
-	old_size = mhandle_hash_table_size;
+/*	old_size = mhandle_hash_table_size;
 	old_ht = mhandle_hash_table;
 	mhandle_hash_table_size = mhandle_hash_table_size * 2;
-	mhandle_hash_table = (struct mhandle_item_t *) calloc(mhandle_hash_table_size, sizeof(struct mhandle_item_t));
+	mhandle_hash_table = (struct mhandle_item_t *) calloc(mhandle_hash_table_size, sizeof(struct mhandle_item_t *));
+
+	while(i < mhandle_hash_table_size)
+	{
+		(mhandle_hash_table+i) = calloc(MHANDLE_HASH_TABLE_SIZE_2, sizeof(struct mhandle_item_t));
+		i++;
+	}
+
 	if (!mhandle_hash_table)
 		mhandle_out_of_memory("lib mhandle (resizing hash table)");
-	
+*/
 	/* put elements into new hash table */
-	for (i = 0; i < old_size; i++)
+/*	for (i = 0; i < old_size; i++)
 	{
 		if (old_ht[i].active && !old_ht[i].removed)
 		{
@@ -112,26 +134,56 @@ static void mhandle_hash_table_grow(void)
 				old_ht[i].at, old_ht[i].corrupt_info);
 		}
 	}
+
+	for(i = 0; i < mhandle_hash_table_size; i++)
+	{
+		free(mhandle_hash_table+i);
+	}
 	free(old_ht);
 }
+*/
+static void mhandle_hash_table_array_grow(int index)
+{
+	int old_size;
+	struct mhandle_item_t *old_ht;
+
+	/* create new hash table */
+	old_size = mhandle_hash_table[index]->size;
+	old_ht = mhandle_hash_table[index]->array;
+	mhandle_hash_table[index]->size = old_size * 2;
+	mhandle_hash_table[index]->array = calloc(mhandle_hash_table[index]->size, sizeof(struct mhandle_item_t *));
+
+	if (!mhandle_hash_table[index])
+		mhandle_out_of_memory("lib mhandle (resizing hash table)");
+
+	memmove(&mhandle_hash_table[index]->array, &old_ht, sizeof(struct mhandle_item_t *) * old_size  );
+
+	//free(old_ht);
+}
+
 
 
 static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, int corrupt_info)
 {
 	struct mhandle_item_t *item;
-	int index;
-	
+	int index,index2;
+
 	/* Hash table too small */
-	if (mhandle_hash_table_count >= mhandle_hash_table_size / 2)
-		mhandle_hash_table_grow();
-	
+	//if (mhandle_hash_table_count >= mhandle_hash_table_size / 2)
+	//	mhandle_hash_table_grow();
+
 	/* Find position */
+	index2 = 0;
 	index = (unsigned long) ptr % mhandle_hash_table_size;
-	while (mhandle_hash_table[index].active && !mhandle_hash_table[index].removed)
-		index = (index + 1) % mhandle_hash_table_size;
-	
+	while (mhandle_hash_table[index]->array[index2].active && !mhandle_hash_table[index]->array[index2].removed){
+		if(index2 == mhandle_hash_table[index]->size-1)
+			mhandle_hash_table_array_grow(index);
+
+		index2++;
+	}
+
 	/* Insert item */
-	item = &mhandle_hash_table[index];
+	item = &mhandle_hash_table[index]->array[index2];
 	item->ptr = ptr;
 	item->size = size;
 	item->at = at;
@@ -145,17 +197,18 @@ static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, i
 
 static struct mhandle_item_t *mhandle_hash_table_get(void *ptr)
 {
-	int idx;
+	int idx,index2=0;
 
 	idx = (unsigned long) ptr % mhandle_hash_table_size;
-	while (mhandle_hash_table[idx].ptr != ptr || !mhandle_hash_table[idx].active
-			|| mhandle_hash_table[idx].removed)
+	while (mhandle_hash_table[idx]->array[index2].ptr != ptr || !mhandle_hash_table[idx]->array[index2].active
+			|| mhandle_hash_table[idx]->array[index2].removed)
 	{
-		if (!mhandle_hash_table[idx].active)
+		//if (!mhandle_hash_table[idx]->array[index2].active)
+		if (index2 == mhandle_hash_table[idx]->size)
 			return NULL;
-		idx = (idx + 1) % mhandle_hash_table_size;
+		index2++;
 	}
-	return &mhandle_hash_table[idx];
+	return &mhandle_hash_table[idx]->array[index2];
 }
 
 
@@ -171,7 +224,7 @@ static unsigned long mhandle_hash_table_remove(void *ptr, char *at)
 			at, ptr);
 		abort();
 	}
-	
+
 	/* Remove item */
 	item->removed = 1;
 	mhandle_mem_used -= item->size;
@@ -199,8 +252,8 @@ static void mhandle_check_corrupt(void *eff_ptr, unsigned long eff_size, char *a
 	unsigned char *as_char;
 
 	int corrupt = 0;
-	int prev;
-	int next;
+	//int prev;
+	//int next;
 
 	void *ptr;
 
@@ -219,9 +272,9 @@ static void mhandle_check_corrupt(void *eff_ptr, unsigned long eff_size, char *a
 			corrupt = 2;
 	if (!corrupt)
 		return;
-	
+
 	/* Find contiguous blocks */
-	prev = -1;
+	/*prev = -1;
 	next = -1;
 	for (i = 0; i < mhandle_hash_table_size; i++)
 	{
@@ -234,12 +287,12 @@ static void mhandle_check_corrupt(void *eff_ptr, unsigned long eff_size, char *a
 					mhandle_hash_table[i].ptr < mhandle_hash_table[next].ptr))
 				next = i;
 		}
-	}
-	
+	}*/
+
 	/* Notify */
 	fprintf(stderr, "\nfatal: %s: memory corrupted %s block (%p, %ld bytes)\n",
 		at, corrupt == 1 ? "before" : "after", ptr, size);
-	if (prev >= 0)
+	/*if (prev >= 0)
 		fprintf(stderr, "\tprev block: %s (%p, %ld bytes)\n",
 			mhandle_hash_table[prev].at,
 			mhandle_hash_table[prev].ptr,
@@ -250,7 +303,7 @@ static void mhandle_check_corrupt(void *eff_ptr, unsigned long eff_size, char *a
 			mhandle_hash_table[next].at,
 			mhandle_hash_table[next].ptr,
 			mhandle_hash_table[next].size);
-	}
+	}*/
 	abort();
 }
 
@@ -260,13 +313,13 @@ static void mhandle_check_corrupt(void *eff_ptr, unsigned long eff_size, char *a
 /*
  * Public Functions
  */
- 
+
 void mhandle_free(void *ptr, char *at)
 {
 	struct mhandle_item_t *item;
 	void *eff_ptr;
 	unsigned long eff_size;
-	
+
 	/* initialization */
 	if (!ptr)
 		return;
@@ -295,7 +348,7 @@ void mhandle_free(void *ptr, char *at)
 		memset(ptr, 0, item->size);
 		free(ptr);
 	}
-	
+
 	/* Remove pointer from data base */
 	mhandle_hash_table_remove(ptr, at);
 }
@@ -306,7 +359,7 @@ void *mhandle_malloc(unsigned long size, char *at)
 	void *ptr;
 	void *eff_ptr;
 	unsigned long eff_size;
-	
+
 	mhandle_init();
 
 	/* Allocate */
@@ -314,7 +367,7 @@ void *mhandle_malloc(unsigned long size, char *at)
 	eff_ptr = malloc(eff_size);
 	if (!eff_ptr)
 		mhandle_out_of_memory(at);
-	
+
 	/* Mark corruption */
 	ptr = eff_ptr + MHANDLE_CORRUPT_RANGE;
 	mhandle_mark_corrupt(eff_ptr, eff_size);
@@ -332,7 +385,7 @@ void *mhandle_calloc(unsigned long nmemb, unsigned long size, char *at)
 
 	unsigned long total;
 	unsigned long eff_total;
-	
+
 	mhandle_init();
 
 	/* Effective size */
@@ -370,7 +423,7 @@ void *mhandle_realloc(void *ptr, unsigned long size, char *at)
 		mhandle_free(ptr, at);
 		return NULL;
 	}
-	
+
 	/* Reallocate */
 	mhandle_init();
 
@@ -398,17 +451,17 @@ void *mhandle_realloc(void *ptr, unsigned long size, char *at)
 	/* Check corruption and remove old pointer */
 	mhandle_check_corrupt(eff_ptr, eff_size, at);
 	mhandle_hash_table_remove(ptr, at);
-	
+
 	/* Reallocate */
 	eff_size = size + MHANDLE_CORRUPT_TOTAL;
 	eff_ptr = realloc(eff_ptr, eff_size);
 	if (!eff_ptr)
 		mhandle_out_of_memory(at);
-	
+
 	/* Mark corruption */
 	ptr = eff_ptr + MHANDLE_CORRUPT_RANGE;
 	mhandle_mark_corrupt(eff_ptr, eff_size);
-	
+
 	/* Record pointer and return */
 	mhandle_hash_table_insert(ptr, size, at, 1);
 	return ptr;
@@ -431,7 +484,7 @@ char *mhandle_strdup(const char *s, char *at)
 	eff_ptr = malloc(eff_size);
 	if (!eff_ptr)
 		mhandle_out_of_memory(at);
-	
+
 	/* Copy string and mark corruption */
 	ptr = eff_ptr + MHANDLE_CORRUPT_RANGE;
 	memcpy(ptr, s, size);
@@ -494,17 +547,18 @@ void *__xstrdup(const char *s, char *at)
 void __mhandle_done()
 {
 	int i;
-	
+
 	/* Visit whole hash table to look for not freed pointers */
-	for (i = 0; i < mhandle_hash_table_size; i++)
-		if (mhandle_hash_table[i].active && !mhandle_hash_table[i].removed)
-			fprintf(stderr, "\nwarning: %s: pointer not freed", mhandle_hash_table[i].at);
-	
+	for (i = 0; i < MHANDLE_HASH_TABLE_SIZE ; i++)
+		for (int j = 0; j < mhandle_hash_table[i]->size ; j++)
+			if (mhandle_hash_table[i]->array[j].active && !mhandle_hash_table[i]->array[j].removed)
+				fprintf(stderr, "\nwarning: %s: pointer not freed", mhandle_hash_table[i]->array[j].at);
+
 	/* Summary message */
 	if (mhandle_hash_table_count)
 		fprintf(stderr, "\n** %d pointers not freed (%lu bytes) **\n",
 			mhandle_hash_table_count, mhandle_mem_used);
-	
+
 	/* Free hash table */
 	assert(mhandle_hash_table_count || !mhandle_mem_used);
 	free(mhandle_hash_table);
@@ -522,17 +576,20 @@ void __mhandle_check(char *at)
 
 	void *eff_ptr;
 	unsigned long eff_size;
-	
+
 	/* Check for corruption in all allocated blocks */
-	for (i = 0; i < mhandle_hash_table_size; i++)
+	for (i = 0; i < MHANDLE_HASH_TABLE_SIZE; i++)
 	{
-		if (mhandle_hash_table[i].active && !mhandle_hash_table[i].removed
-			&& mhandle_hash_table[i].corrupt_info)
+		for (int j = 0; j < mhandle_hash_table[i]->size ; j++)
 		{
-			eff_ptr = mhandle_hash_table[i].ptr - MHANDLE_CORRUPT_RANGE;
-			eff_size = mhandle_hash_table[i].size + MHANDLE_CORRUPT_TOTAL;
-			mhandle_check_corrupt(eff_ptr, eff_size, mhandle_hash_table[i].at);
-			count++;
+			if (mhandle_hash_table[i]->array[j].active && !mhandle_hash_table[i]->array[j].removed
+				&& mhandle_hash_table[i]->array[j].corrupt_info)
+			{
+				eff_ptr = mhandle_hash_table[i]->array[j].ptr - MHANDLE_CORRUPT_RANGE;
+				eff_size = mhandle_hash_table[i]->array[j].size + MHANDLE_CORRUPT_TOTAL;
+				mhandle_check_corrupt(eff_ptr, eff_size, mhandle_hash_table[i]->array[j].at);
+				count++;
+			}
 		}
 	}
 	fprintf(stderr, "libmhandle: %d pointers checked for corruption\n", count);
@@ -550,4 +607,3 @@ void __mhandle_register_ptr(void *ptr, unsigned long size, char *at)
 {
 	mhandle_hash_table_insert(ptr, size, at, 0);
 }
-

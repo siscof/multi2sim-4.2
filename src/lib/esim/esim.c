@@ -400,11 +400,22 @@ void esim_init()
 	ESIM_EV_NONE = esim_register_event_with_name(NULL, 0, "None");
 }
 
-
+long long int esim_event_counter[100];
 void esim_done()
 {
 	void *elem;
 	int index;
+
+	int i = 0;
+	long long aux=0;
+	printf("resumen de eventos (evento = cantidad)\n");
+	while(i < 100)
+	{
+		printf("%d = %lld\n",i,esim_event_counter[i]);
+		aux += esim_event_counter[i];
+		i++;
+	}
+	printf("total = %lld\n",aux);
 
 	/* Free list of frequency domains */
 	LIST_FOR_EACH(esim_domain_list, index)
@@ -532,6 +543,8 @@ void esim_schedule_event(int event_index, void *data, int cycles)
 	struct esim_domain_t *domain;
 	long long when;
 
+	esim_event_counter[event_index]++;
+
 	/* Schedule locked? */
 	if (esim_lock_schedule)
 		return;
@@ -644,7 +657,7 @@ void esim_process_events(int forward)
 
 	 list = list_create_with_size(1);
 
-	if(report_event_status && esim_time%100000 == 0)
+	/*if(report_event_status && esim_time%100000 == 0)
 	{
 		printf("esim_events %d: ",esim_event_heap->count);
 		int i = 0;
@@ -657,7 +670,7 @@ void esim_process_events(int forward)
 			heap_next(esim_event_heap, (void **) &event_aux);
 	 	}
 		printf("\n");
-	}
+	}*/
 
 	 while(1)
 	 {

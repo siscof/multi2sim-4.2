@@ -226,17 +226,18 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
-	/*older_stack = mod_in_flight_write(mod, stack);
+	older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}*/
+	}
 
 		older_stack = mod_in_flight_address(mod, stack->addr, stack);
-	if (mod->level == 1 && older_stack)
+	if (mod->level == 1 && older_stack && (older_stack->access_kind != mod_access_store &&
+	older_stack->access_kind != mod_access_nc_store) )
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
