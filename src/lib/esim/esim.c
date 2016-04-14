@@ -644,7 +644,7 @@ void esim_process_events(int forward)
 
 	 list = list_create_with_size(1);
 
-	if(report_event_status && esim_time%100000 == 0)
+/*	if(report_event_status && esim_time%100000 == 0)
 	{
 		printf("esim_events %d: ",esim_event_heap->count);
 		int i = 0;
@@ -657,7 +657,7 @@ void esim_process_events(int forward)
 			heap_next(esim_event_heap, (void **) &event_aux);
 	 	}
 		printf("\n");
-	}
+	}*/
 
 	 while(1)
 	 {
