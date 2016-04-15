@@ -234,9 +234,7 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 			free(wakeup);
 			continue;
 		}
-
 		linked_list_next(buffer->wakeup_list);
-
 	}
 	//printf("%s: %d \t bytes wakeuped: %d \t waiting list count: %d\n",buffer->link->name, buffer->count,bytes,linked_list_count(buffer->wakeup_list));
 }
