@@ -232,9 +232,11 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 			linked_list_remove(buffer->wakeup_list);
 			esim_schedule_event(wakeup->event, wakeup->stack, 0);
 			free(wakeup);
-			continue;
+			linked_list_next(buffer->wakeup_list);
+		}else{
+			break;
 		}
-		linked_list_next(buffer->wakeup_list);
+		//linked_list_next(buffer->wakeup_list);
 	}
 	//printf("%s: %d \t bytes wakeuped: %d \t waiting list count: %d\n",buffer->link->name, buffer->count,bytes,linked_list_count(buffer->wakeup_list));
 }
