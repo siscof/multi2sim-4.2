@@ -24,7 +24,7 @@
 
 
 /* Initial size for hash table */
-#define MHANDLE_HASH_TABLE_SIZE  1000
+#define MHANDLE_HASH_TABLE_SIZE  100000
 #define MHANDLE_HASH_TABLE_SIZE_2  10
 
 /* Corruption detection extra bytes */
@@ -162,7 +162,7 @@ static void mhandle_hash_table_array_grow(int index)
 }
 
 
-
+int hash_table_size_warning = 0;
 static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, int corrupt_info)
 {
 	struct mhandle_item_t *item;
@@ -180,6 +180,13 @@ static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, i
 			mhandle_hash_table_array_grow(index);
 
 		index2++;
+	}
+
+	if(index2 > 100 && !hash_table_size_warning)
+	{
+		hash_table_size_warning = 1;
+		printf("\nWARNING: mhandle_hash_table[%d]->array is greater than %d \n",index,index2);
+		printf("         mhandle_hash_table_count = %ul \n\n",mhandle_hash_table_count);
 	}
 
 	/* Insert item */
