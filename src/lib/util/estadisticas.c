@@ -180,11 +180,12 @@ void estadisticas(int hit, int lvl){
 
 void statistics_event_init(int interval)
 {
-	EV_STATISTICS_BY_CYCLES = esim_register_event_with_name(statistics_event,	asTiming(si_gpu)->frequency_domain, "statistics_by_cycles");
-
-	statistics_event_interval = interval;
-	esim_schedule_event(EV_STATISTICS_BY_CYCLES, NULL, statistics_event_interval);
-
+	if(si_gpu)
+	{
+		EV_STATISTICS_BY_CYCLES = esim_register_event_with_name(statistics_event,	asTiming(si_gpu)->frequency_domain, "statistics_by_cycles");
+		statistics_event_interval = interval;
+		esim_schedule_event(EV_STATISTICS_BY_CYCLES, NULL, statistics_event_interval);
+	}
 }
 
 void ini_estadisticas(){

@@ -193,7 +193,12 @@ void net_event_handler(int event, void *data)
 		assert(list_count(buffer->msg_list));
 		if (list_get(buffer->msg_list, 0) != msg)
 		{
-			net_buffer_wait(buffer, event, stack, 0);
+			//net_buffer_wait(buffer, event, stack, 0);
+			//stack is net_stack_t *
+			stack->event = event;
+			msg->net_stack = stack;
+			msg->waiting = 1;
+
 			net_debug("msg "
 				"a=\"stall\" "
 				"net=\"%s\" "
@@ -474,7 +479,13 @@ void net_event_handler(int event, void *data)
 				"msg=%lld "
 				"why=\"not-head\"\n",
 				 net->name, msg->id);
-			net_buffer_wait(buffer, event, stack, 0);
+
+			//stack is net_stack_t *
+			stack->event = event;
+			msg->net_stack = stack;
+			msg->waiting = 1;
+
+			//net_buffer_wait(buffer, event, stack, 0);
 			return;
 		}
 
