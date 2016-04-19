@@ -24,7 +24,7 @@
 
 
 /* Initial size for hash table */
-#define MHANDLE_HASH_TABLE_SIZE  10000
+#define MHANDLE_HASH_TABLE_SIZE  1000
 #define MHANDLE_HASH_TABLE_SIZE_2  10
 
 /* Corruption detection extra bytes */
@@ -93,9 +93,9 @@ static void mhandle_init(void)
 
 	for(int i = 0; i < mhandle_hash_table_size; i++)
 	{
-		mhandle_hash_table[i] = calloc(MHANDLE_HASH_TABLE_SIZE, sizeof(struct mhandle_array_t));
+		mhandle_hash_table[i] = calloc(1, sizeof(struct mhandle_array_t));
 		mhandle_hash_table[i]->size = MHANDLE_HASH_TABLE_SIZE_2;
-		mhandle_hash_table[i]->array = calloc(MHANDLE_HASH_TABLE_SIZE_2, sizeof(struct mhandle_item_t *));
+		mhandle_hash_table[i]->array = calloc(MHANDLE_HASH_TABLE_SIZE_2, sizeof(struct mhandle_item_t));
 	}
 	mhandle_hash_table_count = 0;
 	if (!mhandle_hash_table)
@@ -151,14 +151,14 @@ static void mhandle_hash_table_array_grow(int index)
 	old_size = mhandle_hash_table[index]->size;
 	old_ht = mhandle_hash_table[index]->array;
 	mhandle_hash_table[index]->size = old_size * 2;
-	mhandle_hash_table[index]->array = calloc(mhandle_hash_table[index]->size, sizeof(struct mhandle_item_t *));
+	mhandle_hash_table[index]->array = calloc(mhandle_hash_table[index]->size, sizeof(struct mhandle_item_t));
 
 	if (!mhandle_hash_table[index])
 		mhandle_out_of_memory("lib mhandle (resizing hash table)");
 
-	memmove(&mhandle_hash_table[index]->array, &old_ht, sizeof(struct mhandle_item_t *) * old_size  );
+	memmove(mhandle_hash_table[index]->array, old_ht, sizeof(struct mhandle_item_t ) * old_size  );
 
-	//free(old_ht);
+	free(old_ht);
 }
 
 
@@ -176,7 +176,7 @@ static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, i
 	index2 = 0;
 	index = (unsigned long) ptr % mhandle_hash_table_size;
 	while (mhandle_hash_table[index]->array[index2].active && !mhandle_hash_table[index]->array[index2].removed){
-		if(index2 == mhandle_hash_table[index]->size-1)
+		if(index2 == mhandle_hash_table[index]->size - 1)
 			mhandle_hash_table_array_grow(index);
 
 		index2++;
@@ -204,7 +204,7 @@ static struct mhandle_item_t *mhandle_hash_table_get(void *ptr)
 			|| mhandle_hash_table[idx]->array[index2].removed)
 	{
 		//if (!mhandle_hash_table[idx]->array[index2].active)
-		if (index2 == mhandle_hash_table[idx]->size)
+		if (index2 == mhandle_hash_table[idx]->size - 1)
 			return NULL;
 		index2++;
 	}
