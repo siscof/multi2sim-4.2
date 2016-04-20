@@ -26,7 +26,7 @@
 
 
 /* Initial size for hash table */
-#define MHANDLE_HASH_TABLE_SIZE  1000000
+#define MHANDLE_HASH_TABLE_SIZE  10000
 
 /* Corruption detection extra bytes */
 #define MHANDLE_MARK_END		0xa5
@@ -128,7 +128,7 @@ static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, i
 
 	/* Find position */
 	//index = (unsigned long) ptr % mhandle_hash_table_size;
-	index = (unsigned long) hash(ptr, 1) % mhandle_hash_table_size;
+	index = ((unsigned long) hash(&ptr, sizeof(void *))) % mhandle_hash_table_size;
 	while (mhandle_hash_table[index].active && !mhandle_hash_table[index].removed)
 		index = (index + 1) % mhandle_hash_table_size;
 
@@ -147,18 +147,19 @@ static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, i
 
 static struct mhandle_item_t *mhandle_hash_table_get(void *ptr)
 {
-	int idx, i = 0;
+	int idx;
+	//, i = 0;
 
 	//idx = (unsigned long) ptr % mhandle_hash_table_size;
-	idx = (unsigned long) hash(ptr, 1) % mhandle_hash_table_size;
+	idx = ((unsigned long) hash(&ptr, sizeof(void *))) % mhandle_hash_table_size;
 	while (mhandle_hash_table[idx].ptr != ptr || !mhandle_hash_table[idx].active
 			|| mhandle_hash_table[idx].removed)
 	{
-		//if (!mhandle_hash_table[idx].active)
-		//	return NULL;
-		if(i > mhandle_hash_table_size)
+		if (!mhandle_hash_table[idx].active)
 			return NULL;
-		i++;
+		//if(i > mhandle_hash_table_size)
+		//	return NULL;
+		//i++;
 		idx = (idx + 1) % mhandle_hash_table_size;
 	}
 	return &mhandle_hash_table[idx];
