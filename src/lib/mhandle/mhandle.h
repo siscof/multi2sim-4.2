@@ -62,8 +62,6 @@
 
 #endif
 
-
-
 void *mhandle_malloc(size_t size, char *at);
 void *mhandle_calloc(size_t nmemb, size_t size, char *at);
 void *mhandle_realloc(void *ptr, size_t size, char *at);
@@ -86,4 +84,3 @@ unsigned long __mhandle_used_memory();
 void __mhandle_register_ptr(void *ptr, unsigned long size, char *at);
 
 #endif
-

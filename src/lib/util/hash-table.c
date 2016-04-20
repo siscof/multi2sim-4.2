@@ -425,3 +425,88 @@ char *hash_table_find_next(struct hash_table_t *table, void **data_ptr)
 		*data_ptr = NULL;
 	return NULL;
 }
+
+#define    ALIGNED_POINTER(p, t) ((((unsigned long)(p)) & (unsigned long) (sizeof(t)-1)) == 0)
+
+unsigned int murmurhash2(const void *key, int len, int seed)
+{
+    /*
+     * Note: 'm' and 'r' are mixing constants generated offline.
+     * They're not really 'magic', they just happen to work well.
+     * Initialize the hash to a 'random' value.
+     */
+    const unsigned int m = 0x5bd1e995;
+    const unsigned int r = 24;
+
+    const unsigned char *data = key;
+    unsigned int h = (unsigned int) seed ^ (unsigned int) len;
+
+    if (ALIGNED_POINTER(key, unsigned int))
+    {
+        while (len >= sizeof(unsigned int))
+        {
+            unsigned int k = *(const unsigned int *)data;
+
+            k *= m;
+            k ^= k >> r;
+            k *= m;
+
+            h *= m;
+            h ^= k;
+
+            data += sizeof(unsigned int);
+            len -= sizeof(unsigned int);
+        }
+    }
+    else
+    {
+        while (len >= sizeof(unsigned int))
+        {
+            unsigned int k;
+
+            k  = data[0];
+            k |= data[1] << 8;
+            k |= data[2] << 16;
+            k |= data[3] << 24;
+
+            k *= m;
+            k ^= k >> r;
+            k *= m;
+
+            h *= m;
+            h ^= k;
+
+            data += sizeof(unsigned int);
+            len -= sizeof(unsigned int);
+        }
+    }
+
+    /* Handle the last few bytes of the input array. */
+    switch (len) {
+    case 3:
+        h ^= data[2] << 16;
+        /* FALLTHROUGH */
+    case 2:
+        h ^= data[1] << 8;
+        /* FALLTHROUGH */
+    case 1:
+        h ^= data[0];
+        h *= m;
+    }
+
+    /*
+     * Do a few final mixes of the hash to ensure the last few
+     * bytes are well-incorporated.
+     */
+    h ^= h >> 13;
+    h *= m;
+    h ^= h >> 15;
+
+    return h;
+}
+
+
+int hash(const void *key, int len)
+{
+    return murmurhash2(key, len, 42);
+}
