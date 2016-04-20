@@ -22,7 +22,7 @@
 #include <string.h>
 #include <assert.h>
 
-#include </home/sisco/workspace/multi2sim/src/lib/util/hash-table.h>
+#include "../util/hash-table.h"
 
 
 /* Initial size for hash table */
