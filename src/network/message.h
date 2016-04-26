@@ -25,6 +25,7 @@ struct net_msg_t
 	struct net_t *net;
 	struct net_node_t *src_node;
 	struct net_node_t *dst_node;
+	struct mod_stack_t *stack;
 	struct net_stack_t *net_stack;
 	int waiting;
 	long long id;

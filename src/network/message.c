@@ -293,7 +293,7 @@ void net_event_handler(int event, void *data)
 					"msg=%lld "
 					"why=\"input buffer full\"\n",
 					net->name, msg->id);
-				net_buffer_wait(input_buffer, event, stack);
+				net_buffer_wait(input_buffer, event, stack, msg->size);
 				return;
 			}
 
@@ -376,7 +376,7 @@ void net_event_handler(int event, void *data)
 
 			if (input_buffer->count + msg->size > input_buffer->size)
 			{
-				net_buffer_wait(input_buffer, event, stack);
+				net_buffer_wait(input_buffer, event, stack, msg->size);
 				net_debug("msg "
 					"a=\"stall\" "
 					"net=\"%s\" "
@@ -475,7 +475,7 @@ void net_event_handler(int event, void *data)
 				"msg=%lld "
 				"why=\"not-head\"\n",
 				 net->name, msg->id);
-			
+
 			stack->event = event;
 			msg->net_stack = stack;
 			msg->waiting = 1;
@@ -542,7 +542,7 @@ void net_event_handler(int event, void *data)
 				"why=\"dst-full\"\n",
 				net->name,
 				msg->id);
-			net_buffer_wait(output_buffer, event, stack);
+			net_buffer_wait(output_buffer, event, stack, msg->size);
 			return;
 		}
 

@@ -1080,15 +1080,17 @@ int net_can_send_ev(struct net_t *net, struct net_node_t *src_node,
 	/* Output buffer is busy */
 	if (output_buffer->write_busy >= cycle)
 	{
-		esim_schedule_event(retry_event, retry_stack,
-				output_buffer->write_busy - cycle + 1);
+		/*if(output_buffer->write_busy_scheduled < output_buffer->write_busy)
+			output_buffer->write_busy_scheduled = output_buffer->write_busy;*/
+		esim_schedule_event(retry_event, retry_stack,1); //output_buffer->write_busy_scheduled - cycle + 1);
+		//output_buffer->write_busy_scheduled++;
 		return 0;
 	}
 
 	/* Message does not fit in output buffer */
 	if (output_buffer->count + size > output_buffer->size)
 	{
-		net_buffer_wait(output_buffer, retry_event, retry_stack);
+		net_buffer_wait(output_buffer, retry_event, retry_stack, size);
 		return 0;
 	}
 

@@ -93,7 +93,7 @@ void net_buffer_dump_report(struct net_buffer_t *buffer, FILE *f);
 void net_buffer_insert(struct net_buffer_t *buffer, struct net_msg_t *msg);
 void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg);
 
-void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack);
+void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack, int size);
 void net_buffer_wakeup(struct net_buffer_t *buffer);
 
 void net_buffer_update_occupancy(struct net_buffer_t *buffer);

@@ -181,7 +181,7 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 
 
 /* Schedule an event to be called when the buffer releases some space. */
-void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
+void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack, int size)
 {
 	struct net_buffer_wakeup_t *wakeup;
 
@@ -196,6 +196,7 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
 	/* Add it to wakeup list */
 	wakeup->event = event;
 	wakeup->stack = stack;
+	wakeup->size = size;
 	linked_list_add(buffer->wakeup_list, wakeup);
 }
 
