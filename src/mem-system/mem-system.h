@@ -22,6 +22,14 @@
 
 #include <dramsim/bindings-c.h>
 
+enum mem_coalescing_model_t
+{
+	merge_rw = 0,
+	coalesce_rw,
+	si,
+	mem_coalescing_model_t_size
+};
+
 /*
  * Memory System Object
  */
@@ -68,6 +76,7 @@ extern int mem_trace_category;
 extern int mem_frequency;
 extern int mem_peer_transfers;
 extern enum dir_type_t directory_type;
+extern enum mem_coalescing_model_t coalescing_model;
 
 /* Frequency and frequency domain */
 extern int mem_domain_index;

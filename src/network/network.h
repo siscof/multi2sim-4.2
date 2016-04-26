@@ -35,6 +35,7 @@ struct net_stack_t
 	/* Local variables */
 	struct net_t *net;
 	struct net_msg_t *msg;
+	int event;
 	char *command;
 
 	/* Return event */

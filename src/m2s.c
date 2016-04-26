@@ -155,7 +155,7 @@ char *fran_file_red;
 int SALTAR_L1;
 int flag_mshr_enabled = 0;
 int flag_mshr_dynamic_enabled = 0;
-int flag_coalesce_gpu_enabled = 0;
+//int flag_coalesce_gpu_enabled = 0;
 int flag_no_blocking_store = 0;
 long long ventana_muestreo = 10000;
 int forzar_mshr_test = 0;
@@ -725,11 +725,11 @@ static void m2s_read_command_line(int *argc_ptr, char **argv)
     }
 
     /* GPU coalesce enable */
-    if (!strcmp(argv[argi], "--coalesce-gpu-enable"))
+    /*if (!strcmp(argv[argi], "--coalesce-gpu-enable"))
     {
     	flag_coalesce_gpu_enabled = 1;
     	continue;
-    }
+    }*/
 
     /* Non blocking stores enable */
     if (!strcmp(argv[argi], "--NBS-enable"))

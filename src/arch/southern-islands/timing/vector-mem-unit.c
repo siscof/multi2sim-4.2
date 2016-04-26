@@ -270,10 +270,10 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		}
 		else if (uop->vector_mem_read)
 		{
-        	if ((directory_type == dir_type_nmoesi) || uop->glc)
-            	access_kind = mod_access_load;
-            else
-        		access_kind = mod_access_nc_load;
+        	//if ((directory_type == dir_type_nmoesi) || uop->glc)
+        access_kind = mod_access_load;
+          //  else
+        	//	access_kind = mod_access_nc_load;
 		}
 		else
 			fatal("%s: invalid access kind", __FUNCTION__);
@@ -316,12 +316,12 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				//hacer coalesce
 				unsigned int addr = work_item_uop->global_mem_access_addr;
 				int bytes = work_item->global_mem_access_size;
-				struct mod_stack_t *master_stack = mod_can_coalesce_fran(mod, access_kind, addr, &uop->global_mem_witness);
+				struct mod_stack_t *master_stack = mod_can_coalesce_si(mod, access_kind, addr, &uop->global_mem_witness);
 
 				add_access(0);
 
 				//instruccion coalesce
-				if (flag_coalesce_gpu_enabled && master_stack)
+				if (master_stack)
 				{
 					unsigned int shift = (addr & (mod->sub_block_size - 1));
 					long long mask = 0;
@@ -339,7 +339,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 					mod_stack_merge_dirty_mask(master_stack, mask);
 					mod_stack_merge_valid_mask(master_stack, mask);
 					add_coalesce(0);
-					if(uop->vector_mem_write)
+					if(!uop->vector_mem_write)
 						add_coalesce_load(0);
 					else
 						add_coalesce_store(0);

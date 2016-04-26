@@ -31,7 +31,7 @@
 #include "node.h"
 
 
-/* 
+/*
  * Public Functions
  */
 
@@ -111,6 +111,7 @@ void net_buffer_insert(struct net_buffer_t *buffer, struct net_msg_t *msg)
 {
 	struct net_t *net = buffer->net;
 	struct net_node_t *node = buffer->node;
+	//struct net_msg_t *next_msg;
 
 	if (buffer->count + msg->size > buffer->size)
 		panic("%s: not enough space in buffer", __FUNCTION__);
@@ -138,6 +139,7 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 {
 	struct net_t *net = buffer->net;
 	struct net_node_t *node = buffer->node;
+	struct net_msg_t *next_msg;
 
 	assert(buffer->count >= msg->size);
 	buffer->count -= msg->size;
@@ -162,6 +164,16 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 		msg->id,
 		node->name,
 		buffer->name);
+
+	if(list_count(buffer->msg_list))
+	{
+		next_msg = (struct net_msg_t *)list_get(buffer->msg_list, 0);
+		if(next_msg->waiting)
+		{
+			next_msg->waiting = 0;
+			esim_schedule_event(next_msg->net_stack->event, next_msg->net_stack, 0);
+		}
+	}
 
 	/* Schedule events waiting for space in buffer. */
 	net_buffer_wakeup(buffer);
@@ -191,19 +203,29 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack)
 /* Schedule all events waiting in the wakeup list */
 void net_buffer_wakeup(struct net_buffer_t *buffer)
 {
-	struct net_buffer_wakeup_t *wakeup;
+ 	struct net_buffer_wakeup_t *wakeup;
+ 	int bytes = 0;
 
-	while (linked_list_count(buffer->wakeup_list))
-	{
-		/* Get event/stack */
-		linked_list_head(buffer->wakeup_list);
-		wakeup = linked_list_get(buffer->wakeup_list);
-		linked_list_remove(buffer->wakeup_list);
+ 	linked_list_head(buffer->wakeup_list);
 
-		/* Schedule event */
-		esim_schedule_event(wakeup->event, wakeup->stack, 0);
-		free(wakeup);
-	}
+ 	while (!linked_list_is_end(buffer->wakeup_list))
+ 	{
+ 		wakeup = linked_list_get(buffer->wakeup_list);
+ 		assert(wakeup);
+
+ 		if(buffer->count + bytes + wakeup->size <= buffer->size)
+ 		{
+ 			bytes += wakeup->size;
+ 			linked_list_remove(buffer->wakeup_list);
+ 			esim_schedule_event(wakeup->event, wakeup->stack, 0);
+ 			free(wakeup);
+			continue;
+			linked_list_next(buffer->wakeup_list);
+		}else{
+			break;
+ 		}
+	linked_list_next(buffer->wakeup_list);
+ 	}
 }
 
 

@@ -109,8 +109,9 @@ void mod_handler_vi_load(int event, void *data)
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
 
-		if ((stack->mod->level == 1 && ((!flag_coalesce_gpu_enabled && master_stack) || ((stack->mod->compute_unit->scalar_cache == mod) && master_stack))) || (stack->mod->level != 1 && master_stack))
+		if (master_stack)
 		{
+			assert(coalescing_model != coalesce_rw);
 			mod_access_start(mod, stack, mod_access_load);
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
@@ -141,15 +142,15 @@ void mod_handler_vi_load(int event, void *data)
 
 	if(event == EV_MOD_VI_LOAD_SEND)
 	{
-		int msg_size;
+		//int msg_size;
 		if(stack->request_dir == mod_request_up_down)
 		{
 			//new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_FINISH, stack);
 
 			if(stack->reply_size)
-				msg_size = stack->reply_size;
+				stack->msg_size = stack->reply_size;
 			else
-				msg_size = 8;
+				stack->msg_size = 8;
 
 			//stack->request_dir = mod_request_up_down;
 
@@ -157,31 +158,35 @@ void mod_handler_vi_load(int event, void *data)
 			src_node = stack->ret_stack->mod->low_net_node;
 			dst_node = mod->high_net_node;
 			return_event = EV_MOD_VI_LOAD_RECEIVE;
-			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
-				return_event, stack, event, stack);
+			stack->msg = net_try_send_ev(net, src_node, dst_node, stack->msg_size, return_event, stack, event, stack);
 		}
 		else if(stack->request_dir == mod_request_down_up)
 		{
 			//if(stack->reply_size)
 			//	msg_size = stack->reply_size;
 			//else
-			msg_size = 72;
+			stack->msg_size = 72;
 
 			net = mod->low_net;
       src_node = mod_get_low_mod(mod, stack->addr)->high_net_node;
       dst_node = mod->low_net_node;
 			return_event = EV_MOD_VI_LOAD_RECEIVE;
-			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
-				return_event, stack, event, stack);
+			stack->msg = net_try_send_ev(net, src_node, dst_node, stack->msg_size, return_event, stack, event, stack);
 		}
 		else
 		{
 			fatal("Invalid request_dir in EV_MOD_VI_LOAD_SEND");
 		}
+
+		mem_debug("%lld %lld 0x%x %s load send from %s to %s\n", esim_time, stack->id,
+			stack->addr, mod->name, src_node->name, dst_node->name);
+
 		return;
 	}
 	if(event == EV_MOD_VI_LOAD_RECEIVE)
 	{
+		mem_debug("%lld %lld 0x%x %s load receive\n", esim_time, stack->id,
+			stack->addr, mod->name);
 		if(stack->request_dir == mod_request_up_down)
     {
 			net_receive(mod->high_net, mod->high_net_node, stack->msg);
@@ -199,6 +204,8 @@ void mod_handler_vi_load(int event, void *data)
     {
 			fatal("Invalid request_dir in EV_MOD_VI_LOAD_RECEIVE");
     }
+
+
 		return;
 	}
 if (event == EV_MOD_VI_LOAD_LOCK)
@@ -217,14 +224,14 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
-	older_stack = mod_in_flight_write(mod, stack);
+	/*older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}
+	}*/
 
 		older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
@@ -247,11 +254,14 @@ if (event == EV_MOD_VI_LOAD_LOCK)
     }
     mod->mshr_count++;
    */
-    if(SALTAR_L1 && mod->level == 1)
+  if(SALTAR_L1 && mod->level == 1)
 	{
 		stack->request_dir = mod_request_down_up;
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
        	new_stack->reply_size = 8;
+				new_stack->target_mod = new_stack->mod;
+				new_stack->wavefront = stack->wavefront;
+				new_stack->uop = stack->uop;
        	new_stack->request_dir= mod_request_up_down;
        	new_stack->valid_mask = stack->valid_mask;
 
@@ -270,6 +280,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		EV_MOD_VI_LOAD_ACTION, stack);
 	new_stack->wavefront = stack->wavefront;
 	new_stack->uop = stack->uop;
+	new_stack->target_mod = new_stack->mod;
 	new_stack->blocking = 1;
 	new_stack->read = 1;
 	new_stack->valid_mask = stack->valid_mask;
@@ -280,143 +291,129 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	return;
 }
 
-if (event == EV_MOD_VI_LOAD_ACTION)
-{
-	int retry_lat;
-
-	mem_debug("  %lld %lld 0x%x %s load action\n", esim_time, stack->id,
-		stack->addr, mod->name);
-	mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_action\"\n",
-		stack->id, mod->name);
-
-	/* Error locking */
-	if (stack->err)
+	if (event == EV_MOD_VI_LOAD_ACTION)
 	{
-		mod->read_retries++;
-		add_retry(stack,load_action_retry);
-		retry_lat = mod_get_retry_latency(mod);
+		int retry_lat;
 
-		if(mod->level == 1 && stack->client_info && stack->client_info->arch){
-			stack->latencias.retry += stack->client_info->arch->timing->cycle - stack->latencias.start + retry_lat;
-		}
+		mem_debug("  %lld %lld 0x%x %s load action\n", esim_time, stack->id,
+			stack->addr, mod->name);
+		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_action\"\n",
+			stack->id, mod->name);
 
-		stack->latencias.start = 0;
-
-		if (stack->mshr_locked != 0)
+		/* Error locking */
+		if (stack->err)
 		{
-			mshr_unlock(mod);
-			stack->mshr_locked = 0;
-		}
+			mod->read_retries++;
+			add_retry(stack,load_action_retry);
+			retry_lat = mod_get_retry_latency(mod);
 
-		mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
-		stack->retry = 1;
-		esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
-		return;
-	}
+			if(mod->level == 1 && stack->client_info && stack->client_info->arch){
+				stack->latencias.retry += stack->client_info->arch->timing->cycle - stack->latencias.start + retry_lat;
+			}
 
-	//mem_stats.mod_level[mod->level].entradas_bloqueadas++;
+			stack->latencias.start = 0;
 
-	if(mod->level == 1)
-	{
-			/* Hit */
-		if (stack->hit && (stack->glc == 0))
-		{
-			esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
-			estadisticas(1, 0);
+			if (stack->mshr_locked != 0)
+			{
+				mshr_unlock(mod);
+				stack->mshr_locked = 0;
+			}
 
-			//add_hit(mod->level);
-			mod->hits_aux++;
-
+			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
+			stack->retry = 1;
+			esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
 			return;
 		}
 
-		/* MISS */
-//		cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
-		stack->state = 0;
+		//mem_stats.mod_level[mod->level].entradas_bloqueadas++;
 
-		//add_miss(mod->level);
-		estadisticas(0, 0);
-
-		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
-		new_stack->reply_size = 8;
-		new_stack->valid_mask = stack->valid_mask;
-		stack->reply_size = 8 + mod->block_size;
-		stack->request_dir = mod_request_down_up;
-		new_stack->request_dir = mod_request_up_down;
-		new_stack->wavefront = stack->wavefront;
-		new_stack->uop = stack->uop;
-		new_stack->retry = stack->retry;
-		esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
-
-		return;
-	}
-	else
-	{
-			/* Hit */
-		if (stack->hit)
+		if(mod->level == 1)
 		{
+				/* Hit */
+			if (stack->hit && (stack->glc == 0))
+			{
+				esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
+				estadisticas(1, 0);
 
-			estadisticas(1, 0);
-			stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
-			//add_hit(mod->level);
-			mod->hits_aux++;
-			esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
-			return;
-		}
+				//add_hit(mod->level);
+				mod->hits_aux++;
 
-		/* MISS */
-		//add_miss(mod->level);
-		estadisticas(0, 0);
+				return;
+			}
 
-		if(stack->eviction)
-		{
-			int tag = 0;
-			cache_get_block(mod->cache, stack->set, stack->way, &tag, NULL);
-			cache_set_block(mod->cache, stack->set, stack->way, 0, cache_block_invalid);
+			/* MISS */
+	//		cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
+			stack->state = 0;
 
-			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, tag), tag,
-			ESIM_EV_NONE, NULL);
-			new_stack->src_mod = mod;
-			new_stack->reply_size = 8 + mod->block_size;
+			//add_miss(mod->level);
+			estadisticas(0, 0);
+
+			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
+			new_stack->reply_size = 8;
+			new_stack->valid_mask = stack->valid_mask;
+			stack->reply_size = 8 + mod->block_size;
+			new_stack->target_mod = new_stack->mod;
+			stack->request_dir = mod_request_down_up;
 			new_stack->request_dir = mod_request_up_down;
 			new_stack->wavefront = stack->wavefront;
 			new_stack->uop = stack->uop;
 			new_stack->retry = stack->retry;
-			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
+			esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
+
+			return;
 		}
+		else
+		{
+				/* Hit */
+			if (stack->hit)
+			{
 
+				estadisticas(1, 0);
+				stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
+				//add_hit(mod->level);
+				mod->hits_aux++;
+				esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
+				return;
+			}
 
+			/* MISS */
+			//add_miss(mod->level);
+			estadisticas(0, 0);
 
-		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,
-			EV_MOD_VI_LOAD_SEND, stack);
-		new_stack->reply_size = 8;
-		stack->reply_size = 8 + mod->block_size;
-		stack->request_dir = mod_request_down_up;
-		new_stack->request_dir = mod_request_up_down;
-		new_stack->wavefront = stack->wavefront;
-		new_stack->uop = stack->uop;
-		new_stack->retry = stack->retry;
-		esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
+			if(stack->eviction)
+			{
+				int tag = 0;
+				cache_get_block(mod->cache, stack->set, stack->way, &tag, NULL);
 
-		return;
+				new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, tag), tag,
+				ESIM_EV_NONE, NULL);
+				new_stack->src_mod = mod;
+				new_stack->reply_size = 8 + mod->block_size;
+				new_stack->target_mod = new_stack->mod;
+				new_stack->request_dir = mod_request_up_down;
+				new_stack->wavefront = stack->wavefront;
+				new_stack->uop = stack->uop;
+				new_stack->retry = stack->retry;
+				esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 
-	}
+				cache_set_block(mod->cache, stack->set, stack->way, 0, cache_block_invalid);
+			}
 
+			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,
+				EV_MOD_VI_LOAD_SEND, stack);
+			new_stack->reply_size = 8;
+			stack->reply_size = 8 + mod->block_size;
+			new_stack->target_mod = new_stack->mod;
+			stack->request_dir = mod_request_down_up;
+			new_stack->request_dir = mod_request_up_down;
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
+			new_stack->retry = stack->retry;
+			esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
 
-		/* Miss */
-/*	        if (mod->mshr_count >= mod->mshr_size)
-                {
-                        mod->read_retries++;
-                        retry_lat = mod_get_retry_latency(mod);
-                        dir_entry_unlock(mod->dir, stack->set, stack->way);
-                        mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
-                        stack->retry = 1;
-                        esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
-                        return;
-                }*/
-		//mod->mshr_count++;
+			return;
 
-
+		}
 	}
 
 	if (event == EV_MOD_VI_LOAD_MISS)
@@ -428,21 +425,8 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_miss\"\n",
 			stack->id, mod->name);
 
-		//Fran
-		//stack->mod->mshr_count--;
-
-		/* Error on read request. Unlock block and retry load. */
 		assert(!stack->err);
-		/*if (stack->err)
-		{
-			mod->read_retries++;
-			retry_lat = mod_get_retry_latency(mod);
-			dir_entry_unlock(mod->dir, stack->set, stack->way);
-			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
-			stack->retry = 1;
-			esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
-			return;
-		}*/
+
 		if(mod->level == 1 && stack->client_info && stack->client_info->arch)
 		{
 			stack->latencias.miss = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction;
@@ -464,6 +448,46 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			stack->id, mod->name);
 		assert(!stack->err);
 		//mem_stats.mod_level[mod->level].entradas_bloqueadas--;
+
+		if (mod->kind == mod_kind_main_memory &&
+		 	mod->dram_system &&
+			stack->request_dir == mod_request_up_down &&
+			!stack->main_memory_accessed &&
+			stack->reply != reply_ack_data_sent_to_peer)
+		{
+			struct dram_system_t *ds = mod->dram_system;
+			assert(ds);
+
+			if (stack->mshr_locked != 0)
+			{
+				mshr_unlock(mod);
+				stack->mshr_locked = 0;
+			}
+
+			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+			{
+				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
+				esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 5);
+				return;
+			}
+
+			/* Access main memory system */
+			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->mod->dram_system->name);
+			stack->event = EV_MOD_VI_LOAD_FINISH;
+			linked_list_add(ds->pending_reads, stack);
+			//if (stack->wavefront) {
+			//	dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+			//}else{
+				dram_system_add_read_trans(ds->handler, stack->addr, 0, 0);
+			//}
+
+			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
+			/* Ctx main memory stats */
+			assert(!stack->prefetch);
+			//ctx->mm_read_accesses++;
+
+			return;
+		}
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(mod);
@@ -472,6 +496,8 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Unlock directory entry */
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
+		stack->uop->mem_mm_latency += mod->latency;
+		stack->uop->mem_mm_accesses++;
 
 		/* Impose the access latency before continuing */
 
@@ -503,21 +529,10 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 				estadis[0].media_latencia += (long long) (ciclo - stack->tiempo_acceso);
 				estadis[0].media_latencia_contador++;
 			}
-			//load_finished++;
-			/*if( (load_finished % 10000) == 0 )
-			{
-				load_finished = 0;
-				fran_debug_t1000k("%lld\n", ciclo);
-				fran_debug_hitRatio("%lld\n",ciclo - ret_ciclo);
-				ret_ciclo = ciclo;
-			}*/
 		}
 
 		if(!stack->coalesced && mod->level == 1)
 		{
-	    //mod->mshr_count--;
-			//mod_stack_wakeup_mod_head(mod);
-
 			if(mod == mod->compute_unit->vector_cache)
 				mod->compute_unit->compute_device->interval_statistics->vcache_load_finish++;
 			else
@@ -552,10 +567,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			add_CoalesceMiss(mod->level);
 		}
 
-
-		//if(stack->ret_stack)
-		//	stack->ret_stack->reply_size = 72;
-		/* Increment witness variable */
 		if(mod->level == 1)
 		{
 			if (stack->witness_ptr)
@@ -588,7 +599,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 void mod_handler_vi_store(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
-	struct mod_stack_t *new_stack, *older_stack, *master_stack;
+	struct mod_stack_t *new_stack, *master_stack, *older_stack;
 
 	struct mod_t *mod = stack->mod;
 
@@ -596,7 +607,6 @@ void mod_handler_vi_store(int event, void *data)
   struct net_node_t *src_node;
   struct net_node_t *dst_node;
   int return_event;
-	//int retry_lat;
 
 	if (event == EV_MOD_VI_STORE || event == EV_MOD_VI_NC_STORE)
 	{
@@ -627,7 +637,7 @@ void mod_handler_vi_store(int event, void *data)
 
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
 		//mod_access_start(mod, stack, mod_access_store);
-		if ((stack->mod->level == 1 && !flag_coalesce_gpu_enabled && master_stack) || (stack->mod->level != 1 && master_stack))
+		if (master_stack)
 		{
 			mod_access_start(mod, stack, mod_access_store);
 			assert(master_stack->addr == stack->addr);
@@ -637,20 +647,9 @@ void mod_handler_vi_store(int event, void *data)
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_VI_STORE_FINISH);
 			add_coalesce(mod->level);
 			add_coalesce_store(mod->level);
-
-			// Increment witness variable
-			/*if (stack->witness_ptr)
-				(*stack->witness_ptr)++;
-			stack->witness_ptr = NULL;*/
 			return;
 		}
 
-		/*if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
-		{
-			mod_stack_wait_in_mod(stack, mod, EV_MOD_VI_STORE);
-			return;
-		}
-		mod->mshr_count++;*/
 		add_access(mod->level);
 		mod_access_start(mod, stack, mod_access_store);
 		/* Continue */
@@ -729,30 +728,16 @@ void mod_handler_vi_store(int event, void *data)
 			return;
     }
 
-    /*if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
-		{
-			mod->read_retries++;
-			retry_lat = mod_get_retry_latency(mod);
-			mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
-			stack->retry = 1;
-			esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, retry_lat);
-			return;
-		}*/
-		//mod->mshr_count++;
-
 		if(SALTAR_L1 && mod->level == 1)
 		{
 			stack->request_dir = mod_request_down_up;
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_STORE_SEND, stack);
+			new_stack->wavefront = stack->wavefront;
+			new_stack->uop = stack->uop;
+			new_stack->target_mod = new_stack->mod;
 			new_stack->request_dir= mod_request_up_down;
 			new_stack->src_mod = mod;
 			new_stack->dirty_mask = stack->dirty_mask;
-
-			// Increment witness variable
-			/*if (stack->witness_ptr)
-				(*stack->witness_ptr)++;
-			stack->witness_ptr = NULL;*/
-
 			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 			return;
 
@@ -767,13 +752,13 @@ void mod_handler_vi_store(int event, void *data)
 			EV_MOD_VI_STORE_ACTION, stack);
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
+		new_stack->target_mod = new_stack->mod;
 		new_stack->retry = stack->retry;
 		new_stack->wavefront = stack->wavefront;
 		new_stack->uop = stack->uop;
 		new_stack->witness_ptr = stack->witness_ptr;
 		stack->witness_ptr = NULL;
 		esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
-
 		return;
 	}
 
@@ -794,81 +779,35 @@ void mod_handler_vi_store(int event, void *data)
 			struct mod_t *target_mod = mod_get_low_mod(mod, stack->tag);
 			new_stack = mod_stack_create(stack->id, target_mod, stack->tag, ESIM_EV_NONE, NULL);
 			new_stack->src_mod = mod;
+			new_stack->wavefront = stack->wavefront;
+			new_stack->target_mod = new_stack->mod;
+			new_stack->uop = stack->uop;
 			new_stack->dirty_mask = stack->dirty_mask;
 			new_stack->request_dir = mod_request_up_down;
 			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
-
-
-			//da igual si es un hit o un miss
-
-			//cache_clean_block_dirty(mod->cache, stack->set, stack->way);
-/*			if(stack->glc == 0 && (~stack->dirty_mask) == 0)
-			{
-				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
-				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-			}
-			else if(stack->hit)
-			{
-				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
-			}*/
-
 			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 		}
 		else
 		{
-			/* Hit - state=V*/
-			/*if (stack->hit)
-			{
-				if(mod->kind != mod_kind_main_memory)
-				{
-					cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-					cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				}
-				//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
-			}
-			else
-			{*/
-			/* Miss - state=I */
-
 				if(stack->eviction)
 				{
 					int tag = 0;
 					cache_get_block(mod->cache, stack->set, stack->way, &tag, NULL);
 					new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, tag), tag, ESIM_EV_NONE, NULL);
 					new_stack->src_mod = mod;
+					new_stack->target_mod = new_stack->mod;
 					new_stack->dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
 					new_stack->reply_size = 8 + mod->block_size;
 					new_stack->wavefront = stack->wavefront;
 					new_stack->uop = stack->uop;
 					new_stack->request_dir = mod_request_up_down;
 					esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
-					//cache_set_block(mod->cache, stack->set, stack->way, 0, cache_block_invalid);
+					cache_set_block(mod->cache, stack->set, stack->way, 0, cache_block_invalid);
 				}
 
 				cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 
-				/*new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,  EV_MOD_VI_STORE_SEND, stack);
-				new_stack->src_mod = mod;
-				new_stack->dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
-				new_stack->reply_size = 8 + mod->block_size;
-				new_stack->request_dir = mod_request_up_down;
-				stack->request_dir = mod_request_down_up;
-				new_stack->wavefront = stack->wavefront;
-				new_stack->uop = stack->uop;
-				stack->reply_size = 8 + mod->block_size;
-				esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);*/
-				/*
-				//resetearla mascara de dirty y añadir bit
-				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
-				//cache_clean_block_dirty(mod->cache, stack->set, stack->way);
-				cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				// si dirty_mask esta completa deberiamos hacer evict? para limpiarla manteniendo el bloque valio?
-				dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
-				*/
-				//return;
-			//}
 			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 		}
 		return;
@@ -884,8 +823,8 @@ void mod_handler_vi_store(int event, void *data)
 
 		/* Error in write request, unlock block and retry store. */
 		assert(!stack->err);
-		if(stack->request_dir == mod_request_down_up)
-			cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
+		//if(stack->request_dir == mod_request_down_up)
+		cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
 
 		if (mod->kind == mod_kind_main_memory &&
 		 	mod->dram_system &&
@@ -906,30 +845,23 @@ void mod_handler_vi_store(int event, void *data)
 
 			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
 			{
-				//stack->err = 1;
-				//ret->err = 1;
-				//ret->retry |= 1 << target_mod->level;
-
-				//mod_stack_set_reply(ret, reply_ack_error);
-				//stack->reply_size = 8;
-
-				//dir_entry_unlock(mod->dir, stack->set, stack->way);
-
 				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
-
 				esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 5);
 				return;
 			}
 
 			/* Access main memory system */
 			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->mod->dram_system->name);
+			stack->event = EV_MOD_VI_STORE_FINISH;
 			linked_list_add(ds->pending_reads, stack);
-			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
-
+			//if (stack->wavefront->id > 0) {
+			//	dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+			//}else{
+				dram_system_add_read_trans(ds->handler, stack->addr, 0, 0);
+			//}
 			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 			/* Ctx main memory stats */
 			assert(!stack->prefetch);
-			//ctx->mm_read_accesses++;
 
 			return;
 		}
@@ -940,11 +872,17 @@ void mod_handler_vi_store(int event, void *data)
 			stack->mshr_locked = 0;
 		}
 
-		dir_entry_unlock(mod->dir, stack->set, stack->way);
+		if(stack->dir_lock)
+		{
+			dir_entry_unlock(mod->dir, stack->set, stack->way);
+			stack->dir_lock = NULL;
+		}
 
 		int latency = mod->latency;
-		if(mod->dram_system)
-			latency = 0;
+		assert(!mod->dram_system);
+
+		stack->uop->mem_mm_latency += latency;
+		stack->uop->mem_mm_accesses++;
 
 		/* Impose the access latency before continuing */
 		esim_schedule_event(EV_MOD_VI_STORE_FINISH, stack, latency);
@@ -959,6 +897,12 @@ void mod_handler_vi_store(int event, void *data)
 			stack->id, mod->name);
 		mem_trace("mem.end_access name=\"A-%lld\"\n",
 			stack->id);
+
+		if(stack->dir_lock)
+		{
+			dir_entry_unlock(mod->dir, stack->set, stack->way);
+			stack->dir_lock = NULL;
+		}
 
 		/* Return event queue element into event queue */
 		if (mod->level == 1 && stack->event_queue && stack->event_queue_item)
@@ -980,12 +924,6 @@ void mod_handler_vi_store(int event, void *data)
 			if(stack->retry && !stack->hit)
 				add_latencias_nc_write(&(stack->latencias));
 		}
-
-		/*if(!stack->coalesced)
-		{
-	       	mod->mshr_count--;
-			//mod_stack_wakeup_mod_head(mod);
-		}*/
 
 		/* Finish access */
 		mod_access_finish(mod, stack);
@@ -1187,32 +1125,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
 		dir_lock = dir_lock_get(mod->dir, stack->set, stack->way);
-		/*if (dir_lock->lock && !stack->blocking)
-		{
-			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
-				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
-			ret->err = 1;
-			mod_unlock_port(mod, port, stack);
-			ret->port_locked = 0;
-			mod_stack_return(stack);
-			return;
-		}*/
 
-		/* Lock directory entry. If lock fails, port needs to be released to prevent
-		 * deadlock.  When the directory entry is released, locking port and
-		 * directory entry will be retried. */
-
-		//if(stack->dir_lock && stack->dir_lock->lock == 0 && stack->dir_lock != dir_lock)
-		//{
-			//while(stack->dir_lock->lock_queue)
-			//{
-				/* Wake up access */
-				//esim_schedule_event(stack->dir_lock->lock_queue->dir_lock_event, stack->dir_lock->lock_queue, 0);
-				//stack->dir_lock->lock_queue = stack->dir_lock->lock_queue->dir_lock_next;
-			//}
-		//}
-
-		stack->dir_lock = dir_lock;
 
 		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_VI_FIND_AND_LOCK, stack))
 		{
@@ -1230,9 +1143,6 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		{
 			/* Find victim */
 			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
-
-
-			//cache_set_block(mod->cache, stack->set, stack->way,	0, cache_block_invalid);
 
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way,
@@ -1268,13 +1178,6 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 			ret->latencias.lock_dir = ret->client_info->arch->timing->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
 		}
 
-		/* On miss, evict if victim is a valid block. */
-		/*if (!stack->hit && stack->state && cache_get_block_dirty_mask(mod->cache, stack->set, stack->way))
-		{
-			stack->eviction = 1;
-			//cache_set_block(mod->cache, stack->src_set, stack->src_way,	0, cache_block_invalid);
-		}*/
-
 		/* Continue */
 		esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK_FINISH, stack, 0);
 		return;
@@ -1289,16 +1192,6 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 		/* If evict produced err, return err */
 		assert(!stack->err);
-		/*if (stack->err)
-		{
-			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
-			assert(stack->state);
-			assert(stack->eviction);
-			ret->err = 1;
-			dir_entry_unlock(mod->dir, stack->set, stack->way);
-			mod_stack_return(stack);
-			return;
-		}*/
 
 		/* If this is a main memory, the block is here. A previous miss was just a miss
 		 * in the directory. */
@@ -1319,8 +1212,6 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		if (stack->eviction)
 		{
 			mod->evictions++;
-			//cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
-			//assert(!stack->state);
 		}
 
 		if(!stack->retry && (ret->origin || !stack->blocking))

@@ -30,6 +30,7 @@ struct net_buffer_wakeup_t
 {
 	int event;
 	void *stack;
+	int size;
 
 };
 
@@ -68,7 +69,7 @@ struct net_buffer_t
 	long long sched_when;	/* Last cycle when scheduler was called */
 	struct net_buffer_t *sched_buffer;	/* Input buffer to fetch from */
 
-	/* List of events to schedule when new space becomes available in the 
+	/* List of events to schedule when new space becomes available in the
 	 * buffer. Elements are of type 'struct net_buffer_wakeup_t' */
 	struct linked_list_t *wakeup_list;
 

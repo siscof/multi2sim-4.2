@@ -968,6 +968,27 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 	/* For efficiency, first check in the hash table of accesses
 	 * whether there is an access in flight to the same block. */
 	assert(access_kind);
+
+  switch(coalescing_model)
+  {
+    case merge_rw:
+      break;
+
+    case coalesce_rw:
+      return NULL;
+
+    case si:
+    {
+      if(access_kind == mod_access_load || access_kind == mod_access_nc_load)
+        return NULL;
+      break;
+    }
+
+    default:
+      fatal("in mod_can_coalesce(): coalescing_model invalid");
+      break;
+  }
+
 	if (!mod_in_flight_address(mod, addr, older_than_stack))
 		return NULL;
 
@@ -1064,7 +1085,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 	return NULL;
 }
 
-struct mod_stack_t *mod_can_coalesce_fran(struct mod_t *mod,
+struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 	enum mod_access_kind_t access_kind, unsigned int addr,
 	int *global_mem_witness)
 {
@@ -1076,8 +1097,26 @@ struct mod_stack_t *mod_can_coalesce_fran(struct mod_t *mod,
 	/* For efficiency, first check in the hash table of accesses
 	 * whether there is an access in flight to the same block. */
 	assert(access_kind);
-	//if (!mod_in_flight_address(mod, addr, NULL))
-	//	return NULL;
+
+  switch(coalescing_model)
+  {
+    case merge_rw:
+      return NULL;
+
+    case coalesce_rw:
+      break;
+
+    case si:
+    {
+      if(access_kind == mod_access_store || access_kind == mod_access_nc_store)
+        return NULL;
+      break;
+    }
+
+    default:
+      fatal("in mod_can_coalesce_si(): coalescing_model invalid");
+  }
+
 
 	/* Get youngest access older than 'older_than_stack' */
 	tail = mod->access_list_tail;
