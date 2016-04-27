@@ -952,6 +952,113 @@ int mod_get_retry_latency(struct mod_t *mod)
 	return random() % mod->latency + mod->latency;
 }
 
+struct mod_stack_t *mod_can_coalesce_old(struct mod_t *mod,
+	enum mod_access_kind_t access_kind, unsigned int addr,
+	struct mod_stack_t *older_than_stack)
+{
+	struct mod_stack_t *stack;
+	struct mod_stack_t *tail;
+
+	/* For efficiency, first check in the hash table of accesses
+	 * whether there is an access in flight to the same block. */
+	assert(access_kind);
+
+	if (!mod_in_flight_address(mod, addr, older_than_stack))
+		return NULL;
+
+	/* Get youngest access older than 'older_than_stack' */
+	tail = older_than_stack ? older_than_stack->access_list_prev :
+		mod->access_list_tail;
+
+	/* Coalesce depending on access kind */
+	switch (access_kind)
+	{
+
+	case mod_access_load:
+	{
+		for (stack = tail; stack; stack = stack->access_list_prev)
+		{
+			/* Only coalesce with groups of reads or prefetches at the tail */
+			if (stack->access_kind != mod_access_load &&
+			    stack->access_kind != mod_access_prefetch)
+				return NULL;
+
+			if (stack->addr >> mod->log_block_size ==
+				addr >> mod->log_block_size)
+				return stack->master_stack ? stack->master_stack : stack;
+		}
+		break;
+	}
+
+	case mod_access_store:
+	{
+		/* Only coalesce with last access */
+		stack = tail;
+		if (!stack)
+			return NULL;
+
+		/* Only if it is a write */
+		if (stack->access_kind != mod_access_store)
+			return NULL;
+
+		/* Only if it is an access to the same block */
+		if (stack->addr >> mod->log_block_size != addr >> mod->log_block_size)
+			return NULL;
+
+		/* Only if previous write has not started yet */
+		if (stack->port_locked)
+			return NULL;
+
+		/* Coalesce */
+		return stack->master_stack ? stack->master_stack : stack;
+	}
+
+	case mod_access_nc_store:
+	{
+		/* Only coalesce with last access */
+		stack = tail;
+		if (!stack)
+			return NULL;
+
+		/* Only if it is a non-coherent write */
+		if (stack->access_kind != mod_access_nc_store)
+			return NULL;
+
+		/* Only if it is an access to the same block */
+		if (stack->addr >> mod->log_block_size != addr >> mod->log_block_size)
+			return NULL;
+
+		/* Only if previous write has not started yet */
+		if (stack->port_locked)
+			return NULL;
+
+		/* Coalesce */
+		return stack->master_stack ? stack->master_stack : stack;
+	}
+	case mod_access_prefetch:
+		/* At this point, we know that there is another access (load/store)
+		 * to the same block already in flight. Just find and return it.
+		 * The caller may abort the prefetch since the block is already
+		 * being fetched. */
+		for (stack = tail; stack; stack = stack->access_list_prev)
+		{
+			if (stack->addr >> mod->log_block_size ==
+				addr >> mod->log_block_size)
+				return stack;
+		}
+		assert(!"Hash table wrongly reported another access to same block.\n");
+		break;
+
+
+	default:
+		panic("%s: invalid access type", __FUNCTION__);
+		break;
+	}
+
+	/* No access found */
+	return NULL;
+}
+
 
 /* Check if an access to a module can be coalesced with another access older
  * than 'older_than_stack'. If 'older_than_stack' is NULL, check if it can

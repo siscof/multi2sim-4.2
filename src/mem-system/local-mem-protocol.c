@@ -69,7 +69,7 @@ void mod_handler_local_mem_load(int event, void *data)
 		mod_access_start(mod, stack, mod_access_load);
 
 		/* Coalesce access */
-		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, stack);
+		master_stack = mod_can_coalesce_old(mod, mod_access_load, stack->addr, stack);
 		if (master_stack)
 		{
 			mod->reads++;
@@ -171,7 +171,7 @@ void mod_handler_local_mem_store(int event, void *data)
 		mod_access_start(mod, stack, mod_access_store);
 
 		/* Coalesce access */
-		master_stack = mod_can_coalesce(mod, mod_access_store, stack->addr, stack);
+		master_stack = mod_can_coalesce_old(mod, mod_access_store, stack->addr, stack);
 		if (master_stack)
 		{
 			mod->writes++;
