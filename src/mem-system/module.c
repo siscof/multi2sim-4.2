@@ -990,22 +990,6 @@ struct mod_stack_t *mod_can_coalesce_old(struct mod_t *mod,
 		break;
 	}
 
-  case mod_access_nc_load:
-  {
-    for (stack = tail; stack; stack = stack->access_list_prev)
-    {
-      /* Only coalesce with groups of reads or prefetches at the tail */
-      if (stack->access_kind != mod_access_load && stack->access_kind != mod_access_nc_load &&
-          stack->access_kind != mod_access_prefetch)
-        return NULL;
-
-      if (stack->addr >> mod->log_block_size ==
-        addr >> mod->log_block_size)
-        return stack->master_stack ? stack->master_stack : stack;
-    }
-    break;
-  }
-
 	case mod_access_store:
 	{
 		/* Only coalesce with last access */
@@ -1029,28 +1013,6 @@ struct mod_stack_t *mod_can_coalesce_old(struct mod_t *mod,
 		return stack->master_stack ? stack->master_stack : stack;
 	}
 
-	case mod_access_nc_store:
-	{
-		/* Only coalesce with last access */
-		stack = tail;
-		if (!stack)
-			return NULL;
-
-		/* Only if it is a non-coherent write */
-		if (stack->access_kind != mod_access_nc_store)
-			return NULL;
-
-		/* Only if it is an access to the same block */
-		if (stack->addr >> mod->log_block_size != addr >> mod->log_block_size)
-			return NULL;
-
-		/* Only if previous write has not started yet */
-		if (stack->port_locked)
-			return NULL;
-
-		/* Coalesce */
-		return stack->master_stack ? stack->master_stack : stack;
-	}
 	case mod_access_prefetch:
 		/* At this point, we know that there is another access (load/store)
 		 * to the same block already in flight. Just find and return it.

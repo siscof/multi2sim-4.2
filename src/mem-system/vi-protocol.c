@@ -108,7 +108,7 @@ void mod_handler_vi_load(int event, void *data)
 		/* Coalesce access */
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
-
+		//if ((stack->mod->level == 1 && ((!flag_coalesce_gpu_enabled && master_stack) || ((stack->mod->compute_unit->scalar_cache == mod) && master_stack))) || (stack->mod->level != 1 && master_stack))
 		if (master_stack)
 		{
 			assert(coalescing_model != coalesce_rw);
@@ -226,14 +226,14 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
-	older_stack = mod_in_flight_write(mod, stack);
+	/*older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}
+	}*/
 
 		older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
@@ -601,7 +601,8 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 void mod_handler_vi_store(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
-	struct mod_stack_t *new_stack, *master_stack, *older_stack;
+	struct mod_stack_t *new_stack, *master_stack;
+	//, *older_stack;
 
 	struct mod_t *mod = stack->mod;
 
@@ -721,14 +722,14 @@ void mod_handler_vi_store(int event, void *data)
 				stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 		//older_stack = mod_in_flight_write_fran(mod, stack);
-		older_stack = mod_in_flight_write(mod, stack);
+		/*older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
 			return;
-    }
+    }*/
 
 		if(SALTAR_L1 && mod->level == 1)
 		{
