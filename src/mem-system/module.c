@@ -1103,6 +1103,8 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
     case si:
     {
+      if(mod->level == 1 && mod->compute_unit->scalar_cache == mod)
+        break;
       if(access_kind == mod_access_load || access_kind == mod_access_nc_load)
         return NULL;
       break;
