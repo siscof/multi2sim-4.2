@@ -229,12 +229,15 @@ void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uo
 
 void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
-	compute_unit->interval_alu_issued++;
+	if(uop->scalar_mem_read){
+		compute_unit->compute_device->interval_statistics->macroinst[s_mem_u]++;
+		compute_unit->compute_device->interval_statistics->op_counter[s_mem_u]++;
+	}else{
 	compute_unit->compute_device->interval_statistics->macroinst[scalar_u]++;
-	compute_unit->compute_device->interval_statistics->instructions_counter++;
-
 	compute_unit->compute_device->interval_statistics->op_counter[scalar_u]++;
-
+	}
+	compute_unit->interval_alu_issued++;
+	compute_unit->compute_device->interval_statistics->instructions_counter++;
 	uop->wavefront->work_group->op_counter++;
 }
 
