@@ -1071,6 +1071,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 {
 	struct mod_stack_t *stack;
 	struct mod_stack_t *tail;
+  int limit = 256;
 
 	/* For efficiency, first check in the hash table of accesses
 	 * whether there is an access in flight to the same block. */
@@ -1148,25 +1149,27 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
 	case mod_access_nc_store:
 	{
-		/* Only coalesce with last access */
-		stack = tail;
-		if (!stack)
-			return NULL;
 
-		/* Only if it is a non-coherent write */
-		if (stack->access_kind != mod_access_nc_store)
-			return NULL;
+    for (stack = tail; stack; stack = stack->access_list_prev)
+		{
+			/* Only coalesce with groups of reads or prefetches at the tail */
+			if (stack->access_kind != mod_access_nc_store)
+				continue;
 
-		/* Only if it is an access to the same block */
-		if (stack->addr >> mod->log_block_size != addr >> mod->log_block_size)
-			return NULL;
+			/* Only if previous write has not started yet */
+			if (stack->port_locked || stack->coalesced)
+        continue;
+        //turn NULL;
 
-		/* Only if previous write has not started yet */
-		if (stack->port_locked)
-			return NULL;
+			if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
+			{
+				return stack;
+			}
 
-		/* Coalesce */
-		return stack->master_stack ? stack->master_stack : stack;
+			limit--;
+			if(limit <= 0)
+				break;
+		}
 	}
 	case mod_access_prefetch:
 		/* At this point, we know that there is another access (load/store)
@@ -1199,7 +1202,7 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 	struct mod_stack_t *stack;
 	struct mod_stack_t *tail;
 	//For efficiency
-	int limit = 64;
+	int limit = 256;
 
 	/* For efficiency, first check in the hash table of accesses
 	 * whether there is an access in flight to the same block. */
@@ -1256,8 +1259,9 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 				continue;
 
 			/* Only if previous write has not started yet */
-			if (stack->port_locked)
-				return NULL;
+			if (stack->port_locked || stack->coalesced)
+        continue;
+        //turn NULL;
 
 			if (global_mem_witness == stack->witness_ptr && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			{
