@@ -226,14 +226,14 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
-	/*older_stack = mod_in_flight_write(mod, stack);
+	older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}*/
+	}
 
 		older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
@@ -642,7 +642,7 @@ void mod_handler_vi_store(int event, void *data)
 		//mod_access_start(mod, stack, mod_access_store);
 		if (master_stack)
 		{
-			mod_access_start(mod, stack, mod_access_store);
+			mod_access_start(mod, stack, mod_access_nc_store);
 			assert(master_stack->addr == stack->addr);
 			mod->nc_writes++;
 			mod_stack_merge_dirty_mask(master_stack, stack->dirty_mask);
@@ -654,7 +654,7 @@ void mod_handler_vi_store(int event, void *data)
 		}
 
 		add_access(mod->level);
-		mod_access_start(mod, stack, mod_access_store);
+		mod_access_start(mod, stack, mod_access_nc_store);
 		/* Continue */
 		esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, 0);
 		return;
@@ -722,14 +722,14 @@ void mod_handler_vi_store(int event, void *data)
 				stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 		//older_stack = mod_in_flight_write_fran(mod, stack);
-		/*older_stack = mod_in_flight_write(mod, stack);
+		older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
 			return;
-    }*/
+    }
 
 		if(SALTAR_L1 && mod->level == 1)
 		{
