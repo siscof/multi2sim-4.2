@@ -709,7 +709,7 @@ void mod_handler_vi_store(int event, void *data)
 
 	if (event == EV_MOD_VI_STORE_LOCK)
 	{
-		//struct mod_stack_t *older_stack;
+		struct mod_stack_t *older_stack;
 
 
 		mem_debug("  %lld %lld 0x%x %s store lock\n", esim_time, stack->id,
