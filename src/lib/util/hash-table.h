@@ -20,6 +20,9 @@
 #ifndef LIB_UTIL_HASH_TABLE_H
 #define LIB_UTIL_HASH_TABLE_H
 
+int hash(const void *key, int len);
+unsigned int murmurhash2(const void *key, int len, int seed);
+
 struct hash_table_t;
 
 /** Iterate through all elements of the hash table.
@@ -70,4 +73,3 @@ char *hash_table_find_first(struct hash_table_t *table, void **data);
 char *hash_table_find_next(struct hash_table_t *table, void **data);
 
 #endif
-
