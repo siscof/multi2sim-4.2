@@ -71,6 +71,7 @@ struct mod_stack_t
 	int high_priority_transaction;
 	int transaction_idle;
 	long long dramsim_mm_start;
+	int msg_size;
 
 	struct latenciometro latencias;
 	struct si_wavefront_t *wavefront;

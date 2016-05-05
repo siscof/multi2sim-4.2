@@ -246,7 +246,7 @@ void net_event_handler(int event, void *data)
 			if (link->virtual_channel > 1)
 			{
 				struct net_buffer_t *temp_buffer;
-
+				fatal("virtual channels!!\n");
 				temp_buffer =
 					net_link_arbitrator_vc(link, node);
 				if (temp_buffer != buffer)
@@ -292,7 +292,7 @@ void net_event_handler(int event, void *data)
 					"msg=%lld "
 					"why=\"input buffer full\"\n",
 					net->name, msg->id);
-				net_buffer_wait(input_buffer, event, stack);
+				net_buffer_wait(input_buffer, event, stack, msg->size);
 				return;
 			}
 
@@ -375,7 +375,7 @@ void net_event_handler(int event, void *data)
 
 			if (input_buffer->count + msg->size > input_buffer->size)
 			{
-				net_buffer_wait(input_buffer, event, stack);
+				net_buffer_wait(input_buffer, event, stack, msg->size);
 				net_debug("msg "
 					"a=\"stall\" "
 					"net=\"%s\" "
@@ -541,7 +541,7 @@ void net_event_handler(int event, void *data)
 				"why=\"dst-full\"\n",
 				net->name,
 				msg->id);
-			net_buffer_wait(output_buffer, event, stack);
+			net_buffer_wait(output_buffer, event, stack, msg->size);
 			return;
 		}
 
