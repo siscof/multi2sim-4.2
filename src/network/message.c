@@ -1,4 +1,4 @@
-/* 
+/*
  *  Multi2Sim
  *  Copyright (C) 2012  Rafael Ubal (ubal@ece.neu.edu)
  *
@@ -33,7 +33,7 @@
 #include "node.h"
 #include "routing-table.h"
 
-/* 
+/*
  * Message
  */
 
@@ -70,7 +70,7 @@ void net_msg_free(struct net_msg_t *msg)
 
 
 
-/* 
+/*
  * Event-driven Simulation
  */
 
@@ -191,7 +191,10 @@ void net_event_handler(int event, void *data)
 		assert(list_count(buffer->msg_list));
 		if (list_get(buffer->msg_list, 0) != msg)
 		{
-			net_buffer_wait(buffer, event, stack);
+			//net_buffer_wait(buffer, event, stack);
+			stack->event = event;
+			msg->net_stack = stack;
+			msg->waiting = 1;
 			net_debug("msg "
 				"a=\"stall\" "
 				"net=\"%s\" "
@@ -238,7 +241,7 @@ void net_event_handler(int event, void *data)
 				return;
 			}
 
-			/* If buffer contain the message but doesn't have the 
+			/* If buffer contain the message but doesn't have the
 			 * shared link in control, wait */
 			if (link->virtual_channel > 1)
 			{
@@ -271,7 +274,7 @@ void net_event_handler(int event, void *data)
 					"msg=%lld "
 					"why=\"input buffer busy\"\n",
 					net->name, msg->id);
-	
+
 				esim_schedule_event(event, stack,
 					input_buffer->write_busy - cycle + 1);
 				return;
@@ -400,7 +403,7 @@ void net_event_handler(int event, void *data)
 
 			/* 4. assign the bus to the buffer. update the
 			 * necessary data ; before here, the bus is not
-			 * assign to anything and is not updated so it can be 
+			 * assign to anything and is not updated so it can be
 			 * assign to other buffers as well. If this certain
 			 * buffer wins that specific bus_lane the appropriate
 			 * fields will be updated. Contains: bus_lane
@@ -471,7 +474,10 @@ void net_event_handler(int event, void *data)
 				"msg=%lld "
 				"why=\"not-head\"\n",
 				 net->name, msg->id);
-			net_buffer_wait(buffer, event, stack);
+			//net_buffer_wait(buffer, event, stack);
+			stack->event = event;
+			msg->net_stack = stack;
+			msg->waiting = 1;
 			return;
 		}
 

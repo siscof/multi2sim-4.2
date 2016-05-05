@@ -31,7 +31,7 @@
 #include "node.h"
 
 
-/* 
+/*
  * Public Functions
  */
 
@@ -138,6 +138,7 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 {
 	struct net_t *net = buffer->net;
 	struct net_node_t *node = buffer->node;
+	struct net_msg_t *next_msg;
 
 	assert(buffer->count >= msg->size);
 	buffer->count -= msg->size;
@@ -162,6 +163,16 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 		msg->id,
 		node->name,
 		buffer->name);
+
+	if(list_count(buffer->msg_list))
+	{
+		next_msg = (struct net_msg_t *)list_get(buffer->msg_list, 0);
+		if(next_msg->waiting)
+		{
+			next_msg->waiting = 0;
+			esim_schedule_event(next_msg->net_stack->event, next_msg->net_stack, 1);
+		}
+	}
 
 	/* Schedule events waiting for space in buffer. */
 	net_buffer_wakeup(buffer);

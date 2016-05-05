@@ -1,4 +1,4 @@
-/* 
+/*
  *  Multi2Sim
  *  Copyright (C) 2012  Rafael Ubal (ubal@ece.neu.edu)
  *
@@ -30,6 +30,10 @@ struct net_msg_t
 	long long busy;		/* In transit until cycle */
 	int size;
 	void *data;
+
+	struct mod_stack_t *stack;
+	struct net_stack_t *net_stack;
+	int waiting;
 
 	/* Current position in network */
 	struct net_node_t *node;
