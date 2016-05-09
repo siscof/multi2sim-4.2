@@ -29,6 +29,7 @@
 struct net_buffer_wakeup_t
 {
 	int event;
+	int size;
 	void *stack;
 	int size;
 

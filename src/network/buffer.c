@@ -171,7 +171,11 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 		if(next_msg->waiting)
 		{
 			next_msg->waiting = 0;
+<<<<<<< HEAD
 			esim_schedule_event(next_msg->net_stack->event, next_msg->net_stack, 0);
+=======
+			esim_schedule_event(next_msg->net_stack->event, next_msg->net_stack, 1);
+>>>>>>> opt_1-2_buffer
 		}
 	}
 
@@ -195,6 +199,7 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack, int si
 
 	/* Add it to wakeup list */
 	wakeup->event = event;
+	wakeup->size = size;
 	wakeup->stack = stack;
 	wakeup->size = size;
 	linked_list_add(buffer->wakeup_list, wakeup);
@@ -205,6 +210,7 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack, int si
 void net_buffer_wakeup(struct net_buffer_t *buffer)
 {
 	struct net_buffer_wakeup_t *wakeup;
+<<<<<<< HEAD
 	//struct net_stack_t *stack;
 	int bytes = 0;
 
@@ -237,6 +243,45 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 			break;
 		}
 		//linked_list_next(buffer->wakeup_list);
+=======
+	int bytes = 0;
+
+	/*while (linked_list_count(buffer->wakeup_list))
+	{
+		linked_list_head(buffer->wakeup_list);
+	 	wakeup = linked_list_get(buffer->wakeup_list);
+		assert(wakeup);
+		if(buffer->count + bytes + wakeup->size > buffer->size)
+		{
+			break;
+		}
+
+		bytes += wakeup->size;
+		linked_list_remove(buffer->wakeup_list);
+		esim_schedule_event(wakeup->event, wakeup->stack, 0);
+		free(wakeup);
+	}*/
+
+	linked_list_head(buffer->wakeup_list);
+	while(!linked_list_is_end(buffer->wakeup_list))
+	{
+		wakeup = linked_list_get(buffer->wakeup_list);
+		assert(wakeup);
+		if((buffer->count + bytes) > (buffer->size - 8))
+		{
+			break;
+		}
+
+		if((buffer->count + bytes + wakeup->size) > buffer->size)
+		{
+			linked_list_next(buffer->wakeup_list);
+			continue;
+		}
+		bytes += wakeup->size;
+		linked_list_remove(buffer->wakeup_list);
+		esim_schedule_event(wakeup->event, wakeup->stack, 0);
+		free(wakeup);
+>>>>>>> opt_1-2_buffer
 	}
 	//printf("%s: %d \t bytes wakeuped: %d \t waiting list count: %d\n",buffer->link->name, buffer->count,bytes,linked_list_count(buffer->wakeup_list));
 }

@@ -250,7 +250,7 @@ void net_event_handler(int event, void *data)
 			if (link->virtual_channel > 1)
 			{
 				struct net_buffer_t *temp_buffer;
-
+				fatal("virtual channels!!\n");
 				temp_buffer =
 					net_link_arbitrator_vc(link, node);
 				if (temp_buffer != buffer)
