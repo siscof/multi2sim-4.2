@@ -1245,7 +1245,7 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 			if(limit <= 0)
 				break;
 		}
-    break;
+    return NULL;
 	}
 
 	if(access_kind == mod_access_store || access_kind == mod_access_nc_store)
@@ -1270,7 +1270,7 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 			if(limit <= 0)
 				break;
 		}
-    break;
+    return NULL;
 	}
 
 
