@@ -142,10 +142,7 @@ void mod_handler_vi_load(int event, void *data)
 
 	if(event == EV_MOD_VI_LOAD_SEND)
 	{
-<<<<<<< HEAD
 		//int msg_size;
-=======
->>>>>>> opt_1-2_buffer
 		if(stack->request_dir == mod_request_up_down)
 		{
 			//new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_FINISH, stack);
