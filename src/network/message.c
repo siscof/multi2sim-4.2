@@ -193,12 +193,19 @@ void net_event_handler(int event, void *data)
 		assert(list_count(buffer->msg_list));
 		if (list_get(buffer->msg_list, 0) != msg)
 		{
+<<<<<<< HEAD
 			//net_buffer_wait(buffer, event, stack, 0);
 			//stack is net_stack_t *
 			stack->event = event;
 			msg->net_stack = stack;
 			msg->waiting = 1;
 
+=======
+			//net_buffer_wait(buffer, event, stack);
+			stack->event = event;
+			msg->net_stack = stack;
+			msg->waiting = 1;
+>>>>>>> opt_1-2_buffer
 			net_debug("msg "
 				"a=\"stall\" "
 				"net=\"%s\" "
@@ -250,7 +257,7 @@ void net_event_handler(int event, void *data)
 			if (link->virtual_channel > 1)
 			{
 				struct net_buffer_t *temp_buffer;
-
+				fatal("virtual channels!!\n");
 				temp_buffer =
 					net_link_arbitrator_vc(link, node);
 				if (temp_buffer != buffer)
@@ -479,6 +486,7 @@ void net_event_handler(int event, void *data)
 				"msg=%lld "
 				"why=\"not-head\"\n",
 				 net->name, msg->id);
+<<<<<<< HEAD
 
 			//stack is net_stack_t *
 			stack->event = event;
@@ -486,6 +494,12 @@ void net_event_handler(int event, void *data)
 			msg->waiting = 1;
 
 			//net_buffer_wait(buffer, event, stack, 0);
+=======
+			//net_buffer_wait(buffer, event, stack);
+			stack->event = event;
+			msg->net_stack = stack;
+			msg->waiting = 1;
+>>>>>>> opt_1-2_buffer
 			return;
 		}
 

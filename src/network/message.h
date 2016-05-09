@@ -34,6 +34,10 @@ struct net_msg_t
 	int size;
 	void *data;
 
+	struct mod_stack_t *stack;
+	struct net_stack_t *net_stack;
+	int waiting;
+
 	/* Current position in network */
 	struct net_node_t *node;
 	struct net_buffer_t *buffer;
