@@ -128,7 +128,7 @@ static void mhandle_hash_table_insert(void *ptr, unsigned long size, char *at, i
 
 	/* Find position */
 	//index = (unsigned long) ptr % mhandle_hash_table_size;
-	index = ((unsigned long) hash(&ptr, sizeof(void *))) % mhandle_hash_table_size;
+	index = (unsigned long) hash(&ptr, sizeof(void *)) % mhandle_hash_table_size;
 	while (mhandle_hash_table[index].active && !mhandle_hash_table[index].removed)
 		index = (index + 1) % mhandle_hash_table_size;
 
@@ -151,7 +151,7 @@ static struct mhandle_item_t *mhandle_hash_table_get(void *ptr)
 	//, i = 0;
 
 	//idx = (unsigned long) ptr % mhandle_hash_table_size;
-	idx = ((unsigned long) hash(&ptr, sizeof(void *))) % mhandle_hash_table_size;
+	idx = (unsigned long) hash(&ptr, sizeof(void *)) % mhandle_hash_table_size;
 	while (mhandle_hash_table[idx].ptr != ptr || !mhandle_hash_table[idx].active
 			|| mhandle_hash_table[idx].removed)
 	{

@@ -1166,6 +1166,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 			if(limit <= 0)
 				break;*/
 		}
+    break;
 	}
 	case mod_access_prefetch:
 		/* At this point, we know that there is another access (load/store)
