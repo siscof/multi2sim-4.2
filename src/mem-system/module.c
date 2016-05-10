@@ -1086,7 +1086,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 
     case si:
     {
-      if(access_kind == mod_access_load || access_kind == mod_access_nc_load)
+      if(mod->level == 1 && mod->compute_unit->vector_cache == mod && (access_kind == mod_access_load || access_kind == mod_access_nc_load))
         return NULL;
       break;
     }
