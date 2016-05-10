@@ -1112,7 +1112,7 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 		for (stack = tail; stack; stack = stack->access_list_prev)
 		{
 			/* Only coalesce with groups of reads or prefetches at the tail */
-			if (stack->access_kind != mod_access_load &&
+			if (stack->access_kind != mod_access_load && stack->access_kind != mod_access_nc_load &&
 			    stack->access_kind != mod_access_prefetch)
 				return NULL;
 
@@ -1122,6 +1122,22 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
 		}
 		break;
 	}
+
+  case mod_access_nc_load:
+  {
+    for (stack = tail; stack; stack = stack->access_list_prev)
+    {
+      /* Only coalesce with groups of reads or prefetches at the tail */
+      if (stack->access_kind != mod_access_load && stack->access_kind != mod_access_nc_load &&
+          stack->access_kind != mod_access_prefetch)
+        return NULL;
+
+      if (stack->addr >> mod->log_block_size ==
+        addr >> mod->log_block_size)
+        return stack->master_stack ? stack->master_stack : stack;
+    }
+    break;
+  }
 
 	case mod_access_store:
 	{
@@ -1233,7 +1249,7 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 		for (stack = tail; stack; stack = stack->access_list_prev)
 		{
 			/* Only coalesce with groups of reads or prefetches at the tail */
-			if (stack->access_kind != mod_access_load)
+			if (stack->access_kind != mod_access_load && stack->access_kind != mod_access_nc_load)
 				continue;
 
 			if (global_mem_witness == stack->witness_ptr && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
@@ -1256,8 +1272,8 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 				continue;
 
 			/* Only if previous write has not started yet */
-			if (stack->port_locked)
-				return NULL;
+			if (stack->port_locked || stack->coalesced)
+				continue;
 
 			if (global_mem_witness == stack->witness_ptr && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			{

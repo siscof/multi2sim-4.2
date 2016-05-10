@@ -107,12 +107,12 @@ void mod_handler_vi_load(int event, void *data)
 
 		/* Coalesce access */
 		stack->origin = 1;
-		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
+		master_stack = mod_can_coalesce(mod, mod_access_nc_load, stack->addr, NULL);
 
 		if (master_stack)
 		{
 			assert(coalescing_model != coalesce_rw);
-			mod_access_start(mod, stack, mod_access_load);
+			mod_access_start(mod, stack, mod_access_nc_load);
 			mod->hits_aux++;
 			mod->delayed_read_hit++;
 			//add_access(mod->level);
@@ -132,7 +132,7 @@ void mod_handler_vi_load(int event, void *data)
 		}
 		mod->mshr_count++;*/
 
-		mod_access_start(mod, stack, mod_access_load);
+		mod_access_start(mod, stack, mod_access_nc_load);
 		add_access(mod->level);
 
 		/* Next event */
@@ -640,7 +640,7 @@ void mod_handler_vi_store(int event, void *data)
 		//mod_access_start(mod, stack, mod_access_store);
 		if (master_stack)
 		{
-			mod_access_start(mod, stack, mod_access_store);
+			mod_access_start(mod, stack, mod_access_nc_store);
 			assert(master_stack->addr == stack->addr);
 			mod->nc_writes++;
 			mod_stack_merge_dirty_mask(master_stack, stack->dirty_mask);
@@ -652,7 +652,7 @@ void mod_handler_vi_store(int event, void *data)
 		}
 
 		add_access(mod->level);
-		mod_access_start(mod, stack, mod_access_store);
+		mod_access_start(mod, stack, mod_access_nc_store);
 		/* Continue */
 		esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, 0);
 		return;

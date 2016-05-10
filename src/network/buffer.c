@@ -197,7 +197,6 @@ void net_buffer_wait(struct net_buffer_t *buffer, int event, void *stack, int si
 	wakeup->event = event;
 	wakeup->size = size;
 	wakeup->stack = stack;
-	wakeup->size = size;
 	linked_list_add(buffer->wakeup_list, wakeup);
 }
 
@@ -207,22 +206,6 @@ void net_buffer_wakeup(struct net_buffer_t *buffer)
 {
 	struct net_buffer_wakeup_t *wakeup;
 	int bytes = 0;
-
-	/*while (linked_list_count(buffer->wakeup_list))
-	{
-		linked_list_head(buffer->wakeup_list);
-	 	wakeup = linked_list_get(buffer->wakeup_list);
-		assert(wakeup);
-		if(buffer->count + bytes + wakeup->size > buffer->size)
-		{
-			break;
-		}
-
-		bytes += wakeup->size;
-		linked_list_remove(buffer->wakeup_list);
-		esim_schedule_event(wakeup->event, wakeup->stack, 0);
-		free(wakeup);
-	}*/
 
 	linked_list_head(buffer->wakeup_list);
 	while(!linked_list_is_end(buffer->wakeup_list))
