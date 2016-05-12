@@ -170,7 +170,7 @@ void net_buffer_extract(struct net_buffer_t *buffer, struct net_msg_t *msg)
 		if(next_msg->waiting)
 		{
 			next_msg->waiting = 0;
-			esim_schedule_event(next_msg->net_stack->event, next_msg->net_stack, 1);
+			esim_schedule_event(next_msg->net_stack->event, next_msg->net_stack, 0);
 		}
 	}
 
