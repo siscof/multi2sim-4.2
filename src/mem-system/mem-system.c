@@ -139,7 +139,7 @@ void mem_system_init(void)
 	int count;
 
 	//FRAN
-	ini_estadisticas();
+	//ini_estadisticas();
 
 
 	/* If any file name was specific for a command-line option related with the
