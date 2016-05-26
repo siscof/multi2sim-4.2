@@ -189,10 +189,8 @@ void statistics_event_init(int interval)
 }
 
 void ini_estadisticas(){
-//estadis = xcalloc(10,sizeof(struct esta_t));/*
 
-statistics_event_init(10000);
-
+//statistics_event_init(10000);
 
 estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 
