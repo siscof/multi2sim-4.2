@@ -625,12 +625,6 @@ void mod_handler_vi_store(int event, void *data)
 		/* Record access */
 		//mod_access_start(mod, stack, mod_access_nc_store);
 
-		/* Increment witness variable */
-		if (stack->mod->level == 1 && stack->witness_ptr)
-		{
-			(*stack->witness_ptr)++;
-			stack->witness_ptr = NULL;
-		}
 		if(mod->level == 1 && stack->client_info && stack->client_info->arch)
 			stack->latencias.start = stack->client_info->arch->timing->cycle;
 
@@ -649,6 +643,14 @@ void mod_handler_vi_store(int event, void *data)
 			mod_stack_wait_in_stack(stack, master_stack, EV_MOD_VI_STORE_FINISH);
 			add_coalesce(mod->level);
 			add_coalesce_store(mod->level);
+
+
+					if (stack->mod->level == 1 && stack->witness_ptr)
+					{
+						(*stack->witness_ptr)++;
+						stack->witness_ptr = NULL;
+					}
+
 			return;
 		}
 
@@ -715,6 +717,12 @@ void mod_handler_vi_store(int event, void *data)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:store_lock\"\n",
 			stack->id, mod->name);
+
+		if (stack->mod->level == 1 && stack->witness_ptr)
+		{
+			(*stack->witness_ptr)++;
+			stack->witness_ptr = NULL;
+		}
 
 		if(stack->latencias.start == 0)
 			if(mod->level == 1 && stack->client_info && stack->client_info->arch)

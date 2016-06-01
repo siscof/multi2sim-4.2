@@ -819,12 +819,6 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_nc_store);
 
-		/* Increment witness variable */
-		if (flag_no_blocking_store && stack->witness_ptr)
-		{
-			(*stack->witness_ptr)++;
-			stack->witness_ptr = NULL;
-		}
 		if(stack->client_info && stack->client_info->arch)
 			stack->latencias.start = stack->client_info->arch->timing->cycle;
 
@@ -919,6 +913,13 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if(stack->latencias.start == 0)
 			if(stack->client_info && stack->client_info->arch)
 				stack->latencias.start = stack->client_info->arch->timing->cycle;
+
+		/* Increment witness variable */
+			if (flag_no_blocking_store && stack->witness_ptr)
+			{
+				(*stack->witness_ptr)++;
+				stack->witness_ptr = NULL;
+			}
 
 		/* If there is any older write, wait for it */
 		older_stack = mod_in_flight_write(mod, stack);
