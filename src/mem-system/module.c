@@ -1096,8 +1096,8 @@ struct mod_stack_t *mod_can_coalesce(struct mod_t *mod,
       break;
   }
 
-	if (!mod_in_flight_address(mod, addr, older_than_stack))
-		return NULL;
+	//if (!mod_in_flight_address(mod, addr, older_than_stack))
+		//return NULL;
 
 	/* Get youngest access older than 'older_than_stack' */
 	tail = older_than_stack ? older_than_stack->access_list_prev :
@@ -1233,15 +1233,14 @@ struct mod_stack_t *mod_can_coalesce_si(struct mod_t *mod,
 		for (stack = tail; stack; stack = stack->access_list_prev)
 		{
 			/* Only coalesce with groups of reads or prefetches at the tail */
-			if (stack->access_kind != mod_access_load)
+			if (stack->access_kind != mod_access_load && access_kind != mod_access_nc_load)
 				continue;
 
 			if (global_mem_witness == stack->witness_ptr && stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
 			{
 				return stack;
 			}
-
-			limit--;
+      limit--;
 			if(limit <= 0)
 				break;
 		}

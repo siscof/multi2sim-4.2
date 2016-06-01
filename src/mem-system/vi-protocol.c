@@ -641,7 +641,7 @@ void mod_handler_vi_store(int event, void *data)
 		//mod_access_start(mod, stack, mod_access_store);
 		if (master_stack)
 		{
-			mod_access_start(mod, stack, mod_access_store);
+			mod_access_start(mod, stack, mod_access_nc_store);
 			assert(master_stack->addr == stack->addr);
 			mod->nc_writes++;
 			mod_stack_merge_dirty_mask(master_stack, stack->dirty_mask);
@@ -653,7 +653,7 @@ void mod_handler_vi_store(int event, void *data)
 		}
 
 		add_access(mod->level);
-		mod_access_start(mod, stack, mod_access_store);
+		mod_access_start(mod, stack, mod_access_nc_store);
 		/* Continue */
 		esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, 0);
 		return;
