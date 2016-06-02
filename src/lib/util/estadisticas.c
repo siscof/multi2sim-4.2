@@ -919,8 +919,10 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
 	//	estadisticas_ipc = (struct esta_t *) calloc(10, sizeof(struct esta_t));
 	//	gpu_inst = (struct si_gpu_unit_stats *) calloc(1, sizeof(struct si_gpu_unit_stats));
 
-	esim_schedule_event(EV_STATISTICS_BY_CYCLES, NULL, statistics_event_interval);
-	printf("%d \n",statistics_event_interval);
+	if(esim_finish != esim_finish_si_max_inst)
+	{
+		esim_schedule_event(EV_STATISTICS_BY_CYCLES, NULL, statistics_event_interval);
+	}
 
 
 }
