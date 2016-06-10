@@ -21,6 +21,7 @@
 #define ARCH_SOUTHERN_ISLANDS_EMU_WAVEFRONT_H
 
 #include <arch/southern-islands/asm/asm.h>
+#include <lib/util/list.h>
 
 
 struct si_wavefront_t
@@ -79,6 +80,7 @@ struct si_wavefront_t
 	int uop_id_counter;
 	struct si_wavefront_pool_entry_t *wavefront_pool_entry;
 	unsigned int barrier_inst : 1;
+	struct list_t *mem_accesses_list;
 
 	/* Statistics */
 	long long inst_count;  /* Total number of instructions */
@@ -90,6 +92,9 @@ struct si_wavefront_t
 	long long global_mem_inst_count;
 	long long lds_inst_count;
 	long long export_inst_count;
+	long long finish_cycle;
+	struct si_gpu_unit_stats *statistics;
+	unsigned int last_stall_pc;
 };
 
 #define SI_FOREACH_WAVEFRONT_IN_WORK_GROUP(WORK_GROUP, WAVEFRONT_ID) \
@@ -123,6 +128,7 @@ void si_wavefront_init_sreg_with_vertex_buffer_table(struct si_wavefront_t *wave
 void si_wavefront_init_sreg_with_fetch_shader(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs);
 int si_wavefront_count_active_work_items(struct si_wavefront_t *wavefront);
+void si_wavefront_add_stall(struct si_wavefront_t *wavefront);
 
 
 #endif

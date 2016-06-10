@@ -271,8 +271,8 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		else if (uop->vector_mem_read)
 		{
         	if ((directory_type == dir_type_nmoesi) || uop->glc)
-            	access_kind = mod_access_load;
-            else
+          	access_kind = mod_access_load;
+          else
         		access_kind = mod_access_nc_load;
 		}
 		else
@@ -343,15 +343,14 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 						add_coalesce_load(0);
 					else
 						add_coalesce_store(0);
-				}
-				else
-				{
+				}	else {
 					//mod_client_info config
 					struct mod_client_info_t *client_info = xcalloc(1,sizeof(struct mod_client_info_t));
 					client_info->arch = arch_southern_islands;
 					//client_info->si_compute_unit = vector_mem->compute_unit;
 
 					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, (void *)uop, NULL, NULL, client_info);
+					
 					uop->global_mem_witness--;
 				}
 

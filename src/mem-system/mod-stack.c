@@ -51,6 +51,7 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 	stack->way = -1;
 	stack->set = -1;
 	stack->tag = -1;
+	stack->hit = -1;
 
 	/* Return */
 	return stack;

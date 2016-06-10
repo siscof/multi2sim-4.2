@@ -22,6 +22,8 @@
 #include <lib/util/debug.h>
 #include <mem-system/memory.h>
 #include <lib/util/estadisticas.h>
+#include <arch/southern-islands/timing/cycle-interval-report.h>
+#include <mem-system/mod-stack.h>
 
 #include "isa.h"
 #include "ndrange.h"
@@ -47,6 +49,9 @@ struct si_wavefront_t *si_wavefront_create(int wavefront_id,
 	wavefront = xcalloc(1, sizeof(struct si_wavefront_t));
 	wavefront->id = wavefront_id;
 	si_wavefront_sreg_init(wavefront);
+
+	wavefront->statistics = xcalloc(1, sizeof(struct si_gpu_unit_stats));
+	wavefront->mem_accesses_list = list_create();
 
 	/* Create work items */
 	wavefront->work_items = xcalloc(si_emu_wavefront_size, sizeof(void *));
@@ -105,9 +110,20 @@ void si_wavefront_free(struct si_wavefront_t *wavefront)
 	assert(wavefront);
 
 	/* Free wavefront */
+	si_wavefront_report_dump(wavefront);
+
+	struct mod_stack_t *stack;
+	int list_size = list_count(wavefront->mem_accesses_list);
+	for(int i = 0; i < list_size; i++)
+	{
+		stack = (struct mod_stack_t *) list_get(wavefront->mem_accesses_list,i);
+		stack->wavefront = NULL;
+	}
 
 	free(wavefront->work_items);
 	free(wavefront->latencies);
+	free(wavefront->statistics);
+	free(wavefront->mem_accesses_list);
 
 	free(wavefront->latencies_counters);
 	memset(wavefront, 0, sizeof(struct si_wavefront_t));
@@ -253,7 +269,9 @@ void si_wavefront_execute(struct si_wavefront_t *wavefront)
 		{
 			si_isa_debug("\n");
 		}
-
+		if(wavefront->finished){
+			wavefront->finish_cycle = asTiming(si_gpu)->cycle;
+		}
 		break;
 	}
 
@@ -908,4 +926,29 @@ void si_wavefront_init_sreg_with_fetch_shader(struct si_wavefront_t *wavefront,
 	mem_ptr.addr = (unsigned int)ndrange->inst_buffer_size;
 
 	memcpy(&wavefront->sreg[first_reg], &mem_ptr, sizeof(mem_ptr));
+}
+
+void si_wavefront_add_stall(struct si_wavefront_t *wavefront)
+{
+	struct mod_stack_t *stack;
+	if(wavefront->last_stall_pc == wavefront->pc)
+		return;
+
+	wavefront->last_stall_pc = wavefront->pc;
+	wavefront->statistics->inst_stall++;
+	int list_size = list_count(wavefront->mem_accesses_list);
+	for(int i = 0; i < list_size; i++)
+	{
+		stack = (struct mod_stack_t *) list_get(wavefront->mem_accesses_list,i);
+		wavefront->statistics->mem_accesses_inflight++;
+
+		if(stack->coalesced)
+		{
+			wavefront->statistics->mem_coalesce++;
+			continue;
+		}
+
+		if(stack->hit == 0)
+			wavefront->statistics->mem_misses++;
+	}
 }

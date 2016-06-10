@@ -169,6 +169,12 @@ struct si_gpu_unit_stats
 	long long active_wavefronts;
 	long long wavefronts_waiting_mem;
 
+	// wavefront
+	long long inst_stall;
+	long long mem_accesses_inflight;
+	long long mem_misses;
+	long long mem_coalesce;
+
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;
 	struct latenciometro *latencias_nc_write;

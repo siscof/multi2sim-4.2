@@ -132,7 +132,8 @@ struct mod_stack_t
 	int finished : 1;
 	int invalided : 1;
 
-	int hit : 1;
+	//int hit : 1;
+	int hit;
 	int err : 1;
 	int shared : 1;
 	int read : 1;

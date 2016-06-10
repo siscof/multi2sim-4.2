@@ -301,7 +301,7 @@ void si_compute_unit_unmap_work_group(struct si_compute_unit_t *compute_unit,
 	struct si_work_group_t *work_group)
 {
 	long work_group_id;
-	si_work_group_report(work_group);
+	si_work_group_report_dump(work_group);
 
 	/* Add work group register access statistics to compute unit */
 	compute_unit->sreg_read_count += work_group->sreg_read_count;
@@ -410,6 +410,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		 * in flight) */
 		if (!wavefront->wavefront_pool_entry->ready)
 		{
+			//si_wavefront_add_stall(wavefront);
 			bloqueo_por_instruction_infly = 1;
 			continue;
 		}
@@ -433,6 +434,8 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		 * memory instructions */
 		if (wavefront->wavefront_pool_entry->wait_for_mem)
 		{
+
+			si_wavefront_add_stall(wavefront);
 			if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
 				!wavefront->wavefront_pool_entry->vm_cnt)
 			{

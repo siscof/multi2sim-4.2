@@ -137,6 +137,8 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 
 	stack->wavefront = stack->uop->wavefront;
 
+  list_add(stack->wavefront->mem_accesses_list, stack);
+
 	stack->work_group_id_in_cu = wg_id;
 
 	/* Initialize */
@@ -668,6 +670,11 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
 	/* Remove from access list */
 	DOUBLE_LINKED_LIST_REMOVE(mod, access, stack);
 
+  /* Remove frome the wavefront */
+  if(stack->wavefront)
+  {
+    list_remove(stack->wavefront->mem_accesses_list, stack);
+  }
 	/* Remove from write access list */
 	assert(stack->access_kind);
 	if (stack->access_kind == mod_access_store)

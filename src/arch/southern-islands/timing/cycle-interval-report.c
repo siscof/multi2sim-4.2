@@ -32,8 +32,9 @@
 #include <lib/util/estadisticas.h>
 #include <mem-system/mshr.h>
 
-int si_spatial_report_active = 0 ;
-int si_cu_spatial_report_active = 0 ;
+int si_spatial_report_active = 0;
+int si_cu_spatial_report_active = 0;
+int si_wf_spatial_report_active = 0;
 int si_device_spatial_report_active = 0 ;
 static int spatial_profiling_interval = 10000;
 static int spatial_profiling_format = 0;
@@ -43,6 +44,7 @@ static char *spatial_report_filename = "report-cu-spatial";
 static char *device_spatial_report_filename = "report-device-spatial";
 static FILE *device_spatial_report_file;
 static FILE *device_spatial_report_file_wg;
+static FILE *device_spatial_report_file_wf;
 
 
 void si_spatial_report_config_read(struct config_t *config)
@@ -99,9 +101,10 @@ void si_spatial_report_config_read(struct config_t *config)
 		device_spatial_report_filename = str_set(NULL, device_file_name);
 		device_spatial_report_file = file_open_for_write(device_spatial_report_filename);
 		device_spatial_report_file_wg = file_open_for_write(str_concat(device_spatial_report_filename,"_wg"));
-		if (!device_spatial_report_file || !device_spatial_report_file_wg)
-			fatal("%s or %s: could not open spatial report file",
-					device_spatial_report_filename, str_concat(device_spatial_report_filename,"_wg"));
+		device_spatial_report_file_wf = file_open_for_write(str_concat(device_spatial_report_filename,"_wf"));
+		if (!device_spatial_report_file || !device_spatial_report_file_wg || !device_spatial_report_file_wf)
+			fatal("%s, %s, %s : could not open spatial report file",
+					device_spatial_report_filename, str_concat(device_spatial_report_filename,"_wg"), str_concat(device_spatial_report_filename,"_wf"));
 	}
 
 	if(!si_device_spatial_report_active && !si_cu_spatial_report_active)
@@ -116,11 +119,19 @@ void si_spatial_report_init()
 
 	if(si_cu_spatial_report_active)
 		si_cu_spatial_report_init();
+
+	if(si_wf_spatial_report_active)
+		si_wf_spatial_report_init();
 }
 
 void si_cu_spatial_report_init()
 {
 	fprintf(spatial_report_file, "cycle, esim_time\n");
+}
+
+void si_wf_spatial_report_init()
+{
+	fprintf(device_spatial_report_file_wf,"op_counter,interval_cycles,esim_time\n");
 }
 
 void si_device_spatial_report_init(SIGpu *device)
@@ -202,6 +213,7 @@ void si_vector_memory_report_new_inst(struct si_compute_unit_t *compute_unit, st
 	compute_unit->compute_device->interval_statistics->op_counter[v_mem_u] += si_wavefront_count_active_work_items(uop->wavefront);
 
 	uop->wavefront->work_group->op_counter += si_wavefront_count_active_work_items(uop->wavefront);
+	uop->wavefront->statistics->op_counter[v_mem_u] += si_wavefront_count_active_work_items(uop->wavefront);
 }
 
 void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
@@ -212,6 +224,7 @@ void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit, struct si
 	compute_unit->compute_device->interval_statistics->op_counter[branch_u]++;
 
 	uop->wavefront->work_group->op_counter++;
+	uop->wavefront->statistics->op_counter[branch_u]++;
 }
 
 void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
@@ -224,6 +237,7 @@ void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uo
 	lds_u] += si_wavefront_count_active_work_items(uop->wavefront);
 
 	uop->wavefront->work_group->op_counter += si_wavefront_count_active_work_items(uop->wavefront);
+	uop->wavefront->statistics->op_counter[lds_u] += si_wavefront_count_active_work_items(uop->wavefront);
 }
 
 
@@ -236,6 +250,7 @@ void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struc
 	compute_unit->compute_device->interval_statistics->op_counter[scalar_u]++;
 
 	uop->wavefront->work_group->op_counter++;
+	uop->wavefront->statistics->op_counter[scalar_u]++;
 }
 
 void si_simd_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
@@ -246,16 +261,7 @@ void si_simd_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct 
 	compute_unit->compute_device->interval_statistics->op_counter[simd_u] += si_wavefront_count_active_work_items(uop->wavefront);
 
 	uop->wavefront->work_group->op_counter += si_wavefront_count_active_work_items(uop->wavefront);
-}
-
-void si_work_group_report(struct si_work_group_t *wg)
-{
-	fprintf(device_spatial_report_file_wg,"%lld,",wg->op_counter);
-
-	fprintf(device_spatial_report_file_wg,"%lld,%lld",
-	asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle - wg->start_cycle, esim_time);
-	fprintf(device_spatial_report_file_wg,"\n");
-	//wg->wavefront_pool->compute_unit->compute_device->cycle_last_wg_op_counter_report = asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle;
+	uop->wavefront->statistics->op_counter[simd_u] += si_wavefront_count_active_work_items(uop->wavefront);
 }
 
 void si_report_global_mem_inflight( struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
@@ -515,5 +521,32 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f,"%lld,%lld", device->interval_statistics->interval_cycles,	esim_time);
 
 	fprintf(f,"\n");
+	fflush(f);
 
+}
+
+void si_work_group_report_dump(struct si_work_group_t *wg)
+{
+	fprintf(device_spatial_report_file_wg,"%d,",wg->id);
+	fprintf(device_spatial_report_file_wg,"%lld,",wg->op_counter);
+
+	fprintf(device_spatial_report_file_wg,"%lld,%lld",
+	asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle - wg->start_cycle, esim_time);
+	fprintf(device_spatial_report_file_wg,"\n");
+	//wg->wavefront_pool->compute_unit->compute_device->cycle_last_wg_op_counter_report = asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle;
+	fflush(device_spatial_report_file_wg);
+}
+
+void si_wavefront_report_dump(struct si_wavefront_t *wavefront)
+{
+	fprintf(device_spatial_report_file_wf,"%d,",wavefront->id);
+	long long total_op = wavefront->statistics->op_counter[simd_u] + wavefront->statistics->op_counter[scalar_u] + wavefront->statistics->op_counter[s_mem_u] + wavefront->statistics->op_counter[v_mem_u] + wavefront->statistics->op_counter[lds_u] + wavefront->statistics->op_counter[branch_u];
+	fprintf(device_spatial_report_file_wf,"%lld,",total_op);
+
+	fprintf(device_spatial_report_file_wf,"%lld,%lld,%lld,%lld,", wavefront->statistics->inst_stall, wavefront->statistics->mem_accesses_inflight, wavefront->statistics->mem_misses, wavefront->statistics->mem_coalesce);
+
+	fprintf(device_spatial_report_file_wf,"%lld,%lld", wavefront->finish_cycle - wavefront->work_group->start_cycle, esim_time);
+	fprintf(device_spatial_report_file_wf,"\n");
+	fflush(device_spatial_report_file_wf);
+	//wg->wavefront_pool->compute_unit->compute_device->cycle_last_wg_op_counter_report = asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle;
 }

@@ -43,7 +43,6 @@ void si_report_mapped_work_group(struct si_compute_unit_t *compute_unit);
 
 void si_report_unmapped_work_group(struct si_compute_unit_t *compute_unit);
 
-
 /* Used in vector unit to keep track of num of mem accesses in flight */
 void si_report_global_mem_inflight( struct si_compute_unit_t *compute_unit, struct si_uop_t *uop);
 
@@ -59,7 +58,8 @@ void si_device_interval_update(SIGpu *device);
 void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit);
 void si_device_spatial_report_dump(SIGpu *device);
 
-void si_work_group_report(struct si_work_group_t *wg);
+void si_work_group_report_dump(struct si_work_group_t *wg);
+void si_wavefront_report_dump(struct si_wavefront_t *wavefront);
 
 void si_spatial_report_done();
 void si_cu_spatial_report_done();
@@ -68,6 +68,7 @@ void si_device_spatial_report_done();
 void si_spatial_report_init();
 void si_cu_spatial_report_init();
 void si_device_spatial_report_init();
+void si_wf_spatial_report_init();
 
 void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long cycles);
 
