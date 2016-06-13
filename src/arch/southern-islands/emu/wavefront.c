@@ -948,6 +948,9 @@ void si_wavefront_add_stall(struct si_wavefront_t *wavefront)
 			continue;
 		}
 
+		if(stack->hit == -1)
+			wavefront->statistics->mem_unknown++;
+
 		if(stack->hit == 0)
 			wavefront->statistics->mem_misses++;
 	}

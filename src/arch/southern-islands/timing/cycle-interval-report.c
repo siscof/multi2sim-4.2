@@ -161,7 +161,7 @@ void si_cu_spatial_report_init()
 
 void si_wf_spatial_report_init()
 {
-	fprintf(wf_spatial_report_file,"wf_id,opc,inst_stall,mem_accesses_inflight,mem_misses,mem_coalesce,exec_cycles,esim_time\n");
+	fprintf(wf_spatial_report_file,"wf_id,opc,inst_stall,mem_accesses_inflight,mem_unknown,mem_misses,mem_coalesce,exec_cycles,esim_time\n");
 }
 
 void si_device_spatial_report_init(SIGpu *device)
@@ -592,7 +592,7 @@ void si_wavefront_report_dump(struct si_wavefront_t *wavefront)
 	long long total_op = wavefront->statistics->op_counter[simd_u] + wavefront->statistics->op_counter[scalar_u] + wavefront->statistics->op_counter[s_mem_u] + wavefront->statistics->op_counter[v_mem_u] + wavefront->statistics->op_counter[lds_u] + wavefront->statistics->op_counter[branch_u];
 	fprintf(wf_spatial_report_file,"%lld,",total_op);
 
-	fprintf(wf_spatial_report_file,"%lld,%lld,%lld,%lld,", wavefront->statistics->inst_stall, wavefront->statistics->mem_accesses_inflight, wavefront->statistics->mem_misses, wavefront->statistics->mem_coalesce);
+	fprintf(wf_spatial_report_file,"%lld,%lld,%lld,%lld,%lld,", wavefront->statistics->inst_stall, wavefront->statistics->mem_accesses_inflight, wavefront->statistics->mem_unknown, wavefront->statistics->mem_misses, wavefront->statistics->mem_coalesce);
 
 	fprintf(wf_spatial_report_file,"%lld,%lld", wavefront->finish_cycle - wavefront->work_group->start_cycle, esim_time);
 	fprintf(wf_spatial_report_file,"\n");
