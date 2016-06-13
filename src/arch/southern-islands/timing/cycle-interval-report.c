@@ -32,19 +32,26 @@
 #include <lib/util/estadisticas.h>
 #include <mem-system/mshr.h>
 
-int si_spatial_report_active = 0;
-int si_cu_spatial_report_active = 0;
-int si_wf_spatial_report_active = 0;
-int si_device_spatial_report_active = 0 ;
 static int spatial_profiling_interval = 10000;
 static int spatial_profiling_format = 0;
 static char *si_spatial_report_section_name = "SISpatialReport";
-static FILE *spatial_report_file;
-static char *spatial_report_filename = "report-cu-spatial";
+
+//int si_spatial_report_active = 0;
+int si_cu_spatial_report_active = 0;
+int si_wf_spatial_report_active = 0;
+int si_wg_spatial_report_active = 0;
+int si_device_spatial_report_active = 0 ;
+
+static char *cu_spatial_report_filename = "report-cu-spatial";
 static char *device_spatial_report_filename = "report-device-spatial";
+static char *wf_spatial_report_filename = "report-wavefront-spatial";
+static char *wg_spatial_report_filename = "report-wavefront-spatial";
+
+static FILE *cu_spatial_report_file;
 static FILE *device_spatial_report_file;
-static FILE *device_spatial_report_file_wg;
-static FILE *device_spatial_report_file_wf;
+//static FILE *device_spatial_report_file_wg;
+static FILE *wf_spatial_report_file;
+static FILE *wg_spatial_report_file;
 
 
 void si_spatial_report_config_read(struct config_t *config)
@@ -52,6 +59,8 @@ void si_spatial_report_config_read(struct config_t *config)
 	char *section;
 	char *cu_file_name;
 	char *device_file_name;
+	char *wf_file_name;
+	char *wg_file_name;
 
 	/*Nothing if section or config is not present */
 	section = si_spatial_report_section_name;
@@ -62,7 +71,7 @@ void si_spatial_report_config_read(struct config_t *config)
 	}
 
 	/* Spatial reports are active */
-	si_spatial_report_active = 1;
+	//si_spatial_report_active = 1;
 
 	/* output format */
 	config_var_enforce(config, section, "Format");
@@ -77,34 +86,55 @@ void si_spatial_report_config_read(struct config_t *config)
 
 	/* Compute Unit File name */
 	//config_var_enforce(config, section, "cu_File");
-	cu_file_name = config_read_string(config, section, "cu_File", NULL);
-	if (cu_file_name && *cu_file_name){
+	cu_file_name = config_read_string(config, section, "cu_file", NULL);
+	if (cu_file_name && *cu_file_name)
+	{
 		si_cu_spatial_report_active = 1;
-
-		spatial_report_filename = str_set(NULL, cu_file_name);
-
-		spatial_report_file = file_open_for_write(spatial_report_filename);
-		if (!spatial_report_file)
+		cu_spatial_report_filename = str_set(NULL, cu_file_name);
+		cu_spatial_report_file = file_open_for_write(cu_spatial_report_filename);
+		if (!cu_spatial_report_file)
 			fatal("%s: could not open spatial report file",
-					spatial_report_filename);
+					cu_spatial_report_filename);
 	}
 		//fatal("%s: %s: invalid or missing value for 'cu_File'",
 		//	si_spatial_report_section_name, section);
 
 	/* Device File name */
-	//config_var_enforce(config, section, "device_File");
-	device_file_name = config_read_string(config, section, "device_File", NULL);
+	device_file_name = config_read_string(config, section, "device_file", NULL);
 	if (device_file_name && *device_file_name)
 	{
 		si_device_spatial_report_active = 1;
 
 		device_spatial_report_filename = str_set(NULL, device_file_name);
 		device_spatial_report_file = file_open_for_write(device_spatial_report_filename);
-		device_spatial_report_file_wg = file_open_for_write(str_concat(device_spatial_report_filename,"_wg"));
-		device_spatial_report_file_wf = file_open_for_write(str_concat(device_spatial_report_filename,"_wf"));
-		if (!device_spatial_report_file || !device_spatial_report_file_wg || !device_spatial_report_file_wf)
-			fatal("%s, %s, %s : could not open spatial report file",
-					device_spatial_report_filename, str_concat(device_spatial_report_filename,"_wg"), str_concat(device_spatial_report_filename,"_wf"));
+		//device_spatial_report_file_wg = file_open_for_write(str_concat(device_spatial_report_filename,"_wg"));
+		//device_spatial_report_file_wf = file_open_for_write(str_concat(device_spatial_report_filename,"_wf"));
+		if (!device_spatial_report_file)
+			fatal("%s: could not open spatial report file", device_spatial_report_filename);
+	}
+
+	wg_file_name = config_read_string(config, section, "wg_file", NULL);
+	if (wg_file_name && *wg_file_name)
+	{
+		si_wg_spatial_report_active = 1;
+
+		wg_spatial_report_filename = str_set(NULL, wg_file_name);
+		wg_spatial_report_file = file_open_for_write(wg_spatial_report_filename);
+
+		if (!wg_spatial_report_file)
+			fatal("%s: could not open spatial report file", wg_spatial_report_filename);
+	}
+
+	wf_file_name = config_read_string(config, section, "wf_file", NULL);
+	if (wf_file_name && *wf_file_name)
+	{
+		si_wf_spatial_report_active = 1;
+
+		wf_spatial_report_filename = str_set(NULL, wf_file_name);
+		wf_spatial_report_file = file_open_for_write(wf_spatial_report_filename);
+
+		if (!wf_spatial_report_file)
+			fatal("%s: could not open spatial report file", wf_spatial_report_filename);
 	}
 
 	if(!si_device_spatial_report_active && !si_cu_spatial_report_active)
@@ -126,17 +156,17 @@ void si_spatial_report_init()
 
 void si_cu_spatial_report_init()
 {
-	fprintf(spatial_report_file, "cycle, esim_time\n");
+	fprintf(cu_spatial_report_file, "cycle, esim_time\n");
 }
 
 void si_wf_spatial_report_init()
 {
-	fprintf(device_spatial_report_file_wf,"op_counter,interval_cycles,esim_time\n");
+	fprintf(wf_spatial_report_file,"wf_id,opc,inst_stall,mem_accesses_inflight,mem_misses,mem_coalesce,exec_cycles,esim_time\n");
 }
 
 void si_device_spatial_report_init(SIGpu *device)
 {
-	fprintf(device_spatial_report_file_wg,"op_counter,interval_cycles,esim_time\n");
+	//fprintf(device_spatial_report_file_wg,"op_counter,interval_cycles,esim_time\n");
 
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 
@@ -150,27 +180,34 @@ void si_device_spatial_report_init(SIGpu *device)
 
 void si_spatial_report_done()
 {
-	if (si_cu_spatial_report_active)
-		si_cu_spatial_report_done();
+	if (si_cu_spatial_report_active){
+		fclose(cu_spatial_report_file);
+		cu_spatial_report_file = NULL;
+		str_free(cu_spatial_report_filename);
+	}
 
 	if (si_device_spatial_report_active)
-		si_device_spatial_report_done();
+	{
+		fclose(device_spatial_report_file);
+		device_spatial_report_file = NULL;
+		str_free(device_spatial_report_filename);
+	}
+
+	if (si_wg_spatial_report_active)
+	{
+		fclose(wg_spatial_report_file);
+		wg_spatial_report_file = NULL;
+		str_free(wg_spatial_report_filename);
+	}
+
+	if (si_wf_spatial_report_active)
+	{
+		fclose(wf_spatial_report_file);
+		wf_spatial_report_file = NULL;
+		str_free(wf_spatial_report_filename);
+	}
 }
 
-void si_cu_spatial_report_done()
-{
-
-	fclose(spatial_report_file);
-	spatial_report_file = NULL;
-	str_free(spatial_report_filename);
-}
-
-void si_device_spatial_report_done()
-{
-	fclose(device_spatial_report_file);
-	device_spatial_report_file = NULL;
-	str_free(device_spatial_report_filename);
-}
 
 void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long cycles)
 {
@@ -180,7 +217,10 @@ void add_wait_for_mem_latency(struct si_compute_unit_t *compute_unit, long long 
 
 void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 {
-	FILE *f = spatial_report_file;
+	if(!si_cu_spatial_report_active)
+		return;
+
+	FILE *f = cu_spatial_report_file;
 
 	if(spatial_profiling_format == 0){
 		fprintf(f,
@@ -458,6 +498,9 @@ void analizar_wavefront(SIGpu *device)
 
 void si_device_spatial_report_dump(SIGpu *device)
 {
+	if(!si_device_spatial_report_active)
+		return;
+
 	FILE *f = device_spatial_report_file;
 
 	analizar_wavefront(device);
@@ -527,26 +570,32 @@ void si_device_spatial_report_dump(SIGpu *device)
 
 void si_work_group_report_dump(struct si_work_group_t *wg)
 {
-	fprintf(device_spatial_report_file_wg,"%d,",wg->id);
-	fprintf(device_spatial_report_file_wg,"%lld,",wg->op_counter);
+	if(!si_wg_spatial_report_active)
+		return;
 
-	fprintf(device_spatial_report_file_wg,"%lld,%lld",
+	fprintf(wg_spatial_report_file,"%d,",wg->id);
+	fprintf(wg_spatial_report_file,"%lld,",wg->op_counter);
+
+	fprintf(wg_spatial_report_file,"%lld,%lld",
 	asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle - wg->start_cycle, esim_time);
-	fprintf(device_spatial_report_file_wg,"\n");
+	fprintf(wg_spatial_report_file,"\n");
 	//wg->wavefront_pool->compute_unit->compute_device->cycle_last_wg_op_counter_report = asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle;
-	fflush(device_spatial_report_file_wg);
+	fflush(wg_spatial_report_file);
 }
 
 void si_wavefront_report_dump(struct si_wavefront_t *wavefront)
 {
-	fprintf(device_spatial_report_file_wf,"%d,",wavefront->id);
+	if(!si_wf_spatial_report_active)
+		return;
+
+	fprintf(wf_spatial_report_file,"%d,",wavefront->id);
 	long long total_op = wavefront->statistics->op_counter[simd_u] + wavefront->statistics->op_counter[scalar_u] + wavefront->statistics->op_counter[s_mem_u] + wavefront->statistics->op_counter[v_mem_u] + wavefront->statistics->op_counter[lds_u] + wavefront->statistics->op_counter[branch_u];
-	fprintf(device_spatial_report_file_wf,"%lld,",total_op);
+	fprintf(wf_spatial_report_file,"%lld,",total_op);
 
-	fprintf(device_spatial_report_file_wf,"%lld,%lld,%lld,%lld,", wavefront->statistics->inst_stall, wavefront->statistics->mem_accesses_inflight, wavefront->statistics->mem_misses, wavefront->statistics->mem_coalesce);
+	fprintf(wf_spatial_report_file,"%lld,%lld,%lld,%lld,", wavefront->statistics->inst_stall, wavefront->statistics->mem_accesses_inflight, wavefront->statistics->mem_misses, wavefront->statistics->mem_coalesce);
 
-	fprintf(device_spatial_report_file_wf,"%lld,%lld", wavefront->finish_cycle - wavefront->work_group->start_cycle, esim_time);
-	fprintf(device_spatial_report_file_wf,"\n");
-	fflush(device_spatial_report_file_wf);
+	fprintf(wf_spatial_report_file,"%lld,%lld", wavefront->finish_cycle - wavefront->work_group->start_cycle, esim_time);
+	fprintf(wf_spatial_report_file,"\n");
+	fflush(wf_spatial_report_file);
 	//wg->wavefront_pool->compute_unit->compute_device->cycle_last_wg_op_counter_report = asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle;
 }

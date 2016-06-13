@@ -61,9 +61,10 @@ void si_device_spatial_report_dump(SIGpu *device);
 void si_work_group_report_dump(struct si_work_group_t *wg);
 void si_wavefront_report_dump(struct si_wavefront_t *wavefront);
 
+
 void si_spatial_report_done();
-void si_cu_spatial_report_done();
-void si_device_spatial_report_done();
+/*void si_cu_spatial_report_done();
+void si_device_spatial_report_done();*/
 
 void si_spatial_report_init();
 void si_cu_spatial_report_init();

@@ -174,11 +174,10 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		/* In the above context, access means any of the
 		 * mod_access calls in si_vector_mem_mem. Means all
 		 * inflight accesses for uop are done */
-		if(si_spatial_report_active)
-		{
-			si_report_global_mem_finish(uop->compute_unit,
-						uop);
-		}
+		//if(si_spatial_report_active)
+		//{
+		si_report_global_mem_finish(uop->compute_unit, uop);
+		//}
 
 		list_remove(vector_mem->mem_buffer, uop);
 		list_enqueue(vector_mem->write_buffer, uop);
@@ -350,31 +349,28 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 					//client_info->si_compute_unit = vector_mem->compute_unit;
 
 					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, (void *)uop, NULL, NULL, client_info);
-					
+
 					uop->global_mem_witness--;
 				}
 
  			}
 		}
 
-		if(si_spatial_report_active)
+		//if(si_spatial_report_active)
+		//{
+		if (uop->vector_mem_write)
 		{
-			if (uop->vector_mem_write)
-			{
-				uop->num_global_mem_write +=
-					uop->global_mem_witness;
-				si_report_global_mem_inflight(uop->compute_unit,
-						uop);
-			}
-			else if (uop->vector_mem_read)
-			{
-				uop->num_global_mem_read +=
-					uop->global_mem_witness;
-				si_report_global_mem_inflight(uop->compute_unit,
-						uop);
-			}
-			else
-				fatal("%s: invalid access kind", __FUNCTION__);
+			uop->num_global_mem_write += uop->global_mem_witness;
+				si_report_global_mem_inflight(uop->compute_unit, uop);
+		}
+		else if (uop->vector_mem_read)
+		{
+			uop->num_global_mem_read +=	uop->global_mem_witness;
+			si_report_global_mem_inflight(uop->compute_unit,	uop);
+		}
+		else
+		{
+			fatal("%s: invalid access kind", __FUNCTION__);
 		}
 
 		/* Transfer the uop to the mem buffer */
@@ -515,8 +511,8 @@ void si_vector_mem_decode(struct si_vector_mem_unit_t *vector_mem)
 		list_remove(vector_mem->issue_buffer, uop);
 		list_enqueue(vector_mem->decode_buffer, uop);
 
-		if (si_spatial_report_active)
-			si_vector_memory_report_new_inst(vector_mem->compute_unit, uop);
+		//if (si_spatial_report_active)
+		si_vector_memory_report_new_inst(vector_mem->compute_unit, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"mem-d\"\n", uop->id_in_compute_unit,

@@ -290,8 +290,8 @@ void si_compute_unit_map_work_group(struct si_compute_unit_t *compute_unit,
 	/* Stats */
 	compute_unit->mapped_work_groups++;
 	work_group->start_cycle = asTiming(compute_unit->compute_device)->cycle;
-	if (si_spatial_report_active)
-		si_report_mapped_work_group(compute_unit);
+	//if (si_spatial_report_active)
+	si_report_mapped_work_group(compute_unit);
 
 	//add_workgroup_finish(compute_unit);
 }
@@ -343,8 +343,8 @@ void si_compute_unit_unmap_work_group(struct si_compute_unit_t *compute_unit,
 	si_trace("si.unmap_wg cu=%d wg=%d\n", compute_unit->id,
 		work_group->id);
 
-	if(si_spatial_report_active)
-		si_report_unmapped_work_group(compute_unit);
+	//if(si_spatial_report_active)
+	si_report_unmapped_work_group(compute_unit);
 
 
 	//add_workgroup_finish(compute_unit);
@@ -1468,6 +1468,6 @@ void si_compute_unit_run(struct si_compute_unit_t *compute_unit)
 	/* Stats */
 	compute_unit->cycle++;
 
-	if(si_spatial_report_active)
-		si_cu_interval_update(compute_unit);
+	//if(si_spatial_report_active)
+	si_cu_interval_update(compute_unit);
 }
