@@ -95,6 +95,7 @@ struct si_wavefront_t
 	long long finish_cycle;
 	struct si_gpu_unit_stats *statistics;
 	unsigned int last_stall_pc;
+	int stall;
 };
 
 #define SI_FOREACH_WAVEFRONT_IN_WORK_GROUP(WORK_GROUP, WAVEFRONT_ID) \

@@ -434,11 +434,10 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		 * memory instructions */
 		if (wavefront->wavefront_pool_entry->wait_for_mem)
 		{
-
-			si_wavefront_add_stall(wavefront);
 			if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
 				!wavefront->wavefront_pool_entry->vm_cnt)
 			{
+				si_wavefront_add_stall(wavefront);
 				add_wait_for_mem_latency(compute_unit, asTiming(si_gpu)->cycle -
 				 	wavefront->wavefront_pool_entry->wait_for_mem_cycle);
 				wavefront->wavefront_pool_entry->wait_for_mem =
@@ -450,6 +449,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 				/* TODO Show a waiting state in visualization
 				 * tool */
 				/* XXX uop is already freed */
+				wavefront->stall = 1;
 				bloqueo_por_mem_access = 1;
 				continue;
 			}

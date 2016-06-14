@@ -931,9 +931,11 @@ void si_wavefront_init_sreg_with_fetch_shader(struct si_wavefront_t *wavefront,
 void si_wavefront_add_stall(struct si_wavefront_t *wavefront)
 {
 	struct mod_stack_t *stack;
-	if(wavefront->last_stall_pc == wavefront->pc)
+	//if(wavefront->last_stall_pc == wavefront->pc)
+	if(!wavefront->stall)
 		return;
 
+	wavefront->stall = 0;
 	wavefront->last_stall_pc = wavefront->pc;
 	wavefront->statistics->inst_stall++;
 	int list_size = list_count(wavefront->mem_accesses_list);
