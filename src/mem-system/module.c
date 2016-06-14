@@ -671,8 +671,21 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
 	DOUBLE_LINKED_LIST_REMOVE(mod, access, stack);
 
   /* Remove frome the wavefront */
-  if(stack->wavefront)
+  if(stack->wavefront && stack->mod->level == 1)
   {
+    if(stack->wavefront->stall)
+    {
+      stack->wavefront->statistics->mem_accesses_inflight++;
+
+      if(stack->coalesced)
+        stack->wavefront->statistics->mem_coalesce++;
+
+      if(stack->hit == -1)
+        stack->wavefront->statistics->mem_unknown++;
+
+      if(stack->hit == 0)
+        stack->wavefront->statistics->mem_misses++;
+    }
     list_remove(stack->wavefront->mem_accesses_list, stack);
   }
 	/* Remove from write access list */
