@@ -956,4 +956,19 @@ void si_wavefront_add_stall(struct si_wavefront_t *wavefront)
 		if(stack->hit == 0)
 			wavefront->statistics->mem_misses++;
 	}*/
+	int misses = wavefront->statistics->mem_misses - wavefront->statistics->prev_mem_misses;
+	if(misses == 0)
+		wavefront->statistics->dist_misses_0++;
+	else if(misses >= 1 && misses <= 5)
+		wavefront->statistics->dist_misses_1_5++;
+	else if(misses >= 6 && misses <= 10)
+		wavefront->statistics->dist_misses_6_10++;
+	else if(misses >= 11 && misses <= 15)
+		wavefront->statistics->dist_misses_11_15++;
+	else if(misses >= 16 && misses <= 20)
+		wavefront->statistics->dist_misses_16_20++;
+	else if(misses >=21)
+		wavefront->statistics->dist_misses_21++;
+
+	wavefront->statistics->prev_mem_misses = wavefront->statistics->mem_misses;
 }

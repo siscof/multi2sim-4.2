@@ -161,7 +161,7 @@ void si_cu_spatial_report_init()
 
 void si_wf_spatial_report_init()
 {
-	fprintf(wf_spatial_report_file,"wf_id,opc,inst_stall,mem_accesses_inflight,mem_unknown,mem_misses,mem_coalesce,exec_cycles,esim_time\n");
+	fprintf(wf_spatial_report_file,"wf_id,opc,inst_stall,mem_accesses_inflight,mem_unknown,mem_misses,mem_coalesce,exec_cycles,esim_time,dist_misses_0,dist_misses_1-5,dist_misses_6-10,dist_misses_11-15,dist_misses_16-20,dist_misses_21\n");
 }
 
 void si_device_spatial_report_init(SIGpu *device)
@@ -594,7 +594,8 @@ void si_wavefront_report_dump(struct si_wavefront_t *wavefront)
 
 	fprintf(wf_spatial_report_file,"%lld,%lld,%lld,%lld,%lld,", wavefront->statistics->inst_stall, wavefront->statistics->mem_accesses_inflight, wavefront->statistics->mem_unknown, wavefront->statistics->mem_misses, wavefront->statistics->mem_coalesce);
 
-	fprintf(wf_spatial_report_file,"%lld,%lld", wavefront->finish_cycle - wavefront->work_group->start_cycle, esim_time);
+	fprintf(wf_spatial_report_file,"%lld,%lld,", wavefront->finish_cycle - wavefront->work_group->start_cycle, esim_time);
+	fprintf(wf_spatial_report_file,"%lld,%lld,%lld,%lld,%lld,%lld",wavefront->statistics->dist_misses_0,wavefront->statistics->dist_misses_1_5,wavefront->statistics->dist_misses_6_10,wavefront->statistics->dist_misses_11_15,wavefront->statistics->dist_misses_16_20,wavefront->statistics->dist_misses_21);
 	fprintf(wf_spatial_report_file,"\n");
 	fflush(wf_spatial_report_file);
 	//wg->wavefront_pool->compute_unit->compute_device->cycle_last_wg_op_counter_report = asTiming(wg->wavefront_pool->compute_unit->compute_device)->cycle;

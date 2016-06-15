@@ -175,6 +175,13 @@ struct si_gpu_unit_stats
 	long long mem_misses;
 	long long mem_unknown;
 	long long mem_coalesce;
+	long long dist_misses_0;
+	long long dist_misses_1_5;
+	long long dist_misses_6_10;
+	long long dist_misses_11_15;
+	long long dist_misses_16_20;
+	long long dist_misses_21;
+	long long prev_mem_misses;
 
 	//latecias de las instrucciones de acceso a memoria
 	struct latenciometro *latencias_load;
