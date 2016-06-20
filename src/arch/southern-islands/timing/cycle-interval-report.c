@@ -52,6 +52,7 @@ static FILE *device_spatial_report_file;
 //static FILE *device_spatial_report_file_wg;
 static FILE *wf_spatial_report_file;
 static FILE *wg_spatial_report_file;
+static FILE *stall_spatial_report_file;
 
 
 void si_spatial_report_config_read(struct config_t *config)
@@ -137,6 +138,9 @@ void si_spatial_report_config_read(struct config_t *config)
 			fatal("%s: could not open spatial report file", wf_spatial_report_filename);
 	}
 
+	stall_spatial_report_file = file_open_for_write("./stall");
+	fprintf(stall_spatial_report_file, "id, stalls, cycle, esim_time\n");
+
 	if(!si_device_spatial_report_active && !si_cu_spatial_report_active)
 		fatal("%s: %s: invalid or missing value for 'device_File' and %s: %s: invalid or missing value for 'cu_File'",
 			device_file_name, section,cu_file_name, section);
@@ -206,6 +210,12 @@ void si_spatial_report_done()
 		wf_spatial_report_file = NULL;
 		str_free(wf_spatial_report_filename);
 	}
+}
+
+void si_stalls_spatial_report(struct si_wavefront_t * wf)
+{
+	fprintf(stall_spatial_report_file, "%d, %lld, %lld\n",wf->id, wf->statistics->mem_misses - wf->statistics->prev_mem_misses, esim_time);
+	fflush(stall_spatial_report_file);
 }
 
 

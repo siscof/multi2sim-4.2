@@ -24,6 +24,7 @@
 #include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/cycle-interval-report.h>
 #include <mem-system/mod-stack.h>
+#include <lib/esim/esim.h>
 
 #include "isa.h"
 #include "ndrange.h"
@@ -969,6 +970,8 @@ void si_wavefront_add_stall(struct si_wavefront_t *wavefront)
 		wavefront->statistics->dist_misses_16_20++;
 	else if(misses >=21)
 		wavefront->statistics->dist_misses_21++;
+
+	si_stalls_spatial_report(wavefront);
 
 	wavefront->statistics->prev_mem_misses = wavefront->statistics->mem_misses;
 }

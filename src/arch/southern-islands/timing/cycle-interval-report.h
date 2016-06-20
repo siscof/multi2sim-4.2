@@ -65,6 +65,7 @@ void si_wavefront_report_dump(struct si_wavefront_t *wavefront);
 void si_spatial_report_done();
 /*void si_cu_spatial_report_done();
 void si_device_spatial_report_done();*/
+void si_stalls_spatial_report(struct si_wavefront_t * wf);
 
 void si_spatial_report_init();
 void si_cu_spatial_report_init();
