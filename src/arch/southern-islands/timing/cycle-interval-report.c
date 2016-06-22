@@ -214,7 +214,7 @@ void si_spatial_report_done()
 
 void si_stalls_spatial_report(struct si_wavefront_t * wf)
 {
-	fprintf(stall_spatial_report_file, "%d, %lld, %lld\n",wf->id, wf->statistics->mem_misses - wf->statistics->prev_mem_misses, esim_time);
+	fprintf(stall_spatial_report_file, "%d, %lld, %lld, %lld\n",wf->id, wf->statistics->mem_misses - wf->statistics->prev_mem_misses, asTiming(wf->work_group->wavefront_pool->compute_unit->compute_device)->cycle, esim_time);
 	fflush(stall_spatial_report_file);
 }
 
