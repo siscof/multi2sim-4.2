@@ -42,6 +42,8 @@ struct si_wavefront_t
 	long long instruction_ready;
 	struct latenciometro *latencies;
 
+	int mshr_access;
+
 	/* Program counter. Offset in 'inst_buffer' where we can find the next
 	 * instruction to be executed. */
 	unsigned int pc;

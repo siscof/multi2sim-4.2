@@ -9,6 +9,7 @@
 extern int flag_mshr_dynamic_enabled;
 extern int EV_MSHR_DYNAMIC_SIZE_EVAL;
 extern int forzar_mshr_test;
+extern int mshr_wavefront;
 
 struct mshr_t
 {
@@ -19,6 +20,9 @@ struct mshr_t
 	int size_anterior;
 	int ipc_anterior;
 	int latencia_anterior;
+
+	struct list_t *wavefront_waiting_list;
+	int entradas_ocupadas_wf;
 
 	//test values
 	int testing;
@@ -38,4 +42,7 @@ void mshr_control(int event, void *data);
 void mshr_control2();
 void mshr_test_sizes();
 int mshr_evaluar_test();
+void mshr_wakeup(struct mshr_t *mshr, int id);
+int mshr_wavefront_misses_count(struct mshr_t *mshr, int id);
+void mshr_wavefront_unlock(struct mod_t *mod);
 #endif

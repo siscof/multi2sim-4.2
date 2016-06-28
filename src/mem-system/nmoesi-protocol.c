@@ -482,6 +482,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(mod);
+			mshr_wavefront_unlock(mod);
 			stack->mshr_locked = 0;
 		}
 
@@ -1199,6 +1200,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(mod);
+			mshr_wavefront_unlock(mod);
 			stack->mshr_locked = 0;
 		}
 
@@ -1835,6 +1837,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				add_miss(mod->level);
 			}
 		}
+
+
 
 		/* Return */
 		ret->err = 0;

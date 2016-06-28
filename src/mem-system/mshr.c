@@ -19,6 +19,8 @@
 int EV_MSHR_DYNAMIC_SIZE_EVAL;
 int INTERVAL;
 
+int mshr_wavefront = 1;
+
 void mshr_event_init(int cycles)
 {
 	EV_MSHR_DYNAMIC_SIZE_EVAL = esim_register_event_with_name(mshr_control,	gpu_domain_index, "mshr_eval");
@@ -46,20 +48,21 @@ struct mshr_t *mshr_create()
 
 int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-	if(mshr_wavefront && stack->wf && stack->mod->level == 1 && stack->wf->mshr_access == 0)
+	if(mshr_wavefront && stack->wavefront && stack->mod->level == 1 && stack->wavefront->mshr_access == 0)
 	{
 
-		if(stack->wf->wavefront_pool_entry->wait_for_mem == 0)
+		if(stack->wavefront->wavefront_pool_entry->wait_for_mem == 0)
 		{
 			return 0;
 		}else{
 			//contar cantidad de misses
-			int wf_accesses = mshr_wavefront_misses_count(mshr, stack->wf->id);
-			stack->wf->mshr_access = 1;
+			int wf_accesses = mshr_wavefront_misses_count(mshr, stack->wavefront->id);
+			//stack->wavefront->mshr_access = 1;
 			if(mshr->size >= (mshr->entradas_ocupadas_wf + wf_accesses))
 			{
+				stack->wavefront->mshr_access = 1;
 				mshr->entradas_ocupadas_wf += wf_accesses;
-				mshr_wakeup(mshr, stack->wf->id);
+				mshr_wakeup(mshr, stack->wavefront->id);
 			}else{
 				return 0;
 			}
@@ -78,10 +81,11 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 
 void mshr_wakeup(struct mshr_t *mshr, int id)
 {
+	struct mod_stack_t *stack_in_list;
 	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
 	{
 		stack_in_list = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
-		if(stack_in_list->wf->id == id)
+		if(stack_in_list->wavefront->id == id)
 		{
 			struct mod_stack_t *stack = (struct mod_stack_t *) list_remove_at(mshr->wavefront_waiting_list,i);
 			int event = stack->waiting_list_event;
@@ -98,11 +102,11 @@ void mshr_wakeup(struct mshr_t *mshr, int id)
 int mshr_wavefront_misses_count(struct mshr_t *mshr, int id)
 {
 	int count = 0;
-	struct mod_stack_t *stack_in_list; = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
+	struct mod_stack_t *stack_in_list;
 	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
 	{
 		stack_in_list = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
-		if(stack_in_list->wf->id == id)
+		if(stack_in_list->wavefront->id == id)
 			count++;
 	}
 	return count;
@@ -111,7 +115,7 @@ int mshr_wavefront_misses_count(struct mshr_t *mshr, int id)
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 {
 	stack->waiting_list_event = event;
-	if(mshr_wavefront && stack->wf && stack->mod->level == 1 && stack->wf->mshr_access == 0)
+	if(mshr_wavefront && stack->wavefront && stack->mod->level == 1 && stack->wavefront->mshr_access == 0)
 	{
 		list_enqueue(mshr->wavefront_waiting_list, stack);
 	}else{
@@ -144,24 +148,9 @@ void mshr_wavefront_unlock(struct mod_t *mod)
 	for(int i = 0; i < list_count(mshr->waiting_list);i++)
 	{
 		stack = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
-		if((mshr->size >= mshr->entradas_ocupadas_wf + mshr_wavefront_misses_count(mshr, stack->wf->id)) && stack->wf->access_)
-			count++;
+		if((mshr->size >= mshr->entradas_ocupadas_wf + mshr_wavefront_misses_count(mshr, stack->wavefront->id)) && stack->wavefront->mshr_access)
+			mshr_wakeup(mshr, stack->wavefront->id);
 	}
-
-
-	if(list_count(mshr->wavefront_waiting_list))
-	{
-		struct mod_stack_t *stack = (struct mod_stack_t *) list_dequeue(mshr->wavefront_waiting_list);
-		int event = stack->waiting_list_event;
-		stack->mshr_locked = 1;
-		if(stack->ret_stack)
-			stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
-		stack->waiting_list_event = 0;
-		esim_schedule_event(event, stack, 0);
-	}else{
-	    mshr->entradasOcupadas--;
-	}
-
 }
 
 void mshr_unlock(struct mod_t *mod)
