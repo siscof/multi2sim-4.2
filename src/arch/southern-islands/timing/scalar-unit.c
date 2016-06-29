@@ -23,6 +23,7 @@
 #include <lib/esim/trace.h>
 #include <lib/util/list.h>
 #include <mem-system/module.h>
+#include <mem-system/mshr.h>
 
 #include "compute-unit.h"
 #include "gpu.h"
@@ -102,6 +103,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * waiting */
 			uop->wavefront_pool_entry->wait_for_mem = 1;
 			uop->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
+			mshr_wakeup(scalar_unit->compute_unit->vector_cache->mshr, uop->wavefront->id);
 		}
 
 		/* Check for "barrier" instruction */

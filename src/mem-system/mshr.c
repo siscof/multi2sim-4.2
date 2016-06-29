@@ -43,12 +43,13 @@ struct mshr_t *mshr_create()
 	mshr->size = 2048;
 	mshr->entradasOcupadas = 0;
 	mshr->waiting_list = list_create();
+	mshr->wavefront_waiting_list = list_create();
 	return mshr;
 }
 
 int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-	if(mshr_wavefront && stack->wavefront && stack->mod->level == 1 && stack->wavefront->mshr_access == 0)
+	if(mshr_wavefront && stack->wavefront && stack->mod->level == 1 && stack->mod == stack->mod->compute_unit->vector_cache && stack->wavefront->mshr_access == 0)
 	{
 
 		if(stack->wavefront->wavefront_pool_entry->wait_for_mem == 0)
@@ -89,7 +90,7 @@ void mshr_wakeup(struct mshr_t *mshr, int id)
 		{
 			struct mod_stack_t *stack = (struct mod_stack_t *) list_remove_at(mshr->wavefront_waiting_list,i);
 			int event = stack->waiting_list_event;
-			stack->mshr_locked = 1;
+			//stack->mshr_locked = 1;
 			if(stack->ret_stack)
 				stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
 
@@ -115,7 +116,7 @@ int mshr_wavefront_misses_count(struct mshr_t *mshr, int id)
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 {
 	stack->waiting_list_event = event;
-	if(mshr_wavefront && stack->wavefront && stack->mod->level == 1 && stack->wavefront->mshr_access == 0)
+	if(mshr_wavefront && stack->wavefront && stack->mod->level == 1 && stack->mod == stack->mod->compute_unit->vector_cache &&  stack->wavefront->mshr_access == 0)
 	{
 		list_enqueue(mshr->wavefront_waiting_list, stack);
 	}else{
@@ -145,7 +146,7 @@ void mshr_wavefront_unlock(struct mod_t *mod)
 
 	mshr->entradas_ocupadas_wf--;
 
-	for(int i = 0; i < list_count(mshr->waiting_list);i++)
+	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
 	{
 		stack = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
 		if((mshr->size >= mshr->entradas_ocupadas_wf + mshr_wavefront_misses_count(mshr, stack->wavefront->id)) && stack->wavefront->mshr_access)
