@@ -363,7 +363,7 @@ static void mem_config_read_general(struct config_t *config)
 	}
 
 	/* Directory type*/
-	MSHRProtocol_str = config_read_string(config, section, "MSHRProtocol", "default");
+	MSHRProtocol_str = config_read_string(config, section, "MshrProtocol", "default");
 
 	if(!strncasecmp(MSHRProtocol_str,"default", 7))
 	{
@@ -375,7 +375,7 @@ static void mem_config_read_general(struct config_t *config)
 	}
 	else
 	{
-		fatal("%s: mshr protocol: %s : isn't a valid mshr protocol (default, wavefront)\n",
+		fatal("%s: MshrProtocol: %s : isn't a valid mshr protocol (default, wavefront)\n",
 				mem_config_file_name, MSHRProtocol_str);
 	}
 

@@ -51,6 +51,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	if(mshr_protocol && stack->wavefront && stack->mod->level == 1 && stack->mod == stack->mod->compute_unit->vector_cache && stack->wavefront->mshr_access == 0)
 	{
+		mshr_wavefront_lock(stack->mod, stack->wavefront);
 
 		if(stack->wavefront->wavefront_pool_entry->wait_for_mem == 0)
 		{
@@ -63,7 +64,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 			{
 				stack->wavefront->mshr_access = 1;
 				mshr->entradas_ocupadas_wf += wf_accesses;
-				mshr_wakeup(mshr, stack->wavefront->id);
+				mshr_wakeup_id(mshr, stack->wavefront->id);
 			}else{
 				return 0;
 			}
@@ -80,8 +81,48 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 
 }
 
-void mshr_wakeup(struct mshr_t *mshr, int id)
+void mshr_wakeup_id(struct mshr_t *mshr, int id)
 {
+	struct mod_stack_t *stack_in_list;
+	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
+	{
+		stack_in_list = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
+		if(stack_in_list->wavefront->id == id)
+		{
+			stack->wavefront->mshr_access = 1;
+
+			struct mod_stack_t *stack = (struct mod_stack_t *) list_remove_at(mshr->wavefront_waiting_list,i);
+			int event = stack->waiting_list_event;
+			//stack->mshr_locked = 1;
+			//if(stack->ret_stack)
+			//	stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
+
+			stack->waiting_list_event = 0;
+			esim_schedule_event(event, stack, 0);
+		}
+	}
+}
+
+void mshr_wakeup_oldest(struct mshr_t *mshr)
+{
+
+	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
+	{
+		stack = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
+		if(stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
+		{
+			if(stack->wavefront->mshr_access != 1 && mshr->size > mshr->entradas_ocupadas_wf)
+			{
+				stack->wavefront->mshr_access = 1;
+				mshr->entradas_ocupadas_wf += wf_accesses;
+				struct mod_stack_t *stack = (struct mod_stack_t *) list_remove_at(mshr->wavefront_waiting_list,i);
+				int event = stack->waiting_list_event;
+				stack->waiting_list_event = 0;
+				esim_schedule_event(event, stack, 0);
+			}
+		}
+	}
+
 	struct mod_stack_t *stack_in_list;
 	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
 	{
@@ -139,18 +180,37 @@ void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 	}
 }*/
 
-void mshr_wavefront_unlock(struct mod_t *mod)
+void mshr_wavefront_lock(struct mod_t *mod)
+{
+	struct mshr_t *mshr = mod->mshr;
+	struct mod_stack_t *stack;
+
+	if(list_count(mshr->wavefront_waiting_list) == 0 && mshr->size > mshr->entradasOcupadas)
+	{
+		stack->wavefront->mshr_access = 1;
+	}
+
+	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
+	{
+		stack = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
+		if(stack->wavefront->mshr_access && (mshr->size >= mshr->entradas_ocupadas_wf + mshr_wavefront_misses_count(mshr, stack->wavefront->id)))
+			mshr_wakeup_id(mshr, stack->wavefront->id);
+	}
+}
+
+void mshr_wavefront_unlock(struct mod_t *mod, struct wavefront_t *wavefront)
 {
 	struct mshr_t *mshr = mod->mshr;
 	struct mod_stack_t *stack;
 
 	mshr->entradas_ocupadas_wf--;
+	wavefront->mshr_access = 0;
 
 	for(int i = 0; i < list_count(mshr->wavefront_waiting_list);i++)
 	{
 		stack = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
-		if((mshr->size >= mshr->entradas_ocupadas_wf + mshr_wavefront_misses_count(mshr, stack->wavefront->id)) && stack->wavefront->mshr_access)
-			mshr_wakeup(mshr, stack->wavefront->id);
+		if(stack->wavefront->mshr_access && (mshr->size >= mshr->entradas_ocupadas_wf + mshr_wavefront_misses_count(mshr, stack->wavefront->id)))
+			mshr_wakeup_id(mshr, stack->wavefront->id);
 	}
 }
 
