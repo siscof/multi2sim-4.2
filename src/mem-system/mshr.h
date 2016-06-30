@@ -9,7 +9,14 @@
 extern int flag_mshr_dynamic_enabled;
 extern int EV_MSHR_DYNAMIC_SIZE_EVAL;
 extern int forzar_mshr_test;
-extern int mshr_wavefront;
+extern int mshr_protocol;
+
+/* Access type */
+enum mshr_protocol
+{
+	mshr_protocol_default = 0,
+	mshr_protocol_wavefront
+};
 
 struct mshr_t
 {

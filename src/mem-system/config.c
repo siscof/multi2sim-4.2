@@ -321,6 +321,7 @@ static void mem_config_read_general(struct config_t *config)
 {
 	char *section;
 	char *dir_type;
+	char *MSHRProtocol_str;
 
 	/* Section with general parameters */
 	section = "General";
@@ -360,6 +361,25 @@ static void mem_config_read_general(struct config_t *config)
 		fatal("%s: directory type: %s : isn't a valid directory type (nmoesi, vi)\n",
 				mem_config_file_name, dir_type);
 	}
+
+	/* Directory type*/
+	MSHRProtocol_str = config_read_string(config, section, "MSHRProtocol", "default");
+
+	if(!strncasecmp(MSHRProtocol_str,"default", 7))
+	{
+		mshr_protocol = mshr_protocol_default;
+	}
+	else if(!strncasecmp(MSHRProtocol_str,"wavefront", 9))
+	{
+		mshr_protocol = mshr_protocol_wavefront;
+	}
+	else
+	{
+		fatal("%s: mshr protocol: %s : isn't a valid mshr protocol (default, wavefront)\n",
+				mem_config_file_name, MSHRProtocol_str);
+	}
+
+
 }
 
 
