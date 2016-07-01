@@ -484,8 +484,6 @@ void mod_handler_nmoesi_load(int event, void *data)
 			mshr_unlock(mod);
 			stack->mshr_locked = 0;
 		}
-		if(mod->level == 1 && mod == mod->compute_unit->vector_cache)
-			mshr_wavefront_unlock(mod);
 
 		/* Unlock directory entry */
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
@@ -1203,9 +1201,6 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mshr_unlock(mod);
 			stack->mshr_locked = 0;
 		}
-
-		if(mod->level == 1 && mod == mod->compute_unit->vector_cache)
-			mshr_wavefront_unlock(mod);
 
 		/* Unlock directory entry */
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
