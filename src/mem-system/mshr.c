@@ -173,7 +173,7 @@ void mshr_wakeup_id(struct mshr_t *mshr, int id)
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 {
 	stack->waiting_list_event = event;
-	if(mshr_protocol != mshr_protocol_default && stack->wavefront && stack->mod->level == 1 && stack->mod == stack->mod->compute_unit->vector_cache &&  stack->wavefront->mshr_access == 0)
+	if(mshr_protocol == mshr_protocol_wavefront && stack->wavefront && stack->mod->level == 1 && stack->mod == stack->mod->compute_unit->vector_cache &&  stack->wavefront->mshr_access == 0)
 	{
 		list_enqueue(mshr->wavefront_waiting_list, stack);
 	}else{
@@ -201,8 +201,8 @@ int mshr_wavefront_lock(struct mod_t *mod, struct si_wavefront_t *wavefront)
 	struct mshr_t *mshr = mod->mshr;
 	struct si_wavefront_t *wf;
 
-	if(!mshr_protocol || !(wavefront) || mod == mod->compute_unit->scalar_cache || wavefront->mshr_access == 1)
-		return wavefront->mshr_access;
+	if(mshr_protocol == mshr_protocol_default || !(wavefront) || mod == mod->compute_unit->scalar_cache || wavefront->mshr_access == 1)
+		return 1;
 
 	if(list_count(mshr->wavefront_list) != 0)
 	{

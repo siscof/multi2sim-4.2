@@ -2238,6 +2238,11 @@ int main(int argc, char **argv)
 		delete(x86_cpu);
 	X86CpuDone();
 
+	/* SI */
+	if (si_gpu)
+		delete(si_gpu);
+
+
 	/* Finalization of architectures */
 	arch_done();
 
