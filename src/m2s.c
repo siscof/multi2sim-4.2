@@ -2240,8 +2240,9 @@ int main(int argc, char **argv)
 
 	/* SI */
 	if (si_gpu)
-		delete(si_gpu);
-
+	{
+			SIGpuDestroy(si_gpu);
+	}
 
 	/* Finalization of architectures */
 	arch_done();
