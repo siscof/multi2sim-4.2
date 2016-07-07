@@ -2239,10 +2239,10 @@ int main(int argc, char **argv)
 	X86CpuDone();
 
 	/* SI */
-	if (si_gpu)
-	{
-			SIGpuDestroy(si_gpu);
-	}
+//	if (si_gpu)
+//	{
+//			SIGpuDestroy(si_gpu);
+//	}
 
 	/* Finalization of architectures */
 	arch_done();
