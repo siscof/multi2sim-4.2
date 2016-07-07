@@ -80,7 +80,7 @@ void mshr_wakeup_id(struct mshr_t *mshr, int id)
 		stack_in_list = (struct mod_stack_t *) list_get(mshr->wavefront_waiting_list, i);
 		if(stack_in_list->wavefront->id == id)
 		{
-			assert(stack_in_list->wavefront->mshr_access);
+			//assert(stack_in_list->wavefront->mshr_access);
 			stack = (struct mod_stack_t *) list_remove_at(mshr->wavefront_waiting_list,i);
 			if(mshr->size > mshr->entradasOcupadas)
 			{
@@ -201,7 +201,7 @@ int mshr_wavefront_lock(struct mod_t *mod, struct si_wavefront_t *wavefront)
 	struct mshr_t *mshr = mod->mshr;
 	struct si_wavefront_t *wf;
 
-	if(mshr_protocol == mshr_protocol_default || !(wavefront) || mod == mod->compute_unit->scalar_cache || wavefront->mshr_access == 1)
+	if(mshr_protocol == mshr_protocol_default || !(wavefront) || (mod->compute_unit && mod == mod->compute_unit->scalar_cache) || wavefront->mshr_access == 1)
 		return 1;
 
 	if(list_count(mshr->wavefront_list) != 0)
@@ -226,7 +226,7 @@ void mshr_wavefront_unlock(struct mod_t *mod, struct si_wavefront_t *wavefront)
 {
 	//struct mshr_t *mshr = mod->mshr;
 
-	if(mshr_protocol == mshr_protocol_default || !wavefront || mod == mod->compute_unit->scalar_cache)
+	if(mshr_protocol == mshr_protocol_default || !wavefront || (mod->compute_unit && mod == mod->compute_unit->scalar_cache))
 		return;
 
 	//assert(list_count(wavefront->mem_accesses_list) == 0);
