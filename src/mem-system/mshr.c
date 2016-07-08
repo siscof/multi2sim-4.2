@@ -201,7 +201,7 @@ int mshr_wavefront_lock(struct mod_t *mod, struct si_wavefront_t *wavefront)
 	struct mshr_t *mshr = mod->mshr;
 	struct si_wavefront_t *wf;
 
-	if(mshr_protocol == mshr_protocol_default || !(wavefront) || (mod->compute_unit && mod == mod->compute_unit->scalar_cache) || wavefront->mshr_access == 1)
+	if(mshr_protocol == mshr_protocol_default || mod->level != 1 || !(wavefront) || (mod->compute_unit && mod == mod->compute_unit->scalar_cache) || wavefront->mshr_access == 1)
 		return 1;
 
 	if(list_count(mshr->wavefront_list) != 0)
@@ -226,7 +226,7 @@ void mshr_wavefront_unlock(struct mod_t *mod, struct si_wavefront_t *wavefront)
 {
 	//struct mshr_t *mshr = mod->mshr;
 
-	if(mshr_protocol == mshr_protocol_default || !wavefront || (mod->compute_unit && mod == mod->compute_unit->scalar_cache))
+	if(mshr_protocol == mshr_protocol_default || mod->level != 1 || !wavefront || (mod->compute_unit && mod == mod->compute_unit->scalar_cache))
 		return;
 
 	//assert(list_count(wavefront->mem_accesses_list) == 0);
