@@ -52,7 +52,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	if(mshr_protocol == mshr_protocol_wavefront)
 	{
-		if(mshr_wavefront_lock(stack->mod, stack->wavefront))
+		if(mshr_wavefront_lock(stack->mod, stack->wavefront) && mshr->size > mshr->entradasOcupadas)
  		{
  			mshr->entradasOcupadas++;
  			return 1;
