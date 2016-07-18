@@ -52,7 +52,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	if(mshr_protocol == mshr_protocol_wavefront)
 	{
-		if(mshr_wavefront_lock(stack->mod, stack->wavefront) && mshr->size > mshr->entradasOcupadas)
+		if(mshr_wavefront_lock(stack->mod, stack->wavefront))
  		{
  			mshr->entradasOcupadas++;
  			return 1;
@@ -88,7 +88,7 @@ void mshr_wakeup_id(struct mshr_t *mshr, int id)
 				stack->waiting_list_event = 0;
 				esim_schedule_event(event, stack, 0);
 			}else{
-			list_enqueue(mshr->waiting_list, stack);
+				list_enqueue(mshr->waiting_list, stack);
 			}
 			//stack->mshr_locked = 1;
 			//if(stack->ret_stack)
