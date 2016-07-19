@@ -41,6 +41,7 @@ struct mshr_t *mshr_create()
 	struct mshr_t *mshr;
 	mshr = calloc(1,sizeof(struct mshr_t));
 	mshr->size = 2048;
+	mshr->accesses_list = list_create();
 	mshr->entradasOcupadas = 0;
 	mshr->waiting_list = list_create();
 	mshr->wavefront_waiting_list = list_create();
@@ -51,13 +52,13 @@ struct mshr_t *mshr_create()
 
 void mshr_access(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-	list_add(mshr->accesses_list,stack);
+	//list_add(mshr->accesses_list,stack);
 	mshr->entradasOcupadas++;
 }
 
 void mshr_leave(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-	list_remove(mshr->accesses_list, stack);
+	//list_remove(mshr->accesses_list, stack);
 	mshr->entradasOcupadas--;
 }
 
@@ -253,6 +254,8 @@ void mshr_unlock(struct mod_t *mod)
 	struct mod_stack_t *stack;
 
 	assert(mshr->entradasOcupadas > 0);
+
+
 
 	if(list_count(mshr->waiting_list))
 	{

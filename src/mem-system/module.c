@@ -72,6 +72,7 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 
 	/* MSHR */
 	mod->mshr = mshr_create();
+  mod->mshr->mod = mod;
 	//xcalloc(1,sizeof(struct mshr_t));
 	mod->coherence_controller = cc_create();
 
@@ -687,6 +688,8 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
         stack->wavefront->statistics->mem_misses++;
     }
     list_remove(stack->wavefront->mem_accesses_list, stack);
+    if(!list_count(stack->wavefront->mem_accesses_list))
+      mshr_wavefront_unlock(stack->mod, stack->wavefront);
   }
 	/* Remove from write access list */
 	assert(stack->access_kind);
