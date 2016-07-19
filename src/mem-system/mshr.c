@@ -48,13 +48,26 @@ struct mshr_t *mshr_create()
 	return mshr;
 }
 
+
+void mshr_access(struct mshr_t *mshr, struct mod_stack_t *stack)
+{
+	list_add(mshr->accesses_list,stack);
+	mshr->entradasOcupadas++;
+}
+
+void mshr_leave(struct mshr_t *mshr, struct mod_stack_t *stack)
+{
+	list_remove(mshr->accesses_list, stack);
+	mshr->entradasOcupadas--;
+}
+
 int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	if(mshr_protocol == mshr_protocol_wavefront)
 	{
 		if(mshr_wavefront_lock(stack->mod, stack->wavefront) && mshr->size > mshr->entradasOcupadas)
  		{
- 			mshr->entradasOcupadas++;
+ 			mshr_access(mshr, stack->ret_stack);
  			return 1;
  		}
  		return 0;
@@ -63,7 +76,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 	{
 		if(mshr->size > mshr->entradasOcupadas)
 		{
-			mshr->entradasOcupadas++;
+			mshr_access(mshr, stack->ret_stack);
 			return 1;
 		}
 		return 0;

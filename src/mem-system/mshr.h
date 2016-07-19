@@ -25,6 +25,7 @@ struct mshr_t
 	int size;
 	int entradasOcupadas;
 	struct list_t *waiting_list;
+	struct list_t *accesses_list;
 	int size_anterior;
 	int ipc_anterior;
 	int latencia_anterior;
@@ -55,4 +56,7 @@ void mshr_wakeup(struct mshr_t *mshr, int id);
 int mshr_wavefront_misses_count(struct mshr_t *mshr, int id);
 int mshr_wavefront_lock(struct mod_t *mod, struct si_wavefront_t *wavefront);
 void mshr_wavefront_unlock(struct mod_t *mod, struct si_wavefront_t *wavefront);
+void mshr_access(struct mshr_t *mshr, struct mod_stack_t *stack);
+void mshr_leave(struct mshr_t *mshr, struct mod_stack_t *stack);
+
 #endif
