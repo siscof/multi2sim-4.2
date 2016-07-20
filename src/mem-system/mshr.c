@@ -225,12 +225,12 @@ int mshr_wavefront_lock(struct mod_t *mod, struct si_wavefront_t *wavefront)
 		{
 			wavefront->mshr_access = 1;
 			list_add(mshr->wavefront_list, wavefront);
-			mshr_wakeup_id(mshr, wavefront->id);
+			//mshr_wakeup_id(mshr, wavefront->id);
 		}
 	}else{
 		wavefront->mshr_access = 1;
 		list_add(mshr->wavefront_list, wavefront);
-		mshr_wakeup_id(mshr, wavefront->id);
+		//mshr_wakeup_id(mshr, wavefront->id);
 	}
 
 	return wavefront->mshr_access;
@@ -252,6 +252,7 @@ void mshr_unlock(struct mod_t *mod)
 {
 	struct mshr_t *mshr = mod->mshr;
 	struct mod_stack_t *stack;
+	int event;
 
 	assert(mshr->entradasOcupadas > 0);
 
@@ -260,7 +261,7 @@ void mshr_unlock(struct mod_t *mod)
 	if(list_count(mshr->waiting_list))
 	{
 		struct mod_stack_t *stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
-		int event = stack->waiting_list_event;
+		event = stack->waiting_list_event;
 		stack->mshr_locked = 1;
 		if(stack->ret_stack)
 			stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
@@ -269,8 +270,17 @@ void mshr_unlock(struct mod_t *mod)
 	}else if(list_count(mshr->wavefront_waiting_list)){
 		mshr->entradasOcupadas--;
 		stack = list_head(mshr->wavefront_waiting_list);
-		mshr_wavefront_lock(mod, stack->wavefront);
-		mshr_wakeup_id(mshr, stack->wavefront->id);
+		if(mshr_wavefront_lock(mod, stack->wavefront) == 1)
+		{
+			list_remove(mshr->wavefront_waiting_list, stack);
+			stack->mshr_locked = 1;
+			event = stack->waiting_list_event;
+			assert(event);
+			mshr->entradasOcupadas++;
+			mshr_wakeup_id(mshr, stack->wavefront->id);
+			stack->waiting_list_event = 0;
+			esim_schedule_event(event, stack, 0);
+		}
 	}else{
 	    mshr->entradasOcupadas--;
 	}
