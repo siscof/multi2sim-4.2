@@ -687,9 +687,6 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
       if(stack->hit == 0)
         stack->wavefront->statistics->mem_misses++;
     }
-    list_remove(stack->wavefront->mem_accesses_list, stack);
-    if(!list_count(stack->wavefront->mem_accesses_list))
-      mshr_wavefront_unlock(stack->mod, stack->wavefront);
   }
 	/* Remove from write access list */
 	assert(stack->access_kind);

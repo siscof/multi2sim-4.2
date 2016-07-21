@@ -586,6 +586,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Finish access */
 		mod_access_finish(mod, stack);
 
+		list_remove(stack->wavefront->mem_accesses_list, stack);
+		if(!list_count(stack->wavefront->mem_accesses_list))
+			mshr_wavefront_unlock(stack->mod, stack->wavefront);
+
 		/* Return */
 		mod_stack_return(stack);
 		return;
@@ -1248,6 +1252,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 		/* Finish access */
 		mod_access_finish(mod, stack);
+
+		list_remove(stack->wavefront->mem_accesses_list, stack);
+		if(!list_count(stack->wavefront->mem_accesses_list))
+			mshr_wavefront_unlock(stack->mod, stack->wavefront);
 
 		/* Return */
 		mod_stack_return(stack);

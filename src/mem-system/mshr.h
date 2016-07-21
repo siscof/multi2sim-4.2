@@ -58,5 +58,6 @@ int mshr_wavefront_lock(struct mod_t *mod, struct si_wavefront_t *wavefront);
 void mshr_wavefront_unlock(struct mod_t *mod, struct si_wavefront_t *wavefront);
 void mshr_access(struct mshr_t *mshr, struct mod_stack_t *stack);
 void mshr_leave(struct mshr_t *mshr, struct mod_stack_t *stack);
+void mshr_wakeup_id(struct mshr_t *mshr, int id);
 
 #endif
