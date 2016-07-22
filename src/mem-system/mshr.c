@@ -41,12 +41,15 @@ struct mshr_t *mshr_create()
 	mshr->size = 2048;
 	mshr->entradasOcupadas = 0;
 	mshr->waiting_list = list_create();
+	mshr->wavefront_list = list_create();
 	return mshr;
 }
 
 int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-
+	/*if(!mshr_wavefront_access(mshr, stack->wavefront))
+		return 0;
+		*/
 	if(mshr->size > mshr->entradasOcupadas)
 	{
 		mshr->entradasOcupadas++;
@@ -56,6 +59,16 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 	return 0;
 
 }
+
+/*int mshr_wavefront_access(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
+{
+	if(wavefront->mem_wait)
+	{
+		list_add(mshr->wavefront_list, wavefront);
+		return 1;
+	}
+	return 0;
+}*/
 
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 {

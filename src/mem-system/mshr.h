@@ -20,6 +20,8 @@ struct mshr_t
 	int ipc_anterior;
 	int latencia_anterior;
 
+	struct list_t *wavefront_list;
+
 	//test values
 	int testing;
 	long long cycle;

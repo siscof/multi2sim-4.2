@@ -27,6 +27,7 @@
 #include <lib/util/debug.h>
 #include <lib/util/list.h>
 #include <lib/util/string.h>
+#include <mem-system/mshr.h>
 
 #include "compute-unit.h"
 #include "gpu.h"
@@ -443,6 +444,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 				wavefront->wavefront_pool_entry->wait_for_mem =
 					0;
 				wavefront->wavefront_pool_entry->wait_for_mem_cycle = 0;
+				//mshr_wavefront_unlock(compute_unit->vector_cache, wavefront);
 			}
 			else
 			{

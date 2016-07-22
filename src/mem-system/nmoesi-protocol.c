@@ -297,6 +297,21 @@ void mod_handler_nmoesi_load(int event, void *data)
 			return;
 		}
 
+		if(mod == stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache)
+		{
+			struct si_wavefront_t *current_wavefront = list_get(stack->mod->mshr->wavefront_list, 0);
+
+			if(current_wavefront && current_wavefront != stack->wavefront)
+			{
+				mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD_LOCK);
+				return;
+			}
+			if(list_count(stack->mod->mshr->wavefront_list) == 0)
+			{
+				list_add(stack->mod->mshr->wavefront_list, stack->wavefront);
+			}
+		}
+
 		stack->event = EV_MOD_NMOESI_LOAD_LOCK2;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK2, new_stack, 0);
@@ -585,6 +600,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		/* Finish access */
 		mod_access_finish(mod, stack);
+
+		if(mod == stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache && list_count(stack->wavefront->mem_accesses_list) == 0)
+		{
+			list_remove(stack->mod->mshr->wavefront_list, stack->wavefront);
+			mod_stack_wakeup_mod(mod);
+		}
 
 		/* Return */
 		mod_stack_return(stack);
