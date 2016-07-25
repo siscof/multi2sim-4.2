@@ -170,6 +170,22 @@ void mod_handler_nmoesi_load(int event, void *data)
 			"state=\"%s:load\" addr=0x%x\n",
 			stack->id, mod->name, stack->addr);
 
+			if(mod == stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache)
+			{
+				struct si_wavefront_t *current_wavefront = list_get(stack->mod->mshr->wavefront_list, 0);
+
+				if(current_wavefront && current_wavefront != stack->wavefront)
+				{
+					mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD);
+					return;
+				}
+				if(!current_wavefront)
+				{
+					list_add(stack->mod->mshr->wavefront_list, stack->wavefront);
+				}
+			}
+
+
 		/* Record access */
 		mod_access_start(mod, stack, mod_access_load);
 		//add_access(mod->level);
@@ -311,22 +327,6 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_lock2\"\n",
 			stack->id, mod->name);
-
-			if(mod == stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache)
-			{
-				struct si_wavefront_t *current_wavefront = list_get(stack->mod->mshr->wavefront_list, 0);
-
-				if(current_wavefront && current_wavefront != stack->wavefront)
-				{
-					mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD_LOCK);
-					return;
-				}
-				if(list_count(stack->mod->mshr->wavefront_list) == 0)
-				{
-					list_add(stack->mod->mshr->wavefront_list, stack->wavefront);
-				}
-			}
-
 
 		if(AVOID_RETRIES)
 		{
