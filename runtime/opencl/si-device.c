@@ -42,11 +42,11 @@ struct opencl_si_device_t *opencl_si_device_create(struct opencl_device_t *paren
 	parent->available = CL_TRUE;
 	parent->compiler_available = CL_FALSE;
 	parent->double_fp_config = CL_FP_DENORM |
-				CL_FP_INF_NAN | 
-				CL_FP_ROUND_TO_NEAREST | 
-				CL_FP_ROUND_TO_ZERO | 
-				CL_FP_ROUND_TO_INF | 
-				CL_FP_FMA | 
+				CL_FP_INF_NAN |
+				CL_FP_ROUND_TO_NEAREST |
+				CL_FP_ROUND_TO_ZERO |
+				CL_FP_ROUND_TO_INF |
+				CL_FP_FMA |
 				CL_FP_SOFT_FLOAT;
 	parent->endian_little = CL_TRUE;
 	parent->error_correction_support = CL_FALSE;
@@ -76,11 +76,11 @@ struct opencl_si_device_t *opencl_si_device_create(struct opencl_device_t *paren
 	parent->max_parameter_size = sizeof (cl_ulong16);
 	parent->max_read_image_args = 0;
 	parent->max_samplers = 0;
-	parent->max_work_group_size = 512;
+	parent->max_work_group_size = 256;
 	parent->max_work_item_dimensions = 3;
-	parent->max_work_item_sizes[0] = 512;
-	parent->max_work_item_sizes[1] = 512;
-	parent->max_work_item_sizes[2] = 512;
+	parent->max_work_item_sizes[0] = 256;
+	parent->max_work_item_sizes[1] = 256;
+	parent->max_work_item_sizes[2] = 256;
 	parent->max_write_image_args = 0;
 	parent->mem_base_addr_align = sizeof (cl_float4);
 	parent->min_data_type_align_size = 1;
@@ -98,12 +98,12 @@ struct opencl_si_device_t *opencl_si_device_create(struct opencl_device_t *paren
 	parent->profile = "PROFILE";
 	parent->profiling_timer_resolution = 0;
 	parent->queue_properties = CL_QUEUE_PROFILING_ENABLE;
-	parent->single_fp_config = CL_FP_DENORM | 
-				CL_FP_INF_NAN | 
-				CL_FP_ROUND_TO_NEAREST | 
-				CL_FP_ROUND_TO_ZERO | 
-				CL_FP_ROUND_TO_INF | 
-				CL_FP_FMA | 
+	parent->single_fp_config = CL_FP_DENORM |
+				CL_FP_INF_NAN |
+				CL_FP_ROUND_TO_NEAREST |
+				CL_FP_ROUND_TO_ZERO |
+				CL_FP_ROUND_TO_INF |
+				CL_FP_FMA |
 				CL_FP_SOFT_FLOAT;
 	parent->type = CL_DEVICE_TYPE_GPU;
 	parent->vendor_id = 0;
@@ -112,19 +112,19 @@ struct opencl_si_device_t *opencl_si_device_create(struct opencl_device_t *paren
 	parent->arch_device_free_func = (opencl_arch_device_free_func_t)
 			opencl_si_device_free;
 
-	parent->arch_device_mem_alloc_func = 
+	parent->arch_device_mem_alloc_func =
 		(opencl_arch_device_mem_alloc_func_t)
 		opencl_si_device_mem_alloc;
 	parent->arch_device_mem_free_func = (opencl_arch_device_mem_free_func_t)
 		opencl_si_device_mem_free;
 	parent->arch_device_mem_read_func = (opencl_arch_device_mem_read_func_t)
 		opencl_si_device_mem_read;
-	parent->arch_device_mem_write_func = 
+	parent->arch_device_mem_write_func =
 		(opencl_arch_device_mem_write_func_t)
 		opencl_si_device_mem_write;
 	parent->arch_device_mem_copy_func = (opencl_arch_device_mem_copy_func_t)
 		opencl_si_device_mem_copy;
-	parent->arch_device_preferred_workgroups_func = 
+	parent->arch_device_preferred_workgroups_func =
 		(opencl_arch_device_preferred_workgroups_func_t)
 		opencl_si_device_preferred_workgroups;
 
@@ -139,26 +139,26 @@ struct opencl_si_device_t *opencl_si_device_create(struct opencl_device_t *paren
 	/* Call-back functions for ND-Range */
 	parent->arch_ndrange_create_func = (opencl_arch_ndrange_create_func_t)
 		opencl_si_ndrange_create;
-	parent->arch_ndrange_free_func = (opencl_arch_ndrange_free_func_t) 
+	parent->arch_ndrange_free_func = (opencl_arch_ndrange_free_func_t)
 		opencl_si_ndrange_free;
-	parent->arch_ndrange_init_func = (opencl_arch_ndrange_init_func_t) 
+	parent->arch_ndrange_init_func = (opencl_arch_ndrange_init_func_t)
 		opencl_si_ndrange_init;
-	parent->arch_ndrange_run_func = (opencl_arch_ndrange_run_func_t) 
+	parent->arch_ndrange_run_func = (opencl_arch_ndrange_run_func_t)
 		opencl_si_ndrange_run;
-	parent->arch_ndrange_run_partial_func = 
-		(opencl_arch_ndrange_run_partial_func_t) 
+	parent->arch_ndrange_run_partial_func =
+		(opencl_arch_ndrange_run_partial_func_t)
 		opencl_si_ndrange_run_partial;
-	
+
 	/* Call-back functions for program */
 	parent->arch_program_create_func = (opencl_arch_program_create_func_t)
 		opencl_si_program_create;
 	parent->arch_program_free_func = (opencl_arch_program_free_func_t)
 		opencl_si_program_free;
-	parent->arch_program_valid_binary_func = 
+	parent->arch_program_valid_binary_func =
 		(opencl_arch_program_valid_binary_func_t)
 		opencl_si_program_valid_binary;
 
-	opencl_debug("[%s] opencl_si_device_t device = %p", __FUNCTION__, 
+	opencl_debug("[%s] opencl_si_device_t device = %p", __FUNCTION__,
 		device);
 
 	/* Return */
