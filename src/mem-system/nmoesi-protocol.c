@@ -173,15 +173,35 @@ void mod_handler_nmoesi_load(int event, void *data)
 			if(mod == stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache)
 			{
 				struct si_wavefront_t *current_wavefront = list_get(stack->mod->mshr->wavefront_list, 0);
-
-				if(current_wavefront && current_wavefront != stack->wavefront)
+				for(int i = 1; current_wavefront; current_wavefront = list_get(stack->mod->mshr->wavefront_list, i), i++)
 				{
-					mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD);
-					return;
+					if(current_wavefront && current_wavefront == stack->wavefront)
+					{
+						break;
+					}
+					current_wavefront = list_get(stack->mod->mshr->wavefront_list,i);
+
+					/*if(current_wavefront && current_wavefront != stack->wavefront)
+					{
+						mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD);
+						return;
+					}
+					if(!current_wavefront)
+					{
+						list_add(stack->mod->mshr->wavefront_list, stack->wavefront);
+					}*/
 				}
 				if(!current_wavefront)
 				{
-					list_add(stack->mod->mshr->wavefront_list, stack->wavefront);
+					//cabe otro wavefront?
+					current_wavefront = list_tail(stack->mod->mshr->wavefront_list);
+					if(list_count(stack->mod->mshr->wavefront_list) == 0 || (current_wavefront->wavefront_pool_entry->wait_for_mem == 1 && mod->mshr->size > mod->mshr->entradasOcupadas)){
+						list_add(stack->mod->mshr->wavefront_list, stack->wavefront);
+					}else{
+						//wait
+						mod_stack_wait_in_mod(stack, mod, EV_MOD_NMOESI_LOAD);
+						return;
+					}
 				}
 			}
 
