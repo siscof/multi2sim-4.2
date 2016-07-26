@@ -750,11 +750,11 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
     if(stack->coalesced)
       continue;
 
-    if (older_than_stack && stack->id == older_than_stack->id)
-  		continue;
+    //if (older_than_stack && stack->id == older_than_stack->id)
+  	//	continue;
 
-    //if (older_than_stack && stack->id >= older_than_stack->id)
-		//	continue;
+    if (older_than_stack && stack->id >= older_than_stack->id)
+			continue;
 
 		/* Address matches */
 		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)
