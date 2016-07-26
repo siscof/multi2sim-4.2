@@ -137,7 +137,8 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 
 	stack->wavefront = stack->uop->wavefront;
 
-  list_add(stack->wavefront->mem_accesses_list, stack);
+  if (access_kind == mod_access_load)
+    list_add(stack->wavefront->mem_accesses_list, stack);
 
 	stack->work_group_id_in_cu = wg_id;
 
@@ -745,8 +746,16 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 		stack = stack->bucket_list_next)
 	{
 		/* This stack is not older than 'older_than_stack' */
-		if (older_than_stack && stack->id >= older_than_stack->id)
-			continue;
+    if(stack->coalesced)
+      continue;
+
+    if(older_than_stack && older_than_stack == stack)
+      continue;
+
+    if(stack->coalesced)
+      continue;
+    //if (older_than_stack && stack->id >= older_than_stack->id)
+		//	continue;
 
 		/* Address matches */
 		if (stack->addr >> mod->log_block_size == addr >> mod->log_block_size)

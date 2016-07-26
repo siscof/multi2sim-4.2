@@ -438,6 +438,7 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 			if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
 				!wavefront->wavefront_pool_entry->vm_cnt)
 			{
+				assert(wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache->mshr->wavefront_list->count == 0 || list_get(wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache->mshr->wavefront_list, 0) != wavefront);
 				si_wavefront_add_stall(wavefront);
 				add_wait_for_mem_latency(compute_unit, asTiming(si_gpu)->cycle -
 				 	wavefront->wavefront_pool_entry->wait_for_mem_cycle);

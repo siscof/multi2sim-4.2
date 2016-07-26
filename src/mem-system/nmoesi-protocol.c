@@ -603,7 +603,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		if(mod == stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->vector_cache && list_count(stack->wavefront->mem_accesses_list) == 0)
 		{
-			list_remove(stack->mod->mshr->wavefront_list, stack->wavefront);
+			list_remove(mod->mshr->wavefront_list, stack->wavefront);
 			mod_stack_wakeup_mod(mod);
 		}
 
