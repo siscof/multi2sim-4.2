@@ -137,7 +137,7 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 
 	stack->wavefront = stack->uop->wavefront;
 
-  list_add(stack->wavefront->mem_accesses_list, stack);
+  //list_add(stack->wavefront->mem_accesses_list, stack);
 
 	stack->work_group_id_in_cu = wg_id;
 
@@ -247,7 +247,13 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 		panic("%s: invalid mod kind", __FUNCTION__);
 	}
 	/* Schedule */
-	esim_execute_event(event, stack);
+  stack->event = event;
+  if(!uop->vector_mem_write && !uop->vector_mem_read)
+  {
+    esim_execute_event(event, stack);
+  }else{
+    list_add(stack->wavefront->mem_accesses_list, stack);
+  }
 
 	/* Return access ID */
 	return stack->id;

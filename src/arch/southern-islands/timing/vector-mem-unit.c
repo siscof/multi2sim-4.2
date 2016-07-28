@@ -352,7 +352,6 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 
 					uop->global_mem_witness--;
 				}
-
  			}
 		}
 

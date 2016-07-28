@@ -133,6 +133,16 @@ void si_wavefront_free(struct si_wavefront_t *wavefront)
 	wavefront = NULL;
 }
 
+void si_wavefront_send_mem_accesses(struct si_wavefront_t *wavefront)
+{
+	struct mod_stack_t *stack;
+	for(int i = 0;list_count(wavefront->mem_accesses_list) > i;i++)
+	{
+		stack = (struct mod_stack_t *)list_count(wavefront->mem_accesses_list)
+		esim_execute_event(stack->event, stack);
+	}
+}
+
 /* Execute the next instruction for the wavefront */
 void si_wavefront_execute(struct si_wavefront_t *wavefront)
 {

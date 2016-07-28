@@ -130,6 +130,7 @@ void si_wavefront_init_sreg_with_fetch_shader(struct si_wavefront_t *wavefront,
 	int first_reg, int num_regs);
 int si_wavefront_count_active_work_items(struct si_wavefront_t *wavefront);
 void si_wavefront_add_stall(struct si_wavefront_t *wavefront);
+void si_wavefront_send_mem_accesses(struct si_wavefront_t *wavefront);
 
 
 #endif
