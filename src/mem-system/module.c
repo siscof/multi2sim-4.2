@@ -248,7 +248,7 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	}
 	/* Schedule */
   stack->event = event;
-  if(!uop->vector_mem_write && !uop->vector_mem_read)
+  if(!stack->uop->vector_mem_write && !stack->uop->vector_mem_read)
   {
     esim_execute_event(event, stack);
   }else{

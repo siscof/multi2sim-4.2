@@ -354,7 +354,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				}
  			}
 		}
-
+si_wavefront_send_mem_accesses(uop->wavefront);
 		//if(si_spatial_report_active)
 		//{
 		if (uop->vector_mem_write)
