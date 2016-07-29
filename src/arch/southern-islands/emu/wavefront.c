@@ -140,7 +140,11 @@ void si_wavefront_send_mem_accesses(struct si_wavefront_t *wavefront)
 	{
 		stack = (struct mod_stack_t *)list_get(wavefront->mem_accesses_list,i);
 		if(!stack->origin)
+		{
+			mod_stack_id++;
+			stack->id = mod_stack_id;
 			esim_execute_event(stack->event, stack);
+		}
 	}
 }
 
