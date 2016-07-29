@@ -27,6 +27,7 @@
 #include <lib/util/debug.h>
 #include <lib/util/list.h>
 #include <lib/util/string.h>
+#include <mem-system/mshr.h>
 
 #include "compute-unit.h"
 #include "gpu.h"

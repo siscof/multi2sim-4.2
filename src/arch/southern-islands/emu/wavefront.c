@@ -191,6 +191,9 @@ void si_wavefront_execute(struct si_wavefront_t *wavefront)
 	/* Set the current instruction */
 	inst = &wavefront->inst;
 
+	if (debug_status(si_isa_debug_category))
+		si_isa_debug("wf%d: ",wavefront->id );
+
 	/* Execute the current instruction */
 	switch (inst->info->fmt)
 	{

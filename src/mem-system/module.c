@@ -248,7 +248,7 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	}
 	/* Schedule */
   stack->event = event;
-  if(!stack->uop->vector_mem_write && !stack->uop->vector_mem_read)
+  if(!stack->uop->vector_mem_read)
   {
     esim_execute_event(event, stack);
   }else{
@@ -750,6 +750,8 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	for (stack = mod->access_hash_table[index].bucket_list_head; stack;
 		stack = stack->bucket_list_next)
 	{
+    if (stack->waiting_list_event)
+      continue;
 		/* This stack is not older than 'older_than_stack' */
 		if (older_than_stack && stack->id >= older_than_stack->id)
 			continue;
