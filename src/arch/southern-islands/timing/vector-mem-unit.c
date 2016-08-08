@@ -30,6 +30,7 @@
 #include <mem-system/module.h>
 #include <mem-system/mod-stack.h>
 #include <lib/util/misc.h>
+#include <stdbool.h>
 
 
 #include "compute-unit.h"
@@ -217,6 +218,29 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		{
 			list_index++;
 			continue;
+		}
+
+		if (list_count(vector_mem->mem_buffer) != 0)
+		{
+			struct si_uop_t *uop_in_mem_buffer;
+			bool wavefront_permitido = false;
+			for(int j = 0; j < list_count(vector_mem->mem_buffer); j++)
+			{
+				uop_in_mem_buffer = list_get(vector_mem->mem_buffer,j);
+				if(uop->wavefront->id == uop_in_mem_buffer->wavefront->id)
+				{
+					wavefront_permitido = true;
+					break;
+				}
+			}
+			if(!wavefront_permitido)
+			{
+				uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
+				if(!(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem))
+				{
+					continue;
+				}
+			}
 		}
 
 		instructions_processed++;

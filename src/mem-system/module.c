@@ -248,12 +248,12 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	}
 	/* Schedule */
   stack->event = event;
-  if(!stack->uop->vector_mem_read)
-  {
+  //if(!stack->uop->vector_mem_read)
+  //{
     esim_execute_event(event, stack);
-  }else{
-    list_add(stack->wavefront->mem_accesses_list, stack);
-  }
+  //}else{
+    //list_add(stack->wavefront->mem_accesses_list, stack);
+  //}
 
 	/* Return access ID */
 	return stack->id;
