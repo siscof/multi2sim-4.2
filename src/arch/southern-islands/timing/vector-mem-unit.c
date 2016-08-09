@@ -220,7 +220,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			continue;
 		}
 
-		if (list_count(vector_mem->mem_buffer) != 0)
+		if (si_main_memory_access_order && list_count(vector_mem->mem_buffer) != 0)
 		{
 			struct si_uop_t *uop_in_mem_buffer;
 			bool wavefront_permitido = false;

@@ -189,6 +189,7 @@ extern int si_gpu_vector_mem_exec_buffer_size;
 extern int si_gpu_vector_mem_write_latency;
 extern int si_gpu_vector_mem_write_buffer_size;
 extern int si_gpu_vector_mem_max_inflight_mem_accesses;
+extern int si_main_memory_access_order;
 
 extern int si_gpu_lds_size;
 extern int si_gpu_lds_alloc_size;
