@@ -40,6 +40,7 @@
 #include "uop.h"
 #include "wavefront-pool.h"
 #include <arch/common/arch.h>
+#include <mem-system/mshr.h>
 
 #include <arch/southern-islands/emu/work-group.h>
 
@@ -224,9 +225,14 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		{
 			struct si_uop_t *uop_in_mem_buffer;
 			bool wavefront_permitido = false;
+			bool wavefront_wait_for_mem = true;
 			for(int j = 0; j < list_count(vector_mem->mem_buffer); j++)
 			{
 				uop_in_mem_buffer = list_get(vector_mem->mem_buffer,j);
+				if(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem == 0)
+				{
+					wavefront_wait_for_mem = false;
+				}
 				if(uop->wavefront->id == uop_in_mem_buffer->wavefront->id)
 				{
 					wavefront_permitido = true;
@@ -235,11 +241,16 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			}
 			if(!wavefront_permitido)
 			{
-				uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
-				if(!(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem))
+				if(vector_mem->compute_unit->vector_cache->mshr->entradasOcupadas > (vector_mem->compute_unit->vector_cache->mshr->size - 4))
 				{
-					continue;
+					//uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
+					//if(!(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem))
+					if(!wavefront_wait_for_mem)
+					{
+						continue;
+					}
 				}
+
 			}
 		}
 

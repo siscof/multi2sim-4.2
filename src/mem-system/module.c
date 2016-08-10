@@ -137,7 +137,7 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 
 	stack->wavefront = stack->uop->wavefront;
 
-  //list_add(stack->wavefront->mem_accesses_list, stack);
+  list_add(stack->wavefront->mem_accesses_list, stack);
 
 	stack->work_group_id_in_cu = wg_id;
 
@@ -252,7 +252,7 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
   //{
     esim_execute_event(event, stack);
   //}else{
-    //list_add(stack->wavefront->mem_accesses_list, stack);
+  //  list_add(stack->wavefront->mem_accesses_list, stack);
   //}
 
 	/* Return access ID */
@@ -750,8 +750,6 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	for (stack = mod->access_hash_table[index].bucket_list_head; stack;
 		stack = stack->bucket_list_next)
 	{
-    if (stack->waiting_list_event)
-      continue;
 		/* This stack is not older than 'older_than_stack' */
 		if (older_than_stack && stack->id >= older_than_stack->id)
 			continue;
