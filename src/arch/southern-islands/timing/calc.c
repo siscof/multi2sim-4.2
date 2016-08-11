@@ -50,24 +50,24 @@ int si_calc_get_work_groups_per_wavefront_pool(int work_items_per_work_group,
 	int max_work_groups_limitted_by_local_mem;
 	int work_groups_per_wavefront_pool;
 
-	/* Get maximum number of work-groups per SIMD as limited by the 
-	 * maximum number of wavefronts, given the number of wavefronts per 
+	/* Get maximum number of work-groups per SIMD as limited by the
+	 * maximum number of wavefronts, given the number of wavefronts per
 	 * work-group in the NDRange */
 	assert(si_emu_wavefront_size > 0);
-	wavefronts_per_work_group = (work_items_per_work_group + 
+	wavefronts_per_work_group = (work_items_per_work_group +
 		si_emu_wavefront_size - 1) / si_emu_wavefront_size;
-	max_work_groups_limitted_by_max_wavefronts = 
+	max_work_groups_limitted_by_max_wavefronts =
 		si_gpu_max_wavefronts_per_wavefront_pool /
 		wavefronts_per_work_group;
 
-	/* Get maximum number of work-groups per SIMD as limited by the number 
-	 * of available registers, given the number of registers used per 
+	/* Get maximum number of work-groups per SIMD as limited by the number
+	 * of available registers, given the number of registers used per
 	 * work-item. */
-	if (si_gpu_register_alloc_granularity == 
+	if (si_gpu_register_alloc_granularity ==
 		si_gpu_register_alloc_wavefront)
 	{
-		registers_per_work_group = ROUND_UP(registers_per_work_item * 
-			si_emu_wavefront_size, si_gpu_register_alloc_size) * 
+		registers_per_work_group = ROUND_UP(registers_per_work_item *
+			si_emu_wavefront_size, si_gpu_register_alloc_size) *
 			wavefronts_per_work_group;
 	}
 	else
@@ -77,27 +77,27 @@ int si_calc_get_work_groups_per_wavefront_pool(int work_items_per_work_group,
 	}
 	/* FIXME need to account for scalar registers */
 	max_work_groups_limitted_by_num_registers = registers_per_work_group ?
-		si_gpu_num_vector_registers / registers_per_work_group :
+		(si_gpu_num_vector_registers / si_gpu_num_wavefront_pools) / registers_per_work_group :
 		si_gpu_max_work_groups_per_wavefront_pool;
 
-	/* Get maximum number of work-groups per SIMD as limited by the 
-	 * amount of available local memory, given the local memory used 
+	/* Get maximum number of work-groups per SIMD as limited by the
+	 * amount of available local memory, given the local memory used
 	 * by each work-group in the NDRange */
-	local_mem_per_work_group = ROUND_UP(local_mem_per_work_group, 
+	local_mem_per_work_group = ROUND_UP(local_mem_per_work_group,
 		si_gpu_lds_alloc_size);
 	max_work_groups_limitted_by_local_mem = local_mem_per_work_group ?
 		si_gpu_lds_size / local_mem_per_work_group :
 		si_gpu_max_work_groups_per_wavefront_pool;
 
-	/* Based on the limits above, calculate the actual limit of work-groups 
+	/* Based on the limits above, calculate the actual limit of work-groups
 	 * per SIMD. */
-	work_groups_per_wavefront_pool = 
+	work_groups_per_wavefront_pool =
 		si_gpu_max_work_groups_per_wavefront_pool;
 	work_groups_per_wavefront_pool = MIN(work_groups_per_wavefront_pool,
 		max_work_groups_limitted_by_max_wavefronts);
-	work_groups_per_wavefront_pool= MIN(work_groups_per_wavefront_pool, 
+	work_groups_per_wavefront_pool= MIN(work_groups_per_wavefront_pool,
 		max_work_groups_limitted_by_num_registers);
-	work_groups_per_wavefront_pool = MIN(work_groups_per_wavefront_pool, 
+	work_groups_per_wavefront_pool = MIN(work_groups_per_wavefront_pool,
 		max_work_groups_limitted_by_local_mem);
 
 	/* Return */
@@ -113,7 +113,7 @@ static void si_calc_plot_work_items_per_work_group(void)
 	char data_file_name[MAX_PATH_SIZE];
 	char script_file_name[MAX_PATH_SIZE];
 	char cmd[MAX_PATH_SIZE];
-	
+
 	int local_mem_per_work_group;
 	int work_items_per_work_group;
 	int registers_per_work_item;
@@ -129,7 +129,7 @@ static void si_calc_plot_work_items_per_work_group(void)
 		si_gpu_calc_file_name, si_emu->ndrange->id);
 	if (!file_can_open_for_write(plot_file_name))
 	{
-		fatal("%s: cannot write GPU occupancy calculation plot", 
+		fatal("%s: cannot write GPU occupancy calculation plot",
 			plot_file_name);
 	}
 
@@ -138,39 +138,39 @@ static void si_calc_plot_work_items_per_work_group(void)
 	local_mem_per_work_group = si_emu->ndrange->local_mem_top;
 	registers_per_work_item = si_emu->ndrange->num_vgpr_used;
 	for (work_items_per_work_group = si_emu_wavefront_size;
-		work_items_per_work_group < 
-		(si_gpu_max_wavefronts_per_wavefront_pool * 
+		work_items_per_work_group <
+		(si_gpu_max_wavefronts_per_wavefront_pool *
 		si_emu_wavefront_size);
 		work_items_per_work_group += si_emu_wavefront_size)
 	{
 		/* Calculate point */
-		work_groups_per_wavefront_pool = 
+		work_groups_per_wavefront_pool =
 			si_calc_get_work_groups_per_wavefront_pool(
-				work_items_per_work_group, 
-				registers_per_work_item, 
+				work_items_per_work_group,
+				registers_per_work_item,
 				local_mem_per_work_group);
-		wavefronts_per_work_group = (work_items_per_work_group + 
+		wavefronts_per_work_group = (work_items_per_work_group +
 			si_emu_wavefront_size - 1) / si_emu_wavefront_size;
 		wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool *
 			wavefronts_per_work_group;
 
 		/* Dump line to data file */
-		fprintf(data_file, "%d %d\n", work_items_per_work_group, 
+		fprintf(data_file, "%d %d\n", work_items_per_work_group,
 				wavefronts_per_wavefront_pool);
 	}
 	fclose(data_file);
 
 	/* Current data point */
 	work_items_per_work_group = ROUND_UP(
-		si_emu->ndrange->local_size, 
+		si_emu->ndrange->local_size,
 		si_emu_wavefront_size);
-	work_groups_per_wavefront_pool = 
+	work_groups_per_wavefront_pool =
 		si_calc_get_work_groups_per_wavefront_pool(
-			work_items_per_work_group, registers_per_work_item, 
+			work_items_per_work_group, registers_per_work_item,
 			local_mem_per_work_group);
-	wavefronts_per_work_group = (work_items_per_work_group + 
+	wavefronts_per_work_group = (work_items_per_work_group +
 		si_emu_wavefront_size - 1) / si_emu_wavefront_size;
-	wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool * 
+	wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool *
 		wavefronts_per_work_group;
 
 	/* Generate gnuplot script */
@@ -181,10 +181,10 @@ static void si_calc_plot_work_items_per_work_group(void)
 	fprintf(script_file, "set ylabel 'Wavefronts per SIMD'\n");
 	fprintf(script_file, "set size 0.65, 0.5\n");
 	fprintf(script_file, "set grid ytics\n");
-	fprintf(script_file, "plot '%s' w linespoints lt 3 lw 5 pt 84 ps 2, ", 
+	fprintf(script_file, "plot '%s' w linespoints lt 3 lw 5 pt 84 ps 2, ",
 		data_file_name);
 	fprintf(script_file, "'-' w linespoints lt 1 lw 4 pt 82 ps 2\n%d "
-		"%d\ne\n", work_items_per_work_group, 
+		"%d\ne\n", work_items_per_work_group,
 		wavefronts_per_wavefront_pool);
 	fclose(script_file);
 
@@ -208,7 +208,7 @@ static void si_calc_plot_registers_per_work_item(void)
 	char data_file_name[MAX_PATH_SIZE];
 	char script_file_name[MAX_PATH_SIZE];
 	char cmd[MAX_PATH_SIZE];
-	
+
 	int local_mem_per_work_group;
 	int work_items_per_work_group;
 	int registers_per_work_item;
@@ -224,7 +224,7 @@ static void si_calc_plot_registers_per_work_item(void)
 		si_gpu_calc_file_name, si_emu->ndrange->id);
 	if (!file_can_open_for_write(plot_file_name))
 	{
-		fatal("%s: cannot write GPU occupancy calculation plot", 
+		fatal("%s: cannot write GPU occupancy calculation plot",
 			plot_file_name);
 	}
 
@@ -232,33 +232,33 @@ static void si_calc_plot_registers_per_work_item(void)
 	data_file = file_create_temp(data_file_name, MAX_PATH_SIZE);
 	local_mem_per_work_group = si_emu->ndrange->local_mem_top;
 	work_items_per_work_group = si_emu->ndrange->local_size;
-	wavefronts_per_work_group = (work_items_per_work_group + 
+	wavefronts_per_work_group = (work_items_per_work_group +
 		si_emu_wavefront_size - 1) / si_emu_wavefront_size;
-	for (registers_per_work_item = 1; registers_per_work_item <= 128; 
+	for (registers_per_work_item = 1; registers_per_work_item <= 128;
 		registers_per_work_item += 4)
 	{
 		/* Calculate point */
-		work_groups_per_wavefront_pool = 
+		work_groups_per_wavefront_pool =
 			si_calc_get_work_groups_per_wavefront_pool(
-				work_items_per_work_group, 
-				registers_per_work_item, 
+				work_items_per_work_group,
+				registers_per_work_item,
 				local_mem_per_work_group);
 		wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool *
 			wavefronts_per_work_group;
 
 		/* Dump line to data file */
-		fprintf(data_file, "%d %d\n", registers_per_work_item, 
+		fprintf(data_file, "%d %d\n", registers_per_work_item,
 			wavefronts_per_wavefront_pool);
 	}
 	fclose(data_file);
 
 	/* Current data point */
 	registers_per_work_item = si_emu->ndrange->num_vgpr_used;
-	work_groups_per_wavefront_pool = 
+	work_groups_per_wavefront_pool =
 		si_calc_get_work_groups_per_wavefront_pool(
-			work_items_per_work_group, 
+			work_items_per_work_group,
 			registers_per_work_item, local_mem_per_work_group);
-	wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool * 
+	wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool *
 		wavefronts_per_work_group;
 
 	/* Generate gnuplot script */
@@ -272,10 +272,10 @@ static void si_calc_plot_registers_per_work_item(void)
 	fprintf(script_file, "set xtics (0,16,32,48,64,80,96,112,128)\n");
 	fprintf(script_file, "set size 0.65, 0.5\n");
 	fprintf(script_file, "set grid ytics\n");
-	fprintf(script_file, "plot '%s' w linespoints lt 3 lw 5 pt 84 ps 2, ", 
+	fprintf(script_file, "plot '%s' w linespoints lt 3 lw 5 pt 84 ps 2, ",
 		data_file_name);
 	fprintf(script_file, "'-' w linespoints lt 1 lw 4 pt 82 ps 2\n%d "
-		"%d\ne\n", registers_per_work_item, 
+		"%d\ne\n", registers_per_work_item,
 		wavefronts_per_wavefront_pool);
 	fclose(script_file);
 
@@ -299,7 +299,7 @@ static void si_calc_plot_local_mem_per_work_group(void)
 	char data_file_name[MAX_PATH_SIZE];
 	char script_file_name[MAX_PATH_SIZE];
 	char cmd[MAX_PATH_SIZE];
-	
+
 	int local_mem_per_work_group;
 	int work_items_per_work_group;
 	int registers_per_work_item;
@@ -315,7 +315,7 @@ static void si_calc_plot_local_mem_per_work_group(void)
 	snprintf(plot_file_name, MAX_PATH_SIZE, "%s.%d.local_mem.eps",
 		si_gpu_calc_file_name, si_emu->ndrange->id);
 	if (!file_can_open_for_write(plot_file_name))
-		fatal("%s: cannot write GPU occupancy calculation plot", 
+		fatal("%s: cannot write GPU occupancy calculation plot",
 			plot_file_name);
 
 	/* Generate data file */
@@ -323,33 +323,33 @@ static void si_calc_plot_local_mem_per_work_group(void)
 	registers_per_work_item = si_emu->ndrange->num_vgpr_used;
 	local_mem_step = MAX(1, si_gpu_lds_size / 32);
 	work_items_per_work_group = si_emu->ndrange->local_size;
-	wavefronts_per_work_group = (work_items_per_work_group + 
+	wavefronts_per_work_group = (work_items_per_work_group +
 		si_emu_wavefront_size - 1) / si_emu_wavefront_size;
 	for (local_mem_per_work_group = local_mem_step;
 		local_mem_per_work_group <= si_gpu_lds_size;
 		local_mem_per_work_group += local_mem_step)
 	{
 		/* Calculate point */
-		work_groups_per_wavefront_pool = 
+		work_groups_per_wavefront_pool =
 			si_calc_get_work_groups_per_wavefront_pool(
-			work_items_per_work_group, registers_per_work_item, 
+			work_items_per_work_group, registers_per_work_item,
 			local_mem_per_work_group);
 		wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool *
 			wavefronts_per_work_group;
 
 		/* Dump line to data file */
-		fprintf(data_file, "%d %d\n", local_mem_per_work_group, 
+		fprintf(data_file, "%d %d\n", local_mem_per_work_group,
 			wavefronts_per_wavefront_pool);
 	}
 	fclose(data_file);
 
 	/* Current data point */
 	local_mem_per_work_group = si_emu->ndrange->local_mem_top;
-	work_groups_per_wavefront_pool = 
+	work_groups_per_wavefront_pool =
 		si_calc_get_work_groups_per_wavefront_pool(
-			work_items_per_work_group, registers_per_work_item, 
+			work_items_per_work_group, registers_per_work_item,
 			local_mem_per_work_group);
-	wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool * 
+	wavefronts_per_wavefront_pool = work_groups_per_wavefront_pool *
 		wavefronts_per_work_group;
 
 	/* Generate gnuplot script */
@@ -366,7 +366,7 @@ static void si_calc_plot_local_mem_per_work_group(void)
 	fprintf(script_file, "plot '%s' u ($1/1024):2 w linespoints lt 3 "
 		"lw 5 pt 84 ps 2, ", data_file_name);
 	fprintf(script_file, "'-' u ($1/1024):2 w linespoints lt 1 lw 4 pt 82 "
-		"ps 2\n%d %d\ne\n", local_mem_per_work_group, 
+		"ps 2\n%d %d\ne\n", local_mem_per_work_group,
 		wavefronts_per_wavefront_pool);
 	fclose(script_file);
 
