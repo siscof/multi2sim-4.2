@@ -241,15 +241,15 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			}
 			if(!wavefront_permitido)
 			{
-				if(vector_mem->compute_unit->vector_cache->mshr->entradasOcupadas > (vector_mem->compute_unit->vector_cache->mshr->size /2))
-				{
+				//if(vector_mem->compute_unit->vector_cache->mshr->entradasOcupadas > (vector_mem->compute_unit->vector_cache->mshr->size /2))
+				//{
 					//uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
 					//if(!(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem))
-					if(!wavefront_wait_for_mem)
-					{
-						continue;
-					}
+				if(!wavefront_wait_for_mem)
+				{
+					continue;
 				}
+				//}
 
 			}
 		}
