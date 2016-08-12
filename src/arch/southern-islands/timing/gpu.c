@@ -402,7 +402,8 @@ int si_gpu_vector_mem_read_buffer_size = 1;
 int si_gpu_vector_mem_max_inflight_mem_accesses = 32;
 int si_gpu_vector_mem_write_latency = 1;
 int si_gpu_vector_mem_write_buffer_size = 1;
-int si_main_memory_access_order = 0;
+int si_gpu_vector_mem_main_memory_access_order = 0;
+int si_gpu_vector_mem_maximum_wavefronts_in_mem = 32;
 
 /* LDS memory parameters */
 int si_gpu_lds_size = 65536; /* 64KB */
@@ -1036,11 +1037,18 @@ void si_gpu_read_config(void)
 		fatal("%s: invalid value for 'WriteBufferSize'.\n%s",
 			si_gpu_config_file_name, err_note);
 
-	si_main_memory_access_order = config_read_int(
+	si_gpu_vector_mem_main_memory_access_order = config_read_int(
 		gpu_config, section, "MainMemoryAccessOrder",
-		si_main_memory_access_order);
-	if (si_main_memory_access_order != 1 && si_main_memory_access_order != 0)
+		si_gpu_vector_mem_main_memory_access_order);
+	if (si_gpu_vector_mem_main_memory_access_order != 1 && si_gpu_vector_mem_main_memory_access_order != 0)
 		fatal("%s: invalid value for 'main_memory_access_order'.\n%s",
+			si_gpu_config_file_name, err_note);
+
+	si_gpu_vector_mem_maximum_wavefronts_in_mem = config_read_int(
+		gpu_config, section, "MaximumWavefrontsInFlight",
+		si_gpu_vector_mem_maximum_wavefronts_in_mem);
+	if (si_gpu_vector_mem_maximum_wavefronts_in_mem <= 0)
+		fatal("%s: invalid value for 'MaximumWavefrontsInFlight'.\n%s",
 			si_gpu_config_file_name, err_note);
 
 	/* Local Data Share Unit */

@@ -43,7 +43,6 @@
 #include <mem-system/mshr.h>
 
 #include <arch/southern-islands/emu/work-group.h>
-
 #include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/cycle-interval-report.h>
 
@@ -221,11 +220,13 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			continue;
 		}
 
-		if (si_main_memory_access_order && list_count(vector_mem->mem_buffer) != 0)
+		if (si_gpu_vector_mem_main_memory_access_order && list_count(vector_mem->mem_buffer) != 0)
 		{
 			struct si_uop_t *uop_in_mem_buffer;
 			bool wavefront_permitido = false;
 			bool wavefront_wait_for_mem = true;
+			struct si_wavefront_t *wave_inflight;
+			struct list_t *inflight_wavefronts_list = list_create();
 			for(int j = 0; j < list_count(vector_mem->mem_buffer); j++)
 			{
 				uop_in_mem_buffer = list_get(vector_mem->mem_buffer,j);
@@ -238,9 +239,24 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 					wavefront_permitido = true;
 					break;
 				}
+				//wavefront in mem system
+				int k = 0;
+				for(; k < list_count(inflight_wavefronts_list); k++)
+				{
+					wave_inflight = list_get(vector_mem->mem_buffer,k);
+					if(uop_in_mem_buffer->wavefront->id == wave_inflight->id)
+					{
+						break;
+					}
+				}
+				if(k >= list_count(inflight_wavefronts_list))
+						list_add(inflight_wavefronts_list,uop_in_mem_buffer->wavefront);
+
 			}
 			if(!wavefront_permitido)
 			{
+				if(list_count(inflight_wavefronts_list) > si_gpu_vector_mem_maximum_wavefronts_in_mem)
+					continue;
 				//if(vector_mem->compute_unit->vector_cache->mshr->entradasOcupadas > (vector_mem->compute_unit->vector_cache->mshr->size /2))
 				//{
 					//uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
@@ -252,6 +268,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				//}
 
 			}
+			list_free(inflight_wavefronts_list);
 		}
 
 		instructions_processed++;
