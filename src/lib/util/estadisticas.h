@@ -263,6 +263,7 @@ struct mem_system_stats
 
 struct latenciometro
 {
+	long long wavefront_access;
 	long long start;
 	long long queue;
 	long long lock_mshr;

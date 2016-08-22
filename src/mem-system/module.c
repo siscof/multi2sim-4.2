@@ -134,6 +134,7 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
 
 	// uop reference
 	stack->uop = (struct si_uop_t *)uop;
+  stack->latencias.wavefront_access = stack->uop->read_ready;
 
 	stack->wavefront = stack->uop->wavefront;
 
