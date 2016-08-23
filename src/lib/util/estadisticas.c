@@ -344,7 +344,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 
 	if((*stack->witness_ptr) != -1){
 		if(/*(latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0 &&*/ !stack->retry && stack->hit){
-			mem_stats.latencias_load_hit->wavefront_access += latencias->wavefront_access - latencias->start;
+			mem_stats.latencias_load_hit->wavefront_access += latencias->start - latencias->wavefront_access;
 			mem_stats.latencias_load_hit->queue += latencias->queue;
 			mem_stats.latencias_load_hit->lock_mshr += latencias->lock_mshr;
 			mem_stats.latencias_load_hit->lock_dir += latencias->lock_dir;
@@ -354,7 +354,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 			mem_stats.latencias_load_hit->finish += latencias->finish;
 			mem_stats.latencias_load_hit->access++;
 		}else{
-			mem_stats.latencias_load_miss->wavefront_access += latencias->wavefront_access - latencias->start;
+			mem_stats.latencias_load_miss->wavefront_access += latencias->start - latencias->wavefront_access;
 			mem_stats.latencias_load_miss->queue += latencias->queue;
 			mem_stats.latencias_load_miss->lock_mshr += latencias->lock_mshr;
 			mem_stats.latencias_load_miss->lock_dir += latencias->lock_dir;
@@ -366,7 +366,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 		}
 	}else{
 		if(/*(latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0*/ !stack->retry && stack->hit){
-			mem_stats.latencias_load_critical_hit->wavefront_access += latencias->wavefront_access - latencias->start;
+			mem_stats.latencias_load_critical_hit->wavefront_access += latencias->start - latencias->wavefront_access;
 			mem_stats.latencias_load_critical_hit->queue += latencias->queue;
 			mem_stats.latencias_load_critical_hit->lock_mshr += latencias->lock_mshr;
 			mem_stats.latencias_load_critical_hit->lock_dir += latencias->lock_dir;
@@ -376,7 +376,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 			mem_stats.latencias_load_critical_hit->finish += latencias->finish;
 			mem_stats.latencias_load_critical_hit->access++;
 		}else{
-			mem_stats.latencias_load_critical_miss->wavefront_access += latencias->wavefront_access - latencias->start;
+			mem_stats.latencias_load_critical_miss->wavefront_access += latencias->start - latencias->wavefront_access;
 			mem_stats.latencias_load_critical_miss->queue += latencias->queue;
 			mem_stats.latencias_load_critical_miss->lock_mshr += latencias->lock_mshr;
 			mem_stats.latencias_load_critical_miss->lock_dir += latencias->lock_dir;
@@ -391,7 +391,7 @@ void add_latencias_load(struct mod_stack_t *stack)
 
 void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf)
 {
-	long long stack_latency = (latencias->wavefront_access - latencias->start) + latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->retry + latencias->miss + latencias->finish;
+	long long stack_latency = (latencias->start - latencias->wavefront_access) + latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->retry + latencias->miss + latencias->finish;
 	assert(wf != NULL);
 	if(wf->latencies->total < stack_latency)
 	{
@@ -405,7 +405,7 @@ void add_wavefront_latencias_load(struct si_wavefront_t *wf)
 	if(wf->mem_blocking)
 	{
 		struct latenciometro *latencias = wf->latencies;
-		gpu_stats.latencias_load->wavefront_access += latencias->wavefront_access - latencias->start;
+		gpu_stats.latencias_load->wavefront_access += latencias->start - latencias->wavefront_access;
 		gpu_stats.latencias_load->queue += latencias->queue;
 		gpu_stats.latencias_load->lock_mshr += latencias->lock_mshr;
 		gpu_stats.latencias_load->lock_dir += latencias->lock_dir;
@@ -428,7 +428,7 @@ void add_wavefront_scalar_latencias_load(struct si_wavefront_t *wf)
 	if(wf->scalar_mem_blocking)
 	{
 		struct latenciometro *latencias = wf->latencies;
-		gpu_stats.latencias_load->wavefront_access += latencias->wavefront_access - latencias->start;
+		gpu_stats.latencias_load->wavefront_access += latencias->start - latencias->wavefront_access;
 		gpu_stats.latencias_load->queue += latencias->queue;
 		gpu_stats.latencias_load->lock_mshr += latencias->lock_mshr;
 		gpu_stats.latencias_load->lock_dir += latencias->lock_dir;
@@ -449,7 +449,7 @@ void add_wavefront_scalar_latencias_load(struct si_wavefront_t *wf)
 
 void add_latencias_nc_write(struct latenciometro *latencias)
 {
-	mem_stats.latencias_nc_write->wavefront_access += latencias->wavefront_access - latencias->start;
+	mem_stats.latencias_nc_write->wavefront_access += latencias->start - latencias->wavefront_access;
 	mem_stats.latencias_nc_write->queue += latencias->queue;
 	mem_stats.latencias_nc_write->lock_mshr += latencias->lock_mshr;
 	mem_stats.latencias_nc_write->lock_dir += latencias->lock_dir;
