@@ -220,6 +220,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			continue;
 		}
 
+		// wavefront access control
 		if (si_gpu_vector_mem_main_memory_access_order && list_count(vector_mem->mem_buffer) != 0)
 		{
 			struct si_uop_t *uop_in_mem_buffer;
@@ -256,13 +257,17 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			if(!wavefront_permitido)
 			{
 				if(list_count(inflight_wavefronts_list) > si_gpu_vector_mem_maximum_wavefronts_in_mem)
+				{
+					list_free(inflight_wavefronts_list);
 					continue;
+				}
 				//if(vector_mem->compute_unit->vector_cache->mshr->entradasOcupadas > (vector_mem->compute_unit->vector_cache->mshr->size /2))
 				//{
 					//uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
 					//if(!(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem))
 				if(!wavefront_wait_for_mem)
 				{
+					list_free(inflight_wavefronts_list);
 					continue;
 				}
 				//}
