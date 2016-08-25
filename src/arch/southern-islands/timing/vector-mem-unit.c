@@ -225,16 +225,16 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		{
 			struct si_uop_t *uop_in_mem_buffer;
 			bool wavefront_permitido = false;
-			bool wavefront_wait_for_mem = true;
+			//bool wavefront_wait_for_mem = true;
 			struct si_wavefront_t *wave_inflight;
 			struct list_t *inflight_wavefronts_list = list_create();
 			for(int j = 0; j < list_count(vector_mem->mem_buffer); j++)
 			{
 				uop_in_mem_buffer = list_get(vector_mem->mem_buffer,j);
-				if(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem == 0)
+				/*if(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem == 0)
 				{
 					wavefront_wait_for_mem = false;
-				}
+				}*/
 				if(uop->wavefront->id == uop_in_mem_buffer->wavefront->id)
 				{
 					wavefront_permitido = true;
@@ -265,11 +265,11 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 				//{
 					//uop_in_mem_buffer = list_head(vector_mem->mem_buffer);
 					//if(!(uop_in_mem_buffer->wavefront->wavefront_pool_entry->wait_for_mem))
-				if(!wavefront_wait_for_mem)
+				/*if(!wavefront_wait_for_mem)
 				{
 					list_free(inflight_wavefronts_list);
 					continue;
-				}
+				}*/
 				//}
 
 			}
