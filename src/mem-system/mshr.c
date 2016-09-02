@@ -15,9 +15,11 @@
 #include <arch/southern-islands/timing/compute-unit.h>
 #include <stdlib.h>
 #include <math.h>
+#include <stdbool.h>
 
 int EV_MSHR_DYNAMIC_SIZE_EVAL;
 int INTERVAL;
+struct list_t *access_list;
 
 void mshr_event_init(int cycles)
 {
@@ -36,6 +38,9 @@ void mshr_init(struct mshr_t *mshr, int size)
 
 struct mshr_t *mshr_create()
 {
+
+access_list = list_create();
+
 	struct mshr_t *mshr;
 	mshr = calloc(1,sizeof(struct mshr_t));
 	mshr->size = 2048;
@@ -46,9 +51,42 @@ struct mshr_t *mshr_create()
 
 int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-
+struct mod_t *mod = stack->mod;
 	if(mshr->size > mshr->entradasOcupadas)
 	{
+		if(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+		{
+			struct mod_stack_t *stack_access;
+			bool wavefront_permitido = false;
+			struct list_t *wavefront_list = list_create();
+			for(int j = 0; j < list_count(access_list); j++)
+			{
+				stack_access = list_get(access_list,j);
+
+				if(stack->wavefront->id == stack_access->wavefront->id)
+				{
+					wavefront_permitido = true;
+					break;
+				}
+
+				if(list_index_of(wavefront_list, stack_access->wavefront) == -1)
+						list_add(wavefront_list,stack_access->wavefront);
+			}
+			if(!wavefront_permitido)
+			{
+				for(int i = 0; i < list_count(wavefront_list); i++)
+				{
+					struct si_wavefront_t *wavefront_in_mshr = list_get(access_list,i);
+					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
+					{
+						list_free(wavefront_list);
+						return 0;
+					}
+				}
+			}
+			list_free(wavefront_list);
+		}
+
 		mshr->entradasOcupadas++;
 		return 1;
 	}
