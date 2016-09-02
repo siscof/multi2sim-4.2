@@ -86,7 +86,7 @@ struct mod_t *mod = stack->mod;
 			}
 			list_free(wavefront_list);
 		}
-
+		list_add(access_list,stack);
 		mshr->entradasOcupadas++;
 		return 1;
 	}
@@ -121,6 +121,28 @@ void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 	}
 }*/
 
+void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
+{
+	struct mshr_t *mshr = mod->mshr;
+
+	assert(mshr->entradasOcupadas > 0);
+	list_remove(access_list,stack);
+
+	if(list_count(mshr->waiting_list))
+	{
+		struct mod_stack_t *stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
+		int event = stack->waiting_list_event;
+		stack->mshr_locked = 1;
+		list_add(access_list,stack);
+		if(stack->ret_stack)
+			stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
+		stack->waiting_list_event = 0;
+		esim_schedule_event(event, stack, 0);
+	}else{
+	        mshr->entradasOcupadas--;
+	}
+}
+
 void mshr_unlock(struct mod_t *mod)
 {
 	struct mshr_t *mshr = mod->mshr;
@@ -139,7 +161,6 @@ void mshr_unlock(struct mod_t *mod)
 	}else{
 	        mshr->entradasOcupadas--;
 	}
-
 }
 
 void mshr_free(struct mshr_t *mshr)

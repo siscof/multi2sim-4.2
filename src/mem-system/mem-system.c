@@ -56,6 +56,7 @@ int mem_trace_category;
 int mem_peer_transfers;
 int fran_category;
 int EV_MAIN_MEMORY_TIC;
+int mshr_protocol = 0;
 
 /* Frequency domain, as returned by function 'esim_new_domain'. */
 int mem_frequency = 1000;

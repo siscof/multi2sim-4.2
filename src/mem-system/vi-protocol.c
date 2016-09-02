@@ -304,7 +304,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		if (stack->mshr_locked != 0)
 		{
-			mshr_unlock(mod);
+			mshr_unlock_si(mod, stack);
 			stack->mshr_locked = 0;
 		}
 
@@ -466,7 +466,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		//mem_stats.mod_level[mod->level].entradas_bloqueadas--;
 		if (stack->mshr_locked != 0)
 		{
-			mshr_unlock(mod);
+			mshr_unlock_si(mod, stack);
 			stack->mshr_locked = 0;
 		}
 
@@ -900,7 +900,7 @@ void mod_handler_vi_store(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -936,7 +936,7 @@ void mod_handler_vi_store(int event, void *data)
 
 		if (stack->mshr_locked != 0)
 		{
-			mshr_unlock(mod);
+			mshr_unlock_si(mod, stack);
 			stack->mshr_locked = 0;
 		}
 
