@@ -19,7 +19,7 @@
 
 int EV_MSHR_DYNAMIC_SIZE_EVAL;
 int INTERVAL;
-struct list_t *access_list;
+//struct list_t *access_list;
 
 void mshr_event_init(int cycles)
 {
@@ -38,14 +38,12 @@ void mshr_init(struct mshr_t *mshr, int size)
 
 struct mshr_t *mshr_create()
 {
-
-access_list = list_create();
-
 	struct mshr_t *mshr;
 	mshr = calloc(1,sizeof(struct mshr_t));
 	mshr->size = 2048;
 	mshr->entradasOcupadas = 0;
 	mshr->waiting_list = list_create();
+	mshr->access_list = list_create();
 	return mshr;
 }
 
@@ -59,9 +57,9 @@ struct mod_t *mod = stack->mod;
 			struct mod_stack_t *stack_access;
 			bool wavefront_permitido = false;
 			struct list_t *wavefront_list = list_create();
-			for(int j = 0; j < list_count(access_list); j++)
+			for(int j = 0; j < list_count(mshr->access_list); j++)
 			{
-				stack_access = list_get(access_list,j);
+				stack_access = list_get(mshr->access_list,j);
 
 				if(stack->wavefront->id == stack_access->wavefront->id)
 				{
@@ -86,7 +84,7 @@ struct mod_t *mod = stack->mod;
 			}
 			list_free(wavefront_list);
 		}
-		list_add(access_list,stack);
+		list_add(mshr->access_list,stack);
 		mshr->entradasOcupadas++;
 		return 1;
 	}
@@ -124,22 +122,80 @@ void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 {
 	struct mshr_t *mshr = mod->mshr;
+	struct mod_stack_t *next_stack;
 
 	assert(mshr->entradasOcupadas > 0);
-	list_remove(access_list,stack);
+	list_remove(mshr->access_list,stack);
+	mshr->entradasOcupadas--;
 
-	if(list_count(mshr->waiting_list))
+	if(mshr_protocol == mshr_protocol_wavefront && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 	{
-		struct mod_stack_t *stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
-		int event = stack->waiting_list_event;
-		stack->mshr_locked = 1;
-		list_add(access_list,stack->ret_stack);
-		if(stack->ret_stack)
-			stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
-		stack->waiting_list_event = 0;
-		esim_schedule_event(event, stack, 0);
+		for(int i; i < list_count(mshr->waiting_list); i++)
+		{
+			if(mshr->entradasOcupadas >= mshr->size)
+				return;
+
+			struct mod_stack_t *stack_access;
+			bool wavefront_permitido = false;
+			struct list_t *wavefront_list = list_create();
+			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
+
+			for(int j = 0; j < list_count(mshr->access_list); j++)
+			{
+				stack_access = list_get(mshr->access_list,j);
+
+				if(next_stack->wavefront->id == stack_access->wavefront->id)
+				{
+					wavefront_permitido = true;
+					break;
+				}
+
+				if(list_index_of(wavefront_list, stack_access->wavefront) == -1)
+						list_add(wavefront_list,stack_access->wavefront);
+			}
+			if(!wavefront_permitido)
+			{
+				wavefront_permitido = true;
+				for(int i = 0; i < list_count(wavefront_list); i++)
+				{
+					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,i);
+					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
+					{
+						wavefront_permitido = false;
+					}
+				}
+			}
+			list_free(wavefront_list);
+
+			if(wavefront_permitido)
+			{
+				list_remove_at(mshr->waiting_list,i);
+				int event = next_stack->waiting_list_event;
+				next_stack->mshr_locked = 1;
+				assert(next_stack->ret_stack);
+				list_add(mshr->access_list,next_stack->ret_stack);
+				if(next_stack->ret_stack)
+					next_stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->ret_stack->latencias.start - next_stack->ret_stack->latencias.queue;
+				next_stack->waiting_list_event = 0;
+				esim_schedule_event(event, next_stack, 0);
+				mshr->entradasOcupadas++;
+			}
+
+		}
 	}else{
-	        mshr->entradasOcupadas--;
+
+		if(list_count(mshr->waiting_list))
+		{
+			next_stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
+			int event = next_stack->waiting_list_event;
+			next_stack->mshr_locked = 1;
+			list_add(mshr->access_list,next_stack->ret_stack);
+			if(next_stack->ret_stack)
+				next_stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->ret_stack->latencias.start - next_stack->ret_stack->latencias.queue;
+			next_stack->waiting_list_event = 0;
+			esim_schedule_event(event, next_stack, 0);
+			mshr->entradasOcupadas++;
+		}
 	}
 }
 

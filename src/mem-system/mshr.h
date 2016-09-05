@@ -23,6 +23,7 @@ struct mshr_t
 	int size;
 	int entradasOcupadas;
 	struct list_t *waiting_list;
+	struct list_t *access_list;
 	int size_anterior;
 	int ipc_anterior;
 	int latencia_anterior;

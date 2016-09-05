@@ -363,14 +363,18 @@ void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct
 
 void si_report_gpu_idle(SIGpu *device)
 {
-	device->interval_statistics->gpu_idle = 1;
+	if(si_device_spatial_report_active)
+		device->interval_statistics->gpu_idle = 1;
 }
 
 void si_report_mapped_work_group(struct si_compute_unit_t *compute_unit)
 {
-	/*TODO Add calculation here to change this to wavefront pool entries used */
-	compute_unit->interval_mapped_work_groups++;
-	compute_unit->compute_device->interval_statistics->interval_mapped_work_groups++;
+	if(si_device_spatial_report_active)
+	{
+		/*TODO Add calculation here to change this to wavefront pool entries used */
+		compute_unit->interval_mapped_work_groups++;
+		compute_unit->compute_device->interval_statistics->interval_mapped_work_groups++;
+	}
 }
 
 
@@ -409,42 +413,49 @@ int contador_mshr = 20;
 void si_device_interval_update(SIGpu *device)
 {
 	/* If interval - reset the counters in all the engines */
-	device->interval_statistics->interval_cycles++;
 
-	if (si_device_spatial_report_active && (device->interval_statistics->interval_cycles >= spatial_profiling_interval))
+	if (si_device_spatial_report_active)
 	{
-		si_device_spatial_report_dump(device);
-		device->op = device->interval_statistics->macroinst[scalar_u] + device->interval_statistics->op_counter[simd_u] + device->interval_statistics->op_counter[v_mem_u] + device->interval_statistics->macroinst[s_mem_u] + device->interval_statistics->op_counter[lds_u];
-		device->cycles = device->interval_statistics->interval_cycles;
+		device->interval_statistics->interval_cycles++;
 
-		/*
-		 * This counter is not reset since memory accesses could still
-		 * be in flight in the hierarchy
-		 * compute_unit->inflight_mem_accesses = 0;
-		 */
-		/*device->interval_cycle = 0;
-		device->interval_mapped_work_groups = 0;
-		compute_unit->interval_unmapped_work_groups = 0;
-		compute_unit->interval_alu_issued = 0;
-		compute_unit->interval_lds_issued = 0;*/
-		contador_mshr--;
-
-		if(flag_mshr_dynamic_enabled && contador_mshr == 0)
+		if(device->interval_statistics->interval_cycles >= spatial_profiling_interval)
 		{
-		  mshr_control2();
-			contador_mshr=20;
-		}
+			si_device_spatial_report_dump(device);
+			device->op = device->interval_statistics->macroinst[scalar_u] + device->interval_statistics->op_counter[simd_u] + device->interval_statistics->op_counter[v_mem_u] + device->interval_statistics->macroinst[s_mem_u] + device->interval_statistics->op_counter[lds_u];
+			device->cycles = device->interval_statistics->interval_cycles;
 
-		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+			/*
+			 * This counter is not reset since memory accesses could still
+			 * be in flight in the hierarchy
+			 * compute_unit->inflight_mem_accesses = 0;
+			 */
+			/*device->interval_cycle = 0;
+			device->interval_mapped_work_groups = 0;
+			compute_unit->interval_unmapped_work_groups = 0;
+			compute_unit->interval_alu_issued = 0;
+			compute_unit->interval_lds_issued = 0;*/
+			contador_mshr--;
+
+			if(flag_mshr_dynamic_enabled && contador_mshr == 0)
+			{
+			  mshr_control2();
+				contador_mshr=20;
+			}
+
+			memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+		}
 	}
 }
 
 void si_device_interval_update_force(SIGpu *device)
 {
-	if(device->interval_statistics->interval_cycles > 0)
+	if(si_device_spatial_report_active)
 	{
-		si_device_spatial_report_dump(device);
-		memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+		if(device->interval_statistics->interval_cycles > 0)
+		{
+			si_device_spatial_report_dump(device);
+			memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+		}
 	}
 }
 

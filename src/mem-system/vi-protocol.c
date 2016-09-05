@@ -124,13 +124,6 @@ void mod_handler_vi_load(int event, void *data)
 			return;
 		}
 
-	/*	if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
-		{
-			mod_stack_wait_in_mod(stack, mod, EV_MOD_VI_LOAD);
-			return;
-		}
-		mod->mshr_count++;*/
-
 		mod_access_start(mod, stack, mod_access_load);
 		add_access(mod->level);
 
@@ -236,18 +229,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		return;
 	}
 
-	/*if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
-    {
-        mod->read_retries++;
-        retry_lat = mod_get_retry_latency(mod);
-       	mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
-       	stack->retry = 1;
-       	esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
-      	return;
-    }
-    mod->mshr_count++;
-   */
-    if(SALTAR_L1 && mod->level == 1)
+  if(SALTAR_L1 && mod->level == 1)
 	{
 		stack->request_dir = mod_request_down_up;
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
