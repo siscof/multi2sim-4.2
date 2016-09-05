@@ -76,7 +76,7 @@ struct mod_t *mod = stack->mod;
 			{
 				for(int i = 0; i < list_count(wavefront_list); i++)
 				{
-					struct si_wavefront_t *wavefront_in_mshr = list_get(access_list,i);
+					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,i);
 					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
 					{
 						list_free(wavefront_list);
@@ -133,7 +133,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 		struct mod_stack_t *stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
 		int event = stack->waiting_list_event;
 		stack->mshr_locked = 1;
-		list_add(access_list,stack);
+		list_add(access_list,stack->ret_stack);
 		if(stack->ret_stack)
 			stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
 		stack->waiting_list_event = 0;

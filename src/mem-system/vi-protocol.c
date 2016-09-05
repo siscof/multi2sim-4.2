@@ -1166,7 +1166,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && mod->kind != mod_kind_main_memory)
 			{
-				if(!mshr_lock(mod->mshr, stack))
+				if(!mshr_lock(mod->mshr, stack->ret_stack))
 				{
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
