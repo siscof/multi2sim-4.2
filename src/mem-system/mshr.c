@@ -54,7 +54,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 struct mod_t *mod = stack->mod;
 	if(mshr->size > mshr->entradasOcupadas)
 	{
-		if(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+		if(mshr_protocol == mshr_protocol_wavefront && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 		{
 			struct mod_stack_t *stack_access;
 			bool wavefront_permitido = false;

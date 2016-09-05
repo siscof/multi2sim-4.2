@@ -9,6 +9,13 @@
 extern int flag_mshr_dynamic_enabled;
 extern int EV_MSHR_DYNAMIC_SIZE_EVAL;
 extern int forzar_mshr_test;
+extern int mshr_protocol;
+
+enum mshr_protocol
+{
+	mshr_protocol_default = 0,
+	mshr_protocol_wavefront
+};
 
 struct mshr_t
 {
@@ -24,14 +31,6 @@ struct mshr_t
 	int testing;
 	long long cycle;
 	long long oper_count;
-};
-
-extern int mshr_protocol;
-
-enum mshr_protocol
-{
-	mshr_protocol_default = 0,
-	mshr_protocol_wavefront
 };
 
 void mshr_init(struct mshr_t *mshr, int size);
