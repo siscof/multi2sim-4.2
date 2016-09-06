@@ -60,7 +60,7 @@ struct mod_t *mod = stack->mod;
 			for(int j = 0; j < list_count(mshr->access_list); j++)
 			{
 				stack_access = list_get(mshr->access_list,j);
-
+				assert(stack_access);
 				if(stack->wavefront->id == stack_access->wavefront->id)
 				{
 					wavefront_permitido = true;
@@ -135,6 +135,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			if(mshr->entradasOcupadas >= mshr->size)
 				return;
 
+
 			struct mod_stack_t *stack_access;
 			bool wavefront_permitido = false;
 			struct list_t *wavefront_list = list_create();
@@ -143,7 +144,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			for(int j = 0; j < list_count(mshr->access_list); j++)
 			{
 				stack_access = list_get(mshr->access_list,j);
-
+				assert(stack_access);
 				if(next_stack->wavefront->id == stack_access->wavefront->id)
 				{
 					wavefront_permitido = true;

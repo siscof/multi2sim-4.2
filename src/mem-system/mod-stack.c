@@ -28,6 +28,7 @@
 #include "mem-system.h"
 #include "mod-stack.h"
 #include "coherence_controller.h"
+#include "mshr.h"
 
 long long mod_stack_id;
 
@@ -62,6 +63,14 @@ void mod_stack_return(struct mod_stack_t *stack)
 {
 	/* Wake up dependent accesses */
 	mod_stack_wakeup_stack(stack);
+
+	/* borra desde aqui*/
+	struct mod_t *mod = stack->mod;
+	struct mshr_t *mshr = mod->mshr;
+	assert(list_index_of(mshr->waiting_list, stack) == -1);
+	assert(list_index_of(mshr->access_list, stack)== -1);
+
+	/*hasta aqui*/
 
 	if(stack->ret_stack == 0)
 	{
