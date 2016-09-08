@@ -76,7 +76,8 @@ int EV_MOD_VI_FIND_AND_LOCK_FINISH;
 void mod_handler_vi_load(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
-	struct mod_stack_t *new_stack, *older_stack;
+	struct mod_stack_t *new_stack;
+	//, *older_stack;
 
 	struct mod_t *mod = stack->mod;
 	struct net_t *net;
@@ -210,16 +211,23 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	/* If there is any older access to the same address that this access could not
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
-	older_stack = mod_in_flight_write(mod, stack);
+
+	/* para el wavefront */
+	/*if()
+	{
+
+	}*/
+
+	/*older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}
+	}*/
 
-		older_stack = mod_in_flight_address(mod, stack->addr, stack);
+	/*	older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -227,7 +235,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 			assert(!older_stack->waiting_list_event);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}
+	}*/
 
   if(SALTAR_L1 && mod->level == 1)
 	{
