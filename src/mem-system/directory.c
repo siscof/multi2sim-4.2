@@ -252,8 +252,8 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 			{
 				if(lock_queue_iter->request_dir != mod_request_down_up)
 				{
-					dir_lock->lock_queue = stack;
 					stack->dir_lock_next = lock_queue_iter;
+					dir_lock->lock_queue = stack;
 					mem_debug("    0x%x access suspended\n", stack->tag);
 					return 0;
 				}
@@ -344,7 +344,9 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 		}
 
 		/* Wake up access */
-		esim_schedule_event(dir_lock->lock_queue->dir_lock_event, dir_lock->lock_queue, 1);
+		dir_lock->lock_queue->event = dir_lock->lock_queue->dir_lock_event;
+		esim_schedule_mod_stack_event(dir_lock->lock_queue, 1);
+		//esim_schedule_event(dir_lock->lock_queue->dir_lock_event, dir_lock->lock_queue, 1);
 		dir_lock->lock_queue = dir_lock->lock_queue->dir_lock_next;
 	}
 
