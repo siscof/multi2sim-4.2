@@ -75,7 +75,7 @@ struct mod_t *mod = stack->mod;
 				for(int i = 0; i < list_count(wavefront_list); i++)
 				{
 					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,i);
-					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
+					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem == 0)
 					{
 						list_free(wavefront_list);
 						return 0;
@@ -130,11 +130,11 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 
 	if(mshr_protocol == mshr_protocol_wavefront && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 	{
-		for(int i; i < list_count(mshr->waiting_list); i++)
+		assert(mshr->entradasOcupadas < mshr->size);
+		for(int i = 0; i < list_count(mshr->waiting_list); i++)
 		{
 			if(mshr->entradasOcupadas >= mshr->size)
 				return;
-
 
 			struct mod_stack_t *stack_access;
 			bool wavefront_permitido = false;
@@ -178,7 +178,9 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 				if(next_stack->ret_stack)
 					next_stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->ret_stack->latencias.start - next_stack->ret_stack->latencias.queue;
 				next_stack->waiting_list_event = 0;
-				esim_schedule_event(event, next_stack, 0);
+				next_stack->event = event;
+				esim_schedule_mod_stack_event(next_stack, 0);
+				//esim_schedule_event(event, next_stack, 0);
 				mshr->entradasOcupadas++;
 			}
 
@@ -194,7 +196,9 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			if(next_stack->ret_stack)
 				next_stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->ret_stack->latencias.start - next_stack->ret_stack->latencias.queue;
 			next_stack->waiting_list_event = 0;
-			esim_schedule_event(event, next_stack, 0);
+			next_stack->event = event;
+			esim_schedule_mod_stack_event(next_stack, 0);
+			//esim_schedule_event(event, next_stack, 0);
 			mshr->entradasOcupadas++;
 		}
 	}

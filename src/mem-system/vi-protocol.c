@@ -129,7 +129,9 @@ void mod_handler_vi_load(int event, void *data)
 		add_access(mod->level);
 
 		/* Next event */
-		esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, 0);
+		stack->event = EV_MOD_VI_LOAD_LOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, 0);
 		return;
 	}
 
@@ -179,15 +181,23 @@ void mod_handler_vi_load(int event, void *data)
 		if(stack->request_dir == mod_request_up_down)
     {
 			net_receive(mod->high_net, mod->high_net_node, stack->msg);
-			esim_schedule_event(EV_MOD_VI_LOAD, stack, 0);
+			stack->event = EV_MOD_VI_LOAD;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_LOAD, stack, 0);
 		}
     else if(stack->request_dir == mod_request_down_up)
     {
 			net_receive(mod->low_net, mod->low_net_node, stack->msg);
 			if(SALTAR_L1 && mod->level == 1)
-				esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
-			else
-				esim_schedule_event(EV_MOD_VI_LOAD_MISS, stack, 0);
+			{
+				stack->event = EV_MOD_VI_LOAD_UNLOCK;
+				esim_schedule_mod_stack_event(stack, 0);
+				//esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
+			}else{
+				stack->event = EV_MOD_VI_LOAD_MISS;
+				esim_schedule_mod_stack_event(stack, 0);
+				//esim_schedule_event(EV_MOD_VI_LOAD_MISS, stack, 0);
+			}
 		}
 		else
     {
@@ -246,7 +256,9 @@ if (event == EV_MOD_VI_LOAD_LOCK)
        	new_stack->valid_mask = stack->valid_mask;
 
 		stack->reply_size = 8 + mod->block_size;
-       	esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
+		new_stack->event = EV_MOD_VI_LOAD_SEND;
+		esim_schedule_mod_stack_event(new_stack, 0);
+    //   	esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
 		return;
 	}
 
@@ -266,7 +278,9 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	new_stack->tiempo_acceso = stack->tiempo_acceso;
 	new_stack->retry = stack->retry;
 	stack->find_and_lock_stack = new_stack;
-	esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
+	new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
+	esim_schedule_mod_stack_event(new_stack, 0);
+	//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
 	return;
 }
 
@@ -300,7 +314,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 		stack->retry = 1;
-		esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
+		stack->event = EV_MOD_VI_LOAD_LOCK;
+		esim_schedule_mod_stack_event(stack, retry_lat);
+		//esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
 		return;
 	}
 
@@ -336,7 +352,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		new_stack->wavefront = stack->wavefront;
 		new_stack->uop = stack->uop;
 		new_stack->retry = stack->retry;
-		esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
+		new_stack->event = EV_MOD_VI_LOAD_SEND;
+		esim_schedule_mod_stack_event(new_stack, 0);
+		//esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
 
 		return;
 	}
@@ -350,7 +368,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
 			//add_hit(mod->level);
 			mod->hits_aux++;
-			esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
+			stack->event = EV_MOD_VI_LOAD_UNLOCK;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
 			return;
 		}
 
@@ -372,7 +392,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			new_stack->wavefront = stack->wavefront;
 			new_stack->uop = stack->uop;
 			new_stack->retry = stack->retry;
-			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
+			new_stack->event = EV_MOD_VI_STORE_SEND;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 		}
 
 
@@ -386,7 +408,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		new_stack->wavefront = stack->wavefront;
 		new_stack->uop = stack->uop;
 		new_stack->retry = stack->retry;
-		esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
+		new_stack->event = EV_MOD_VI_LOAD_SEND;
+		esim_schedule_mod_stack_event(new_stack, 0);
+		//esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
 
 		return;
 
@@ -442,7 +466,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
 		cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->valid_mask);
 		/* Continue */
-		esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
+		stack->event = EV_MOD_VI_LOAD_UNLOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
 		return;
 	}
 
@@ -465,8 +491,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Impose the access latency before continuing */
 
-		esim_schedule_event(EV_MOD_VI_LOAD_FINISH, stack,
-				mod->latency);
+		stack->event = EV_MOD_VI_LOAD_FINISH;
+		esim_schedule_mod_stack_event(stack, mod->latency);
+		//esim_schedule_event(EV_MOD_VI_LOAD_FINISH, stack,	mod->latency);
 
 		return;
 	}
@@ -644,7 +671,9 @@ void mod_handler_vi_store(int event, void *data)
 		add_access(mod->level);
 		mod_access_start(mod, stack, mod_access_store);
 		/* Continue */
-		esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, 0);
+		stack->event = EV_MOD_VI_STORE_LOCK;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, 0);
 		return;
 	}
     if(event == EV_MOD_VI_STORE_SEND)
@@ -680,12 +709,16 @@ void mod_handler_vi_store(int event, void *data)
         if(stack->request_dir == mod_request_up_down)
         {
 			net_receive(mod->high_net, mod->high_net_node, stack->msg);
-			esim_schedule_event(EV_MOD_VI_STORE, stack, 0);
+			stack->event = EV_MOD_VI_STORE;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE, stack, 0);
         }
         else if(stack->request_dir == mod_request_down_up)
         {
 			net_receive(mod->low_net, mod->low_net_node, stack->msg);
-			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
+			stack->event = EV_MOD_VI_STORE_UNLOCK;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
         }
         else
         {
@@ -742,8 +775,9 @@ void mod_handler_vi_store(int event, void *data)
 			/*if (stack->witness_ptr)
 				(*stack->witness_ptr)++;
 			stack->witness_ptr = NULL;*/
-
-			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
+			stack->event = EV_MOD_VI_STORE_SEND;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 			return;
 
 		}
@@ -762,7 +796,9 @@ void mod_handler_vi_store(int event, void *data)
 		new_stack->uop = stack->uop;
 		new_stack->witness_ptr = stack->witness_ptr;
 		stack->witness_ptr = NULL;
-		esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
+		new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
+		esim_schedule_mod_stack_event(new_stack, 0);
+		//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
 
 		return;
 	}
@@ -786,7 +822,9 @@ void mod_handler_vi_store(int event, void *data)
 			new_stack->src_mod = mod;
 			new_stack->dirty_mask = stack->dirty_mask;
 			new_stack->request_dir = mod_request_up_down;
-			esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
+			new_stack->event = EV_MOD_VI_STORE_SEND;
+			esim_schedule_mod_stack_event(new_stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 
 
 			//da igual si es un hit o un miss
@@ -801,8 +839,9 @@ void mod_handler_vi_store(int event, void *data)
 			{
 				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
 			}*/
-
-			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
+			stack->event = EV_MOD_VI_STORE_UNLOCK;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 		}
 		else
 		{
@@ -831,7 +870,9 @@ void mod_handler_vi_store(int event, void *data)
 					new_stack->wavefront = stack->wavefront;
 					new_stack->uop = stack->uop;
 					new_stack->request_dir = mod_request_up_down;
-					esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
+					new_stack->event = EV_MOD_VI_STORE_SEND;
+					esim_schedule_mod_stack_event(new_stack, 0);
+					//esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 					//cache_set_block(mod->cache, stack->set, stack->way, 0, cache_block_invalid);
 				}
 
@@ -859,7 +900,9 @@ void mod_handler_vi_store(int event, void *data)
 				*/
 				//return;
 			//}
-			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
+			stack->event = EV_MOD_VI_STORE_UNLOCK;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 		}
 		return;
 	}
@@ -906,8 +949,9 @@ void mod_handler_vi_store(int event, void *data)
 				//dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
-
-				esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 5);
+				stack->event = EV_MOD_VI_STORE_UNLOCK;
+				esim_schedule_mod_stack_event(stack, 5);
+				//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 5);
 				return;
 			}
 
@@ -937,7 +981,9 @@ void mod_handler_vi_store(int event, void *data)
 			latency = 0;
 
 		/* Impose the access latency before continuing */
-		esim_schedule_event(EV_MOD_VI_STORE_FINISH, stack, latency);
+		stack->event = EV_MOD_VI_STORE_FINISH;
+		esim_schedule_mod_stack_event(stack, latency);
+		//esim_schedule_event(EV_MOD_VI_STORE_FINISH, stack, latency);
 		return;
 	}
 
@@ -1238,7 +1284,9 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		cache_access_block(mod->cache, stack->set, stack->way);
 
 		/* Access latency */
-		esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
+		stack->event = EV_MOD_VI_FIND_AND_LOCK_ACTION;
+		esim_schedule_mod_stack_event(stack, mod->dir_latency);
+		//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
 		return;
 	}
    	if ( event == EV_MOD_VI_FIND_AND_LOCK_ACTION)
@@ -1266,7 +1314,9 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		}*/
 
 		/* Continue */
-		esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK_FINISH, stack, 0);
+		stack->event = EV_MOD_VI_FIND_AND_LOCK_FINISH;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK_FINISH, stack, 0);
 		return;
 	}
 
