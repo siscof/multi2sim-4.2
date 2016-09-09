@@ -344,10 +344,13 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 		}
 
 		/* Wake up access */
-		dir_lock->lock_queue->event = dir_lock->lock_queue->dir_lock_event;
-		esim_schedule_mod_stack_event(dir_lock->lock_queue, 1);
+		struct mod_stack_t * stack = dir_lock->lock_queue;
+		stack->event = stack->dir_lock_event;
+		stack->dir_lock_event = 0;
+		dir_lock->lock_queue = stack->dir_lock_next;
+		stack->dir_lock_next = NULL;
+		esim_schedule_mod_stack_event(stack, 1);
 		//esim_schedule_event(dir_lock->lock_queue->dir_lock_event, dir_lock->lock_queue, 1);
-		dir_lock->lock_queue = dir_lock->lock_queue->dir_lock_next;
 	}
 
 	/* Trace */
