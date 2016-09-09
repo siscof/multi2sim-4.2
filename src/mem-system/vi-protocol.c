@@ -575,10 +575,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			add_CoalesceMiss(mod->level);
 		}
 
-		/* proba bloqueo */
-		if(mod->access_list_count == 0)
-		mod_stack_wakeup_mod(mod);
-
 		//if(stack->ret_stack)
 		//	stack->ret_stack->reply_size = 72;
 		/* Increment witness variable */
@@ -603,6 +599,11 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Return */
 		mod_stack_return(stack);
+
+		/* proba bloqueo */
+		if(mod->access_list_count == 0)
+			mod_stack_wakeup_mod(mod);
+
 		return;
 	}
 
