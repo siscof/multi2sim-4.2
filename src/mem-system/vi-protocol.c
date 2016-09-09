@@ -97,6 +97,12 @@ void mod_handler_vi_load(int event, void *data)
 			"state=\"%s:load\" addr=0x%x\n",
 			stack->id, mod->name, stack->addr);
 
+		/* proba para accesosos*/
+		if(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool == (asTiming(si_gpu)->cycle/ 10000)%10){
+			stack->event = event;
+			mod_stack_wait_in_mod(stack, mod, event);
+		}
+
 		//if(event == EV_MOD_VI_LOAD)
 		//	stack->glc = 1;
 
@@ -569,6 +575,9 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			add_CoalesceMiss(mod->level);
 		}
 
+		/* proba bloqueo */
+		if(mod->access_list_count == 0)
+		mod_stack_wakeup_mod(mod);
 
 		//if(stack->ret_stack)
 		//	stack->ret_stack->reply_size = 72;

@@ -608,7 +608,7 @@ void mod_lock_port(struct mod_t *mod, struct mod_stack_t *stack, int event)
 	/* Schedule event */
   stack->event = event;
   esim_schedule_mod_stack_event(stack, 0);
-	//esim_schedule_event(event, stack, 0);
+	esim_schedule_event(event, stack, 0);
 }
 
 
