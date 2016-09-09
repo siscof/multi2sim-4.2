@@ -98,9 +98,10 @@ void mod_handler_vi_load(int event, void *data)
 			stack->id, mod->name, stack->addr);
 
 		/* proba para accesosos*/
-		if(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool == (asTiming(si_gpu)->cycle/ 10000)%10){
+		if(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 1000)%10){
+			long long wait =  ((asTiming(si_gpu)->cycle/ 10000) + (stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool * 1000)) - asTiming(si_gpu)->cycle;
 			stack->event = event;
-			mod_stack_wait_in_mod(stack, mod, event);
+			esim_schedule_mod_stack_event(stack, wait);
 			return;
 		}
 
@@ -600,10 +601,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Return */
 		mod_stack_return(stack);
-
-		/* proba bloqueo */
-		if(mod->access_list_count == 0)
-			mod_stack_wakeup_mod(mod);
 
 		return;
 	}
