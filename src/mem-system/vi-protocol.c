@@ -101,6 +101,7 @@ void mod_handler_vi_load(int event, void *data)
 		if(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool == (asTiming(si_gpu)->cycle/ 10000)%10){
 			stack->event = event;
 			mod_stack_wait_in_mod(stack, mod, event);
+			return;
 		}
 
 		//if(event == EV_MOD_VI_LOAD)
