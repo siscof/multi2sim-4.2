@@ -98,15 +98,15 @@ void mod_handler_vi_load(int event, void *data)
 			stack->id, mod->name, stack->addr);
 
 		/* proba para accesosos*/
-		/*if(mod->level == 1 && stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 1000)%10){
-			long long wait = ((asTiming(si_gpu)->cycle - asTiming(si_gpu)->cycle%10000)  +(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool * 1000)) - asTiming(si_gpu)->cycle;
+		if(mod->level == 1 && stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 10)%10){
+			long long wait = ((asTiming(si_gpu)->cycle - asTiming(si_gpu)->cycle%100)  +(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool * 10)) - asTiming(si_gpu)->cycle;
 			if(wait < 0)
-				wait += 10000;
+				wait += 100;
 
 			stack->event = event;
 			esim_schedule_mod_stack_event(stack, wait);
 			return;
-		}*/
+		}
 
 		//if(event == EV_MOD_VI_LOAD)
 		//	stack->glc = 1;
