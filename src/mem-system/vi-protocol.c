@@ -98,6 +98,7 @@ void mod_handler_vi_load(int event, void *data)
 			stack->id, mod->name, stack->addr);
 
 		/* proba para accesosos*/
+		/*
 		if(mod->level == 1 && stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 10)%10){
 			long long wait = ((asTiming(si_gpu)->cycle - asTiming(si_gpu)->cycle%100)  +(stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool * 10)) - asTiming(si_gpu)->cycle;
 			if(wait < 0)
@@ -106,7 +107,7 @@ void mod_handler_vi_load(int event, void *data)
 			stack->event = event;
 			esim_schedule_mod_stack_event(stack, wait);
 			return;
-		}
+		}*/
 
 		//if(event == EV_MOD_VI_LOAD)
 		//	stack->glc = 1;
@@ -1209,6 +1210,18 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 			if (stack->way < 0)
 			{
 				stack->way = cache_replace_block(mod->cache, stack->set);
+			}
+
+			/* proba para accesosos*/
+
+			if(mod->level == 1 && stack->read != 0 && stack->ret_stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 10)%10){
+				long long wait = ((asTiming(si_gpu)->cycle - asTiming(si_gpu)->cycle%100)  +(stack->ret_stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool * 10)) - asTiming(si_gpu)->cycle;
+				if(wait < 0)
+					wait += 100;
+
+				stack->event = EV_MOD_VI_FIND_AND_LOCK_PORT;
+				esim_schedule_mod_stack_event(stack, wait);
+				return;
 			}
 
 			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && mod->kind != mod_kind_main_memory)
