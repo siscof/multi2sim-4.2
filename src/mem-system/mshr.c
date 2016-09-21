@@ -157,9 +157,9 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			if(!wavefront_permitido)
 			{
 				wavefront_permitido = true;
-				for(int i = 0; i < list_count(wavefront_list); i++)
+				for(int k = 0; k < list_count(wavefront_list); k++)
 				{
-					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,i);
+					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,k);
 					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
 					{
 						wavefront_permitido = false;
@@ -171,6 +171,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			if(wavefront_permitido)
 			{
 				list_remove_at(mshr->waiting_list,i);
+				i--;
 				int event = next_stack->waiting_list_event;
 				next_stack->mshr_locked = 1;
 				assert(next_stack->ret_stack);
