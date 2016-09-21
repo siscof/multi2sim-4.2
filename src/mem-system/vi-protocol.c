@@ -235,20 +235,14 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
 
-	/* para el wavefront */
-	/*if()
-	{
-
-	}*/
-
-	/*older_stack = mod_in_flight_write(mod, stack);
+	older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}*/
+	}
 
 	older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
@@ -784,15 +778,6 @@ void mod_handler_vi_store(int event, void *data)
 			return;
     }*/
 
-    /*if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
-		{
-			mod->read_retries++;
-			retry_lat = mod_get_retry_latency(mod);
-			mem_debug("mshr full, retrying in %d cycles\n", retry_lat);
-			stack->retry = 1;
-			esim_schedule_event(EV_MOD_VI_STORE_LOCK, stack, retry_lat);
-			return;
-		}*/
 		//mod->mshr_count++;
 
 		if(SALTAR_L1 && mod->level == 1)
