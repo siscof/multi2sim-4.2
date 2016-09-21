@@ -48,6 +48,7 @@ int EV_MOD_VI_LOAD;
 int EV_MOD_VI_LOAD_SEND;
 int EV_MOD_VI_LOAD_RECEIVE;
 int EV_MOD_VI_LOAD_LOCK;
+int EV_MOD_VI_LOAD_LOCK2;
 int EV_MOD_VI_LOAD_ACTION;
 int EV_MOD_VI_LOAD_MISS;
 int EV_MOD_VI_LOAD_UNLOCK;
@@ -219,7 +220,7 @@ void mod_handler_vi_load(int event, void *data)
 	}
 if (event == EV_MOD_VI_LOAD_LOCK)
 {
-	//struct mod_stack_t *older_stack;
+	struct mod_stack_t *older_stack;
 
 	mem_debug("  %lld %lld 0x%x %s load lock\n", esim_time, stack->id,
 		stack->addr, mod->name);
@@ -249,7 +250,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 		return;
 	}*/
 
-	/*	older_stack = mod_in_flight_address(mod, stack->addr, stack);
+	older_stack = mod_in_flight_address(mod, stack->addr, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -257,7 +258,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 			assert(!older_stack->waiting_list_event);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}*/
+	}
 
   if(SALTAR_L1 && mod->level == 1)
 	{
@@ -280,6 +281,37 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	}
 
 	/* Call find and lock */
+	/*new_stack = mod_stack_create(stack->id, mod, stack->addr,
+		EV_MOD_VI_LOAD_ACTION, stack);
+	new_stack->wavefront = stack->wavefront;
+	new_stack->uop = stack->uop;
+	new_stack->blocking = 1;
+	new_stack->read = 1;
+	new_stack->valid_mask = stack->valid_mask;
+	new_stack->tiempo_acceso = stack->tiempo_acceso;
+	new_stack->retry = stack->retry;
+	stack->find_and_lock_stack = new_stack;
+	new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
+	esim_schedule_mod_stack_event(new_stack, 0);*/
+	//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
+	stack->event = EV_MOD_VI_LOAD_LOCK2;
+	esim_schedule_mod_stack_event(stack, 0);
+	return;
+}
+
+if (event == EV_MOD_VI_LOAD_LOCK2)
+{
+
+	mem_debug("  %lld %lld 0x%x %s load lock2\n", esim_time, stack->id,
+		stack->addr, mod->name);
+	mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_lock2\"\n",
+		stack->id, mod->name);
+
+	if(stack->client_info && stack->client_info->arch){
+		stack->latencias.queue = stack->client_info->arch->timing->cycle - stack->latencias.start;
+	}
+	/* Call find and lock */
+
 	new_stack = mod_stack_create(stack->id, mod, stack->addr,
 		EV_MOD_VI_LOAD_ACTION, stack);
 	new_stack->wavefront = stack->wavefront;
@@ -292,7 +324,6 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	stack->find_and_lock_stack = new_stack;
 	new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
 	esim_schedule_mod_stack_event(new_stack, 0);
-	//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
 	return;
 }
 
@@ -326,7 +357,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 		stack->retry = 1;
-		stack->event = EV_MOD_VI_LOAD_LOCK;
+		stack->event = EV_MOD_VI_LOAD_LOCK2;
 		esim_schedule_mod_stack_event(stack, retry_lat);
 		//esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
 		return;
@@ -1038,7 +1069,8 @@ void mod_handler_vi_store(int event, void *data)
 
 void mod_handler_vi_find_and_lock(int event, void *data)
 {
-	struct mod_stack_t *stack = data, *oldest_stack=NULL;
+	struct mod_stack_t *stack = data;
+	//, *oldest_stack=NULL;
 	struct mod_stack_t *ret = stack->ret_stack;
 	//struct mod_stack_t *new_stack;
 

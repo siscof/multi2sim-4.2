@@ -189,6 +189,9 @@ void mem_system_init(void)
                         mem_domain_index, "mod_vi_load_receive");
 	EV_MOD_VI_LOAD_LOCK = esim_register_event_with_name(mod_handler_vi_load,
 			mem_domain_index, "mod_vi_load_lock");
+	EV_MOD_VI_LOAD_LOCK2 =
+	esim_register_event_with_name(mod_handler_vi_load,
+			mem_domain_index, "mod_vi_load_lock2");
 	EV_MOD_VI_LOAD_ACTION = esim_register_event_with_name(mod_handler_vi_load,
 			mem_domain_index, "mod_vi_load_action");
 	EV_MOD_VI_LOAD_MISS = esim_register_event_with_name(mod_handler_vi_load,

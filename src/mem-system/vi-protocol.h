@@ -27,6 +27,7 @@ extern int EV_MOD_VI_LOAD;
 extern int EV_MOD_VI_LOAD_SEND;
 extern int EV_MOD_VI_LOAD_RECEIVE;
 extern int EV_MOD_VI_LOAD_LOCK;
+extern int EV_MOD_VI_LOAD_LOCK2;
 extern int EV_MOD_VI_LOAD_ACTION;
 extern int EV_MOD_VI_LOAD_MISS;
 extern int EV_MOD_VI_LOAD_UNLOCK;
@@ -58,4 +59,3 @@ void mod_handler_vi_store(int event, void *data);
 
 
 #endif
-
