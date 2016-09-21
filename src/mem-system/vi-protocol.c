@@ -409,8 +409,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			//esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);
 		}
 
-
-
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,
 			EV_MOD_VI_LOAD_SEND, stack);
 		new_stack->reply_size = 8;
@@ -425,7 +423,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		//esim_schedule_event(EV_MOD_VI_LOAD_SEND, new_stack, 0);
 
 		return;
-
 	}
 
 
@@ -459,16 +456,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Error on read request. Unlock block and retry load. */
 		assert(!stack->err);
-		/*if (stack->err)
-		{
-			mod->read_retries++;
-			retry_lat = mod_get_retry_latency(mod);
-			dir_entry_unlock(mod->dir, stack->set, stack->way);
-			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
-			stack->retry = 1;
-			esim_schedule_event(EV_MOD_VI_LOAD_LOCK, stack, retry_lat);
-			return;
-		}*/
+
 		if(mod->level == 1 && stack->client_info && stack->client_info->arch)
 		{
 			stack->latencias.miss = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr - stack->latencias.lock_dir - stack->latencias.eviction;
@@ -617,7 +605,8 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 void mod_handler_vi_store(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
-	struct mod_stack_t *new_stack, *older_stack, *master_stack;
+	struct mod_stack_t *new_stack, *master_stack;
+	//*older_stack, *master_stack;
 
 	struct mod_t *mod = stack->mod;
 
@@ -755,14 +744,14 @@ void mod_handler_vi_store(int event, void *data)
 				stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 		//older_stack = mod_in_flight_write_fran(mod, stack);
-		older_stack = mod_in_flight_write(mod, stack);
+		/*older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
 			return;
-    }
+    }*/
 
     /*if (mod->mshr_size && mod->mshr_count >= mod->mshr_size)
 		{
@@ -1049,7 +1038,7 @@ void mod_handler_vi_store(int event, void *data)
 
 void mod_handler_vi_find_and_lock(int event, void *data)
 {
-	struct mod_stack_t *stack = data;
+	struct mod_stack_t *stack = data, *oldest_stack=NULL;
 	struct mod_stack_t *ret = stack->ret_stack;
 	//struct mod_stack_t *new_stack;
 
@@ -1207,6 +1196,15 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		if (!stack->hit)
 		{
 			/* Find victim */
+			/*oldest_stack = mshr_block_in_flight(mod->mshr, stack);
+			if(oldest_stack && flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && mod->kind != mod_kind_main_memory)
+			{
+				mod_stack_wait_in_stack(stack, oldest_stack, EV_MOD_VI_FIND_AND_LOCK);
+				mod_unlock_port(mod, port, stack);
+				ret->port_locked = 0;
+				return;
+			}*/
+
 			if (stack->way < 0)
 			{
 				stack->way = cache_replace_block(mod->cache, stack->set);
@@ -1214,7 +1212,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 			/* proba para accesosos*/
 
-			if(mod->level == 1 && stack->read != 0 && stack->ret_stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 10)%10){
+			/*if(mod->level == 1 && stack->read != 0 && stack->ret_stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool != (asTiming(si_gpu)->cycle/ 10)%10){
 				long long wait = ((asTiming(si_gpu)->cycle - asTiming(si_gpu)->cycle%100)  +(stack->ret_stack->wavefront->wavefront_pool_entry->id_in_wavefront_pool * 10)) - asTiming(si_gpu)->cycle;
 				if(wait < 0)
 					wait += 100;
@@ -1222,7 +1220,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 				stack->event = EV_MOD_VI_FIND_AND_LOCK_PORT;
 				esim_schedule_mod_stack_event(stack, wait);
 				return;
-			}
+			}*/
 
 			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && mod->kind != mod_kind_main_memory)
 			{
