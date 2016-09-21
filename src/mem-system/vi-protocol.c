@@ -235,7 +235,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
 
-	older_stack = mod_in_flight_write(mod, stack);
+	/*older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -252,7 +252,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 			assert(!older_stack->waiting_list_event);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}
+	}*/
 
   if(SALTAR_L1 && mod->level == 1)
 	{
