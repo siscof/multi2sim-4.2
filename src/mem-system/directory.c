@@ -360,7 +360,8 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 	/* Unlock entry */
 	dir_lock->lock = 0;
 	dir_lock->stack_id = 0;
-	dir_lock->stack->dir_lock = NULL;
+	if(dir_lock->stack)
+		dir_lock->stack->dir_lock = NULL;
 	dir_lock->stack = NULL;
 }
 
