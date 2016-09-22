@@ -220,7 +220,7 @@ void mod_handler_vi_load(int event, void *data)
 	}
 if (event == EV_MOD_VI_LOAD_LOCK)
 {
-	//struct mod_stack_t *older_stack;
+	struct mod_stack_t *older_stack;
 
 	mem_debug("  %lld %lld 0x%x %s load lock\n", esim_time, stack->id,
 		stack->addr, mod->name);
@@ -235,7 +235,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	 * be coalesced with, wait for it. */
 	//older_stack = mod_in_flight_write_fran(mod, stack);
 
-	/*older_stack = mod_in_flight_write(mod, stack);
+	older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
 		mem_debug("    %lld wait for access %lld\n",
@@ -252,7 +252,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 			assert(!older_stack->waiting_list_event);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
-	}*/
+	}
 
   if(SALTAR_L1 && mod->level == 1)
 	{
@@ -756,7 +756,7 @@ void mod_handler_vi_store(int event, void *data)
 
 	if (event == EV_MOD_VI_STORE_LOCK)
 	{
-		//struct mod_stack_t *older_stack;
+		struct mod_stack_t *older_stack;
 
 
 		mem_debug("  %lld %lld 0x%x %s store lock\n", esim_time, stack->id,
@@ -769,14 +769,14 @@ void mod_handler_vi_store(int event, void *data)
 				stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 		//older_stack = mod_in_flight_write_fran(mod, stack);
-		/*older_stack = mod_in_flight_write(mod, stack);
+		older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
 			return;
-    }*/
+    }
 
 		//mod->mshr_count++;
 
