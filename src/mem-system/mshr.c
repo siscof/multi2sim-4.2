@@ -128,6 +128,8 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 	list_remove(mshr->access_list,stack);
 	mshr->entradasOcupadas--;
 
+	assert(list_index_of(mshr->access_list, stack) == -1);
+
 	if(mshr_protocol == mshr_protocol_wavefront && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 	{
 		assert(mshr->entradasOcupadas < mshr->size);

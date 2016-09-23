@@ -368,7 +368,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->latencias.start = 0;
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -442,7 +442,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -481,7 +481,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 		if (stack->mshr_locked != 0)
 		{
-			mshr_unlock(mod);
+			mshr_unlock_si(mod,stack);
+			//mshr_unlock(mod);
 			stack->mshr_locked = 0;
 		}
 
@@ -1001,7 +1002,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -1063,7 +1064,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -1161,7 +1162,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -1198,7 +1199,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 		if (stack->mshr_locked != 0)
 		{
-			mshr_unlock(mod);
+			mshr_unlock_si(mod,stack);
+			//mshr_unlock(mod);
 			stack->mshr_locked = 0;
 		}
 
@@ -1360,7 +1362,7 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -1411,7 +1413,7 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
@@ -1448,7 +1450,7 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 
 		if (stack->mshr_locked != 0)
 		{
-			mshr_unlock(mod);
+			mshr_unlock_si(mod, stack);
 			stack->mshr_locked = 0;
 		}
 
@@ -1689,7 +1691,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			ret->err = 1;
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack->ret_stack);
 				stack->mshr_locked = 0;
 			}
 			mod_unlock_port(mod, port, stack);
@@ -1793,7 +1795,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			if (stack->mshr_locked != 0)
 			{
-				mshr_unlock(mod);
+				mshr_unlock_si(mod, stack);
 				stack->mshr_locked = 0;
 			}
 
