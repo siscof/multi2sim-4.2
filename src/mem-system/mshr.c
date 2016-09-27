@@ -52,7 +52,11 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 struct mod_t *mod = stack->mod;
 	if(mshr->size > mshr->entradasOcupadas)
 	{
-		if(mshr_protocol == mshr_protocol_wavefront && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+		if(mshr_protocol == mshr_protocol_wavefront_occupancy)
+		{
+
+		}
+		else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 		{
 			struct mod_stack_t *stack_access;
 			bool wavefront_permitido = false;
@@ -89,9 +93,7 @@ struct mod_t *mod = stack->mod;
 		mshr->entradasOcupadas++;
 		return 1;
 	}
-
 	return 0;
-
 }
 
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
@@ -131,8 +133,14 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 
 	assert(list_index_of(mshr->access_list, stack) == -1);
 
-	if(mshr_protocol == mshr_protocol_wavefront && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
+		/* propuesta 2: */
+
+	}
+	else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+	{
+		/* propuesta 1: asignar mshr por wavefront en fifo*/
 		assert(mshr->entradasOcupadas < mshr->size);
 		for(int i = 0; i < list_count(mshr->waiting_list); i++)
 		{
@@ -191,7 +199,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 
 		}
 	}else{
-
+		/* default */
 		if(list_count(mshr->waiting_list))
 		{
 			next_stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);

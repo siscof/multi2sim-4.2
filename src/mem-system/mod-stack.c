@@ -68,7 +68,14 @@ void mod_stack_return(struct mod_stack_t *stack)
 	struct mod_t *mod = stack->mod;
 	struct mshr_t *mshr = mod->mshr;
 	assert(list_index_of(mshr->waiting_list, stack) == -1);
-	assert(stack->mod->level != 1 || list_index_of(mshr->access_list, stack) == -1);
+	assert(list_index_of(mshr->access_list, stack) == -1);
+	if(stack->target_mod)
+	{
+		mod = stack->target_mod;
+		mshr = mod->mshr;
+		assert(list_index_of(mshr->waiting_list, stack) == -1);
+		assert(list_index_of(mshr->access_list, stack) == -1);
+	}
 
 	/*hasta aqui*/
 

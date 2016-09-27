@@ -369,13 +369,17 @@ static void mem_config_read_general(struct config_t *config)
 	{
 		mshr_protocol = mshr_protocol_default;
 	}
-	else if(!strncasecmp(mshr_protocol_str,"wavefront", 10))
+	else if(!strncasecmp(mshr_protocol_str,"fifo", 5))
 	{
-		mshr_protocol = mshr_protocol_wavefront;
+		mshr_protocol = mshr_protocol_wavefront_fifo;
+	}
+	else if(!strncasecmp(mshr_protocol_str,"occupancy", 10))
+	{
+		mshr_protocol = mshr_protocol_wavefront_occupancy;
 	}
 	else
 	{
-		fatal("%s: mshr protocol: %s : isn't a valid mshr protocol (default, wavefront)\n",
+		fatal("%s: mshr protocol: %s : isn't a valid mshr protocol (default, fifo, occupancy)\n",
 				mem_config_file_name, mshr_protocol_str);
 	}
 }
