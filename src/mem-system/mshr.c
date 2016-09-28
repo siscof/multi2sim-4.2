@@ -76,15 +76,24 @@ struct mod_t *mod = stack->mod;
 			}
 			if(!wavefront_permitido)
 			{
+				int wavefront_waiting_for_mem = 0;
 				for(int i = 0; i < list_count(wavefront_list); i++)
 				{
 					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,i);
-					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem == 0)
+					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
 					{
-						list_free(wavefront_list);
-						return 0;
+						wavefront_waiting_for_mem++;
 					}
 				}
+
+				//assert(list_count(wavefront_list) != 0);
+
+				if(wavefront_waiting_for_mem != 0 && wavefront_waiting_for_mem != list_count(wavefront_list))
+				{
+					list_free(wavefront_list);
+					return 0;
+				}
+
 			}
 			list_free(wavefront_list);
 		}
@@ -121,7 +130,34 @@ void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 	        mshr->entradasOcupadas--;
 	}
 }*/
+/*
+bool_t mshr_wavefront_inflight(struct si_wavefront_t * wavefront)
+{
+	for(int j = 0; j < list_count(mshr->access_list); j++)
+	{
+		stack_access = list_get(mshr->access_list,j);
+		assert(stack_access);
+		if(wavefront->id == stack_access->wavefront->id)
+		{
+			return true;
+		}
+	}
+	return false;
+}
 
+struct list_t * mshr_get_wavefront_list()
+{
+	struct list_t *wavefront_list = list_create();
+	for(int j = 0; j < list_count(mshr->access_list); j++)
+	{
+		stack_access = list_get(mshr->access_list,j);
+		assert(stack_access);
+
+		if(list_index_of(wavefront_list, stack_access->wavefront) == -1)
+				list_add(wavefront_list,stack_access->wavefront);
+	}
+}
+*/
 void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 {
 	struct mshr_t *mshr = mod->mshr;
@@ -168,13 +204,20 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			if(!wavefront_permitido)
 			{
 				wavefront_permitido = true;
+				int wavefront_waiting_for_mem = 0;
 				for(int k = 0; k < list_count(wavefront_list); k++)
 				{
 					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,k);
 					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
 					{
-						wavefront_permitido = false;
+						wavefront_waiting_for_mem++;
 					}
+				}
+				//assert(list_count(wavefront_list) != 0);
+
+				if(wavefront_waiting_for_mem != 0 && wavefront_waiting_for_mem != list_count(wavefront_list))
+				{
+					wavefront_permitido = false;
 				}
 			}
 			list_free(wavefront_list);
