@@ -44,6 +44,7 @@ struct mshr_t *mshr_create()
 	mshr->entradasOcupadas = 0;
 	mshr->waiting_list = list_create();
 	mshr->access_list = list_create();
+	mshr->wavefront_list = list_create();
 	return mshr;
 }
 
@@ -144,8 +145,68 @@ bool_t mshr_wavefront_inflight(struct si_wavefront_t * wavefront)
 	}
 	return false;
 }
+*/
+void mshr_wakeup_stack(struct mshr_t *mshr, int index)
+{
+	struct mod_stack_t *stack = list_remove_at(mshr->waiting_list,index);
+	int event = stack->waiting_list_event;
+	stack->mshr_locked = 1;
+	assert(stack->ret_stack);
+	assert(list_index_of(mshr->access_list, stack) == -1);
+	list_add(mshr->access_list,stack->ret_stack);
+	if(stack->ret_stack)
+		stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - stack->ret_stack->latencias.start - stack->ret_stack->latencias.queue;
+	stack->waiting_list_event = 0;
+	stack->event = event;
+	esim_schedule_mod_stack_event(stack, 0);
+	mshr->entradasOcupadas++;
+}
 
-struct list_t * mshr_get_wavefront_list()
+void mshr_add_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
+{
+	struct mod_t *mod = mshr->mod;
+	struct mod_stack_t *stack;
+
+	assert(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1);
+
+	list_add(mshr->wavefront_list, wavefront);
+	if(mshr_protocol == mshr_protocol_wavefront_fifo)
+	{
+		for(int j = 0; j < list_count(mshr->waiting_list); j++)
+		{
+			stack = list_get(mshr->waiting_list, j);
+			if(mshr->size > mshr->entradasOcupadas)
+			{
+				if(stack->wavefront->id == wavefront->id)
+				{
+					mshr_wakeup_stack(mshr,j);
+					j--;
+				}
+			}else{
+				break;
+			}
+		}
+	}
+}
+
+void mshr_remove_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
+{
+		if(list_remove(mshr->wavefront_list, wavefront) == NULL)
+			 return;
+
+		if(mshr_protocol == mshr_protocol_wavefront_fifo)
+		{
+			if(mshr->size > mshr->entradasOcupadas && list_count(mshr->waiting_list) == 0)
+			{
+				for(int i = mshr->size - mshr->entradasOcupadas; i > 0; i--)
+				{
+					mshr_wakeup_stack(mshr,0);
+				}
+			}
+		}
+}
+
+/*struct list_t *mshr_get_wavefront_list(mshr)
 {
 	struct list_t *wavefront_list = list_create();
 	for(int j = 0; j < list_count(mshr->access_list); j++)
@@ -156,12 +217,13 @@ struct list_t * mshr_get_wavefront_list()
 		if(list_index_of(wavefront_list, stack_access->wavefront) == -1)
 				list_add(wavefront_list,stack_access->wavefront);
 	}
-}
-*/
+}*/
+
 void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 {
 	struct mshr_t *mshr = mod->mshr;
 	struct mod_stack_t *next_stack;
+	struct si_wavefront_t *wavefront;
 
 	assert(mshr->entradasOcupadas > 0);
 	list_remove(mshr->access_list,stack);
@@ -183,12 +245,26 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			if(mshr->entradasOcupadas >= mshr->size)
 				return;
 
-			struct mod_stack_t *stack_access;
-			bool wavefront_permitido = false;
-			struct list_t *wavefront_list = list_create();
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
+			if(list_count(mshr->wavefront_list) != 0)
+			{
+				for(int j = 0; j < list_count(mshr->wavefront_list); j++)
+				{
+					wavefront = (struct si_wavefront_t *) list_get(mshr->wavefront_list,j);
+					if(next_stack->wavefront->id == wavefront->id)
+					{
+						mshr_wakeup_stack(mshr,i);
+						i--;
+					}
+				}
+			}
+			else
+			{
+				mshr_wakeup_stack(mshr,i);
+				i--;
+			}
 
-			for(int j = 0; j < list_count(mshr->access_list); j++)
+			/*for(int j = 0; j < list_count(mshr->access_list); j++)
 			{
 				stack_access = list_get(mshr->access_list,j);
 				assert(stack_access);
@@ -210,6 +286,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,k);
 					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
 					{
+						for()
 						wavefront_waiting_for_mem++;
 					}
 				}
@@ -239,7 +316,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 				//esim_schedule_event(event, next_stack, 0);
 				mshr->entradasOcupadas++;
 			}
-
+*/
 		}
 	}else{
 		/* default */

@@ -32,6 +32,7 @@
 //fran
 #include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/cycle-interval-report.h>
+#include <mem-system/mshr.h>
 
 void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 {
@@ -102,7 +103,8 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * waiting */
 			uop->wavefront_pool_entry->wait_for_mem = 1;
 			uop->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
-			//si_wavefront_send_mem_accesses(uop->wavefront);
+			if(uop->wavefront_pool_entry->lgkm_cnt != 0)
+				mshr_add_wavefront(scalar_unit->compute_unit->vector_cache->mshr, uop->wavefront);
 		}
 
 		/* Check for "barrier" instruction */
