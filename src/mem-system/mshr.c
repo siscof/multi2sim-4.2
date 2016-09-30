@@ -167,7 +167,7 @@ void mshr_add_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
 	struct mod_t *mod = mshr->mod;
 	struct mod_stack_t *stack;
 
-	assert(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1);
+	assert(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1 && list_index_of(mshr->wavefront_list, wavefront) == -1);
 
 	list_add(mshr->wavefront_list, wavefront);
 	if(mshr_protocol == mshr_protocol_wavefront_fifo)

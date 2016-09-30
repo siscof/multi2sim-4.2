@@ -72,6 +72,7 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 
 	/* MSHR */
 	mod->mshr = mshr_create();
+  mod->mshr->mod = mod;
 	//xcalloc(1,sizeof(struct mshr_t));
 	mod->coherence_controller = cc_create();
 
