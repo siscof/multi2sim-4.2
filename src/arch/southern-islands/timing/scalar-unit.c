@@ -103,7 +103,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * waiting */
 			uop->wavefront_pool_entry->wait_for_mem = 1;
 			uop->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
-			if(uop->wavefront_pool_entry->lgkm_cnt != 0)
+			if(uop->wavefront_pool_entry->vm_cnt != 0 && (uop->inst.micro_inst.sopp.simm16 & 0xf) != 0)
 				mshr_add_wavefront(scalar_unit->compute_unit->vector_cache->mshr, uop->wavefront);
 		}
 
