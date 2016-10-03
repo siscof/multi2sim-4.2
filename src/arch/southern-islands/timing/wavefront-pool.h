@@ -42,8 +42,11 @@ struct si_wavefront_pool_entry_t
 
 	/* Outstanding memory accesses */
 	unsigned int vm_cnt;     /* Vector memory count */
+	unsigned int waiting_vm_cnt;
 	unsigned int exp_cnt;    /* Export count */
+	unsigned int waiting_exp_cnt;
 	unsigned int lgkm_cnt;   /* LDS, GDS, Constant, and message count */
+	unsigned int waiting_lgkm_cnt; 
 };
 
 struct si_wavefront_pool_t

@@ -435,8 +435,11 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		 * memory instructions */
 		if (wavefront->wavefront_pool_entry->wait_for_mem)
 		{
-			if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
-				!wavefront->wavefront_pool_entry->vm_cnt)
+			/*if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
+				!wavefront->wavefront_pool_entry->vm_cnt)*/
+			if(uop->wavefront_pool_entry->waiting_vm_cnt <= uop->wavefront_pool_entry->vm_cnt
+				&& uop->wavefront_pool_entry->waiting_exp_cnt <= uop->wavefront_pool_entry->exp_cnt
+				&& uop->wavefront_pool_entry->waiting_lgkm_cnt <= uop->wavefront_pool_entry->lgkm_cnt)
 			{
 				si_wavefront_add_stall(wavefront);
 				add_wait_for_mem_latency(compute_unit, asTiming(si_gpu)->cycle -
@@ -444,6 +447,9 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 				wavefront->wavefront_pool_entry->wait_for_mem =
 					0;
 				wavefront->wavefront_pool_entry->wait_for_mem_cycle = 0;
+				uop->wavefront_pool_entry->waiting_vm_cnt = 0;
+				uop->wavefront_pool_entry->waiting_exp_cnt = 0;
+				uop->wavefront_pool_entry->waiting_lgkm_cnt = 0;
 			}
 			else
 			{
