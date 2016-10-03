@@ -196,7 +196,7 @@ void mshr_remove_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront
 
 		if(mshr_protocol == mshr_protocol_wavefront_fifo)
 		{
-			if(mshr->size > mshr->entradasOcupadas && list_count(mshr->waiting_list) == 0)
+			if(mshr->size > mshr->entradasOcupadas && list_count(mshr->waiting_list) != 0)
 			{
 				for(int i = mshr->size - mshr->entradasOcupadas; i > 0; i--)
 				{

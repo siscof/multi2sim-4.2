@@ -74,9 +74,12 @@ void si_vector_mem_complete(struct si_vector_mem_unit_t *vector_mem)
 		/* Access complete, remove the uop from the queue */
 		list_remove(vector_mem->write_buffer, uop);
 
-		assert(uop->wavefront_pool_entry->lgkm_cnt > 0);
-		uop->wavefront_pool_entry->lgkm_cnt--;
-		if(uop->wavefront_pool_entry->lgkm_cnt == 0)
+		assert(uop->wavefront_pool_entry->vm_cnt > 0);
+		uop->wavefront_pool_entry->vm_cnt--;
+		if(uop->vector_mem_write == 1)
+			uop->wavefront_pool_entry->exp_cnt--;
+			
+		if(uop->wavefront_pool_entry->vm_cnt == 0)
 			mshr_remove_wavefront(vector_mem->compute_unit->vector_cache->mshr, uop->wavefront);
 
 		si_trace("si.end_inst id=%lld cu=%d\n", uop->id_in_compute_unit,

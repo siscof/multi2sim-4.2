@@ -437,9 +437,9 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		{
 			/*if (!wavefront->wavefront_pool_entry->lgkm_cnt &&
 				!wavefront->wavefront_pool_entry->vm_cnt)*/
-			if(uop->wavefront_pool_entry->waiting_vm_cnt <= uop->wavefront_pool_entry->vm_cnt
-				&& uop->wavefront_pool_entry->waiting_exp_cnt <= uop->wavefront_pool_entry->exp_cnt
-				&& uop->wavefront_pool_entry->waiting_lgkm_cnt <= uop->wavefront_pool_entry->lgkm_cnt)
+			if(uop->wavefront_pool_entry->waiting_vm_cnt >= uop->wavefront_pool_entry->vm_cnt
+				&& uop->wavefront_pool_entry->waiting_exp_cnt >= uop->wavefront_pool_entry->exp_cnt
+				&& uop->wavefront_pool_entry->waiting_lgkm_cnt >= uop->wavefront_pool_entry->lgkm_cnt)
 			{
 				si_wavefront_add_stall(wavefront);
 				add_wait_for_mem_latency(compute_unit, asTiming(si_gpu)->cycle -
@@ -854,6 +854,7 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 			assert(uop);
 
 			/* Only evaluate memory instructions */
+			assert(uop->inst.info->fmt != SI_FMT_MUBUF && uop->inst.info->fmt != SI_FMT_MIMG);
 			if (uop->inst.info->fmt != SI_FMT_MTBUF)
 			{
 				list_index++;
@@ -900,7 +901,10 @@ void si_compute_unit_issue_oldest(struct si_compute_unit_t *compute_unit,
 			uop->wavefront_pool_entry->ready_next_cycle = 1;
 
 			compute_unit->vector_mem_inst_count++;
-			uop->wavefront_pool_entry->lgkm_cnt++;
+			//uop->wavefront_pool_entry->lgkm_cnt++;
+			uop->wavefront_pool_entry->vm_cnt++;
+			if(uop->vector_mem_write == 1)
+				uop->wavefront_pool_entry->exp_cnt++;
 		}
 	}
 
@@ -1352,7 +1356,9 @@ void si_compute_unit_issue_first(struct si_compute_unit_t *compute_unit,
 
 			mem_insts_issued++;
 			compute_unit->vector_mem_inst_count++;
-			uop->wavefront_pool_entry->lgkm_cnt++;
+			uop->wavefront_pool_entry->vm_cnt++;
+			if(uop->vector_mem_write == 1)
+				uop->wavefront_pool_entry->exp_cnt++;
 
 			break;
 		}

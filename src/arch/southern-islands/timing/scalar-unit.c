@@ -105,8 +105,8 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			uop->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
 
 			uop->wavefront_pool_entry->waiting_vm_cnt = uop->inst.micro_inst.sopp.simm16 & 0xf;
-			uop->wavefront_pool_entry->waiting_exp_cnt = (uop->inst.micro_inst.sopp.simm16 >> 4) & 0xf;
-			uop->wavefront_pool_entry->waiting_lgkm_cnt = (uop->inst.micro_inst.sopp.simm16 >> 8) & 0xf;
+			uop->wavefront_pool_entry->waiting_exp_cnt = (uop->inst.micro_inst.sopp.simm16 >> 4) & 0x7;
+			uop->wavefront_pool_entry->waiting_lgkm_cnt = (uop->inst.micro_inst.sopp.simm16 >> 7) & 0x1f;
 
 			if(uop->wavefront_pool_entry->waiting_vm_cnt > uop->wavefront_pool_entry->vm_cnt)
 			//if(uop->wavefront_pool_entry->vm_cnt != 0 && (uop->inst.micro_inst.sopp.simm16 & 0xf) != 0)
