@@ -57,11 +57,43 @@ struct mod_t *mod = stack->mod;
 		{
 
 		}
-		else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+		else if(mshr_protocol == mshr_protocol_wavefront_fifo)
 		{
-			struct mod_stack_t *stack_access;
-			bool wavefront_permitido = false;
-			struct list_t *wavefront_list = list_create();
+			if(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+			{
+				if(stack->wavefront->mshr_prio)
+				{
+					assert(list_index_of(mshr->access_list, stack) == -1);
+					list_add(mshr->access_list,stack);
+					mshr->entradasOcupadas++;
+					return 1;
+				}else{
+					if(mshr->entradas_reservadas)
+					{
+						//revisar esto!!!
+						if((mshr->size - mshr->entradas_reservadas) > mshr->entradasOcupadas)
+						{
+							assert(list_index_of(mshr->access_list, stack) == -1);
+							list_add(mshr->access_list,stack);
+							mshr->entradasOcupadas++;
+							return 1;
+						}
+					}else{
+						assert(list_index_of(mshr->access_list, stack) == -1);
+						list_add(mshr->access_list,stack);
+						mshr->entradasOcupadas++;
+						return 1;
+					}
+				}
+				return 0;
+			}else{
+				assert(list_index_of(mshr->access_list, stack) == -1);
+				list_add(mshr->access_list,stack);
+				mshr->entradasOcupadas++;
+				return 1;
+			}
+
+			/*
 			for(int j = 0; j < list_count(mshr->access_list); j++)
 			{
 				stack_access = list_get(mshr->access_list,j);
@@ -96,12 +128,17 @@ struct mod_t *mod = stack->mod;
 				}
 
 			}
-			list_free(wavefront_list);
+			list_free(wavefront_list);*/
 		}
-		assert(list_index_of(mshr->access_list, stack) == -1);
-		list_add(mshr->access_list,stack);
-		mshr->entradasOcupadas++;
-		return 1;
+		else if(mshr_protocol == mshr_protocol_default)
+		{
+			assert(list_index_of(mshr->access_list, stack) == -1);
+			list_add(mshr->access_list,stack);
+			mshr->entradasOcupadas++;
+			return 1;
+		}else{
+			fatal("Invalid mshr_protocol");
+		}
 	}
 	return 0;
 }
@@ -268,9 +305,6 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 
 		for(int i = 0; i < list_count(mshr->waiting_list); i++)
 		{
-			if(mshr->entradasOcupadas >= mshr->size)
-				return;
-
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
 			if(mshr->entradasOcupadas >= mshr->size)
 			{
