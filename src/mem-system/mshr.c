@@ -262,7 +262,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 		/* propuesta 2: */
 
 	}
-	else if(mshr_protocol == mshr_protocol_wavefront_fifo && /*mod->compute_unit && mod->compute_unit->vector_cache == mod &&*/ mod->level == 1)
+	else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 	{
 		/* propuesta 1: asignar mshr por wavefront en fifo*/
 		assert(mshr->entradasOcupadas < mshr->size);
@@ -286,7 +286,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			}
 		}
 
-		for(int i = 0; i < list_count(mshr->waiting_list); i++)
+		/*for(int i = 0; i < list_count(mshr->waiting_list); i++)
 		{
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
 			if(mshr->entradasOcupadas >= mshr->size)
@@ -295,7 +295,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			}else{
 				mshr_wakeup_stack(mshr,i);
 				i--;
-			}
+			}*/
 
 			/*for(int j = 0; j < list_count(mshr->access_list); j++)
 			{
@@ -349,8 +349,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 				//esim_schedule_event(event, next_stack, 0);
 				mshr->entradasOcupadas++;
 			}
-*/
-		}
+		}*/
 	}else{
 		/* default */
 		if(list_count(mshr->waiting_list))
