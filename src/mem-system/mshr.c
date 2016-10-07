@@ -48,97 +48,80 @@ struct mshr_t *mshr_create()
 	return mshr;
 }
 
-int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
+void mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
-struct mod_t *mod = stack->mod;
-	if(mshr->size > mshr->entradasOcupadas)
+	if(list_index_of(mshr->wavefront_list, stack->wavefront) != -1)
 	{
-		if(mshr_protocol == mshr_protocol_wavefront_occupancy)
-		{
+		stack->wavefront->mshr_prio = true;
+		stack->wavefront->mshr_prio_entries = list_count(stack->wavefront->mem_accesses_list);
+		mshr->entradas_reservadas += stack->wavefront->mshr_prio_entries;
+	}
+	assert(list_index_of(mshr->access_list, stack) == -1);
+	list_add(mshr->access_list,stack);
+	mshr->entradasOcupadas++;
+}
 
-		}
-		else if(mshr_protocol == mshr_protocol_wavefront_fifo)
+int mshr_try_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
+{
+	struct mod_t *mod = stack->mod;
+	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
+	{
+
+	}
+	else if(mshr_protocol == mshr_protocol_wavefront_fifo)
+	{
+		if(mshr->size > mshr->entradasOcupadas)
 		{
 			if(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 			{
 				if(stack->wavefront->mshr_prio)
 				{
 					assert(list_index_of(mshr->access_list, stack) == -1);
-					list_add(mshr->access_list,stack);
-					mshr->entradasOcupadas++;
+					mshr_lock(mshr, stack);
 					return 1;
 				}else{
-					if(mshr->entradas_reservadas)
+					if(list_index_of(mshr->wavefront_list, stack->wavefront) == -1)
 					{
-						//revisar esto!!!
-						if((mshr->size - mshr->entradas_reservadas) > mshr->entradasOcupadas)
+						return 0;
+						/*if((mshr->size - mshr->entradas_reservadas) > mshr->entradasOcupadas)
 						{
-							assert(list_index_of(mshr->access_list, stack) == -1);
-							list_add(mshr->access_list,stack);
-							mshr->entradasOcupadas++;
+
+							mshr_lock(mshr, stack);
 							return 1;
-						}
+						}*/
 					}else{
-						assert(list_index_of(mshr->access_list, stack) == -1);
-						list_add(mshr->access_list,stack);
-						mshr->entradasOcupadas++;
-						return 1;
+						if(mshr->size > mshr->entradas_reservadas)
+						{
+							mshr->entradas_reservadas += list_count(stack->wavefront->mem_accesses_list);
+							stack->wavefront->mshr_prio = true;
+							mshr_lock(mshr, stack);
+							return 1;
+						}else{
+							return 0;
+						}
 					}
 				}
 				return 0;
 			}else{
 				assert(list_index_of(mshr->access_list, stack) == -1);
-				list_add(mshr->access_list,stack);
-				mshr->entradasOcupadas++;
+				mshr_lock(mshr, stack);
 				return 1;
 			}
-
-			/*
-			for(int j = 0; j < list_count(mshr->access_list); j++)
-			{
-				stack_access = list_get(mshr->access_list,j);
-				assert(stack_access);
-				if(stack->wavefront->id == stack_access->wavefront->id)
-				{
-					wavefront_permitido = true;
-					break;
-				}
-
-				if(list_index_of(wavefront_list, stack_access->wavefront) == -1)
-						list_add(wavefront_list,stack_access->wavefront);
-			}
-			if(!wavefront_permitido)
-			{
-				int wavefront_waiting_for_mem = 0;
-				for(int i = 0; i < list_count(wavefront_list); i++)
-				{
-					struct si_wavefront_t *wavefront_in_mshr = list_get(wavefront_list,i);
-					if(wavefront_in_mshr->wavefront_pool_entry->wait_for_mem != 0)
-					{
-						wavefront_waiting_for_mem++;
-					}
-				}
-
-				//assert(list_count(wavefront_list) != 0);
-
-				if(wavefront_waiting_for_mem != 0 && wavefront_waiting_for_mem != list_count(wavefront_list))
-				{
-					list_free(wavefront_list);
-					return 0;
-				}
-
-			}
-			list_free(wavefront_list);*/
+		}else{
+			return 0;
 		}
-		else if(mshr_protocol == mshr_protocol_default)
+	}
+	else if(mshr_protocol == mshr_protocol_default)
+	{
+		if(mshr->size > mshr->entradasOcupadas)
 		{
 			assert(list_index_of(mshr->access_list, stack) == -1);
-			list_add(mshr->access_list,stack);
-			mshr->entradasOcupadas++;
-			return 1;
+			mshr_lock(mshr, stack);
 		}else{
-			fatal("Invalid mshr_protocol");
+			return 0;
 		}
+	}else{
+		fatal("Invalid mshr_protocol");
 	}
 	return 0;
 }
