@@ -172,20 +172,28 @@ void mshr_add_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
 	assert(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1);
 
 	list_add(mshr->wavefront_list, wavefront);
+
 	if(mshr_protocol == mshr_protocol_wavefront_fifo)
 	{
-		for(int j = 0; j < list_count(mshr->waiting_list); j++)
+		if(mshr->entradas_reservadas <= mshr->size)
 		{
-			stack = list_get(mshr->waiting_list, j);
-			if(mshr->size > mshr->entradasOcupadas)
+			wavefront->mshr_prio = true;
+			wavefront->mshr_prio_entries = list_count(wavefront->mem_accesses_list);
+			mshr->entradas_reservadas += wavefront->mshr_prio_entries;
+
+			for(int j = 0; j < list_count(mshr->waiting_list); j++)
 			{
-				if(stack->wavefront->id == wavefront->id)
+				stack = list_get(mshr->waiting_list, j);
+				if(mshr->size > mshr->entradasOcupadas)
 				{
-					mshr_wakeup_stack(mshr,j);
-					j--;
+					if(stack->wavefront->id == wavefront->id)
+					{
+						mshr_wakeup_stack(mshr,j);
+						j--;
+					}
+				}else{
+					break;
 				}
-			}else{
-				break;
 			}
 		}
 	}
@@ -196,16 +204,12 @@ void mshr_remove_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront
 		if(list_remove(mshr->wavefront_list, wavefront) == NULL)
 			 return;
 
-		if(mshr_protocol == mshr_protocol_wavefront_fifo)
-		{
-			if(mshr->size > mshr->entradasOcupadas && list_count(mshr->waiting_list) != 0)
-			{
-				for(int i = mshr->size - mshr->entradasOcupadas; i > 0; i--)
-				{
-					mshr_wakeup_stack(mshr,0);
-				}
-			}
-		}
+		assert(wavefront->mshr_prio_entries == 0);
+
+		//if(mshr_protocol == mshr_protocol_wavefront_fifo)
+		//{
+			wavefront->mshr_prio = false;
+		//}
 }
 
 /*struct list_t *mshr_get_wavefront_list(mshr)
@@ -238,30 +242,40 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 		/* propuesta 2: */
 
 	}
-	else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+	else if(mshr_protocol == mshr_protocol_wavefront_fifo && /*mod->compute_unit && mod->compute_unit->vector_cache == mod &&*/ mod->level == 1)
 	{
 		/* propuesta 1: asignar mshr por wavefront en fifo*/
 		assert(mshr->entradasOcupadas < mshr->size);
+
+		for(int j = 0; j < list_count(mshr->wavefront_list); j++)
+		{
+			wavefront = (struct si_wavefront_t *) list_get(mshr->wavefront_list,j);
+			if(wavefront->mshr_prio)
+			{
+				for(int i = 0; i < list_count(mshr->waiting_list); i++)
+				{
+					next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
+					if(next_stack->wavefront->id == wavefront->id)
+					{
+						mshr_wakeup_stack(mshr,i);
+						i--;
+					}
+					if(mshr->entradasOcupadas >= mshr->size)
+						return;
+				}
+			}
+		}
+
 		for(int i = 0; i < list_count(mshr->waiting_list); i++)
 		{
 			if(mshr->entradasOcupadas >= mshr->size)
 				return;
 
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
-			if(list_count(mshr->wavefront_list) != 0)
+			if(mshr->entradasOcupadas >= mshr->size)
 			{
-				for(int j = 0; j < list_count(mshr->wavefront_list); j++)
-				{
-					wavefront = (struct si_wavefront_t *) list_get(mshr->wavefront_list,j);
-					if(next_stack->wavefront->id == wavefront->id)
-					{
-						mshr_wakeup_stack(mshr,i);
-						i--;
-					}
-				}
-			}
-			else
-			{
+				return;
+			}else{
 				mshr_wakeup_stack(mshr,i);
 				i--;
 			}

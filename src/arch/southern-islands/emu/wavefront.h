@@ -22,6 +22,7 @@
 
 #include <arch/southern-islands/asm/asm.h>
 #include <lib/util/list.h>
+#include <stdbool.h>
 
 
 struct si_wavefront_t
@@ -81,6 +82,8 @@ struct si_wavefront_t
 	struct si_wavefront_pool_entry_t *wavefront_pool_entry;
 	unsigned int barrier_inst : 1;
 	struct list_t *mem_accesses_list;
+	bool mshr_prio;
+	int mshr_prio_entries;
 
 	/* Statistics */
 	long long inst_count;  /* Total number of instructions */

@@ -23,6 +23,7 @@ struct mshr_t
 	struct mod_t *mod;
 	int size;
 	int entradasOcupadas;
+	int entradas_reservadas;
 	struct list_t *waiting_list;
 	struct list_t *access_list;
 	struct list_t *wavefront_list;

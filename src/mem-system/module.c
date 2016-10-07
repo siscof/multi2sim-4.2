@@ -138,7 +138,6 @@ long long mod_access_si(struct mod_t *mod, enum mod_access_kind_t access_kind,
   stack->latencias.wavefront_access = stack->uop->read_ready;
 
 	stack->wavefront = stack->uop->wavefront;
-
   list_add(stack->wavefront->mem_accesses_list, stack);
 
 	stack->work_group_id_in_cu = wg_id;
