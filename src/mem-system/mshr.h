@@ -40,6 +40,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack);
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event);
 void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack);
 void mshr_unlock(struct mod_t *mod);
+void mshr_wavefront_wakeup(struct mod_t *mod, struct si_wavefront_t *wavefront);
 //void mshr_unlock(struct mshr_t *mshr);
 //void mshr_unlock2(struct mod_t *mod);
 struct mshr_t *mshr_create();

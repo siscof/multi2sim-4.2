@@ -30,6 +30,7 @@
 #include "uop.h"
 #include "wavefront-pool.h"
 //fran
+#include <mem-system/mshr.h>
 #include <lib/util/estadisticas.h>
 #include <arch/southern-islands/timing/cycle-interval-report.h>
 
@@ -102,6 +103,8 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * waiting */
 			uop->wavefront_pool_entry->wait_for_mem = 1;
 			uop->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
+			mshr_wavefront_wakeup(scalar_unit->compute_unit->vector_cache, uop->wavefront);
+
 			//si_wavefront_send_mem_accesses(uop->wavefront);
 		}
 
