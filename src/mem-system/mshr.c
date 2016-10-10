@@ -80,16 +80,17 @@ int mshr_try_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 					mshr_lock(mshr, stack);
 					return 1;
 				}else{
-					if(list_index_of(mshr->wavefront_list, stack->wavefront) == -1)
+					return 0;
+					/*if(list_index_of(mshr->wavefront_list, stack->wavefront) == -1)
 					{
-						return 0;
+						return 0;*/
 						/*if((mshr->size - mshr->entradas_reservadas) > mshr->entradasOcupadas)
 						{
 
 							mshr_lock(mshr, stack);
 							return 1;
 						}*/
-					}else{
+					/*}else{
 						if(mshr->size > mshr->entradas_reservadas)
 						{
 							mshr->entradas_reservadas += list_count(stack->wavefront->mem_accesses_list);
@@ -99,7 +100,7 @@ int mshr_try_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 						}else{
 							return 0;
 						}
-					}
+					}*/
 				}
 				return 0;
 			}else{
@@ -186,7 +187,7 @@ void mshr_add_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
 {
 	struct mod_t *mod = mshr->mod;
 	struct mod_stack_t *stack;
-	if(list_index_of(mshr->wavefront_list, wavefront) == -1)
+	if(list_index_of(mshr->wavefront_list, wavefront) != -1)
 		return;
 
 	assert(mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1);
@@ -224,11 +225,13 @@ void mshr_remove_wavefront(struct mshr_t *mshr, struct si_wavefront_t *wavefront
 		if(list_remove(mshr->wavefront_list, wavefront) == NULL)
 			 return;
 
-		assert(wavefront->mshr_prio_entries == 0);
+		//assert(wavefront->mshr_prio_entries == 0);
 
 		//if(mshr_protocol == mshr_protocol_wavefront_fifo)
 		//{
 			wavefront->mshr_prio = false;
+			mshr->entradas_reservadas -= wavefront->mshr_prio_entries;
+			//wavefront->mshr_prio_entries = 0;
 		//}
 }
 
@@ -286,6 +289,31 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 			}
 		}
 
+		for(int j = 0; j < list_count(mshr->wavefront_list); j++)
+		{
+			if(mshr->entradas_reservadas <= mshr->size)
+			{
+				wavefront = (struct si_wavefront_t *) list_get(mshr->wavefront_list,j);
+				if(!wavefront->mshr_prio)
+				{
+					wavefront->mshr_prio = true;
+					wavefront->mshr_prio_entries = list_count(wavefront->mem_accesses_list);
+					mshr->entradas_reservadas += wavefront->mshr_prio_entries;
+
+					for(int i = 0; i < list_count(mshr->waiting_list); i++)
+					{
+						next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
+						if(next_stack->wavefront->id == wavefront->id)
+						{
+							mshr_wakeup_stack(mshr,i);
+							i--;
+						}
+						if(mshr->entradasOcupadas >= mshr->size)
+							return;
+					}
+				}
+			}
+		}
 		/*for(int i = 0; i < list_count(mshr->waiting_list); i++)
 		{
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list,i);
