@@ -449,7 +449,7 @@ struct list_t * si_vector_mem_get_access_list(struct si_vector_mem_unit_t *vecto
 {
 	struct si_uop_t *uop;
 	int size = list_count(vector_mem->mem_buffer);
-	struct list_t *list = xcalloc(1, sizeof(struct list_t));
+	struct list_t *list = list_create();
 	for(int i = 0; i < 5 && i < size; i++)
 	{
 		uop = list_get(vector_mem->mem_buffer,i);

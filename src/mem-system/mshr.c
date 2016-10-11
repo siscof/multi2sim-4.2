@@ -118,6 +118,7 @@ int mshr_try_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 		{
 			assert(list_index_of(mshr->access_list, stack) == -1);
 			mshr_lock(mshr, stack);
+			return 1;
 		}else{
 			return 0;
 		}
@@ -169,6 +170,7 @@ bool_t mshr_wavefront_inflight(struct si_wavefront_t * wavefront)
 */
 void mshr_wakeup_stack(struct mshr_t *mshr, int index)
 {
+	assert(list_count(mshr->waiting_list));
 	struct mod_stack_t *stack = list_remove_at(mshr->waiting_list,index);
 	int event = stack->waiting_list_event;
 	stack->mshr_locked = 1;
@@ -279,7 +281,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 				mshr_wakeup_stack(mshr,wakeup_index);
 			}
 		}
-		if(mshr->entradasOcupadas < mshr->size)
+		if(mshr->entradasOcupadas < mshr->size && list_count(mshr->waiting_list))
 		{
 			mshr_wakeup_stack(mshr,0);
 		}
