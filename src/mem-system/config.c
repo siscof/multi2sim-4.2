@@ -369,6 +369,10 @@ static void mem_config_read_general(struct config_t *config)
 	{
 		mshr_protocol = mshr_protocol_default;
 	}
+	else if(!strncasecmp(mshr_protocol_str,"vmb_fifo", 9))
+	{
+		mshr_protocol = mshr_protocol_vmb_fifo;
+	}
 	else if(!strncasecmp(mshr_protocol_str,"fifo", 5))
 	{
 		mshr_protocol = mshr_protocol_wavefront_fifo;

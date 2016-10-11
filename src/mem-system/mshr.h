@@ -14,6 +14,7 @@ extern int mshr_protocol;
 enum mshr_protocol
 {
 	mshr_protocol_default = 0,
+	mshr_protocol_vmb_fifo,
 	mshr_protocol_wavefront_fifo,
 	mshr_protocol_wavefront_occupancy
 };

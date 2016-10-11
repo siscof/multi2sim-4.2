@@ -445,6 +445,22 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	}
 }
 
+struct list_t * si_vector_mem_get_access_list(struct si_vector_mem_unit_t *vector_mem)
+{
+	struct si_uop_t *uop;
+	int size = list_count(vector_mem->mem_buffer);
+	struct list_t *list = xcalloc(1, sizeof(struct list_t));
+	for(int i = 0; i < 5 && i < size; i++)
+	{
+		uop = list_get(vector_mem->mem_buffer,i);
+		for(int j = 0; j < list_count(uop->mem_accesses_list); j++)
+		{
+			list_add(list, list_get(vector_mem->mem_buffer,i));
+		}
+	}
+	return list;
+}
+
 void si_vector_mem_read(struct si_vector_mem_unit_t *vector_mem)
 {
 	struct si_uop_t *uop;

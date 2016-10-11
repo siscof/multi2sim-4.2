@@ -112,7 +112,7 @@ int mshr_try_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 			return 0;
 		}
 	}
-	else if(mshr_protocol == mshr_protocol_default)
+	else if(mshr_protocol == mshr_protocol_default || mshr_protocol == mshr_protocol_vmb_fifo)
 	{
 		if(mshr->size > mshr->entradasOcupadas)
 		{
@@ -253,6 +253,8 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 	struct mshr_t *mshr = mod->mshr;
 	struct mod_stack_t *next_stack;
 	struct si_wavefront_t *wavefront;
+	struct list_t *list;
+	int wakeup_index;
 
 	assert(mshr->entradasOcupadas > 0);
 	list_remove(mshr->access_list,stack);
@@ -263,6 +265,24 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
 		/* propuesta 2: */
+
+	}
+	else if(mshr_protocol == mshr_protocol_vmb_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
+	{
+		list = si_vector_mem_get_access_list(&mod->compute_unit->vector_mem_unit);
+		for(int i = 0; i< list_count(list); i++)
+		{
+			next_stack = list_get(list, i);
+			wakeup_index = list_index_of(mshr->waiting_list, next_stack);
+			if(wakeup_index != -1)
+			{
+				mshr_wakeup_stack(mshr,wakeup_index);
+			}
+		}
+		if(mshr->entradasOcupadas < mshr->size)
+		{
+			mshr_wakeup_stack(mshr,0);
+		}
 
 	}
 	else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)

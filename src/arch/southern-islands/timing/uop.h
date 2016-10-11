@@ -96,6 +96,7 @@ struct si_uop_t
 	/* Witness memory accesses */
 	int global_mem_witness;
 	int lds_witness;
+	struct list_t *mem_accesses_list;
 
 	/* Added for Profiling reports*/
 	int num_global_mem_read ;    //deprecated

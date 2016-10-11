@@ -39,4 +39,6 @@ struct si_vector_mem_unit_t
 	long long inflight_mem_write;
 };
 
+struct list_t *si_vector_mem_get_access_list(struct si_vector_mem_unit_t *vector_mem);
+
 #endif
