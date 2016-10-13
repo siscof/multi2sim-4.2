@@ -276,7 +276,7 @@ void mshr_unlock_si(struct mod_t *mod, struct mod_stack_t *stack)
 		{
 			next_stack = list_get(list, i);
 			wakeup_index = list_index_of(mshr->waiting_list, next_stack);
-			if(wakeup_index != -1)
+			if(mshr->entradasOcupadas < mshr->size && wakeup_index != -1)
 			{
 				mshr_wakeup_stack(mshr,wakeup_index);
 			}

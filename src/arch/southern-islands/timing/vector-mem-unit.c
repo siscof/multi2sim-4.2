@@ -455,7 +455,7 @@ struct list_t * si_vector_mem_get_access_list(struct si_vector_mem_unit_t *vecto
 		uop = list_get(vector_mem->mem_buffer,i);
 		for(int j = 0; j < list_count(uop->mem_accesses_list); j++)
 		{
-			list_add(list, list_get(vector_mem->mem_buffer,i));
+			list_add(list, list_get(uop->mem_accesses_list,j));
 		}
 	}
 	return list;
