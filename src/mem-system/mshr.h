@@ -49,4 +49,5 @@ void mshr_control(int event, void *data);
 void mshr_control2();
 void mshr_test_sizes();
 int mshr_evaluar_test();
+void mshr_wakeup(struct mshr_t *mshr, int index);
 #endif

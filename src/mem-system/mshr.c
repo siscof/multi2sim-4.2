@@ -211,7 +211,8 @@ void mshr_wavefront_wakeup(struct mod_t *mod, struct si_wavefront_t *wavefront)
 	else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
 	{
 		/* propuesta 1: asignar mshr por wavefront en fifo*/
-
+		struct mod_stack_t *stack_access;
+		struct list_t *wavefront_list = list_create();
 		int inflight_accesses = 0;
 		for(int i = 0; i < list_count(mshr->access_list); i++)
 		{
@@ -221,6 +222,7 @@ void mshr_wavefront_wakeup(struct mod_t *mod, struct si_wavefront_t *wavefront)
 				inflight_accesses += list_count(stack_access->wavefront->mem_accesses_list);
 			}
 		}
+		list_free(wavefront_list);
 
 		if(inflight_accesses < mshr->size)
 		{
