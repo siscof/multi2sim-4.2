@@ -94,6 +94,7 @@ struct mod_t *mod = stack->mod;
 					mshr->entradasOcupadas++;
 					return 1;
 				}
+				return 0;
 			}
 		}
 	/*	else if(mshr_protocol == mshr_protocol_wavefront_fifo && mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1)
@@ -219,6 +220,7 @@ void mshr_wavefront_wakeup(struct mod_t *mod, struct si_wavefront_t *wavefront)
 			stack_access = list_get(mshr->access_list,i);
 			if(list_index_of(wavefront_list, stack_access->wavefront) == -1)
 			{
+				list_add(wavefront_list, stack_access->wavefront);
 				inflight_accesses += list_count(stack_access->wavefront->mem_accesses_list);
 			}
 		}
