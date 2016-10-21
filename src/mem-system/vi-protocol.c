@@ -1005,11 +1005,11 @@ void mod_handler_vi_store(int event, void *data)
 
 			if (stack->hit)
 			{
-				if(mod->kind != mod_kind_main_memory)
+				/*if(mod->kind != mod_kind_main_memory)
 				{
 					cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 					cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				}
+				}*/
 				//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 			}
 			else
@@ -1044,10 +1044,10 @@ void mod_handler_vi_store(int event, void *data)
 				esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);*/
 
 				//resetearla mascara de dirty y añadir bit
-				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
+				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
 				//cache_clean_block_dirty(mod->cache, stack->set, stack->way);
-				cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+				//cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+				//cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 
 				//return;
 			}
@@ -1069,7 +1069,11 @@ void mod_handler_vi_store(int event, void *data)
 		/* Error in write request, unlock block and retry store. */
 		assert(!stack->err);
 		if(stack->request_dir == mod_request_down_up)
+		{
 			cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
+			cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+			cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+		}
 
 		if (stack->mshr_locked != 0)
 		{
