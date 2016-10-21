@@ -962,7 +962,10 @@ static void mem_config_read_dram_systems(struct config_t *config)
 		if(!system_config_str)
 			system_config_str = config_read_string(config, section, "SystemDescription", "system.ini");
 
-		ret = snprintf(dram_system_intrep_file, MAX_PATH_SIZE, "%s/%s.csv", dram_interval_reports_dir, dram_system_name);
+		ret = snprintf(dram_system_intrep_file, MAX_PATH_SIZE, "./%s.csv", dram_system_name);
+
+		//	ret = snprintf(dram_system_intrep_file, MAX_PATH_SIZE, "%s/%s.csv", dram_interval_reports_dir, dram_system_name);
+
 		if (ret < 0 || ret >= MAX_PATH_SIZE)
 			fatal("%s: string too long", dram_system_intrep_file);
 
