@@ -1002,6 +1002,67 @@ void mod_handler_vi_store(int event, void *data)
 				return;
 			}
 			*/
+			/* If another module has not given the block,
+				 access main memory */
+			if (mod->kind == mod_kind_main_memory
+				&& mod->dram_system)
+			{
+				struct dram_system_t *ds = mod->dram_system;
+				assert(ds);
+
+				assert(stack->mshr_locked == 0);
+
+				if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+				{
+					//stack->err = 1;
+					//ret->err = 1;
+					//ret->retry |= 1 << mod->level;
+
+					//mod_stack_set_reply(ret, reply_ack_error);
+					//stack->reply_size = 8;
+
+					//dir_entry_unlock(mod->dir, stack->set, stack->way);
+
+					mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
+
+
+					/*
+					new_stack = mod_stack_create(stack->id, mod, stack->addr,
+						EV_MOD_VI_LOAD_ACTION, stack);
+					new_stack->wavefront = stack->wavefront;
+					new_stack->uop = stack->uop;
+					new_stack->blocking = 1;
+					new_stack->read = 1;
+					new_stack->valid_mask = stack->valid_mask;
+					new_stack->tiempo_acceso = stack->tiempo_acceso;
+					new_stack->retry = stack->retry;
+					stack->find_and_lock_stack = new_stack;
+					new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
+					*/
+					stack->event = EV_MOD_VI_LOAD_ACTION;
+					esim_schedule_mod_stack_event(stack, 10);
+
+					//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 5);
+					return;
+				}
+
+				estadisticas(1, 0);
+				stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
+				//add_hit(mod->level);
+				mod->hits_aux++;
+				stack->event = EV_MOD_VI_STORE_UNLOCK;
+
+				/* Access main memory system */
+				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
+				linked_list_add(ds->pending_reads, stack);
+				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+
+				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
+				/* Ctx main memory stats */
+				assert(!stack->prefetch);
+				//ctx->mm_read_accesses++;
+				return;
+			}
 
 			if (stack->hit)
 			{
@@ -1084,6 +1145,11 @@ void mod_handler_vi_store(int event, void *data)
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 		int latency = mod->latency;
+		if (mod->kind == mod_kind_main_memory
+			&& mod->dram_system)
+			{
+				latency = 0;
+			}
 
 		/* Impose the access latency before continuing */
 		stack->event = EV_MOD_VI_STORE_FINISH;
