@@ -355,11 +355,12 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 			/* Hit */
 		if (stack->hit || mod->kind == mod_kind_main_memory)
 		{
-
+			/*
 			estadisticas(1, 0);
 			stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
 			//add_hit(mod->level);
 			mod->hits_aux++;
+			*/
 
 			/* If another module has not given the block,
 				 access main memory */
@@ -380,11 +381,12 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 					//mod_stack_set_reply(ret, reply_ack_error);
 					//stack->reply_size = 8;
 
-					dir_entry_unlock(mod->dir, stack->set, stack->way);
+					//dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 					mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
 
 
+					/*
 					new_stack = mod_stack_create(stack->id, mod, stack->addr,
 						EV_MOD_VI_LOAD_ACTION, stack);
 					new_stack->wavefront = stack->wavefront;
@@ -396,13 +398,18 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 					new_stack->retry = stack->retry;
 					stack->find_and_lock_stack = new_stack;
 					new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
-					esim_schedule_mod_stack_event(new_stack, 10);
-
-
+					*/
+					stack->event = EV_MOD_VI_LOAD_ACTION;
+					esim_schedule_mod_stack_event(stack, 10);
 
 					//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 5);
 					return;
 				}
+
+				estadisticas(1, 0);
+				stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
+				//add_hit(mod->level);
+				mod->hits_aux++;
 				stack->event = EV_MOD_VI_LOAD_UNLOCK;
 
 				/* Access main memory system */
@@ -415,7 +422,12 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 				assert(!stack->prefetch);
 				//ctx->mm_read_accesses++;
 				return;
-			 }
+			}
+
+			estadisticas(1, 0);
+ 			stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
+ 			//add_hit(mod->level);
+ 			mod->hits_aux++;
 
 			stack->event = EV_MOD_VI_LOAD_UNLOCK;
  			esim_schedule_mod_stack_event(stack, 0);
@@ -534,7 +546,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* Impose the access latency before continuing */
 
-			stack->event = EV_MOD_VI_LOAD_FINISH;
+		stack->event = EV_MOD_VI_LOAD_FINISH;
 
 		if(mod->kind == mod_kind_main_memory
 			&& mod->dram_system)
@@ -901,6 +913,7 @@ void mod_handler_vi_store(int event, void *data)
 
 			/* If another module has not given the block,
 				 access main memory */
+			/*
 			if (mod->kind == mod_kind_main_memory
 				&& mod->dram_system)
 			{
@@ -921,8 +934,6 @@ void mod_handler_vi_store(int event, void *data)
 					dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 					mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
-
-
 					new_stack = mod_stack_create(stack->id, mod, stack->addr,
 						EV_MOD_VI_STORE_ACTION, stack);
 					new_stack->blocking = 1;
@@ -934,24 +945,32 @@ void mod_handler_vi_store(int event, void *data)
 					stack->witness_ptr = NULL;
 					new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
 					esim_schedule_mod_stack_event(new_stack, 10);
-
-					//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 5);
 					return;
 				}
 				stack->event = EV_MOD_VI_STORE_UNLOCK;
 
-				/* Access main memory system */
 				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 				linked_list_add(ds->pending_reads, stack);
 				dram_system_add_read_trans(ds->handler, stack->addr, 99, 0);
 
 				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
-				/* Ctx main memory stats */
 				assert(!stack->prefetch);
 				//ctx->mm_read_accesses++;
 				return;
 			}
+			*/
 
+			if (stack->hit)
+			{
+				if(mod->kind != mod_kind_main_memory)
+				{
+					cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+					cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+				}
+				//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
+			}
+			else
+			{
 
 				if(stack->eviction)
 				{
@@ -968,9 +987,6 @@ void mod_handler_vi_store(int event, void *data)
 					//cache_set_block(mod->cache, stack->set, stack->way, 0, cache_block_invalid);
 				}
 
-				cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-
 				/*new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr,  EV_MOD_VI_STORE_SEND, stack);
 				new_stack->src_mod = mod;
 				new_stack->dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
@@ -981,18 +997,18 @@ void mod_handler_vi_store(int event, void *data)
 				new_stack->uop = stack->uop;
 				stack->reply_size = 8 + mod->block_size;
 				esim_schedule_event(EV_MOD_VI_STORE_SEND, new_stack, 0);*/
-				/*
+
 				//resetearla mascara de dirty y añadir bit
 				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
 				//cache_clean_block_dirty(mod->cache, stack->set, stack->way);
 				cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-				// si dirty_mask esta completa deberiamos hacer evict? para limpiarla manteniendo el bloque valio?
-				dirty_mask = cache_get_block_dirty_mask(mod->cache, stack->set, stack->way);
-				*/
+
 				//return;
-			//}
-			esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
+			}
+			stack->event = EV_MOD_VI_STORE_UNLOCK;
+			esim_schedule_mod_stack_event(stack, 0);
+			//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
 		}
 		return;
 	}
@@ -1010,53 +1026,6 @@ void mod_handler_vi_store(int event, void *data)
 		if(stack->request_dir == mod_request_down_up)
 			cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
 
-		if (mod->kind == mod_kind_main_memory &&
-		 	mod->dram_system &&
-			stack->request_dir == mod_request_up_down &&
-			!stack->main_memory_accessed &&
-			stack->reply != reply_ack_data_sent_to_peer)
-		{
-			struct dram_system_t *ds = mod->dram_system;
-			//struct x86_ctx_t *ctx = stack->client_info->ctx;
-			assert(ds);
-			//assert(ctx);
-
-			if (stack->mshr_locked != 0)
-			{
-				mshr_unlock(mod);
-				stack->mshr_locked = 0;
-			}
-
-			if (!dram_system_will_accept_trans(ds->handler, stack->addr))
-			{
-				//stack->err = 1;
-				//ret->err = 1;
-				//ret->retry |= 1 << target_mod->level;
-
-				//mod_stack_set_reply(ret, reply_ack_error);
-				//stack->reply_size = 8;
-
-				//dir_entry_unlock(mod->dir, stack->set, stack->way);
-
-				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, mod->name);
-
-				esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 5);
-				return;
-			}
-
-			/* Access main memory system */
-			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->mod->dram_system->name);
-			linked_list_add(ds->pending_reads, stack);
-			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
-
-			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
-			/* Ctx main memory stats */
-			assert(!stack->prefetch);
-			//ctx->mm_read_accesses++;
-
-			return;
-		}
-
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(mod);
@@ -1066,8 +1035,6 @@ void mod_handler_vi_store(int event, void *data)
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 		int latency = mod->latency;
-		if(mod->dram_system)
-			latency = 0;
 
 		/* Impose the access latency before continuing */
 		esim_schedule_event(EV_MOD_VI_STORE_FINISH, stack, latency);
