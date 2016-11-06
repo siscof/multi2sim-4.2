@@ -93,6 +93,8 @@ struct esta_t
 	long long misses;
   long long loads;
   long long invalidations;
+	long long load_invalidation;
+	long long write_invalidation;
 	long long evictions;
 
   long long uop_load_finish;
@@ -250,8 +252,6 @@ struct mem_system_stats
 
 	long long access_finished;
 
-	//coalesce
-
 	struct retry_stats_t retries[num_retries_kinds];
 	long long stacks_with_retries;
 	// MSHR
@@ -332,6 +332,8 @@ void add_inst_to_vmb();
 void add_inst_to_vmb();
 void add_coalesce_load(int level);
 void add_coalesce_store(int level);
+void add_load_invalidation(int level);
+void add_store_invalidation(int level);
 void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf);
 void add_cache_states(int state, int level);
 
