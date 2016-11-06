@@ -94,7 +94,7 @@ struct esta_t
   long long loads;
   long long invalidations;
 	long long load_invalidation;
-	long long write_invalidation;
+	long long store_invalidation;
 	long long evictions;
 
   long long uop_load_finish;
