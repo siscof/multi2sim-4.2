@@ -1379,8 +1379,9 @@ int SIGpuRun(Timing *self)
 	{
 		gpu->idle = FALSE;
 
-		if(flag_mshr_dynamic_enabled)
+		if(flag_mshr_dynamic_enabled){
 			mshr_test_sizes();
+		}
 	}
 
 	ndrange = si_emu->ndrange;
