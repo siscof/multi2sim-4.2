@@ -238,6 +238,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
+		fatal("write in flight1");
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
@@ -256,6 +257,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 
   if(SALTAR_L1 && mod->level == 1)
 	{
+		fatal("write in flight2");
 		stack->request_dir = mod_request_down_up;
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
        	new_stack->reply_size = 8;
@@ -333,6 +335,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 	/* Error locking */
 	if (stack->err)
 	{
+			fatal("error");
 		mod->read_retries++;
 		add_retry(stack,load_action_retry);
 		retry_lat = mod_get_retry_latency(mod);
@@ -748,7 +751,7 @@ void mod_handler_vi_store(int event, void *data)
 		//mod_access_start(mod, stack, mod_access_store);
 		if ((stack->mod->level == 1 && !flag_coalesce_gpu_enabled && master_stack) || (stack->mod->level != 1 && master_stack))
 		{
-			mod_access_start(mod, stack, mod_access_store);
+			mod_access_start(mod, stack, mod_access_nc_store);
 			assert(master_stack->addr == stack->addr);
 			mod->nc_writes++;
 			mod_stack_merge_dirty_mask(master_stack, stack->dirty_mask);
@@ -771,7 +774,7 @@ void mod_handler_vi_store(int event, void *data)
 		}
 		mod->mshr_count++;*/
 		add_access(mod->level);
-		mod_access_start(mod, stack, mod_access_store);
+		mod_access_start(mod, stack, mod_access_nc_store);
 		/* Continue */
 		stack->event = EV_MOD_VI_STORE_LOCK;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -848,6 +851,7 @@ void mod_handler_vi_store(int event, void *data)
 		older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
+			fatal("write in flight3");
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
