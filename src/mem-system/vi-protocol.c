@@ -1044,7 +1044,7 @@ void mod_handler_vi_store(int event, void *data)
 					stack->find_and_lock_stack = new_stack;
 					new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
 					*/
-					stack->event = EV_MOD_VI_STORE_ACTION;
+					stack->event = EV_MOD_VI_LOAD_ACTION;
 					esim_schedule_mod_stack_event(stack, 10);
 
 					//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 5);
@@ -1052,7 +1052,7 @@ void mod_handler_vi_store(int event, void *data)
 				}
 
 				estadisticas(1, 0);
-				stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
+				//stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
 				//add_hit(mod->level);
 				mod->hits_aux++;
 				stack->event = EV_MOD_VI_STORE_UNLOCK;
