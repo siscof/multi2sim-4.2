@@ -548,9 +548,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_miss\"\n",
 			stack->id, mod->name);
 
-		//Fran
-		//stack->mod->mshr_count--;
-
 		/* Error on read request. Unlock block and retry load. */
 		assert(!stack->err);
 
@@ -751,7 +748,7 @@ void mod_handler_vi_store(int event, void *data)
 		//mod_access_start(mod, stack, mod_access_store);
 		if ((stack->mod->level == 1 && !flag_coalesce_gpu_enabled && master_stack) || (stack->mod->level != 1 && master_stack))
 		{
-			mod_access_start(mod, stack, mod_access_nc_store);
+			mod_access_start(mod, stack, mod_access_store);
 			assert(master_stack->addr == stack->addr);
 			mod->nc_writes++;
 			mod_stack_merge_dirty_mask(master_stack, stack->dirty_mask);
@@ -774,7 +771,7 @@ void mod_handler_vi_store(int event, void *data)
 		}
 		mod->mshr_count++;*/
 		add_access(mod->level);
-		mod_access_start(mod, stack, mod_access_nc_store);
+		mod_access_start(mod, stack, mod_access_store);
 		/* Continue */
 		stack->event = EV_MOD_VI_STORE_LOCK;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -851,7 +848,7 @@ void mod_handler_vi_store(int event, void *data)
 		older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
-			fatal("write in flight3");
+			warning("write in flight3");
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
