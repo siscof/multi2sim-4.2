@@ -238,7 +238,6 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	older_stack = mod_in_flight_write(mod, stack);
 	if (mod->level == 1 && older_stack)
 	{
-		fatal("write in flight1");
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
@@ -257,7 +256,6 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 
   if(SALTAR_L1 && mod->level == 1)
 	{
-		fatal("write in flight2");
 		stack->request_dir = mod_request_down_up;
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
        	new_stack->reply_size = 8;
@@ -335,7 +333,6 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 	/* Error locking */
 	if (stack->err)
 	{
-			fatal("error");
 		mod->read_retries++;
 		add_retry(stack,load_action_retry);
 		retry_lat = mod_get_retry_latency(mod);
@@ -848,7 +845,6 @@ void mod_handler_vi_store(int event, void *data)
 		older_stack = mod_in_flight_write(mod, stack);
     if (mod->level == 1 && older_stack)
     {
-			warning("write in flight3");
 			//assert(!older_stack->waiting_list_event);
       mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
       mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_STORE_LOCK);
