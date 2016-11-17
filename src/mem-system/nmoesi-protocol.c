@@ -1729,6 +1729,14 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			/* Find victim */
 			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
+			if(stack->state)
+			{
+				if(stack->read)
+					add_load_invalidation(mod->level);
+				else
+					add_store_invalidation(mod->level);
+			}
+		
 			assert(stack->state || !dir_entry_group_shared_or_owned(mod->dir,
 				stack->set, stack->way));
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",

@@ -93,6 +93,8 @@ struct esta_t
 	long long misses;
   long long loads;
   long long invalidations;
+  long long load_invalidation;
+  long long store_invalidation;
 	long long evictions;
 
   long long uop_load_finish;
@@ -334,6 +336,8 @@ void add_coalesce_load(int level);
 void add_coalesce_store(int level);
 void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wavefront_t *wf);
 void add_cache_states(int state, int level);
+void add_load_invalidation(int level);
+void add_store_invalidation(int level);
 
 
 #endif

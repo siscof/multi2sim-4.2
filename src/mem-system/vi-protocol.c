@@ -460,7 +460,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 				/* Access main memory system */
 				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 				linked_list_add(ds->pending_reads, stack);
-				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_read_trans(ds->handler, stack->addr, 50, 50);
 
 				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 				/* Ctx main memory stats */
@@ -923,15 +923,21 @@ void mod_handler_vi_store(int event, void *data)
 			//da igual si es un hit o un miss
 
 			//cache_clean_block_dirty(mod->cache, stack->set, stack->way);
-/*			if(stack->glc == 0 && (~stack->dirty_mask) == 0)
+
+			if(stack->glc == 0 && (~stack->dirty_mask) == 0)
 			{
-				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
-				cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
+				if(stack->hit && stack->state)
+					add_store_invalidation(1);
+
+				//cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
+				//cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 			}
 			else if(stack->hit)
 			{
-				cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
-			}*/
+				add_store_invalidation(1);
+				//cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
+			}
+
 			stack->event = EV_MOD_VI_STORE_UNLOCK;
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_VI_STORE_UNLOCK, stack, 0);
@@ -1055,7 +1061,7 @@ void mod_handler_vi_store(int event, void *data)
 				/* Access main memory system */
 				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 				linked_list_add(ds->pending_reads, stack);
-				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_read_trans(ds->handler, stack->addr, 99, 99);
 
 				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 				/* Ctx main memory stats */
@@ -1129,12 +1135,12 @@ void mod_handler_vi_store(int event, void *data)
 
 		/* Error in write request, unlock block and retry store. */
 		assert(!stack->err);
-		if(stack->request_dir == mod_request_down_up)
-		{
+		//if(stack->request_dir == mod_request_down_up)
+		//{
 			cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
 			cache_write_block_dirty_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
 			cache_write_block_valid_mask(mod->cache, stack->set, stack->way, stack->dirty_mask);
-		}
+		//}
 
 		if (stack->mshr_locked != 0)
 		{
@@ -1462,7 +1468,13 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		{
 			/* Find victim */
 			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
-
+			if(stack->state)
+			{
+				if(stack->read)
+					add_load_invalidation(mod->level);
+				else
+					add_store_invalidation(mod->level);
+			}
 
 			//cache_set_block(mod->cache, stack->set, stack->way,	0, cache_block_invalid);
 
