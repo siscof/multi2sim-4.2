@@ -460,7 +460,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 				/* Access main memory system */
 				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 				linked_list_add(ds->pending_reads, stack);
-				dram_system_add_read_trans(ds->handler, stack->addr, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
 				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 				/* Ctx main memory stats */
