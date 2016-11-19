@@ -2233,7 +2233,6 @@ void mod_handler_nmoesi_evict(int event, void *data)
 					esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
 					return;
 				}
-
 				/* Access main memory system */
 				dram_system_add_write_trans(ds->handler, stack->tag >> 2, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
