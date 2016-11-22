@@ -1,0 +1,313 @@
+[ Network.mesh ] 
+  DefaultInputBufferSize = 128 
+  DefaultOutputBufferSize = 128 
+  DefaultBandwidth = 64 
+
+;;;;;;;;;; NODES ;;;;;;;;;; 
+
+[ Network.mesh.Node.n0 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n1 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n2 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n3 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n4 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n5 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n6 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n7 ] 
+Type = EndNode 
+
+[ Network.mesh.Node.n8 ] 
+Type = EndNode 
+
+;;;;;;;; SWITCHES ;;;;;;;; 
+
+[ Network.mesh.Node.s0 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s1 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s2 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s3 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s4 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s5 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s6 ] 
+Type = Switch 
+
+[ Network.mesh.Node.s7 ] 
+Type = Switch 
+
+;;;;;;;;;; LINKS ;;;;;;;;;; 
+
+[ Network.mesh.Link.s0s1 ] 
+  Source = s0 
+  Dest = s1 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s1s2 ] 
+  Source = s1 
+  Dest = s2 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s2s3 ] 
+  Source = s2 
+  Dest = s3 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s0s4 ] 
+  Source = s0 
+  Dest = s4 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s1s5 ] 
+  Source = s1 
+  Dest = s5 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s2s6 ] 
+  Source = s2 
+  Dest = s6 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s3s7 ] 
+  Source = s3 
+  Dest = s7 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s4s5 ] 
+  Source = s4 
+  Dest = s5 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s5s6 ] 
+  Source = s5 
+  Dest = s6 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.s6s7 ] 
+  Source = s6 
+  Dest = s7 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n0s0 ] 
+  Source = n0 
+  Dest = s0 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n1s1] 
+  Source = n1 
+  Dest = s1 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n2s2 ] 
+  Source = n2 
+  Dest = s2 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n3s3 ] 
+  Source = n3 
+  Dest = s3 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n4s4 ] 
+  Source = n4 
+  Dest = s4 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n5s5 ] 
+  Source = n5 
+  Dest = s5 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n6s6 ] 
+  Source = n6 
+  Dest = s6 
+  Type = Bidirectional 
+
+[ Network.mesh.Link.n7s7 ] 
+  Source = n7 
+  Dest = s7 
+  Type = Bidirectional 
+  
+[ Network.mesh.Link.n8s7 ] 
+  Source = n8 
+  Dest = s7 
+  Type = Bidirectional 
+  
+[ Network.mesh.Link.n8s3 ] 
+  Source = n8 
+  Dest = s3 
+  Type = Bidirectional 
+ 
+[ Network.mesh.Routes ]
+  n0.to.n1 = s0
+  n0.to.n2 = s0
+  n0.to.n3 = s0
+  n0.to.n4 = s0
+  n0.to.n5 = s0
+  n0.to.n6 = s0
+  n0.to.n7 = s0
+  n0.to.n8 = s0
+  
+  n1.to.n0 = s1
+  n1.to.n2 = s1
+  n1.to.n3 = s1
+  n1.to.n4 = s1
+  n1.to.n5 = s1
+  n1.to.n6 = s1
+  n1.to.n7 = s1
+  n1.to.n8 = s1
+  
+  n2.to.n0 = s2
+  n2.to.n1 = s2
+  n2.to.n3 = s2
+  n2.to.n4 = s2
+  n2.to.n5 = s2
+  n2.to.n6 = s2
+  n2.to.n7 = s2
+  n2.to.n8 = s2
+  
+  n3.to.n0 = s3
+  n3.to.n1 = s3
+  n3.to.n2 = s3
+  n3.to.n4 = s3
+  n3.to.n5 = s3
+  n3.to.n6 = s3
+  n3.to.n7 = s3
+  n3.to.n8 = s3
+  
+  n4.to.n0 = s4
+  n4.to.n1 = s4
+  n4.to.n2 = s4
+  n4.to.n3 = s4
+  n4.to.n5 = s4
+  n4.to.n6 = s4
+  n4.to.n7 = s4
+  n4.to.n8 = s4
+  
+  n5.to.n0 = s5
+  n5.to.n1 = s5
+  n5.to.n2 = s5
+  n5.to.n3 = s5
+  n5.to.n4 = s5
+  n5.to.n6 = s5
+  n5.to.n7 = s5
+  n5.to.n8 = s5
+
+  n6.to.n0 = s6
+  n6.to.n1 = s6
+  n6.to.n2 = s6
+  n6.to.n3 = s6
+  n6.to.n4 = s6
+  n6.to.n5 = s6
+  n6.to.n7 = s6
+  n6.to.n8 = s6
+  
+  n7.to.n0 = s7
+  n7.to.n1 = s7
+  n7.to.n2 = s7
+  n7.to.n3 = s7
+  n7.to.n4 = s7
+  n7.to.n5 = s7
+  n7.to.n6 = s7
+  n7.to.n8 = s7
+  
+  n8.to.n0 = s3
+  n8.to.n1 = s3
+  n8.to.n2 = s3
+  n8.to.n3 = s3
+  n8.to.n4 = s7
+  n8.to.n5 = s7
+  n8.to.n6 = s7
+  n8.to.n7 = s7
+  
+  s0.to.n1 = s1
+  s0.to.n2 = s1
+  s0.to.n3 = s1
+  s0.to.n4 = s4
+  s0.to.n5 = s1
+  s0.to.n6 = s1
+  s0.to.n7 = s1
+  s0.to.n8 = s1
+  
+  s1.to.n0 = s0
+  s1.to.n2 = s2
+  s1.to.n3 = s2
+  s1.to.n4 = s0
+  s1.to.n5 = s5
+  s1.to.n6 = s2
+  s1.to.n7 = s2
+  s1.to.n8 = s2
+  
+  s2.to.n0 = s1
+  s2.to.n1 = s1
+  s2.to.n3 = s3
+  s2.to.n4 = s1
+  s2.to.n5 = s1
+  s2.to.n6 = s6
+  s2.to.n7 = s3
+  s2.to.n8 = s3
+  
+  s3.to.n0 = s2
+  s3.to.n1 = s2
+  s3.to.n2 = s2
+  s3.to.n4 = s2
+  s3.to.n5 = s2
+  s3.to.n6 = s2
+  s3.to.n7 = s7
+  
+  s4.to.n0 = s0
+  s4.to.n1 = s5
+  s4.to.n2 = s5
+  s4.to.n3 = s5
+  s4.to.n5 = s5
+  s4.to.n6 = s5
+  s4.to.n7 = s5
+  s4.to.n8 = s5
+  
+  s5.to.n0 = s4
+  s5.to.n1 = s1
+  s5.to.n2 = s6
+  s5.to.n3 = s6
+  s5.to.n4 = s4
+  s5.to.n6 = s6
+  s5.to.n7 = s6
+  s5.to.n8 = s6
+  
+  s6.to.n0 = s5
+  s6.to.n1 = s5
+  s6.to.n2 = s2
+  s6.to.n3 = s7
+  s6.to.n4 = s5
+  s6.to.n5 = s5
+  s6.to.n7 = s7
+  s6.to.n8 = s7
+  
+  s7.to.n0 = s6
+  s7.to.n1 = s6
+  s7.to.n2 = s6
+  s7.to.n3 = s3
+  s7.to.n4 = s6
+  s7.to.n5 = s6
+  s7.to.n6 = s6

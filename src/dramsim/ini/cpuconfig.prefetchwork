@@ -1,0 +1,24 @@
+[ General ]
+Cores = 8
+; FastForward = 10000000000
+; InstructionCachePerfect = t
+
+[ Queues ]
+LsqSize = 128
+IqSize = 64
+RobSize = 128
+RfIntSize = 288
+RfFpSize = 288
+
+[ Pipeline ]
+DecodeWidth = 4
+DispatchWidth = 4
+IssueWidth = 4
+CommitWidth = 4
+
+[ BranchPredictor ]
+; CHANGE IF NEEDED
+Kind = Combined
+
+; Precision=Pref utiles/Pref totales
+; Coverage=Pref Utiles/Fallos sin pref
