@@ -32,7 +32,7 @@
 
 namespace DRAMSim
 {
-
+bool print_b = true;
 void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsigned &newTransactionRank, unsigned &newTransactionBank, unsigned &newTransactionRow, unsigned &newTransactionColumn)
 {
 	uint64_t tempA, tempB;
@@ -43,6 +43,15 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 	unsigned	bankBitWidth = dramsim_log2(NUM_BANKS);
 	unsigned	rowBitWidth = dramsim_log2(NUM_ROWS);
 	unsigned	colBitWidth = dramsim_log2(NUM_COLS);
+	if (print_b){
+		std::cout << NUM_CHANS;
+		std::cout << NUM_RANKS;
+		std::cout << NUM_BANKS;
+		std::cout << NUM_ROWS;
+		std::cout << NUM_COLS;
+
+		print_b = false;
+	}
 	// this forces the alignment to the width of a single burst (64 bits = 8 bytes = 3 address bits for DDR parts)
 	unsigned	byteOffsetWidth = dramsim_log2((JEDEC_DATA_BUS_BITS/8));
 	// Since we're assuming that a request is for BL*BUS_WIDTH, the bottom bits
@@ -311,14 +320,14 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 		newTransactionChan = tempA ^ tempB;
 
 		tempA = physicalAddress;
-		physicalAddress = physicalAddress >> bankBitWidth;
-		tempB = physicalAddress << bankBitWidth;
-		newTransactionBank = tempA ^ tempB;
-
-		tempA = physicalAddress;
 		physicalAddress = physicalAddress >> rankBitWidth;
 		tempB = physicalAddress << rankBitWidth;
 		newTransactionRank = tempA ^ tempB;
+
+		tempA = physicalAddress;
+		physicalAddress = physicalAddress >> bankBitWidth;
+		tempB = physicalAddress << bankBitWidth;
+		newTransactionBank = tempA ^ tempB;
 
 		tempA = physicalAddress;
 		physicalAddress = physicalAddress >> rowBitWidth;

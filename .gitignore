@@ -36,6 +36,6 @@ ltmain.sh
 /compile
 depcomp
 missing
-src/dramsim
+
 status
 tags
