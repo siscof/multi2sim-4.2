@@ -44,11 +44,8 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 	unsigned	rowBitWidth = dramsim_log2(NUM_ROWS);
 	unsigned	colBitWidth = dramsim_log2(NUM_COLS);
 	if (print_b){
-		std::cout << NUM_CHANS;
-		std::cout << NUM_RANKS;
-		std::cout << NUM_BANKS;
-		std::cout << NUM_ROWS;
-		std::cout << NUM_COLS;
+		std::cout << "\nnum_chans: "<< NUM_CHANS << "\nnum_ranks" << NUM_RANKS << "\nnum_banks" << NUM_BANKS << "\nnum_rows"  << NUM_ROWS << "\nnum_cols" << NUM_COLS;
+	
 
 		print_b = false;
 	}

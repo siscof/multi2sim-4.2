@@ -115,6 +115,8 @@ MemorySystem::MemorySystem(unsigned id, unsigned int megsOfMemory, CSVWriter &cs
 	if (megsOfMemory != 0)
 	{
 		NUM_RANKS = megsOfMemory / megsOfStoragePerRank;
+		std::cout << "\nMemorySystem.cpp: \nnum_megosstorageperrank:" << megsOfStoragePerRank << "num_ranks: " << NUM_RANKS;
+		
 		if (NUM_RANKS == 0)
 		{
 			PRINT("WARNING: Cannot create memory system with "<<megsOfMemory<<"MB, defaulting to minimum size of "<<megsOfStoragePerRank<<"MB");
@@ -262,4 +264,3 @@ extern "C"
 		;
 	}
 }
-
