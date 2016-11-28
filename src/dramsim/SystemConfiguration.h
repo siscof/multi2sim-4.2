@@ -149,7 +149,8 @@ enum AddressMappingScheme
 	Scheme5,
 	Scheme6,
 	Scheme7,
-	Scheme8
+	Scheme8,
+	Scheme9
 };
 
 // used in MemoryController and CommandQueue

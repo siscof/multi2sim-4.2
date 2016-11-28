@@ -45,7 +45,7 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 	unsigned	colBitWidth = dramsim_log2(NUM_COLS);
 	if (print_b){
 		std::cout << "\nnum_chans: "<< NUM_CHANS << "\nnum_ranks" << NUM_RANKS << "\nnum_banks" << NUM_BANKS << "\nnum_rows"  << NUM_ROWS << "\nnum_cols" << NUM_COLS;
-	
+
 
 		print_b = false;
 	}
@@ -320,6 +320,37 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 		physicalAddress = physicalAddress >> rankBitWidth;
 		tempB = physicalAddress << rankBitWidth;
 		newTransactionRank = tempA ^ tempB;
+
+		tempA = physicalAddress;
+		physicalAddress = physicalAddress >> bankBitWidth;
+		tempB = physicalAddress << bankBitWidth;
+		newTransactionBank = tempA ^ tempB;
+
+		tempA = physicalAddress;
+		physicalAddress = physicalAddress >> rowBitWidth;
+		tempB = physicalAddress << rowBitWidth;
+		newTransactionRow = tempA ^ tempB;
+
+	}
+	else if(addressMappingScheme == Scheme9)
+	{
+		//row:col:rank:bank:chan
+		//col:bank:chan:col
+
+		tempA = physicalAddress;
+		physicalAddress = physicalAddress >> colHighBitWidth;
+		tempB = physicalAddress << colHighBitWidth;
+		newTransactionColumn = tempA ^ tempB;
+
+		tempA = physicalAddress;
+		physicalAddress = physicalAddress >> channelBitWidth;
+		tempB = physicalAddress << channelBitWidth;
+		newTransactionChan = tempA ^ tempB;
+
+		//tempA = physicalAddress;
+		//physicalAddress = physicalAddress >> rankBitWidth;
+		//tempB = physicalAddress << rankBitWidth;
+		//newTransactionRank = tempA ^ tempB;
 
 		tempA = physicalAddress;
 		physicalAddress = physicalAddress >> bankBitWidth;
