@@ -665,7 +665,8 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 	while(!linked_list_is_end(dram_system->pending_reads))
 	{
 		stack = linked_list_get(dram_system->pending_reads);
-		if (stack->addr == address)
+		//if (stack->addr == address)
+		if ((stack->addr & 0xffc0) == address || ((stack->addr & 0xffc0) | 0x0020) == address)
 		{
 			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
 			stack->main_memory_accessed = 1;
@@ -676,15 +677,21 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 				stack->uop->mem_mm_accesses++;
 			}
 
-			if(directory_type == dir_type_nmoesi)
+			stack->dramsim_pending_reads--;
+
+			if(stack->dramsim_pending_reads == 0)
 			{
-				dir_entry_unlock(stack->target_mod->dir, stack->set, stack->way);
-				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
-			}else{
-				esim_schedule_mod_stack_event(stack, 0);
+				if(directory_type == dir_type_nmoesi)
+				{
+					dir_entry_unlock(stack->target_mod->dir, stack->set, stack->way);
+					esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+				}else{
+					esim_schedule_mod_stack_event(stack, 0);
+				}
+				linked_list_remove(dram_system->pending_reads);
 			}
-			linked_list_remove(dram_system->pending_reads);
 			found++;
+			return;
 		}
 		else
 			linked_list_next(dram_system->pending_reads);

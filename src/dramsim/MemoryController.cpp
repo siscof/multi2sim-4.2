@@ -980,7 +980,7 @@ void MemoryController::estimateBandwidthRequirements()
 
 bool MemoryController::WillAcceptTransaction()
 {
-	return transactionQueue.size() < TRANS_QUEUE_DEPTH;
+	return transactionQueue.size() < (TRANS_QUEUE_DEPTH - 1);
 }
 
 //allows outside source to make request of memory system
