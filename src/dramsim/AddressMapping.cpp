@@ -347,10 +347,10 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 		tempB = physicalAddress << channelBitWidth;
 		newTransactionChan = tempA ^ tempB;
 
-		//tempA = physicalAddress;
-		//physicalAddress = physicalAddress >> rankBitWidth;
-		//tempB = physicalAddress << rankBitWidth;
-		//newTransactionRank = tempA ^ tempB;
+		tempA = physicalAddress;
+		physicalAddress = physicalAddress >> rankBitWidth;
+		tempB = physicalAddress << rankBitWidth;
+		newTransactionRank = tempA ^ tempB;
 
 		tempA = physicalAddress;
 		physicalAddress = physicalAddress >> bankBitWidth;
