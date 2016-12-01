@@ -373,10 +373,8 @@ void addressMapping(uint64_t physicalAddress, unsigned &newTransactionChan, unsi
 		tempB = physicalAddress << colHighBitWidth;
 		newTransactionColumn = tempA ^ tempB;
 
-		tempA = physicalAddress;
 		physicalAddress = physicalAddress >> 3;
-		tempB = physicalAddress << channelBitWidth;
-		newTransactionChan = tempA ^ tempB;
+		newTransactionChan = 0;
 
 		tempA = physicalAddress;
 		physicalAddress = physicalAddress >> rankBitWidth;
