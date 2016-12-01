@@ -61,10 +61,10 @@ BusPacket::BusPacket(BusPacketType packtype, uint64_t physicalAddr,
 
 void BusPacket::print(uint64_t currentClockCycle, bool dataStart)
 {
-	if (this == NULL)
-	{
-		return;
-	}
+	//if (this == NULL)
+	//{
+	//	return;
+	//}
 
 	if (VERIFICATION_OUTPUT)
 	{
@@ -102,12 +102,12 @@ void BusPacket::print(uint64_t currentClockCycle, bool dataStart)
 }
 void BusPacket::print()
 {
-	if (this == NULL) //pointer use makes this a necessary precaution
-	{
-		return;
-	}
-	else
-	{
+	//if (this == NULL) //pointer use makes this a necessary precaution
+	//{
+	//	return;
+	//}
+	//else
+	//{
 		switch (busPacketType)
 		{
 		case READ:
@@ -140,7 +140,7 @@ void BusPacket::print()
 			ERROR("Trying to print unknown kind of bus packet");
 			exit(-1);
 		}
-	}
+	//}
 }
 
 void BusPacket::printData() const

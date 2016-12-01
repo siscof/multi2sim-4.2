@@ -461,7 +461,10 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 				linked_list_add(ds->pending_reads, stack);
 				//dram_system_add_read_trans(ds->handler, stack->tag >> 2, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
-				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				//dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_read_trans(ds->handler, stack->addr & 0xffc0, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_read_trans(ds->handler, (stack->addr & 0xffc0) | 0x0020, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				stack->dramsim_pending_reads=2;
 
 				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 				/* Ctx main memory stats */
@@ -1063,13 +1066,18 @@ void mod_handler_vi_store(int event, void *data)
 				mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 				linked_list_add(ds->pending_reads, stack);
 				//dram_system_add_read_trans(ds->handler, stack->tag >> 2, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
-				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				//dram_system_add_write_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_write_trans(ds->handler, stack->addr & 0xffc0, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				dram_system_add_write_trans(ds->handler, (stack->addr & 0xffc0) | 0x0020, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+				//stack->dramsim_pending_reads=2;
 
 				stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 				/* Ctx main memory stats */
 				assert(!stack->prefetch);
 				//ctx->mm_read_accesses++;
-				return;
+
+				stack->event = EV_MOD_VI_STORE_UNLOCK;
+				esim_schedule_mod_stack_event(stack, 0);
 			}
 
 			if (stack->hit)
