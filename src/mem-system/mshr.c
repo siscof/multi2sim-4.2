@@ -50,10 +50,18 @@ int mshr_pre_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
+		if(mshr->mod->compute_unit && mshr->mod->compute_unit->vector_cache == mshr->mod && mshr->mod->level == 1 &&
+			stack->wavefront->wavefront_pool_entry->wait_for_mem == 0)
+		{
+			return 1;
+		}else{
+			return 0;
+		}
 	}
 	else if(mshr_protocol == mshr_protocol_wavefront_fifo)
 	{
-		if(mshr->mod->compute_unit && mshr->mod->compute_unit->vector_cache == mshr->mod && mshr->mod->level == 1 && stack->wavefront->wavefront_pool_entry->wait_for_mem == 0)
+		if(mshr->mod->compute_unit && mshr->mod->compute_unit->vector_cache == mshr->mod && mshr->mod->level == 1 &&
+			stack->wavefront->wavefront_pool_entry->wait_for_mem == 0)
 		{
 			return 1;
 		}else{
@@ -98,8 +106,12 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 
 	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
-		if(mshr->size > mshr->entradasOcupadas){
-
+		if(mshr->size > mshr->entradasOcupadas)
+		{
+			assert(list_index_of(mshr->access_list, stack) == -1);
+			list_add(mshr->access_list,stack);
+			mshr->entradasOcupadas++;
+			return 1;
 		}else{
 			return 0;
 		}
