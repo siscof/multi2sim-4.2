@@ -436,11 +436,11 @@ void si_device_interval_update(SIGpu *device)
 			compute_unit->interval_lds_issued = 0;*/
 			contador_mshr--;
 
-			if(flag_mshr_dynamic_enabled && contador_mshr == 0)
+			/*if(flag_mshr_dynamic_enabled && contador_mshr == 0)
 			{
 			  mshr_control2();
 				contador_mshr=20;
-			}
+			}*/
 
 			memset(device->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
 		}

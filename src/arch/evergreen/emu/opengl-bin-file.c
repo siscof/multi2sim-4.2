@@ -69,7 +69,7 @@ static struct list_t *elf_file_list_create(void *ptr_buffer, size_t buf_size)
 		{
 			offset = xcalloc(1, sizeof(int));
 			*offset = (int)(ptr_copy - ptr_buffer);
-			list_add(elf_file_list, offset);			
+			list_add(elf_file_list, offset);
 		}
 		ptr_copy++;
 	}
@@ -86,7 +86,7 @@ static void elf_file_list_free(struct list_t * elf_file_list)
 }
 
 
-/* Given a buffer and buffer size, find out whether the buffer content is an external ELF or not. 
+/* Given a buffer and buffer size, find out whether the buffer content is an external ELF or not.
  * Return 0 as Yes and -1 as No */
 static int is_external_elf(void *ptr_buffer, int buf_size)
 {
@@ -109,13 +109,13 @@ static int is_external_elf(void *ptr_buffer, int buf_size)
 			if(!strcmp(elf_section->name,"binary"))
 			{
 				elf_file_free(elf_file);
-				return 0;		
+				return 0;
 			}
 		}
 		elf_file_free(elf_file);
 		return -1;
 	}
-	
+
 	return -1;
 }
 
@@ -265,33 +265,33 @@ static int amd_opengl_shader_set_isa_buffer(struct evg_opengl_shader_t *opengl_s
 	int i;
 
 	if (!&opengl_shader->isa_buffer)
-		fatal("%s: shader error", __FUNCTION__);	
+		fatal("%s: shader error", __FUNCTION__);
 
-		/* Initialize ISA buffer */
-		if (opengl_shader->internal_elf_file)
+	/* Initialize ISA buffer */
+	if (opengl_shader->internal_elf_file)
+	{
+		for (i = 0; i < list_count(opengl_shader->internal_elf_file->section_list); i++)
 		{
-			for (i = 0; i < list_count(opengl_shader->internal_elf_file->section_list); i++)
+			internal_section = list_get(opengl_shader->internal_elf_file->section_list, i);
+
+			/* ISAs in '.text' section */
+			if (!strcmp(internal_section->name,".text"))
 			{
-				internal_section = list_get(opengl_shader->internal_elf_file->section_list, i);
+				isa_offset = get_isa_offset(opengl_shader);
+				elf_buffer_seek(&opengl_shader->internal_elf_file->buffer, internal_section->header->sh_offset);
 
-				/* ISAs in '.text' section */
-				if (!strcmp(internal_section->name,".text"))
-				{					
-					isa_offset = get_isa_offset(opengl_shader);
-					elf_buffer_seek(&opengl_shader->internal_elf_file->buffer, internal_section->header->sh_offset);
-					
-					opengl_shader->isa_buffer.ptr  = opengl_shader->internal_elf_file->buffer.ptr + opengl_shader->internal_elf_file->buffer.pos + isa_offset;
-					opengl_shader->isa_buffer.size = opengl_shader->internal_elf_file->buffer.size - isa_offset;
-					opengl_shader->isa_buffer.pos  = 0;
-					return 1;
-				}
+				opengl_shader->isa_buffer.ptr  = opengl_shader->internal_elf_file->buffer.ptr + opengl_shader->internal_elf_file->buffer.pos + isa_offset;
+				opengl_shader->isa_buffer.size = opengl_shader->internal_elf_file->buffer.size - isa_offset;
+				opengl_shader->isa_buffer.pos  = 0;
+				return 1;
 			}
-
 		}
-		else
-			fatal("No internal ELF for this shader!");
 
-		return 0;
+	}
+	else
+		fatal("No internal ELF for this shader!");
+
+	return 0;
 }
 
 
@@ -397,7 +397,7 @@ struct evg_opengl_bin_file_t *evg_opengl_bin_file_create(void *ptr, int size, ch
 	{
 		/* Initialize shader */
 		opengl_shader = amd_opengl_shader_create_from_buffer(ptr, size, elf_file_list, i, name);
-		
+
 		/* Add shader to shader list */
 		list_add(bin_file->shader_list, opengl_shader);
 	}
