@@ -88,7 +88,7 @@ void mshr_wavefront_wakeup(struct mshr_t *mshr, struct si_wavefront_t *wavefront
 	{
 		stack_access = list_get(mshr->blocked_list,j);
 		assert(stack_access);
-		if(wavefront->id == stack_access->wavefront->id)
+		if(wavefront->id == stack_access->ret_stack->wavefront->id)
 		{
 			stack_access->event = stack_access->waiting_list_event;
 			stack_access->waiting_list_event = 0;

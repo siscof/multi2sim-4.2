@@ -1408,8 +1408,8 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
 					ret->mshr_locked = 0;
-					if(stack->dir_lock && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 )
-						dir_entry_unlock(mod->dir, stack->set, stack->way);
+					//if(stack->dir_lock && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 )
+					//	dir_entry_unlock(mod->dir, stack->set, stack->way);
 
 					mshr_delay(mod->mshr,stack, EV_MOD_VI_FIND_AND_LOCK);
 					return;
