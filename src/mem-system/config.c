@@ -664,7 +664,7 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 		block_size, latency);
 
 	/* Initialize */
-	mod->mshr_size = mshr_size;
+	//mod->mshr_size = mshr_size;
 	mshr_init(mod->mshr, mshr_size);
 	//mod->mshr->size = mshr_size;
 	mod->dir_assoc = assoc;

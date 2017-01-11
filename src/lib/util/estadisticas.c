@@ -262,7 +262,7 @@ void add_load_invalidation(int level)
 	//(estadisticas_ipc + level)->coalesce++;
         mem_stats.mod_level[level].load_invalidation++;
 }
-		
+
 void add_store_invalidation(int level)
 {
 	//(estadisticas_ipc + level)->coalesce++;
@@ -694,12 +694,12 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
 
 	if(mod->level == 1)
 	{
-		mshr[1] += mod->mshr->entradasOcupadas;
+		mshr[1] += mod->mshr->occupied_entries;
 		mshr_size[1] = mod->mshr->size;
 	}
 
 	if(mod->level == 2)
-		mshr[2] += mod->mshr->entradasOcupadas;
+		mshr[2] += mod->mshr->occupied_entries;
 
     for (int x = 0; x < dir->xsize; x++)
     {

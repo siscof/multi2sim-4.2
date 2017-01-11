@@ -72,6 +72,7 @@ struct mod_stack_t
 	int transaction_idle;
 	long long dramsim_mm_start;
 	int dramsim_accesses;
+	struct mshr_entry_t *mshr_entry;
 
 	struct latenciometro latencias;
 	struct si_wavefront_t *wavefront;

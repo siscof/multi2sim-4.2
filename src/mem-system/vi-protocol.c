@@ -1403,7 +1403,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && mod->kind != mod_kind_main_memory)
 			{
-				if(mshr_pre_lock(mod->mshr, stack->ret_stack))
+				/*if(mshr_pre_lock(mod->mshr, stack->ret_stack))
 				{
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
@@ -1413,7 +1413,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 					mshr_delay(mod->mshr,stack, EV_MOD_VI_FIND_AND_LOCK);
 					return;
-				}
+				}*/
 				if(!mshr_lock(mod->mshr, stack->ret_stack))
 				{
 					mod_unlock_port(mod, port, stack);
