@@ -74,6 +74,8 @@ struct mod_stack_t
 	int dramsim_accesses;
 	struct mshr_entry_t *mshr_entry;
 
+	int find_and_lock_return_event;
+
 	struct latenciometro latencias;
 	struct si_wavefront_t *wavefront;
 	struct si_uop_t *uop;

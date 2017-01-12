@@ -331,19 +331,24 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Call find and lock */
 
 
-		new_stack = mod_stack_create(stack->id, mod, stack->addr,
-			EV_MOD_NMOESI_LOAD_ACTION, stack);
-		new_stack->wavefront = stack->wavefront;
-		new_stack->uop = stack->uop;
-		new_stack->blocking = 1;
-		new_stack->read = 1;
-		new_stack->tiempo_acceso = stack->tiempo_acceso;
-		new_stack->retry = stack->retry;
-		stack->find_and_lock_stack = new_stack;
+		//new_stack = mod_stack_create(stack->id, mod, stack->addr,
+		//	EV_MOD_NMOESI_LOAD_ACTION, stack);
+		//new_stack->wavefront = stack->wavefront;
+		//new_stack->uop = stack->uop;
+		//new_stack->blocking = 1;
+		stack->blocking = 1;
+		//new_stack->read = 1;
+		stack->read = 1;
+		//new_stack->tiempo_acceso = stack->tiempo_acceso;
+		//new_stack->retry = stack->retry;
+		//stack->find_and_lock_stack = new_stack;
 
-		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
-		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
+		//new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_LOAD_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_mod_stack_event(new_stack, 0);
+
 		return;
 	}
 
@@ -664,6 +669,7 @@ void mod_handler_nmoesi_store(int event, void *data)
 		}
 
 		/* Call find and lock */
+		/*
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_STORE_ACTION, stack);
 		new_stack->wavefront = stack->wavefront;
@@ -672,7 +678,13 @@ void mod_handler_nmoesi_store(int event, void *data)
 		new_stack->write = 1;
 		new_stack->retry = stack->retry;
 		new_stack->witness_ptr = stack->witness_ptr;
-		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
+		*/
+		stack->blocking = 1;
+		stack->write = 1;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_STORE_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 
 		/* Set witness variable to NULL so that retries from the same
 		 * stack do not increment it multiple times */
@@ -971,6 +983,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		}
 
 		/* Call find and lock */
+		/*
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_NC_STORE_WRITEBACK, stack);
 		new_stack->wavefront = stack->wavefront;
@@ -978,9 +991,12 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
 		new_stack->retry = stack->retry;
-
-		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
+		*/
+		stack->blocking = 1;
+		stack->nc_write = 1;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_NC_STORE_WRITEBACK;
+		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -1330,6 +1346,7 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 		}
 
 		/* Call find and lock */
+		/*
 		new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_NMOESI_PREFETCH_ACTION, stack);
 		new_stack->wavefront = stack->wavefront;
@@ -1339,7 +1356,13 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 		new_stack->prefetch = 1;
 		new_stack->retry = 0;
 		new_stack->witness_ptr = stack->witness_ptr;
-		esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
+		*/
+		stack->blocking = 0;
+		stack->prefetch = 1;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_PREFETCH_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 
 		/* Set witness variable to NULL so that retries from the same
 		 * stack do not increment it multiple times */
@@ -1501,7 +1524,8 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 void mod_handler_nmoesi_find_and_lock(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
-	struct mod_stack_t *ret = stack->ret_stack;
+	//struct mod_stack_t *ret = stack->ret_stack;
+	struct mod_stack_t *ret = stack;
 	struct mod_stack_t *new_stack;
 
 	struct mod_t *mod = stack->mod;
@@ -1516,11 +1540,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* Default return values */
 		ret->err = 0;
-		ret->find_and_lock_stack = stack;
-		assert(ret->id == stack->id);
+		//ret->find_and_lock_stack = stack;
+		//assert(ret->id == stack->id);
 
 		/* If this stack has already been assigned a way, keep using it */
-		stack->way = ret->way;
+		//stack->way = ret->way;
 
 		/* Get a port */
 		mod_lock_port(mod, stack, EV_MOD_NMOESI_FIND_AND_LOCK_PORT);
@@ -1670,7 +1694,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					mshr_delay(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
 					return;
 				}*/
-				if(!mshr_lock(mod->mshr, stack->ret_stack))
+				if(!mshr_lock(mod->mshr, stack))
 				{
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
@@ -1681,7 +1705,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					if(!stack->blocking)
 					{
 						ret->err = 1;
-						mod_stack_return(stack);
+						stack->event = stack->find_and_lock_return_event;
+						esim_schedule_mod_stack_event(stack, 0);
+						//mod_stack_return(stack);
 					}else{
 						mshr_enqueue(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
 					}
@@ -1711,7 +1737,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			}
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
-			mod_stack_return(stack);
+			stack->event = stack->find_and_lock_return_event;
+			esim_schedule_mod_stack_event(stack, 0);
+			//mod_stack_return(stack);
 			return;
 		}
 
@@ -1828,7 +1856,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			ret->err = 1;
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			ret->find_and_lock_stack = NULL;
-			mod_stack_return(stack);
+			stack->event = stack->find_and_lock_return_event;
+			esim_schedule_mod_stack_event(stack, 0);
+			//mod_stack_return(stack);
 			return;
 		}
 		if(ret->client_info && ret->client_info->arch){
@@ -1873,7 +1903,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		ret->tag = stack->tag;
 		ret->mshr_locked = stack->mshr_locked;
 		ret->find_and_lock_stack = NULL;
-		mod_stack_return(stack);
+		stack->event = stack->find_and_lock_return_event;
+		esim_schedule_mod_stack_event(stack, 0);
+		//mod_stack_return(stack);
 		return;
 	}
 
@@ -2023,28 +2055,41 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		/* Find and lock */
 		if (stack->state == cache_block_noncoherent)
 		{
+			/*
 			new_stack = mod_stack_create(stack->id, target_mod, stack->src_tag,
 				EV_MOD_NMOESI_EVICT_PROCESS_NONCOHERENT, stack);
 			new_stack->wavefront = stack->wavefront;
 			new_stack->retry = stack->retry;
 			new_stack->uop = stack->uop;
 			new_stack->nc_write = 1;
+			*/
+			stack->nc_write = 1;
+			stack->find_and_lock_return_event = EV_MOD_NMOESI_EVICT_PROCESS_NONCOHERENT;
 		}
 		else
 		{
+			/*
 			new_stack = mod_stack_create(stack->id, target_mod, stack->src_tag,
 				EV_MOD_NMOESI_EVICT_PROCESS, stack);
 			new_stack->wavefront = stack->wavefront;
 			new_stack->uop = stack->uop;
 			new_stack->write = 1;
+			*/
+			stack->write = 1;
+			stack->find_and_lock_return_event = EV_MOD_NMOESI_EVICT_PROCESS;
 		}
 
 		/* FIXME It's not guaranteed to be a write */
-		new_stack->blocking = 0;
-		//new_stack->write = 1;
+		/*new_stack->blocking = 0;
 		new_stack->retry = 0;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
+		*/
+		stack->blocking = 0;
+		stack->retry = 0;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		//stack->find_and_lock_return_event = EV_MOD_NMOESI_PREFETCH_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_mod_stack_event(new_stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -2439,6 +2484,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 		}
 		/* Find and lock */
+		/*
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
 			EV_MOD_NMOESI_READ_REQUEST_ACTION, stack);
 		new_stack->wavefront = stack->wavefront;
@@ -2448,7 +2494,14 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		new_stack->read = 1;
 		new_stack->retry = 0;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
+		*/
+
+		stack->read = 1;
+		stack->blocking = stack->request_dir == mod_request_down_up;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_READ_REQUEST_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_mod_stack_event(new_stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -3222,6 +3275,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 
 		/* Find and lock */
+		/*
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
 			EV_MOD_NMOESI_WRITE_REQUEST_ACTION, stack);
 		new_stack->wavefront = stack->wavefront;
@@ -3230,7 +3284,14 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		new_stack->blocking = stack->request_dir == mod_request_down_up;
 		new_stack->write = 1;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
+		*/
+
+		stack->write = 1;
+		stack->blocking = stack->request_dir == mod_request_down_up;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_WRITE_REQUEST_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_mod_stack_event(new_stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -3834,7 +3895,7 @@ void mod_handler_nmoesi_message(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
 	struct mod_stack_t *ret = stack->ret_stack;
-	struct mod_stack_t *new_stack;
+	//struct mod_stack_t *new_stack;
 
 	struct mod_t *mod = stack->mod;
 	struct mod_t *target_mod = stack->target_mod;
@@ -3881,6 +3942,7 @@ void mod_handler_nmoesi_message(int event, void *data)
 		net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
 
 		/* Find and lock */
+		/*
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
 			EV_MOD_NMOESI_MESSAGE_ACTION, stack);
 		new_stack->wavefront = stack->wavefront;
@@ -3888,9 +3950,14 @@ void mod_handler_nmoesi_message(int event, void *data)
 		new_stack->uop = stack->uop;
 		new_stack->message = stack->message;
 		new_stack->blocking = 0;
-
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
+		*/
+
+		stack->blocking = 0;
+		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+		stack->find_and_lock_return_event = EV_MOD_NMOESI_MESSAGE_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
+		//esim_schedule_mod_stack_event(new_stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
