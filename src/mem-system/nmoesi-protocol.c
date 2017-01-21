@@ -1857,6 +1857,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			dir_entry_unlock(mod->dir, stack->set, stack->way);
 			ret->find_and_lock_stack = NULL;
 			stack->event = stack->find_and_lock_return_event;
+			stack->find_and_lock_return_event = 0;
 			esim_schedule_mod_stack_event(stack, 0);
 			//mod_stack_return(stack);
 			return;
@@ -1904,6 +1905,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		ret->mshr_locked = stack->mshr_locked;
 		ret->find_and_lock_stack = NULL;
 		stack->event = stack->find_and_lock_return_event;
+		stack->find_and_lock_return_event = 0;
 		esim_schedule_mod_stack_event(stack, 0);
 		//mod_stack_return(stack);
 		return;
