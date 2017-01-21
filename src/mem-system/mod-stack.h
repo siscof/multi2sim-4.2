@@ -96,6 +96,7 @@ struct mod_stack_t
 	struct mod_client_info_t *client_info;
 
 	struct mod_t *mod;
+	struct mod_t *return_mod;
 	struct mod_t *target_mod;
 	struct mod_t *except_mod;
 	struct mod_t *peer;
