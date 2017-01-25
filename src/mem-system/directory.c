@@ -237,7 +237,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 		/* Enqueue the stack to the end of the lock queue */
 		stack->dir_lock_next = NULL;
 		stack->dir_lock_event = event;
-		stack->ret_stack->way = stack->way;
+		//stack->ret_stack->way = stack->way;
 
 		if (!dir_lock->lock_queue)
 		{

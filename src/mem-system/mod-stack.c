@@ -40,7 +40,7 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 	/* Initialize */
 	stack = xcalloc(1, sizeof(struct mod_stack_t));
 	stack->id = id;
-	stack->mod = mod;
+	stack->target_mod = mod;
 	stack->addr = addr;
 	stack->ret_event = ret_event;
 	stack->ret_stack = ret_stack;
@@ -65,7 +65,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 	mod_stack_wakeup_stack(stack);
 
 	/* borra desde aqui*/
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 	struct mshr_t *mshr = mod->mshr;
 	assert(list_index_of(mshr->waiting_list, stack) == -1);
 	assert(list_index_of(mshr->access_list, stack) == -1);
@@ -96,7 +96,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 	if(stack->target_mod)
 		aux = cc_search_transaction_index(stack->target_mod->coherence_controller,stack->id);
 	else
-		aux = cc_search_transaction_index(stack->mod->coherence_controller,stack->id);
+		aux = cc_search_transaction_index(stack->target_mod->coherence_controller,stack->id);
 
 	assert(aux == -1);
 
@@ -111,7 +111,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 void mod_stack_wait_in_mod(struct mod_stack_t *stack,
 	struct mod_t *mod, int event)
 {
-	assert(mod == stack->mod);
+	assert(mod == stack->target_mod);
 	assert(!DOUBLE_LINKED_LIST_MEMBER(mod, waiting, stack));
 	stack->waiting_list_event = event;
 	DOUBLE_LINKED_LIST_INSERT_TAIL(mod, waiting, stack);
@@ -224,7 +224,7 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 		else if(master_stack->mod != stack->mod)
 			avoid_retry_stack = stack;*/
 
-		if(master_stack->mod != stack->mod)
+		if(master_stack->target_mod != stack->target_mod)
 		{
 			if(!avoid_retry_stack)
 				avoid_retry_stack = stack;
@@ -284,14 +284,14 @@ void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask)
 /* word debe contarse en BYTE o en PALABRAS? */
 void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int words)
 {
-	unsigned int shift = (addr & (stack->mod->sub_block_size - 1)) >> 2;
-	int tag = stack->addr & ~(stack->mod->sub_block_size - 1);
+	unsigned int shift = (addr & (stack->target_mod->sub_block_size - 1)) >> 2;
+	int tag = stack->addr & ~(stack->target_mod->sub_block_size - 1);
 	if(words == 0)
 		words = 1;
 
 	stack->stack_size += 4*words;
 
-	assert((tag + stack->mod->sub_block_size) >= (addr + words * 4));
+	assert((tag + stack->target_mod->sub_block_size) >= (addr + words * 4));
 	for(;words > 0 ; words--)
 	{
 		assert(!(stack->dirty_mask & (shift + words - 1)));
@@ -304,14 +304,14 @@ void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int 
 
 void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words)
 {
-	unsigned int shift = (addr & (stack->mod->sub_block_size - 1)) >> 2;
-	int tag = stack->addr & ~(stack->mod->sub_block_size - 1);
+	unsigned int shift = (addr & (stack->target_mod->sub_block_size - 1)) >> 2;
+	int tag = stack->addr & ~(stack->target_mod->sub_block_size - 1);
 	if(words == 0)
 		words = 1;
 
 	stack->stack_size += 4*words;
 
-	assert((tag + stack->mod->sub_block_size) >= (addr + words * 4));
+	assert((tag + stack->target_mod->sub_block_size) >= (addr + words * 4));
 	for(;words > 0 ; words--)
 	{
 		assert(!(stack->valid_mask & (shift + words - 1)));

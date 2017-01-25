@@ -31,7 +31,7 @@ void cc_free(struct coherence_controller_t *cc)
 // desde el find and lock se tiene que pasar stack->ret
 int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *stack, int event)
 {
-	struct mod_t *mod = stack->find_and_lock_stack->mod;
+	struct mod_t *mod = stack->find_and_lock_stack->target_mod;
 
 	struct mod_port_t *port = stack->find_and_lock_stack->port;
 
@@ -65,7 +65,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 			stack_locked->transaction_blocked = 1;
 			stack_locked->stack_superior = stack;
 
-		}else if(stack->mod->level != 1){
+		}else if(stack->target_mod->level != 1){
 			//else down-up
 
 			stack_locked = cc_search_transaction(cc,dir_lock->stack_id);
@@ -73,7 +73,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 			stack_locked->transaction_blocking = 1;
 			//stack->high_priority_transaction = 1;
 			dir_entry_lock(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way, event, stack->find_and_lock_stack);
-			printf("stack_id = %lld  |  mod_level = %d  |  mod = %d  |  blocking = %d\n",stack->id,stack->mod->level, mod->level, stack->find_and_lock_stack->blocking);
+			printf("stack_id = %lld  |  mod_level = %d  |  mod = %d  |  blocking = %d\n",stack->id,stack->target_mod->level, mod->level, stack->find_and_lock_stack->blocking);
 			stack->transaction_idle = 0;
 			stack->find_and_lock_stack->transaction_idle = 0;
 		}
@@ -148,7 +148,7 @@ void cc_remove_stack(struct coherence_controller_t *cc, struct mod_stack_t *stac
 	if(stack->target_mod)
 		cc = stack->target_mod->coherence_controller;
 	else
-		cc = stack->mod->coherence_controller;
+		cc = stack->target_mod->coherence_controller;
 
 	int index = cc_search_transaction_index(cc,stack->id);
 

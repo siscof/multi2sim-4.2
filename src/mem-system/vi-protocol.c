@@ -80,7 +80,7 @@ void mod_handler_vi_load(int event, void *data)
 	struct mod_stack_t *new_stack;
 	//, *older_stack;
 
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 	struct net_t *net;
 	struct net_node_t *src_node;
 	struct net_node_t *dst_node;
@@ -123,7 +123,7 @@ void mod_handler_vi_load(int event, void *data)
 		stack->origin = 1;
 		master_stack = mod_can_coalesce(mod, mod_access_load, stack->addr, NULL);
 
-		if ((stack->mod->level == 1 && ((!flag_coalesce_gpu_enabled && master_stack) || ((stack->mod->compute_unit->scalar_cache == mod) && master_stack))) || (stack->mod->level != 1 && master_stack))
+		if ((stack->target_mod->level == 1 && ((!flag_coalesce_gpu_enabled && master_stack) || ((stack->target_mod->compute_unit->scalar_cache == mod) && master_stack))) || (stack->target_mod->level != 1 && master_stack))
 		{
 			mod_access_start(mod, stack, mod_access_load);
 			mod->hits_aux++;
@@ -710,7 +710,7 @@ void mod_handler_vi_store(int event, void *data)
 	struct mod_stack_t *new_stack, *master_stack;
 	//*older_stack, *master_stack;
 
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 
   struct net_t *net;
   struct net_node_t *src_node;
@@ -734,7 +734,7 @@ void mod_handler_vi_store(int event, void *data)
 		//mod_access_start(mod, stack, mod_access_nc_store);
 
 		/* Increment witness variable */
-		if (stack->mod->level == 1 && stack->witness_ptr)
+		if (stack->target_mod->level == 1 && stack->witness_ptr)
 		{
 			(*stack->witness_ptr)++;
 			stack->witness_ptr = NULL;
@@ -742,12 +742,12 @@ void mod_handler_vi_store(int event, void *data)
 		if(mod->level == 1 && stack->client_info && stack->client_info->arch)
 			stack->latencias.start = stack->client_info->arch->timing->cycle;
 
-		if (stack->mod->level == 1)
+		if (stack->target_mod->level == 1)
 			stack->origin = 1;
 
 		master_stack = mod_can_coalesce(mod, mod_access_nc_store, stack->addr, stack);
 		//mod_access_start(mod, stack, mod_access_store);
-		if ((stack->mod->level == 1 && !flag_coalesce_gpu_enabled && master_stack) || (stack->mod->level != 1 && master_stack))
+		if ((stack->target_mod->level == 1 && !flag_coalesce_gpu_enabled && master_stack) || (stack->target_mod->level != 1 && master_stack))
 		{
 			mod_access_start(mod, stack, mod_access_store);
 			assert(master_stack->addr == stack->addr);
@@ -1221,7 +1221,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 	struct mod_stack_t *ret = stack->ret_stack;
 	//struct mod_stack_t *new_stack;
 
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 
 
 	if (event == EV_MOD_VI_FIND_AND_LOCK)
@@ -1270,7 +1270,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		//implementacion de valid mask
 		if(stack->hit && stack->read)
 		{
-			unsigned int valid_mask = mod_get_valid_mask(stack->mod, stack->set, stack->way);
+			unsigned int valid_mask = mod_get_valid_mask(stack->target_mod, stack->set, stack->way);
 			if ((~valid_mask) & stack->valid_mask)
 				stack->hit = 0;
 		}

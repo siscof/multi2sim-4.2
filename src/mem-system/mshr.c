@@ -177,7 +177,7 @@ void mshr_lock_entry(struct mshr_t *mshr, struct mod_stack_t *stack)
 		fatal("there are not free entries");
 
 	mem_debug("  %lld %lld 0x%x %s mshr entry lock\n", esim_time, stack->id,
-		stack->tag, stack->mod->name);
+		stack->tag, stack->target_mod->name);
 
 	entry->stack = stack;
 	stack->mshr_entry = entry;
@@ -187,7 +187,7 @@ void mshr_lock_entry(struct mshr_t *mshr, struct mod_stack_t *stack)
 void mshr_unlock_entry(struct mshr_entry_t *entry)
 {
 	mem_debug("  %lld %lld 0x%x %s mshr entry unlock\n", esim_time, entry->stack->id,
-		entry->stack->tag, entry->stack->mod->name);
+		entry->stack->tag, entry->stack->target_mod->name);
 	entry->stack->mshr_entry = NULL;
 	entry->stack = NULL;
 	entry->mshr->occupied_entries--;

@@ -52,7 +52,7 @@ void mod_handler_local_mem_load(int event, void *data)
 	struct mod_stack_t *stack = data;
 	struct mod_stack_t *new_stack;
 
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 
 
 	if (event == EV_MOD_LOCAL_MEM_LOAD)
@@ -154,7 +154,7 @@ void mod_handler_local_mem_store(int event, void *data)
 	struct mod_stack_t *stack = data;
 	struct mod_stack_t *new_stack;
 
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 
 
 	if (event == EV_MOD_LOCAL_MEM_STORE)
@@ -253,7 +253,7 @@ void mod_handler_local_mem_find_and_lock(int event, void *data)
 	struct mod_stack_t *stack = data;
 	struct mod_stack_t *ret = stack->ret_stack;
 
-	struct mod_t *mod = stack->mod;
+	struct mod_t *mod = stack->target_mod;
 
 
 	if (event == EV_MOD_LOCAL_MEM_FIND_AND_LOCK)

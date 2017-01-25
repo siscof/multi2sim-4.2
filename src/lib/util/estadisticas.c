@@ -349,10 +349,10 @@ void add_latencias_load(struct mod_stack_t *stack)
 {
 	struct latenciometro  *latencias = &(stack->latencias);
 
-	if(stack->mod == stack->mod->compute_unit->scalar_cache)
+	if(stack->target_mod == stack->target_mod->compute_unit->scalar_cache)
 		return;
 
-	assert(stack->mod == stack->mod->compute_unit->vector_cache);
+	assert(stack->target_mod == stack->target_mod->compute_unit->vector_cache);
 
 	if((*stack->witness_ptr) != -1){
 		if(/*(latencias->queue + latencias->lock_mshr + latencias->lock_dir + latencias->eviction + latencias->miss) == 0 &&*/ !stack->retry && stack->hit){

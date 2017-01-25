@@ -621,7 +621,7 @@ void mod_unlock_port(struct mod_t *mod, struct mod_port_t *port,
 	/* Checks */
 	assert(mod->num_locked_ports > 0);
 	assert(stack->port == port && port->stack == stack);
-	assert(stack->mod == mod);
+	assert(stack->target_mod == mod);
 
 	/* Unlock port */
 	stack->port = NULL;
@@ -681,7 +681,7 @@ void mod_access_finish(struct mod_t *mod, struct mod_stack_t *stack)
 	DOUBLE_LINKED_LIST_REMOVE(mod, access, stack);
 
   /* Remove frome the wavefront */
-  if(stack->wavefront && stack->mod->level == 1)
+  if(stack->wavefront && stack->target_mod->level == 1)
   {
     if(stack->wavefront->stall)
     {
@@ -789,7 +789,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	for (int k = 0; k < list_count(mem_system->mod_list); k++)
 	{
 		mod_in_conflict = list_get(mem_system->mod_list, k);
-		if(mod_in_conflict->level != 1 || mod_in_conflict == mod || mod_in_conflict->compute_unit->id == stack->mod->compute_unit->id || mod_in_conflict == stack->mod->compute_unit->scalar_cache)
+		if(mod_in_conflict->level != 1 || mod_in_conflict == mod || mod_in_conflict->compute_unit->id == stack->target_mod->compute_unit->id || mod_in_conflict == stack->target_mod->compute_unit->scalar_cache)
 			continue;
 
 		index = (stack->addr >> mod_in_conflict->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
@@ -797,7 +797,7 @@ struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 		ret_stack = ret_stack->bucket_list_next)
 		{
 			/* Address matches */
-			if ((ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->mod->log_block_size) && stack != ret_stack)
+			if ((ret_stack->addr >> mod_in_conflict->log_block_size == stack->addr >> stack->target_mod->log_block_size) && stack != ret_stack)
 			{
 			 	if( ret_stack->event == EV_MOD_NMOESI_LOAD_LOCK || ret_stack->event == EV_MOD_NMOESI_NC_STORE_LOCK || ((ret_stack->event == EV_MOD_NMOESI_LOAD_LOCK2 || ret_stack->event == EV_MOD_NMOESI_NC_STORE_LOCK2) && /*ret_stack->find_and_lock_stack == NULL && ret_stack->latencias.start != stack->latencias.start) */ ret_stack->waiting_list_event != 0) || ret_stack->master_stack != NULL)
 				{
