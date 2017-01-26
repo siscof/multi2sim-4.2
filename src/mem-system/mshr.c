@@ -247,15 +247,12 @@ void mshr_wakeup(struct mshr_t *mshr, int index)
 	struct mod_stack_t *next_stack = (struct mod_stack_t *) list_remove_at(mshr->waiting_list, index);
 	int event = next_stack->waiting_list_event;
 	next_stack->mshr_locked = 1;
-	list_add(mshr->access_list,next_stack->ret_stack);
-	if(next_stack->ret_stack)
-		next_stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->ret_stack->latencias.start - next_stack->ret_stack->latencias.queue;
+	list_add(mshr->access_list,next_stack);
+	next_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->latencias.start - next_stack->latencias.queue;
 	next_stack->waiting_list_event = 0;
 	next_stack->event = event;
-	esim_schedule_mod_stack_event(next_stack, 0);
-
-
 	mshr_lock_entry(mshr, next_stack);
+	esim_schedule_mod_stack_event(next_stack, 0);
 }
 
 void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
@@ -298,15 +295,13 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 			next_stack = (struct mod_stack_t *) list_dequeue(mshr->waiting_list);
 			int event = next_stack->waiting_list_event;
 			next_stack->mshr_locked = 1;
-			list_add(mshr->access_list,next_stack->ret_stack);
-			if(next_stack->ret_stack)
-				next_stack->ret_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->ret_stack->latencias.start - next_stack->ret_stack->latencias.queue;
+			list_add(mshr->access_list,next_stack);
+				next_stack->latencias.lock_mshr = asTiming(si_gpu)->cycle - next_stack->latencias.start - next_stack->latencias.queue;
 			next_stack->waiting_list_event = 0;
 			next_stack->event = event;
+			mshr_lock_entry(mshr, next_stack);
 			esim_schedule_mod_stack_event(next_stack, 0);
 			//esim_schedule_event(event, next_stack, 0);
-
-			mshr_lock_entry(mshr, stack);
 		}
 	}
 }
