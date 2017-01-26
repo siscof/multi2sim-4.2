@@ -1821,7 +1821,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (!stack->hit && stack->state)
 		{
 			stack->eviction = 1;
-			new_stack = mod_stack_create(stack->id,	mod_get_low_mod(target_mod, stack->tag), 0,
+			//mod_get_low_mod(target_mod, stack->tag)
+			new_stack = mod_stack_create(stack->id,	target_mod, 0,
 				EV_MOD_NMOESI_FIND_AND_LOCK_FINISH, stack);
 			new_stack->wavefront = stack->wavefront;
 			new_stack->retry = stack->retry;
@@ -1957,7 +1958,6 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		stack->src_set = stack->set;
 		stack->src_way = stack->way;
 		stack->src_tag = stack->tag;
-		// comentar el target_mod???
 		//stack->target_mod = mod_get_low_mod(return_mod, stack->tag);
 
 		/* Send write request to all sharers */
