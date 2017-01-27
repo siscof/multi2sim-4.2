@@ -65,6 +65,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 	mod_stack_wakeup_stack(stack);
 
 	/* borra desde aqui*/
+	/*
 	struct mod_t *mod = stack->target_mod;
 	struct mshr_t *mshr = mod->mshr;
 	assert(list_index_of(mshr->waiting_list, stack) == -1);
@@ -76,6 +77,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 		assert(list_index_of(mshr->waiting_list, stack) == -1);
 		assert(list_index_of(mshr->access_list, stack) == -1);
 	}
+	*/
 
 	/*hasta aqui*/
 
@@ -92,14 +94,15 @@ void mod_stack_return(struct mod_stack_t *stack)
 		ret_stack->find_and_lock_stack = NULL;
 
 	/* Free */
-	int aux;
+	/*int aux;
+
 	if(stack->target_mod)
 		aux = cc_search_transaction_index(stack->target_mod->coherence_controller,stack->id);
 	else
 		aux = cc_search_transaction_index(stack->target_mod->coherence_controller,stack->id);
 
 	assert(aux == -1);
-
+*/
 	free(stack);
 	ret_stack->event = ret_event;
 	esim_schedule_mod_stack_event(ret_stack, 0);

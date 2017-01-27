@@ -1958,7 +1958,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		stack->src_set = stack->set;
 		stack->src_way = stack->way;
 		stack->src_tag = stack->tag;
-		//stack->target_mod = mod_get_low_mod(return_mod, stack->tag);
+		stack->target_mod = mod_get_low_mod(return_mod, stack->tag);
 
 		/* Send write request to all sharers */
 		new_stack = mod_stack_create(stack->id, return_mod, 0, EV_MOD_NMOESI_EVICT_INVALID, stack);
@@ -2074,6 +2074,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			new_stack->uop = stack->uop;
 			new_stack->nc_write = 1;
 			*/
+			stack->addr = stack->src_tag;
 			stack->nc_write = 1;
 			stack->find_and_lock_return_event = EV_MOD_NMOESI_EVICT_PROCESS_NONCOHERENT;
 		}
@@ -2086,6 +2087,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			new_stack->uop = stack->uop;
 			new_stack->write = 1;
 			*/
+			stack->addr = stack->src_tag;
 			stack->write = 1;
 			stack->find_and_lock_return_event = EV_MOD_NMOESI_EVICT_PROCESS;
 		}
@@ -2506,7 +2508,6 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		new_stack->retry = 0;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
-
 		stack->read = 1;
 		stack->blocking = stack->request_dir == mod_request_down_up;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
@@ -3872,9 +3873,9 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 				stack->pending++;
 			}
 		}
+			stack->event = EV_MOD_NMOESI_INVALIDATE_FINISH;
+			esim_schedule_mod_stack_event(stack, 0);
 
-		stack->event = EV_MOD_NMOESI_INVALIDATE_FINISH;
-		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_INVALIDATE_FINISH, stack, 0);
 		return;
 	}
@@ -3894,7 +3895,9 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 		assert(stack->pending > 0);
 		stack->pending--;
 		if (stack->pending)
+		{
 			return;
+		}
 		mod_stack_return(stack);
 		return;
 	}
