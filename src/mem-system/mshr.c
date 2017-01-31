@@ -302,20 +302,28 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 	}
 	else if(mshr_protocol == mshr_protocol_wavefront_fifo /*&& mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1*/)
 	{
-		int i = 0;
-		while(i < list_count(mshr->waiting_list))
+		if(mod->level == 1 && mod->compute_unit->vector_cache == mod)
 		{
-			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
-			if(next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
+			int i = 0;
+			while(i < list_count(mshr->waiting_list))
 			{
-				if(mshr->occupied_entries < mshr->size)
+				next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
+				if(next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
 				{
-					mshr_wakeup(mshr,i);
+					if(mshr->occupied_entries < mshr->size)
+					{
+						mshr_wakeup(mshr,i);
+					}else{
+						break;
+					}
 				}else{
-					break;
+					i++;
 				}
-			}else{
-				i++;
+			}
+		}else{
+			if(list_count(mshr->waiting_list))
+			{
+				mshr_wakeup(mshr,0);
 			}
 		}
 	}else if(mshr_protocol == mshr_protocol_default){

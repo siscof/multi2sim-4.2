@@ -63,7 +63,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 
 		/* If this is the last instruction and there are outstanding
 		 * memory operations, wait for them to complete */
-		if (uop->wavefront_last_inst &&
+		/*if (uop->wavefront_last_inst &&
 			(uop->wavefront_pool_entry->lgkm_cnt ||
 			 uop->wavefront_pool_entry->vm_cnt ||
 			 uop->wavefront_pool_entry->exp_cnt))
@@ -75,7 +75,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 
 			list_index++;
 			continue;
-		}
+		}*/
 
 		/* Decrement the outstanding memory access count */
 		if (uop->scalar_mem_read)
