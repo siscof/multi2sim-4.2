@@ -5,6 +5,7 @@
 
 #include "mod-stack.h"
 #include <stdio.h>
+#include <stdbool.h>
 
 extern int flag_mshr_dynamic_enabled;
 extern int EV_MSHR_DYNAMIC_SIZE_EVAL;
@@ -51,7 +52,7 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack);
 struct mshr_t *mshr_create();
 void mshr_free(struct mshr_t *mshr);
 void mshr_wakeup(struct mshr_t *mshr, int index);
-void mshr_wavefront_wakeup(struct mshr_t *mshr, struct si_wavefront_t *wavefront);
+void mshr_wavefront_wakeup(struct mshr_t *mshr);
 void mshr_delay(struct mshr_t *mshr, struct mod_stack_t *stack, int event);
 int mshr_pre_lock(struct mshr_t *mshr, struct mod_stack_t *stack);
 
