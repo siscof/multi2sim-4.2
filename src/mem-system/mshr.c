@@ -67,7 +67,7 @@ struct mshr_t *mshr_create(int size)
 	list_enqueue(mshr->blocked_list, stack);
 }*/
 
-void mshr_wavefront_wakeup(struct mshr_t *mshr, struct si_wavefront_t *wavefront)
+void mshr_wavefront_wakeup(struct mshr_t *mshr/*, struct si_wavefront_t *wavefront*/)
 {
 	struct mod_stack_t *next_stack;
 	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
@@ -76,7 +76,7 @@ void mshr_wavefront_wakeup(struct mshr_t *mshr, struct si_wavefront_t *wavefront
 		while(i < list_count(mshr->waiting_list))
 		{
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
-			if(next_stack->wavefront == wavefront && next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
+			if(next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
 			{
 				if(mshr->occupied_entries < mshr->size)
 				{
@@ -96,7 +96,7 @@ void mshr_wavefront_wakeup(struct mshr_t *mshr, struct si_wavefront_t *wavefront
 		{
 			next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
 
-			if(next_stack->wavefront == wavefront && next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
+			if(next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
 			{
 				if(mshr->occupied_entries < mshr->size)
 				{
@@ -323,16 +323,15 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 		/* propuesta 2: */
 		if(mod->level == 1 && mod->compute_unit->vector_cache == mod)
 		{
-			struct mod_stack_t *launch_stack;
+			struct mod_stack_t *launch_stack = NULL;
 			struct si_wavefront_t *wavefront;
 
 			//
-			struct list_t *wavefront_list = mshr_get_wavefront_list(mshr)
+			struct list_t *wavefront_list = mshr_get_wavefront_list(mshr);
 			if(list_index_of(wavefront_list,stack->wavefront)==-1)
 				list_add(wavefront_list, stack->wavefront);
 
-			int i = 0;
-			while(i < list_count(wavefront_list))
+			for(int i = 0; i < list_count(wavefront_list); i++)
 			{
 				wavefront = (struct si_wavefront_t *) list_get(wavefront_list, i);
 				for(int j = 0; j < list_count(mshr->waiting_list); j++)
@@ -348,32 +347,35 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 						}
 					}
 				}
-				i++;
 			}
 
-			while(i < list_count(mshr->waiting_list))
+			while(mshr->occupied_entries < mshr->size)
 			{
-				next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
-				if(next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
+				int launch_stack_index = -1;
+				for(int i = 0; i < list_count(mshr->waiting_list); i++)
 				{
-					if(mshr->occupied_entries < mshr->size)
+					next_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
+					if(next_stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
 					{
-						if(!launch_stack || list_count(launch_stack->wavefront->mem_accesses_list) > list_count(next_stack->wavefront->mem_accesses_list))
+						if(launch_stack_index == -1 || list_count(launch_stack->wavefront->mem_accesses_list) > list_count(next_stack->wavefront->mem_accesses_list))
 						{
-							launch_stack = next_stack;
+							launch_stack_index = i;
 						}
 					}else{
-						break;
+						continue;
 					}
-				}else{
-					i++;
+				}
+
+				if(launch_stack_index != -1)
+				{
+					mshr_wakeup(mshr,launch_stack_index);
 				}
 			}
-
 		}else{
-				list_add(mshr->access_list,stack);
-				mshr_lock_entry(mshr, stack);
-				return 1;
+			if(list_count(mshr->waiting_list))
+			{
+				mshr_wakeup(mshr,0);
+			}
 		}
 	}
 	else if(mshr_protocol == mshr_protocol_wavefront_fifo /*&& mod->compute_unit && mod->compute_unit->vector_cache == mod && mod->level == 1*/)
