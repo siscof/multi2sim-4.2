@@ -369,6 +369,8 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 				if(launch_stack_index != -1)
 				{
 					mshr_wakeup(mshr,launch_stack_index);
+				}else{
+					return;
 				}
 			}
 		}else{
