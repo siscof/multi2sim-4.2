@@ -63,7 +63,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 
 		/* If this is the last instruction and there are outstanding
 		 * memory operations, wait for them to complete */
-		if (uop->wavefront_last_inst &&
+		/*if (uop->wavefront_last_inst &&
 			(uop->wavefront_pool_entry->lgkm_cnt ||
 			 uop->wavefront_pool_entry->vm_cnt ||
 			 uop->wavefront_pool_entry->exp_cnt))
@@ -75,7 +75,7 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 
 			list_index++;
 			continue;
-		}
+		}*/
 
 		/* Decrement the outstanding memory access count */
 		if (uop->scalar_mem_read)
@@ -156,27 +156,6 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * more instructions for it */
 			uop->wavefront_pool_entry->wavefront_finished = 1;
 			uop->work_group->wavefronts_completed_timing++;
-
-			if (uop->work_group->wavefronts_completed_timing ==
-				uop->work_group->wavefront_count)
-			{
-				uop->work_group->finished_timing = 1;
-			}
-
-			/* Check if wavefront finishes a work-group */
-			assert(uop->work_group);
-			assert(uop->work_group->wavefronts_completed_timing <=
-				uop->work_group->wavefront_count);
-			if (uop->work_group->finished_timing)
-			{
-				assert(uop->work_group->
-					wavefronts_completed_timing ==
-					uop->work_group->wavefront_count);
-
-				si_compute_unit_unmap_work_group(
-					scalar_unit->compute_unit,
-					uop->work_group);
-			}
 		}
 
 		si_trace("si.end_inst id=%lld cu=%d\n", uop->id_in_compute_unit,

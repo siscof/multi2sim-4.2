@@ -422,6 +422,35 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 		if (wavefront->wavefront_pool_entry->wavefront_finished)
 		{
 			assert(wavefront->finished);
+
+			if (wavefront->wavefront_pool_entry->lgkm_cnt ||
+				  wavefront->wavefront_pool_entry->vm_cnt ||
+				  wavefront->wavefront_pool_entry->exp_cnt)
+			{
+				continue;
+			}
+
+			if (wavefront->work_group->wavefronts_completed_timing !=
+				wavefront->work_group->wavefront_count)
+			{
+				continue;
+			}
+
+			wavefront->work_group->finished_timing = 1;
+
+			/* Check if wavefront finishes a work-group */
+			assert(wavefront->work_group);
+			assert(wavefront->work_group->wavefronts_completed_timing <=
+				wavefront->work_group->wavefront_count);
+
+			assert(wavefront->work_group->
+				wavefronts_completed_timing ==
+				wavefront->work_group->wavefront_count);
+
+			si_compute_unit_unmap_work_group(
+				compute_unit,
+				wavefront->work_group);
+
 			continue;
 		}
 
