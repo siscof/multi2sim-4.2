@@ -155,7 +155,6 @@ void si_scalar_unit_complete(struct si_scalar_unit_t *scalar_unit)
 			 * so that the hardware wont try to fetch any
 			 * more instructions for it */
 			uop->wavefront_pool_entry->wavefront_finished = 1;
-			uop->work_group->wavefronts_completed_timing++;
 		}
 
 		si_trace("si.end_inst id=%lld cu=%d\n", uop->id_in_compute_unit,

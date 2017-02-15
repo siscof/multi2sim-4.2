@@ -430,6 +430,9 @@ void si_compute_unit_fetch(struct si_compute_unit_t *compute_unit,
 				continue;
 			}
 
+			wavefront->work_group->wavefronts_completed_timing++;
+			wavefront->wavefront_pool_entry->ready = 0;
+
 			if (wavefront->work_group->wavefronts_completed_timing !=
 				wavefront->work_group->wavefront_count)
 			{
