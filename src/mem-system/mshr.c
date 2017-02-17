@@ -135,7 +135,12 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	struct mod_t *mod = stack->target_mod;
 
-	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
+	if(mshr_protocol == mshr_protocol_XXXX)
+	{
+		/* propuesta 3: */
+
+	}
+	else if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
 		if(mshr->size > mshr->occupied_entries)
 		{
@@ -149,7 +154,6 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 					{
 						list_add(mshr->access_list,stack);
 						mshr_lock_entry(mshr, stack);
-
 						return 1;
 					}
 
@@ -318,7 +322,12 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 
 	assert(list_index_of(mshr->access_list, stack) == -1);
 
-	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
+	if(mshr_protocol == mshr_protocol_XXXX)
+	{
+		/* propuesta 3: */
+
+	}
+	else if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
 		/* propuesta 2: */
 		if(mod->level == 1 && mod->compute_unit->vector_cache == mod)
