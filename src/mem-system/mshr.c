@@ -337,6 +337,7 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 
 			//
 			struct list_t *wavefront_list = mshr_get_wavefront_list(mshr);
+
 			if(list_index_of(wavefront_list,stack->wavefront)==-1)
 				list_add(wavefront_list, stack->wavefront);
 
@@ -369,6 +370,7 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 						if(launch_stack_index == -1 || list_count(launch_stack->wavefront->mem_accesses_list) > list_count(next_stack->wavefront->mem_accesses_list))
 						{
 							launch_stack_index = i;
+							launch_stack = (struct mod_stack_t *) list_get(mshr->waiting_list, i);
 						}
 					}else{
 						continue;

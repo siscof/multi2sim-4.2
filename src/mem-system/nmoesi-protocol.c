@@ -1690,7 +1690,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 				stack->way = cache_replace_block(target_mod->cache, stack->set);
 			}
-			if(flag_mshr_enabled && stack->read && stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
+			if(flag_mshr_enabled && stack->request_dir != mod_request_down_up && stack->read && stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
 			{
 				/*if(mshr_pre_lock(mod->mshr, stack->ret_stack))
 				{

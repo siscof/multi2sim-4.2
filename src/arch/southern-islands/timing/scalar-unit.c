@@ -198,7 +198,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 		}
 
 		/* Stall if the width has been reached */
-		if ((instructions_processed + list_index) > si_gpu_scalar_unit_width)
+		if (instructions_processed > si_gpu_scalar_unit_width)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d "
 				"uop_id=%lld stg=\"s\"\n",
@@ -241,7 +241,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 
 	list_index = 0;
 	list_entries = list_count(scalar_unit->inflight_mem_buffer);
-
+	instructions_processed = 0;
 
 	for (i = 0; i < list_entries; i++)
 	{
@@ -257,7 +257,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 		}
 
 		/* Stall if the width has been reached */
-		if ((instructions_processed +list_index) > si_gpu_scalar_unit_width)
+		if (instructions_processed > si_gpu_scalar_unit_width)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d "
 				"uop_id=%lld stg=\"s\"\n",
