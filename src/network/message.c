@@ -1,4 +1,4 @@
-/* 
+/*
  *  Multi2Sim
  *  Copyright (C) 2012  Rafael Ubal (ubal@ece.neu.edu)
  *
@@ -33,7 +33,9 @@
 #include "node.h"
 #include "routing-table.h"
 
-/* 
+#include <arch/southern-islands/timing/gpu.h>
+
+/*
  * Message
  */
 
@@ -70,7 +72,7 @@ void net_msg_free(struct net_msg_t *msg)
 
 
 
-/* 
+/*
  * Event-driven Simulation
  */
 
@@ -130,12 +132,14 @@ void net_event_handler(int event, void *data)
 				"msg=%lld "
 				"size=%d "
 				"src=\"%s\" "
-				"dst=\"%s\"\n",
+				"dst=\"%s\" "
+				"gpu_cycle=%lld\n",
 				net->name,
 				msg->id,
 				msg->size,
 				src_node->name,
-				dst_node->name);
+				dst_node->name,
+				asTiming(si_gpu)->cycle);
 
 		/* Get output buffer */
 		entry = net_routing_table_lookup(routing_table, src_node,
@@ -181,11 +185,13 @@ void net_event_handler(int event, void *data)
 				"net=\"%s\" "
 				"msg=%lld "
 				"node=\"%s\" "
-				"buf=\"%s\"\n",
+				"buf=\"%s\" "
+				"gpu_cycle=%lld\n",
 				net->name,
 				msg->id,
 				node->name,
-				buffer->name);
+				buffer->name,
+				asTiming(si_gpu)->cycle);
 
 		/* If message is not at buffer head, process later */
 		assert(list_count(buffer->msg_list));
@@ -238,7 +244,7 @@ void net_event_handler(int event, void *data)
 				return;
 			}
 
-			/* If buffer contain the message but doesn't have the 
+			/* If buffer contain the message but doesn't have the
 			 * shared link in control, wait */
 			if (link->virtual_channel > 1)
 			{
@@ -271,7 +277,7 @@ void net_event_handler(int event, void *data)
 					"msg=%lld "
 					"why=\"input buffer busy\"\n",
 					net->name, msg->id);
-	
+
 				esim_schedule_event(event, stack,
 					input_buffer->write_busy - cycle + 1);
 				return;
@@ -400,7 +406,7 @@ void net_event_handler(int event, void *data)
 
 			/* 4. assign the bus to the buffer. update the
 			 * necessary data ; before here, the bus is not
-			 * assign to anything and is not updated so it can be 
+			 * assign to anything and is not updated so it can be
 			 * assign to other buffers as well. If this certain
 			 * buffer wins that specific bus_lane the appropriate
 			 * fields will be updated. Contains: bus_lane
@@ -455,11 +461,13 @@ void net_event_handler(int event, void *data)
 			"net=\"%s\" "
 			"msg=%lld "
 			"node=\"%s\" "
-			"buf=\"%s\"\n",
+			"buf=\"%s\" "
+			"gpu_cycle=%lld\n",
 			net->name,
 			msg->id,
 			node->name,
-			buffer->name);
+			buffer->name,
+			asTiming(si_gpu)->cycle);
 
 		/* If message is not at buffer head, process later */
 		assert(list_count(buffer->msg_list));
@@ -579,10 +587,12 @@ void net_event_handler(int event, void *data)
 			"a=\"receive\" "
 			"net=\"%s\" "
 			"msg=%lld "
-			"node=\"%s\"\n",
+			"node=\"%s\" "
+			"gpu_cycle=%lld\n",
 			net->name,
 			msg->id,
-			dst_node->name);
+			dst_node->name,
+			asTiming(si_gpu)->cycle);
 
 		/* Stats */
 		net->transfers++;

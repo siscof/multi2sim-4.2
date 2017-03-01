@@ -1097,7 +1097,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 
-			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
+			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK2;
 			esim_schedule_mod_stack_event(stack, retry_lat);
 			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
 			return;
@@ -1196,7 +1196,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 
-			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
+			stack->event = EV_MOD_NMOESI_NC_STORE_LOCK2;
 			esim_schedule_mod_stack_event(stack, retry_lat);
 			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK, stack, retry_lat);
 			return;

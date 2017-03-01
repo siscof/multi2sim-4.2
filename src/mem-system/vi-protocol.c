@@ -163,7 +163,7 @@ void mod_handler_vi_load(int event, void *data)
 			//stack->request_dir = mod_request_up_down;
 
 			net = mod->high_net;
-			src_node = stack->ret_stack->mod->low_net_node;
+			src_node = stack->ret_stack->target_mod->low_net_node;
 			dst_node = mod->high_net_node;
 			return_event = EV_MOD_VI_LOAD_RECEIVE;
 			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
