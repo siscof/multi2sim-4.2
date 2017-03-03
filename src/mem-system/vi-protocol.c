@@ -306,7 +306,7 @@ if (event == EV_MOD_VI_LOAD_LOCK2)
 	}
 	/* Call find and lock */
 
-	new_stack = mod_stack_create(stack->id, mod, stack->addr,
+	/*new_stack = mod_stack_create(stack->id, mod, stack->addr,
 		EV_MOD_VI_LOAD_ACTION, stack);
 	new_stack->wavefront = stack->wavefront;
 	new_stack->uop = stack->uop;
@@ -316,8 +316,12 @@ if (event == EV_MOD_VI_LOAD_LOCK2)
 	new_stack->tiempo_acceso = stack->tiempo_acceso;
 	new_stack->retry = stack->retry;
 	stack->find_and_lock_stack = new_stack;
-	new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
-	esim_schedule_mod_stack_event(new_stack, 0);
+	new_stack->event = EV_MOD_VI_FIND_AND_LOCK;*/
+
+	stack->blocking = 1;
+	stack->read = 1;
+	stack->find_and_lock_return_event = EV_MOD_VI_LOAD_ACTION;
+	esim_schedule_mod_stack_event(stack, 0);
 	return;
 }
 
@@ -881,7 +885,7 @@ void mod_handler_vi_store(int event, void *data)
 		}
 
 		/* Call find and lock */
-		new_stack = mod_stack_create(stack->id, mod, stack->addr,
+		/*new_stack = mod_stack_create(stack->id, mod, stack->addr,
 			EV_MOD_VI_STORE_ACTION, stack);
 		new_stack->blocking = 1;
 		new_stack->nc_write = 1;
@@ -890,8 +894,12 @@ void mod_handler_vi_store(int event, void *data)
 		new_stack->uop = stack->uop;
 		new_stack->witness_ptr = stack->witness_ptr;
 		stack->witness_ptr = NULL;
-		new_stack->event = EV_MOD_VI_FIND_AND_LOCK;
-		esim_schedule_mod_stack_event(new_stack, 0);
+		new_stack->event = EV_MOD_VI_FIND_AND_LOCK;*/
+
+		stack->blocking = 1;
+		stack->nc_write = 1;
+		stack->find_and_lock_return_event = EV_MOD_VI_STORE_ACTION;
+		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
 
 		return;
@@ -1604,7 +1612,10 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		ret->tag = stack->tag;
 		ret->mshr_locked = stack->mshr_locked;
 		ret->find_and_lock_stack = NULL;
-		mod_stack_return(stack);
+		stack->event = stack->find_and_lock_return_event;
+		stack->find_and_lock_return_event = 0;
+		esim_schedule_mod_stack_event(stack, 0);
+		//mod_stack_return(stack);
 		return;
 	}
 
