@@ -249,7 +249,7 @@ if (event == EV_MOD_VI_LOAD_LOCK)
 	{
 		mem_debug("    %lld wait for access %lld\n",
 			stack->id, older_stack->id);
-			assert(!older_stack->waiting_list_event);
+			//assert(!older_stack->waiting_list_event);
 		mod_stack_wait_in_stack(stack, older_stack, EV_MOD_VI_LOAD_LOCK);
 		return;
 	}
@@ -321,6 +321,7 @@ if (event == EV_MOD_VI_LOAD_LOCK2)
 	stack->blocking = 1;
 	stack->read = 1;
 	stack->find_and_lock_return_event = EV_MOD_VI_LOAD_ACTION;
+	stack->event = EV_MOD_VI_FIND_AND_LOCK;
 	esim_schedule_mod_stack_event(stack, 0);
 	return;
 }
@@ -899,6 +900,7 @@ void mod_handler_vi_store(int event, void *data)
 		stack->blocking = 1;
 		stack->nc_write = 1;
 		stack->find_and_lock_return_event = EV_MOD_VI_STORE_ACTION;
+		stack->event = EV_MOD_VI_FIND_AND_LOCK;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_VI_FIND_AND_LOCK, new_stack, 0);
 
@@ -1226,7 +1228,8 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
 	//, *oldest_stack=NULL;
-	struct mod_stack_t *ret = stack->ret_stack;
+	//struct mod_stack_t *ret = stack->ret_stack;
+	struct mod_stack_t *ret = stack;
 	//struct mod_stack_t *new_stack;
 
 	struct mod_t *mod = stack->target_mod;
@@ -1422,7 +1425,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 					mshr_delay(mod->mshr,stack, EV_MOD_VI_FIND_AND_LOCK);
 					return;
 				}*/
-				if(!mshr_lock(mod->mshr, stack->ret_stack))
+				if(!mshr_lock(mod->mshr, stack))
 				{
 					mod_unlock_port(mod, port, stack);
 					ret->port_locked = 0;
