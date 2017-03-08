@@ -152,6 +152,7 @@ struct si_gpu_unit_stats
 	long long gpu_idle;
 	long long work_group_op_counter;
 
+	long long wavefronts_inflight;
 	long long wait_for_mem_time;
 	long long wait_for_mem_counter;
 

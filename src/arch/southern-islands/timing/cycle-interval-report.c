@@ -31,6 +31,7 @@
 
 #include <lib/util/estadisticas.h>
 #include <mem-system/mshr.h>
+#include <mem-system/mod-stack.h>
 
 static int spatial_profiling_interval = 10000;
 static int spatial_profiling_format = 0;
@@ -174,7 +175,7 @@ void si_device_spatial_report_init(SIGpu *device)
 
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 
-	fprintf(device_spatial_report_file, "wait_for_mem_time,wait_for_mem_counter,gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
+	fprintf(device_spatial_report_file, "mshr_wavefront_inflight,wait_for_mem_time,wait_for_mem_counter,gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
 	fprintf(device_spatial_report_file, "mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,uop_load_end,uop_load_lat,uop_load_vmb_lat,uop_load_mm_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
@@ -389,7 +390,7 @@ void si_report_unmapped_work_group(struct si_compute_unit_t *compute_unit)
 void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 {
 	/* If interval - reset the counters in all the engines */
-	compute_unit->interval_cycle ++;
+	compute_unit->interval_cycle++;
 
 	if (si_cu_spatial_report_active && !(asTiming(si_gpu)->cycle % spatial_profiling_interval))
 	{
@@ -494,6 +495,12 @@ void analizar_wavefront(SIGpu *device)
 				if (wavefront->finished)
 					continue;
 
+				/* Wavefront is ready but waiting at barrier */
+				if (wavefront->wavefront_pool_entry->wait_for_barrier)
+				{
+					continue;
+				}
+
 				/* Wavefront is ready but waiting on outstanding
 				 * memory instructions */
 				if (wavefront->wavefront_pool_entry->wait_for_mem)
@@ -502,16 +509,36 @@ void analizar_wavefront(SIGpu *device)
 						wavefront->wavefront_pool_entry->vm_cnt)
 					{
 						device->interval_statistics->wavefronts_waiting_mem++;
-						continue;
 					}
 				}
+			}
+		}
 
-				/* Wavefront is ready but waiting at barrier */
-				if (wavefront->wavefront_pool_entry->wait_for_barrier)
+		for(int h = 0;h < list_count(compute_unit->vector_cache->mshr->access_list);h++)
+		{
+			struct mod_stack_t *stack = list_get(compute_unit->vector_cache->mshr->access_list,h);
+			for (int i = 0; i < list_count(compute_unit->vector_cache->mshr->waiting_list); i++)
+			{
+			  struct mod_stack_t *waiting_stack = list_get(compute_unit->vector_cache->mshr->waiting_list,i);
+				if(stack->wavefront == waiting_stack->wavefront)
 				{
-					continue;
+					device->interval_statistics->wavefronts_inflight++;
+					break;
 				}
+			}
+		}
 
+		for(int h = 0;h < list_count(compute_unit->scalar_cache->mshr->access_list);h++)
+		{
+			struct mod_stack_t *stack = list_get(compute_unit->scalar_cache->mshr->access_list,h);
+			for (int i = 0; i < list_count(compute_unit->scalar_cache->mshr->waiting_list); i++)
+			{
+			  struct mod_stack_t *waiting_stack = list_get(compute_unit->scalar_cache->mshr->waiting_list,i);
+				if(stack->wavefront == waiting_stack->wavefront)
+				{
+					device->interval_statistics->wavefronts_inflight++;
+					break;
+				}
 			}
 		}
 	}
@@ -525,6 +552,7 @@ void si_device_spatial_report_dump(SIGpu *device)
 	FILE *f = device_spatial_report_file;
 
 	analizar_wavefront(device);
+	fprintf(f, "%lld,", device->interval_statistics->wavefronts_inflight);
 	fprintf(f, "%lld,", device->interval_statistics->wait_for_mem_time);
 	fprintf(f, "%lld,", device->interval_statistics->wait_for_mem_counter);
 
