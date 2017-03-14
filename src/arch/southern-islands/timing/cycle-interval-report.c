@@ -22,6 +22,7 @@
 #include <lib/util/file.h>
 #include <lib/util/string.h>
 #include <string.h>
+#include <stdbool.h>
 
 #include "cycle-interval-report.h"
 #include "uop.h"
@@ -409,7 +410,7 @@ void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 	}
 }
 
-int contador_mshr = 20;
+//int contador_mshr = 20;
 
 void si_device_interval_update(SIGpu *device)
 {
@@ -435,9 +436,9 @@ void si_device_interval_update(SIGpu *device)
 			compute_unit->interval_unmapped_work_groups = 0;
 			compute_unit->interval_alu_issued = 0;
 			compute_unit->interval_lds_issued = 0;*/
-			contador_mshr--;
+			/*contador_mshr--;
 
-			/*if(flag_mshr_dynamic_enabled && contador_mshr == 0)
+			if(flag_mshr_dynamic_enabled && contador_mshr == 0)
 			{
 			  mshr_control2();
 				contador_mshr=20;
@@ -514,6 +515,37 @@ void analizar_wavefront(SIGpu *device)
 			}
 		}
 
+		struct list_t *wavefront_list = list_create();
+		for(int h = 0;h < list_count(compute_unit->vector_cache->mshr->access_list);h++)
+		{
+			struct mod_stack_t *stack = list_get(compute_unit->vector_cache->mshr->access_list,h);
+
+			if(list_index_of(wavefront_list, stack->wavefront) != -1)
+			{
+				continue;
+			}
+
+			list_add(wavefront_list,stack->wavefront);
+
+			bool sumar = true;
+
+			for (int i = 0; i < list_count(compute_unit->vector_cache->mshr->waiting_list); i++)
+			{
+				struct mod_stack_t *waiting_stack = list_get(compute_unit->vector_cache->mshr->waiting_list,i);
+				if(stack->wavefront == waiting_stack->wavefront)
+				{
+					sumar = false;
+					break;
+				}
+			}
+			if(sumar)
+			{
+				device->interval_statistics->wavefronts_inflight++;
+			}
+		}
+
+
+/*
 		for(int h = 0;h < list_count(compute_unit->vector_cache->mshr->access_list);h++)
 		{
 			struct mod_stack_t *stack = list_get(compute_unit->vector_cache->mshr->access_list,h);
@@ -522,6 +554,7 @@ void analizar_wavefront(SIGpu *device)
 			  struct mod_stack_t *waiting_stack = list_get(compute_unit->vector_cache->mshr->waiting_list,i);
 				if(stack->wavefront == waiting_stack->wavefront)
 				{
+					compute_unit->
 					device->interval_statistics->wavefronts_inflight++;
 					break;
 				}
@@ -540,7 +573,7 @@ void analizar_wavefront(SIGpu *device)
 					break;
 				}
 			}
-		}
+		}*/
 	}
 }
 
