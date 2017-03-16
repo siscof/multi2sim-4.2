@@ -162,7 +162,8 @@ void si_spatial_report_init()
 
 void si_cu_spatial_report_init()
 {
-	fprintf(cu_spatial_report_file, "cycle, esim_time\n");
+    fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
+    fprintf(cu_spatial_report_file, "CU_id,mshr_wavefront_inflight,mappedWG,unmappedWG,WorkGroup_count,cycles,esim_time\n");
 }
 
 void si_wf_spatial_report_init()
@@ -245,23 +246,39 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
 			compute_unit->interval_lds_issued,
 			compute_unit->interval_cycle);
 	}else if(spatial_profiling_format == 1){
-		fprintf(f,
-			"%d,%lld,%lld,%d,%lld,%lld\n",
-			compute_unit->id,
-			compute_unit->interval_mapped_work_groups,
-			compute_unit->interval_unmapped_work_groups,
-			compute_unit->work_group_count,
-			asTiming(si_gpu)->cycle,
-			esim_time);
+	fprintf(f,"%d,",compute_unit->id);
+            
+        //instruction report total_i, simd_i, scalar_i, v_mem_i, s_mem_i, lds_i
+	fprintf(f, "%lld,", compute_unit->interval_statistics->instructions_counter);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->macroinst[simd_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->op_counter[simd_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->macroinst[scalar_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->macroinst[v_mem_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->op_counter[v_mem_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->macroinst[s_mem_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->macroinst[lds_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->op_counter[lds_u]);
+	fprintf(f, "%lld,", compute_unit->interval_statistics->macroinst[branch_u]);
+                
+        fprintf(f,"%lld,%lld,%lld,%d,%lld,%lld\n",
+            compute_unit->interval_statistics->wavefronts_inflight,
+            compute_unit->interval_mapped_work_groups,
+            compute_unit->interval_unmapped_work_groups,
+            compute_unit->work_group_count,
+            asTiming(si_gpu)->cycle,
+            esim_time);
 	}
 
 }
 
 void si_vector_memory_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
+        compute_unit->interval_statistics->macroinst[v_mem_u]++;
+        compute_unit->interval_statistics->instructions_counter++;
+	compute_unit->interval_statistics->op_counter[v_mem_u] += si_wavefront_count_active_work_items(uop->wavefront);
+    
 	compute_unit->compute_device->interval_statistics->macroinst[v_mem_u]++;
 	compute_unit->compute_device->interval_statistics->instructions_counter++;
-
 	compute_unit->compute_device->interval_statistics->op_counter[v_mem_u] += si_wavefront_count_active_work_items(uop->wavefront);
 
 	uop->wavefront->work_group->op_counter += si_wavefront_count_active_work_items(uop->wavefront);
@@ -270,9 +287,12 @@ void si_vector_memory_report_new_inst(struct si_compute_unit_t *compute_unit, st
 
 void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
-	compute_unit->compute_device->interval_statistics->macroinst[branch_u]++;
+	compute_unit->interval_statistics->macroinst[branch_u]++;
+        compute_unit->interval_statistics->instructions_counter++;
+	compute_unit->interval_statistics->op_counter[branch_u]++;
+        
+        compute_unit->compute_device->interval_statistics->macroinst[branch_u]++;
 	compute_unit->compute_device->interval_statistics->instructions_counter++;
-
 	compute_unit->compute_device->interval_statistics->op_counter[branch_u]++;
 
 	uop->wavefront->work_group->op_counter++;
@@ -281,7 +301,10 @@ void si_branch_report_new_inst(struct si_compute_unit_t *compute_unit, struct si
 
 void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
-	compute_unit->interval_lds_issued++;
+	compute_unit->interval_statistics->macroinst[lds_u]++;
+        compute_unit->interval_statistics->instructions_counter++;
+    
+        compute_unit->interval_lds_issued++;
 	compute_unit->compute_device->interval_statistics->macroinst[lds_u]++;
 	compute_unit->compute_device->interval_statistics->instructions_counter++;
 
@@ -295,10 +318,13 @@ void si_lds_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uo
 
 void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
+        compute_unit->interval_statistics->macroinst[scalar_u]++;
+        compute_unit->interval_statistics->instructions_counter++;
+	compute_unit->interval_statistics->op_counter[scalar_u]++;
+    
 	compute_unit->interval_alu_issued++;
 	compute_unit->compute_device->interval_statistics->macroinst[scalar_u]++;
 	compute_unit->compute_device->interval_statistics->instructions_counter++;
-
 	compute_unit->compute_device->interval_statistics->op_counter[scalar_u]++;
 
 	uop->wavefront->work_group->op_counter++;
@@ -307,7 +333,11 @@ void si_scalar_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struc
 
 void si_simd_alu_report_new_inst(struct si_compute_unit_t *compute_unit, struct si_uop_t *uop)
 {
-	compute_unit->compute_device->interval_statistics->macroinst[simd_u]++;
+        compute_unit->interval_statistics->macroinst[simd_u]++;
+        compute_unit->interval_statistics->instructions_counter++;
+	compute_unit->interval_statistics->op_counter[simd_u] += si_wavefront_count_active_work_items(uop->wavefront);
+    
+        compute_unit->compute_device->interval_statistics->macroinst[simd_u]++;
 	compute_unit->compute_device->interval_statistics->instructions_counter++;
 
 	compute_unit->compute_device->interval_statistics->op_counter[simd_u] += si_wavefront_count_active_work_items(uop->wavefront);
@@ -541,39 +571,9 @@ void analizar_wavefront(SIGpu *device)
 			if(sumar)
 			{
 				device->interval_statistics->wavefronts_inflight++;
+                                compute_unit->interval_statistics->wavefronts_inflight++;
 			}
 		}
-
-
-/*
-		for(int h = 0;h < list_count(compute_unit->vector_cache->mshr->access_list);h++)
-		{
-			struct mod_stack_t *stack = list_get(compute_unit->vector_cache->mshr->access_list,h);
-			for (int i = 0; i < list_count(compute_unit->vector_cache->mshr->waiting_list); i++)
-			{
-			  struct mod_stack_t *waiting_stack = list_get(compute_unit->vector_cache->mshr->waiting_list,i);
-				if(stack->wavefront == waiting_stack->wavefront)
-				{
-					compute_unit->
-					device->interval_statistics->wavefronts_inflight++;
-					break;
-				}
-			}
-		}
-
-		for(int h = 0;h < list_count(compute_unit->scalar_cache->mshr->access_list);h++)
-		{
-			struct mod_stack_t *stack = list_get(compute_unit->scalar_cache->mshr->access_list,h);
-			for (int i = 0; i < list_count(compute_unit->scalar_cache->mshr->waiting_list); i++)
-			{
-			  struct mod_stack_t *waiting_stack = list_get(compute_unit->scalar_cache->mshr->waiting_list,i);
-				if(stack->wavefront == waiting_stack->wavefront)
-				{
-					device->interval_statistics->wavefronts_inflight++;
-					break;
-				}
-			}
-		}*/
 	}
 }
 
@@ -640,8 +640,7 @@ void si_device_spatial_report_dump(SIGpu *device)
 	fprintf(f, "%lld,", device->interval_statistics->macroinst[branch_u]);
 
 	fprintf(f, "%lld,", device->interval_statistics->interval_mapped_work_groups);
-	fprintf(f, "%lld,",
-	device->interval_statistics->interval_unmapped_work_groups);
+	fprintf(f, "%lld,", device->interval_statistics->interval_unmapped_work_groups);
   // fixme change spatial_profiling_interval for cycle_counter or device->interval_cycle
 	fprintf(f,"%lld,%lld", device->interval_statistics->interval_cycles,	esim_time);
 

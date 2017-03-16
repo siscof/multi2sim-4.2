@@ -73,6 +73,7 @@ struct si_compute_unit_t
 	struct si_lds_t lds_unit;
 
 	/* Statistics */
+        struct si_gpu_unit_stats *interval_statistics;
 	long long cycle;
 	long long mapped_work_groups;
 	long long wavefront_count;
