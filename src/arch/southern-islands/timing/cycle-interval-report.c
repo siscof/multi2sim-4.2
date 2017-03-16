@@ -162,8 +162,8 @@ void si_spatial_report_init()
 
 void si_cu_spatial_report_init()
 {
-    fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
-    fprintf(cu_spatial_report_file, "CU_id,mshr_wavefront_inflight,mappedWG,unmappedWG,WorkGroup_count,cycles,esim_time\n");
+    fprintf(cu_spatial_report_file, "CU_id,total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
+    fprintf(cu_spatial_report_file, "mshr_wavefront_inflight,mappedWG,unmappedWG,WorkGroup_count,cycles,esim_time\n");
 }
 
 void si_wf_spatial_report_init()
@@ -262,12 +262,14 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
                 
         fprintf(f,"%lld,%lld,%lld,%d,%lld,%lld\n",
             compute_unit->interval_statistics->wavefronts_inflight,
-            compute_unit->interval_mapped_work_groups,
-            compute_unit->interval_unmapped_work_groups,
+            compute_unit->interval_statistics->interval_mapped_work_groups,
+            compute_unit->interval_statistics->interval_unmapped_work_groups,
             compute_unit->work_group_count,
             asTiming(si_gpu)->cycle,
             esim_time);
-	}
+        //free(compute_unit->interval_statistics);
+        memset(compute_unit->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
+        }
 
 }
 
@@ -406,6 +408,7 @@ void si_report_mapped_work_group(struct si_compute_unit_t *compute_unit)
 		/*TODO Add calculation here to change this to wavefront pool entries used */
 		compute_unit->interval_mapped_work_groups++;
 		compute_unit->compute_device->interval_statistics->interval_mapped_work_groups++;
+                compute_unit->interval_statistics->interval_mapped_work_groups++;
 	}
 }
 
@@ -415,6 +418,7 @@ void si_report_unmapped_work_group(struct si_compute_unit_t *compute_unit)
 	/*TODO Add calculation here to change this to wavefront pool entries used */
 	compute_unit->interval_unmapped_work_groups++;
 	compute_unit->compute_device->interval_statistics->interval_unmapped_work_groups++;
+        compute_unit->interval_statistics->interval_unmapped_work_groups++;
 }
 
 

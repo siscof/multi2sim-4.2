@@ -139,6 +139,8 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->work_groups =
 		xcalloc(si_gpu_max_work_groups_per_wavefront_pool *
 		si_gpu_num_wavefront_pools, sizeof(void *));
+        
+        compute_unit->interval_statistics = xcalloc(1,sizeof(struct si_gpu_unit_stats));
 
 	/* Return */
 	return compute_unit;
