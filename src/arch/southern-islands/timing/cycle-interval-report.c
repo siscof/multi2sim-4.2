@@ -265,7 +265,7 @@ void si_cu_spatial_report_dump(struct si_compute_unit_t *compute_unit)
             compute_unit->interval_statistics->interval_mapped_work_groups,
             compute_unit->interval_statistics->interval_unmapped_work_groups,
             compute_unit->work_group_count,
-            asTiming(si_gpu)->cycle,
+            compute_unit->interval_statistics->interval_cycles,
             esim_time);
         //free(compute_unit->interval_statistics);
         memset(compute_unit->interval_statistics, 0, sizeof(struct si_gpu_unit_stats));
@@ -426,6 +426,7 @@ void si_cu_interval_update(struct si_compute_unit_t *compute_unit)
 {
 	/* If interval - reset the counters in all the engines */
 	compute_unit->interval_cycle++;
+        compute_unit->interval_statistics->interval_cycles++;
 
 	if (si_cu_spatial_report_active && !(asTiming(si_gpu)->cycle % spatial_profiling_interval))
 	{
