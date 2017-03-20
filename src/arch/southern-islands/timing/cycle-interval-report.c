@@ -182,7 +182,7 @@ void si_device_spatial_report_init(SIGpu *device)
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
-	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,cycle,esim_time\n");
+	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,cycles,esim_time\n");
 }
 
 void si_spatial_report_done()
