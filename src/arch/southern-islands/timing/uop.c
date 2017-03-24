@@ -99,6 +99,7 @@ struct si_uop_t *si_uop_create()
 	struct si_uop_t *uop;
 
 	uop = repos_create_object(gpu_uop_repos);
+        uop->mem_accesses_list = list_create();
 	uop->id = gpu_uop_id_counter++;
 	return uop;
 }
@@ -110,6 +111,7 @@ void si_uop_free(struct si_uop_t *gpu_uop)
 		return;
 	if (gpu_uop->latencies_counters)
 		free(gpu_uop->latencies_counters);
+        list_free(gpu_uop->mem_accesses_list);
 	repos_free_object(gpu_uop_repos, gpu_uop);
 }
 

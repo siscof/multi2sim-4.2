@@ -142,9 +142,6 @@ long long ciclo_acceso = 0;
 int acumulado = 0;
 bool AVOID_RETRIES = false;
 
-
-int FRAN = 0;
-//int load_finished = 0;
 long long ret_ciclo = 0;
 
 /* NMOESI Protocol */

@@ -66,6 +66,7 @@ struct si_uop_t
 
 	//fran
 	long long *latencies_counters;
+        struct list_t *mem_accesses_list;
 
 	/* Flags */
 	unsigned int ready : 1;

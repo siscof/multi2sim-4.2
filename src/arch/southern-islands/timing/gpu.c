@@ -402,7 +402,7 @@ int si_gpu_vector_mem_read_buffer_size = 1;
 int si_gpu_vector_mem_max_inflight_mem_accesses = 32;
 int si_gpu_vector_mem_write_latency = 1;
 int si_gpu_vector_mem_write_buffer_size = 1;
-int si_gpu_vector_mem_main_memory_access_order = 0;
+//int si_gpu_vector_mem_main_memory_access_order = 0;
 int si_gpu_vector_mem_maximum_wavefronts_in_mem = 32;
 
 /* LDS memory parameters */

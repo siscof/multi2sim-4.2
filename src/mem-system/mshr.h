@@ -17,7 +17,7 @@ enum mshr_protocol
 	mshr_protocol_default = 0,
 	mshr_protocol_wavefront_fifo,
 	mshr_protocol_wavefront_occupancy,
-	mshr_protocol_XXXX
+	mshr_protocol_vmb_order
 };
 
 struct mshr_t

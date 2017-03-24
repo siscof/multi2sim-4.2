@@ -70,7 +70,31 @@ struct mshr_t *mshr_create(int size)
 void mshr_wavefront_wakeup(struct mshr_t *mshr/*, struct si_wavefront_t *wavefront*/)
 {
 	struct mod_stack_t *next_stack;
-	if(mshr_protocol == mshr_protocol_wavefront_occupancy)
+        struct si_compute_unit_t *cu = mshr->mod->compute_unit;
+        
+	if(mshr_protocol == mshr_protocol_vmb_order)
+	{
+            struct list_t *mem_buffer = cu->vector_mem_unit.mem_buffer;
+
+            for(int i = 0; i < list_count(mem_buffer); i++)
+            {
+                struct si_uop_t *uop = (struct si_uop_t *) list_get(mem_buffer, i);
+                for(int j = 0; j < list_count(uop->mem_accesses_list); j++)
+                {
+                    int index = list_index_of(mshr->waiting_list, list_get(uop->mem_accesses_list,j));
+                    if(index >= 0)
+                    {
+                        if(mshr->occupied_entries < mshr->size)
+                        {
+                            mshr_wakeup(mshr,index);
+                        }else{
+                            return;
+                        }
+                    }
+                }
+            }
+	}
+	else if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
 		int i = 0;
 		while(i < list_count(mshr->waiting_list))
@@ -135,7 +159,7 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 {
 	struct mod_t *mod = stack->target_mod;
 
-	if(mshr_protocol == mshr_protocol_XXXX)
+	if(mshr_protocol == mshr_protocol_vmb_order)
 	{
 		/* propuesta 3: */
 
@@ -193,7 +217,6 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 		assert(list_index_of(mshr->access_list, stack) == -1);
 		if(mshr->size > mshr->occupied_entries)
 		{
-
 			if(mod->level == 1 && mod->compute_unit->vector_cache == mod)
 			{
 				if(stack->wavefront->wavefront_pool_entry->wait_for_mem == 1)
@@ -205,9 +228,9 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 					return 0;
 				}
 			}else{
-					list_add(mshr->access_list,stack);
-					mshr_lock_entry(mshr, stack);
-					return 1;
+				list_add(mshr->access_list,stack);
+				mshr_lock_entry(mshr, stack);
+				return 1;
 			}
 		}else{
 			return 0;
@@ -322,9 +345,35 @@ void mshr_unlock(struct mod_t *mod, struct mod_stack_t *stack)
 
 	assert(list_index_of(mshr->access_list, stack) == -1);
 
-	if(mshr_protocol == mshr_protocol_XXXX)
+	if(mshr_protocol == mshr_protocol_vmb_order)
 	{
-		/* propuesta 3: */
+		if(mod->level == 1 && mod->compute_unit->vector_cache == mod)
+		{
+                    struct list_t *mem_buffer = mshr->mod->compute_unit->vector_mem_unit.mem_buffer;
+
+                    for(int i = 0; i < list_count(mem_buffer); i++)
+                    {
+                        struct si_uop_t *uop = (struct si_uop_t *) list_get(mem_buffer, i);
+                        for(int j = 0; j < list_count(uop->mem_accesses_list); j++)
+                        {
+                            int index = list_index_of(mshr->waiting_list, list_get(uop->mem_accesses_list,j));
+                            if(index >= 0)
+                            {
+                                if(mshr->occupied_entries < mshr->size)
+                                {
+                                    mshr_wakeup(mshr,index);
+                                }else{
+                                    return;
+                                }
+                            }
+                        }
+                    }	
+		}else{
+			if(list_count(mshr->waiting_list))
+			{
+				mshr_wakeup(mshr,0);
+			}
+		}
 
 	}
 	else if(mshr_protocol == mshr_protocol_wavefront_occupancy)
