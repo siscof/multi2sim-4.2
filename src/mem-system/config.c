@@ -377,6 +377,10 @@ static void mem_config_read_general(struct config_t *config)
 	{
 		mshr_protocol = mshr_protocol_wavefront_occupancy;
 	}
+        else if(!strncasecmp(mshr_protocol_str,"vmb_order", 10))
+	{
+		mshr_protocol = mshr_protocol_vmb_order;
+	}
 	else
 	{
 		fatal("%s: mshr protocol: %s : isn't a valid mshr protocol (default, fifo, occupancy)\n",
