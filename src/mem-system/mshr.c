@@ -161,8 +161,15 @@ int mshr_lock(struct mshr_t *mshr, struct mod_stack_t *stack)
 
 	if(mshr_protocol == mshr_protocol_vmb_order)
 	{
-		/* propuesta 3: */
-
+		if(mshr->size > mshr->occupied_entries)
+		{
+			assert(list_index_of(mshr->access_list, stack) == -1);
+			list_add(mshr->access_list,stack);
+			mshr_lock_entry(mshr, stack);
+			return 1;
+		}else{
+			return 0;
+		}
 	}
 	else if(mshr_protocol == mshr_protocol_wavefront_occupancy)
 	{
