@@ -20,7 +20,6 @@
 #ifndef SOUTHERN_ISLANDS_WAVEFRONT_POOL_H
 #define SOUTHERN_ISLANDS_WAVEFRONT_POOL_H
 
-
 struct si_wavefront_pool_entry_t
 {
 	unsigned int valid : 1; /* Valid if wavefront assigned to entry */
@@ -30,6 +29,7 @@ struct si_wavefront_pool_entry_t
 
 	struct si_wavefront_t *wavefront;
 	struct si_uop_t *uop;
+        struct list_t *mem_buffer;
 
 	/* Status (not mutually exclusive) */
 	unsigned int ready : 1;            /* Ready to fetch next instruction */

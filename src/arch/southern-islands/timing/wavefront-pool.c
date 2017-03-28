@@ -42,6 +42,7 @@ struct si_wavefront_pool_t *si_wavefront_pool_create()
 			sizeof(struct si_wavefront_pool_entry_t));
 		wavefront_pool->entries[i]->id_in_wavefront_pool = i;
 		wavefront_pool->entries[i]->wavefront_pool = wavefront_pool;
+                wavefront_pool->entries[i]->mem_buffer = list_create();
 	}
 
 	/* Return */
@@ -53,7 +54,10 @@ void si_wavefront_pool_free(struct si_wavefront_pool_t *wavefront_pool)
 	int i;
 
 	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
+        {
+                free(wavefront_pool->entries[i]->mem_buffer);
 		free(wavefront_pool->entries[i]);
+        }
 
 	free(wavefront_pool->entries);
 	free(wavefront_pool);

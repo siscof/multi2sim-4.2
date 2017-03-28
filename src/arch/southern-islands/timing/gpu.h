@@ -191,6 +191,7 @@ extern int si_gpu_vector_mem_write_buffer_size;
 extern int si_gpu_vector_mem_max_inflight_mem_accesses;
 //extern int si_gpu_vector_mem_main_memory_access_order;
 extern int si_gpu_vector_mem_maximum_wavefronts_in_mem;
+extern int si_gpu_vector_mem_mem_queue_per_wavefront_entry;
 
 extern int si_gpu_lds_size;
 extern int si_gpu_lds_alloc_size;

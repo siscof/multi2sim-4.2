@@ -111,23 +111,28 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 	int list_entries;
 	int list_index = 0;
 	int i;
-
-	list_entries = list_count(vector_mem->mem_buffer);
+        struct list_t *mem_buffer = vector_mem->mem_buffer;
+        
+        /*if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 1)
+            mem_buffer = uop->wavefront_pool_entry->mem_buffer;
+*/
+	list_entries = list_count(mem_buffer);
 
 	/* Sanity check the mem buffer */
 	assert(list_entries <= si_gpu_vector_mem_max_inflight_mem_accesses);
 
 	for (i = 0; i < list_entries; i++)
 	{
-		uop = list_get(vector_mem->mem_buffer, list_index);
+		uop = list_get(mem_buffer, list_index);
 		assert(uop);
 
-		instructions_processed++;
+                if(si_gpu_vector_mem_mem_queue_per_wavefront_entry != 2)
+                    instructions_processed++;
 
 		/* Uop is not ready yet */
 		if (uop->global_mem_witness)
 		{
-			if(i == 0 && list_count(vector_mem->mem_buffer) == si_gpu_vector_mem_max_inflight_mem_accesses)
+			if(i == 0 && list_count(mem_buffer) == si_gpu_vector_mem_max_inflight_mem_accesses)
 			{
 				add_cycle_vmb_blocked(uop->compute_unit->id, uop->vector_mem_write);
 				//add contador tiempo bloqueando
@@ -136,7 +141,10 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 			list_index++;
 			continue;
 		}
-
+                
+                if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 2)
+                    instructions_processed++;
+                
 		/* Stall if the width has been reached. */
 		if (instructions_processed > si_gpu_vector_mem_width)
 		{
@@ -179,8 +187,9 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		//{
 		si_report_global_mem_finish(uop->compute_unit, uop);
 		//}
+                list_remove(mem_buffer, uop);
 
-		list_remove(vector_mem->mem_buffer, uop);
+		//list_remove(vector_mem->mem_buffer, uop);
 		list_enqueue(vector_mem->write_buffer, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
@@ -201,7 +210,11 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	int i;
 	enum mod_access_kind_t access_kind;
 	int list_index = 0;
-
+        struct list_t *mem_buffer = vector_mem->mem_buffer;
+        
+        /*if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 1)
+            mem_buffer = uop->wavefront_pool_entry->mem_buffer;
+        */
 	list_entries = list_count(vector_mem->read_buffer);
 
 	/* Sanity check the read buffer */
@@ -211,7 +224,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	{
 		uop = list_get(vector_mem->read_buffer, list_index);
 		assert(uop);
-		//instructions_processed++;
+		instructions_processed++;
 
 		/* Uop is not ready yet */
 		if (asTiming(si_gpu)->cycle < uop->read_ready)
@@ -220,7 +233,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			continue;
 		}
 
-		instructions_processed++;
+		//instructions_processed++;
 		/* Stall if the width has been reached. */
 		if (instructions_processed > si_gpu_vector_mem_width)
 		{
@@ -233,11 +246,11 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		}
 
 		/* Sanity check mem buffer */
-		assert(list_count(vector_mem->mem_buffer) <=
+		assert(list_count(mem_buffer) <=
 			si_gpu_vector_mem_max_inflight_mem_accesses);
 
 		/* Stall if there is not room in the memory buffer */
-		if (list_count(vector_mem->mem_buffer) ==
+		if (list_count(mem_buffer) ==
 			si_gpu_vector_mem_max_inflight_mem_accesses)
 		{
 			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
@@ -247,7 +260,7 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 			list_index++;
 
 			/* stall cycles by vector mem queue full*/
-			struct si_uop_t *uop_blocking = list_get(vector_mem->mem_buffer, 0);
+			struct si_uop_t *uop_blocking = list_get(mem_buffer, 0);
 			uop_blocking->wavefront->mem_blocking = 1;
 			add_cu_mem_full();
 
@@ -374,7 +387,8 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 
 		/* Transfer the uop to the mem buffer */
 		list_remove(vector_mem->read_buffer, uop);
-		list_enqueue(vector_mem->mem_buffer, uop);
+                //list_enqueue(vector_mem->mem_buffer, uop);
+		list_enqueue(mem_buffer, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"mem-m\"\n", uop->id_in_compute_unit,
