@@ -1048,7 +1048,7 @@ void si_gpu_read_config(void)
         si_gpu_vector_mem_mem_queue_per_wavefront_entry = config_read_int(
 		gpu_config, section, "MemQueuePerWavefrontEntry",
 		si_gpu_vector_mem_mem_queue_per_wavefront_entry);
-	if (si_gpu_vector_mem_mem_queue_per_wavefront_entry != 0 && si_gpu_vector_mem_mem_queue_per_wavefront_entry!= 1 && si_gpu_vector_mem_mem_queue_per_wavefront_entry!= 2)
+	if (si_gpu_vector_mem_mem_queue_per_wavefront_entry != 0 && si_gpu_vector_mem_mem_queue_per_wavefront_entry != 1 && si_gpu_vector_mem_mem_queue_per_wavefront_entry != 2)
 		fatal("%s: invalid value for 'MemQueuePerWavefrontEntry'.\n%s",
 			si_gpu_config_file_name, err_note);
         
