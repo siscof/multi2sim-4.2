@@ -212,6 +212,8 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	int list_index = 0;
         struct list_t *mem_buffer = vector_mem->mem_buffer;
         
+        
+        
         /*if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 1)
             mem_buffer = uop->wavefront_pool_entry->mem_buffer;
         */
@@ -222,10 +224,17 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 
 	for (i = 0; i < list_entries; i++)
 	{
+
+            
 		uop = list_get(vector_mem->read_buffer, list_index);
 		assert(uop);
 		instructions_processed++;
-
+                
+            	if(si_gpu_vector_mem_mem_buffer_per_wavefront == 1)
+                {
+                    mem_buffer = uop->wavefront->wavefront_pool_entry->mem_buffer;
+                }
+                
 		/* Uop is not ready yet */
 		if (asTiming(si_gpu)->cycle < uop->read_ready)
 		{
@@ -283,9 +292,9 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		}
 		else if (uop->vector_mem_read)
 		{
-        	if ((directory_type == dir_type_nmoesi) || uop->glc)
-          	access_kind = mod_access_load;
-          else
+                    if ((directory_type == dir_type_nmoesi) || uop->glc)
+                        access_kind = mod_access_load;
+                    else
         		access_kind = mod_access_nc_load;
 		}
 		else
@@ -301,95 +310,96 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 		SI_FOREACH_WORK_ITEM_IN_WAVEFRONT(uop->wavefront, work_item_id)
 		{
 
-      work_item = uop->wavefront->work_items[work_item_id];
-			work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
+                    work_item = uop->wavefront->work_items[work_item_id];
+                    work_item_uop = &uop->work_item_uop[work_item->id_in_wavefront];
 
-			if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
-		  {
-				if (uop->vector_mem_write && !uop->glc)
-	      {
-					aux->vector_write_nc++;
-        }
-        else if (uop->vector_mem_write && uop->glc)
-        {
-					aux->vector_write++;
-        }
-        else if (uop->vector_mem_read && uop->glc)
-        {
-        	aux->vector_load++;
-				}
-				else if (uop->vector_mem_read && !uop->glc)
-        {
-					aux->vector_load_nc++;
-				}
+                    if (si_wavefront_work_item_active(uop->wavefront, work_item->id_in_wavefront))
+                    {
+                        if (uop->vector_mem_write && !uop->glc)
+                        {
+                            aux->vector_write_nc++;
+                        }
+                        else if (uop->vector_mem_write && uop->glc)
+                        {
+                            aux->vector_write++;
+                        }
+                        else if (uop->vector_mem_read && uop->glc)
+                        {
+                            aux->vector_load++;
+                        }
+                        else if (uop->vector_mem_read && !uop->glc)
+                        {
+                            aux->vector_load_nc++;
+                        }
 
-				uop->active_work_items++;
+                        uop->active_work_items++;
 
-				mod = vector_mem->compute_unit->vector_cache;
-				//hacer coalesce
-				unsigned int addr = work_item_uop->global_mem_access_addr;
-				int bytes = work_item->global_mem_access_size;
-				struct mod_stack_t *master_stack = mod_can_coalesce_fran(mod, access_kind, addr, &uop->global_mem_witness);
+                        mod = vector_mem->compute_unit->vector_cache;
+                        //hacer coalesce
+                        unsigned int addr = work_item_uop->global_mem_access_addr;
+                        int bytes = work_item->global_mem_access_size;
+                        struct mod_stack_t *master_stack = mod_can_coalesce_fran(mod, access_kind, addr, &uop->global_mem_witness);
 
-				add_access(0);
+                        add_access(0);
 
-				//instruccion coalesce
-				if (flag_coalesce_gpu_enabled && master_stack)
-				{
-					unsigned int shift = (addr & (mod->sub_block_size - 1));
-					long long mask = 0;
-					if(bytes == 0)
-						bytes = 64;
+                        //instruccion coalesce
+                        if (flag_coalesce_gpu_enabled && master_stack)
+                        {
+                            unsigned int shift = (addr & (mod->sub_block_size - 1));
+                            long long mask = 0;
+                            if(bytes == 0)
+                                bytes = 64;
 
-					master_stack->stack_size += bytes;
+                            master_stack->stack_size += bytes;
 
-					//assert((tag + mod->sub_block_size) >= (addr + bytes));
-					for(;bytes > 0 ; bytes--)
-					{
-						mask |= 1 << (shift + bytes - 1);
-					}
+                            //assert((tag + mod->sub_block_size) >= (addr + bytes));
+                            for(;bytes > 0 ; bytes--)
+                            {
+                                mask |= 1 << (shift + bytes - 1);
+                            }
 
-					mod_stack_merge_dirty_mask(master_stack, mask);
-					mod_stack_merge_valid_mask(master_stack, mask);
-					add_coalesce(0);
-					if(uop->vector_mem_write)
-						add_coalesce_load(0);
-					else
-						add_coalesce_store(0);
-				}	else {
-					//mod_client_info config
-					struct mod_client_info_t *client_info = xcalloc(1,sizeof(struct mod_client_info_t));
-					client_info->arch = arch_southern_islands;
-					//client_info->si_compute_unit = vector_mem->compute_unit;
+                            mod_stack_merge_dirty_mask(master_stack, mask);
+                            mod_stack_merge_valid_mask(master_stack, mask);
+                            add_coalesce(0);
+                            if(uop->vector_mem_write)
+                                add_coalesce_load(0);
+                            else
+                                add_coalesce_store(0);
+                        }else{
+                            //mod_client_info config
+                            struct mod_client_info_t *client_info = xcalloc(1,sizeof(struct mod_client_info_t));
+                            client_info->arch = arch_southern_islands;
+                            //client_info->si_compute_unit = vector_mem->compute_unit;
 
-					mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, (void *)uop, NULL, NULL, client_info);
-					uop->global_mem_witness--;
-				}
- 			}
-		}
+                            mod_access_si( mod, access_kind, addr, &uop->global_mem_witness, bytes, uop->work_group->id_in_compute_unit, (void *)uop, NULL, NULL, client_info);
+                            uop->global_mem_witness--;
+                        }
+                    }
+                }
 //si_wavefront_send_mem_accesses(uop->wavefront);
 		//if(si_spatial_report_active)
 		//{
 		if (uop->vector_mem_write)
 		{
-			uop->num_global_mem_write += uop->global_mem_witness;
-				si_report_global_mem_inflight(uop->compute_unit, uop);
+                    uop->num_global_mem_write += uop->global_mem_witness;
+                    si_report_global_mem_inflight(uop->compute_unit, uop);
 		}
 		else if (uop->vector_mem_read)
 		{
-			uop->num_global_mem_read +=	uop->global_mem_witness;
-			si_report_global_mem_inflight(uop->compute_unit,	uop);
+                    uop->num_global_mem_read +=	uop->global_mem_witness;
+                    si_report_global_mem_inflight(uop->compute_unit,	uop);
 		}
 		else
 		{
-			fatal("%s: invalid access kind", __FUNCTION__);
+                    fatal("%s: invalid access kind", __FUNCTION__);
 		}
 
 		/* Transfer the uop to the mem buffer */
 		list_remove(vector_mem->read_buffer, uop);
                 //list_enqueue(vector_mem->mem_buffer, uop);
-		list_enqueue(mem_buffer, uop);
 
+                list_enqueue(mem_buffer, uop);
+   
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 			"stg=\"mem-m\"\n", uop->id_in_compute_unit,
 			vector_mem->compute_unit->id, uop->wavefront->id,

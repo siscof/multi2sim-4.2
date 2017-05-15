@@ -29,6 +29,7 @@ struct si_wavefront_pool_t *si_wavefront_pool_create()
 {
 	struct si_wavefront_pool_t *wavefront_pool;
 	int i;
+        struct list_t *list = list_create();
 
 	/* Initialize */
 	wavefront_pool = xcalloc(1, sizeof(struct si_wavefront_pool_t));
@@ -38,11 +39,13 @@ struct si_wavefront_pool_t *si_wavefront_pool_create()
 
 	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
 	{
+                
 		wavefront_pool->entries[i] = xcalloc(1,
 			sizeof(struct si_wavefront_pool_entry_t));
 		wavefront_pool->entries[i]->id_in_wavefront_pool = i;
 		wavefront_pool->entries[i]->wavefront_pool = wavefront_pool;
-                wavefront_pool->entries[i]->mem_buffer = list_create();
+                wavefront_pool->entries[i]->mem_buffer = list;
+                
 	}
 
 	/* Return */

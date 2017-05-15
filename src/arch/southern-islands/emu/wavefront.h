@@ -81,6 +81,7 @@ struct si_wavefront_t
 	struct si_wavefront_pool_entry_t *wavefront_pool_entry;
 	unsigned int barrier_inst : 1;
 	struct list_t *mem_accesses_list;
+        struct list_t *mem_buffer;
 
 	/* Statistics */
 	long long inst_count;  /* Total number of instructions */

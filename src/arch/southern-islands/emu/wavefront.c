@@ -75,6 +75,7 @@ struct si_wavefront_t *si_wavefront_create(int wavefront_id,
 	wavefront->scalar_work_item = si_work_item_create();
 	wavefront->scalar_work_item->wavefront = wavefront;
 	wavefront->scalar_work_item->work_group = work_group;
+        //wavefront->mem_buffer = list_create();
 
 	/* Assign the work group */
 	wavefront->work_group = work_group;
