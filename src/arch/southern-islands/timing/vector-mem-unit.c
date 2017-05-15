@@ -128,6 +128,11 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 
                 if(si_gpu_vector_mem_mem_queue_per_wavefront_entry != 2)
                     instructions_processed++;
+                
+                if(si_gpu_vector_mem_mem_buffer_per_wavefront == 1)
+                {
+                    mem_buffer = uop->wavefront->wavefront_pool_entry->mem_buffer;
+                }
 
 		/* Uop is not ready yet */
 		if (uop->global_mem_witness)
