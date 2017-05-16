@@ -514,7 +514,7 @@ void analizeTypeInstructionInFly(struct si_wavefront_t *wf)
 
 				struct si_scalar_unit_t scalar_unit = wf->wavefront_pool_entry->wavefront_pool->compute_unit->scalar_unit;
 				struct si_uop_t *uop = list_get(scalar_unit.read_buffer,0);
-				if(list_count(scalar_unit.inflight_mem_buffer) == si_gpu_scalar_unit_max_inflight_mem_accesses && uop && uop->scalar_mem_read )
+				if(list_count(scalar_unit.mem_buffer) == si_gpu_scalar_unit_max_inflight_mem_accesses && uop && uop->scalar_mem_read )
 				{
 					gpu_stats.dispatch_mem_scalar_instruction_infly++;
 				}else{

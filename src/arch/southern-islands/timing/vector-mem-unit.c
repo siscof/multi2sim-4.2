@@ -113,9 +113,6 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 	int i;
         struct list_t *mem_buffer = vector_mem->mem_buffer;
         
-        /*if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 1)
-            mem_buffer = uop->wavefront_pool_entry->mem_buffer;
-*/
 	list_entries = list_count(mem_buffer);
 
 	/* Sanity check the mem buffer */
@@ -126,14 +123,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 		uop = list_get(mem_buffer, list_index);
 		assert(uop);
 
-                if(si_gpu_vector_mem_mem_queue_per_wavefront_entry != 2)
-                    instructions_processed++;
-                
-                if(si_gpu_vector_mem_mem_buffer_per_wavefront == 1)
-                {
-                    mem_buffer = uop->wavefront->wavefront_pool_entry->mem_buffer;
-                }
-
+                instructions_processed++;
+    
 		/* Uop is not ready yet */
 		if (uop->global_mem_witness)
 		{
@@ -146,9 +137,6 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 			list_index++;
 			continue;
 		}
-                
-                if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 2)
-                    instructions_processed++;
                 
 		/* Stall if the width has been reached. */
 		if (instructions_processed > si_gpu_vector_mem_width)
@@ -217,11 +205,6 @@ void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
 	int list_index = 0;
         struct list_t *mem_buffer = vector_mem->mem_buffer;
         
-        
-        
-        /*if(si_gpu_vector_mem_mem_queue_per_wavefront_entry == 1)
-            mem_buffer = uop->wavefront_pool_entry->mem_buffer;
-        */
 	list_entries = list_count(vector_mem->read_buffer);
 
 	/* Sanity check the read buffer */

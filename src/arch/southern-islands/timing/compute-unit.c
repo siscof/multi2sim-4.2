@@ -74,7 +74,7 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->scalar_unit.read_buffer = list_create();
 	compute_unit->scalar_unit.exec_buffer = list_create();
 	compute_unit->scalar_unit.write_buffer = list_create();
-	compute_unit->scalar_unit.inflight_mem_buffer = list_create();
+	compute_unit->scalar_unit.mem_buffer = list_create();
 	compute_unit->scalar_unit.compute_unit = compute_unit;
 
 	compute_unit->branch_unit.issue_buffer = list_create();
@@ -88,7 +88,8 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->vector_mem_unit.decode_buffer = list_create();
 	compute_unit->vector_mem_unit.read_buffer = list_create();
 	compute_unit->vector_mem_unit.mem_buffer = list_create();
-	compute_unit->vector_mem_unit.write_buffer = list_create();
+	compute_unit->vector_mem_unit.mem_buffer_list = list_create();
+        compute_unit->vector_mem_unit.write_buffer = list_create();
 	compute_unit->vector_mem_unit.compute_unit = compute_unit;
 
 	compute_unit->lds_unit.issue_buffer = list_create();
@@ -135,6 +136,8 @@ struct si_compute_unit_t *si_compute_unit_create()
 		compute_unit->simd_units[i]->tot_util = xcalloc(1,
 			sizeof(struct si_util_t));
 	}
+        
+        //si_compute_unit_config_vmb(compute_unit);
 
 	compute_unit->work_groups =
 		xcalloc(si_gpu_max_work_groups_per_wavefront_pool *
@@ -157,13 +160,13 @@ void si_compute_unit_free(struct si_compute_unit_t *compute_unit)
 	si_uop_list_free(compute_unit->scalar_unit.read_buffer);
 	si_uop_list_free(compute_unit->scalar_unit.exec_buffer);
 	si_uop_list_free(compute_unit->scalar_unit.write_buffer);
-	si_uop_list_free(compute_unit->scalar_unit.inflight_mem_buffer);
+	si_uop_list_free(compute_unit->scalar_unit.mem_buffer);
 	list_free(compute_unit->scalar_unit.issue_buffer);
 	list_free(compute_unit->scalar_unit.decode_buffer);
 	list_free(compute_unit->scalar_unit.read_buffer);
 	list_free(compute_unit->scalar_unit.exec_buffer);
 	list_free(compute_unit->scalar_unit.write_buffer);
-	list_free(compute_unit->scalar_unit.inflight_mem_buffer);
+	list_free(compute_unit->scalar_unit.mem_buffer);
 
 	/* Branch Unit */
 	si_uop_list_free(compute_unit->branch_unit.issue_buffer);

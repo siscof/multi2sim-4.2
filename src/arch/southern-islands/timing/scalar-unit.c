@@ -240,12 +240,12 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 
 
 	list_index = 0;
-	list_entries = list_count(scalar_unit->inflight_mem_buffer);
+	list_entries = list_count(scalar_unit->mem_buffer);
 	instructions_processed = 0;
 
 	for (i = 0; i < list_entries; i++)
 	{
-		uop = list_get(scalar_unit->inflight_mem_buffer, list_index);
+		uop = list_get(scalar_unit->mem_buffer, list_index);
 
 		assert(uop);
 
@@ -295,7 +295,7 @@ void si_scalar_unit_write(struct si_scalar_unit_t *scalar_unit)
 			si_gpu_scalar_unit_write_latency;
 		//gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, 1);
 
-		list_remove(scalar_unit->inflight_mem_buffer, uop);
+		list_remove(scalar_unit->mem_buffer, uop);
 		list_enqueue(scalar_unit->write_buffer, uop);
 
 		si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
@@ -364,11 +364,11 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 		if (uop->scalar_mem_read)
 		{
 			/* Sanity check exec buffer */
-			assert(list_count(scalar_unit->inflight_mem_buffer) <=
+			assert(list_count(scalar_unit->mem_buffer) <=
 			si_gpu_scalar_unit_max_inflight_mem_accesses);
 
 			/* Stall if there is not room in the exec buffer */
-			if (list_count(scalar_unit->inflight_mem_buffer) ==
+			if (list_count(scalar_unit->mem_buffer) ==
 				si_gpu_scalar_unit_max_inflight_mem_accesses)
 			{
 				si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
@@ -422,7 +422,7 @@ void si_scalar_unit_execute(struct si_scalar_unit_t *scalar_unit)
 			/* Transfer the uop to the execution buffer */
 			list_remove(scalar_unit->read_buffer, uop);
 			//list_enqueue(scalar_unit->exec_buffer, uop);
-			list_enqueue(scalar_unit->inflight_mem_buffer, uop);
+			list_enqueue(scalar_unit->mem_buffer, uop);
 
 			si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
 				"stg=\"su-m\"\n", uop->id_in_compute_unit,

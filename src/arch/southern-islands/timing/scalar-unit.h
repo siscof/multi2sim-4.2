@@ -27,7 +27,7 @@ struct si_scalar_unit_t
 	struct list_t *read_buffer;   /* Register reads */
 	struct list_t *exec_buffer;   /* Execution */
 	struct list_t *write_buffer;  /* Register writes */
-	struct list_t *inflight_mem_buffer; /* Pending memory accesses */
+	struct list_t *mem_buffer; /* Pending memory accesses */
 
 	struct si_compute_unit_t *compute_unit;
 

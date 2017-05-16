@@ -24,12 +24,12 @@
 
 #include "gpu.h"
 #include "wavefront-pool.h"
+#include "compute-unit.h"
 
 struct si_wavefront_pool_t *si_wavefront_pool_create()
 {
 	struct si_wavefront_pool_t *wavefront_pool;
 	int i;
-        struct list_t *list = list_create();
 
 	/* Initialize */
 	wavefront_pool = xcalloc(1, sizeof(struct si_wavefront_pool_t));
@@ -44,8 +44,8 @@ struct si_wavefront_pool_t *si_wavefront_pool_create()
 			sizeof(struct si_wavefront_pool_entry_t));
 		wavefront_pool->entries[i]->id_in_wavefront_pool = i;
 		wavefront_pool->entries[i]->wavefront_pool = wavefront_pool;
-                wavefront_pool->entries[i]->mem_buffer = list;
-                
+                //wavefront_pool->entries[i]->mem_buffer = list;
+                //list_add(wavefront_pool->compute_unit->vector_mem_unit->mem_buffer_list,list);
 	}
 
 	/* Return */
