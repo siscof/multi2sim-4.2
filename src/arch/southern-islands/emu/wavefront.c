@@ -990,7 +990,7 @@ void si_wavefront_add_stall(struct si_wavefront_t *wavefront)
 	else if(misses >=21)
 		wavefront->statistics->dist_misses_21++;
 
-	si_stalls_spatial_report(wavefront);
+	//si_stalls_spatial_report(wavefront);
 
 	wavefront->statistics->prev_mem_misses = wavefront->statistics->mem_misses;
 }

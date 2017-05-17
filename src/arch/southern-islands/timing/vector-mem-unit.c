@@ -108,22 +108,19 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 {
 	struct si_uop_t *uop;
 	int instructions_processed = 0;
-	int list_entries;
 	int list_index = 0;
 	int i;
         struct list_t *mem_buffer;
         struct list_t *wavefronts_waiting = list_create();
-        
-	list_entries = list_count(vector_mem->mem_buffer);
 
 	/* Sanity check the mem buffer */
-	assert(list_entries <= si_gpu_vector_mem_max_inflight_mem_accesses);
+	assert(list_count(vector_mem->mem_buffer) <= si_gpu_vector_mem_max_inflight_mem_accesses);
 
         if(si_gpu_vector_mem_mem_buffer_mode == 0)
         {
-            for (i = 0; i < list_entries; i++)
+            for (i = 0; i < list_count(vector_mem->mem_buffer); i++)
             {
-                    uop = list_get(mem_buffer, list_index);
+                    uop = list_get(vector_mem->mem_buffer, list_index);
                     assert(uop);
 
                     instructions_processed++;
@@ -222,9 +219,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
             for(int j = 0; j < list_count(vector_mem->mem_buffer_list);j++)
             {
                 mem_buffer = list_get(vector_mem->mem_buffer_list,j);
-                list_entries = list_count(mem_buffer);
                 
-                for (i = 0; i < list_entries; i++)
+                for (i = 0; i < list_count(mem_buffer); i++)
                 {
                     uop = list_get(mem_buffer, list_index);
                     assert(uop);

@@ -87,7 +87,7 @@ struct si_compute_unit_t *si_compute_unit_create()
 	compute_unit->vector_mem_unit.issue_buffer = list_create();
 	compute_unit->vector_mem_unit.decode_buffer = list_create();
 	compute_unit->vector_mem_unit.read_buffer = list_create();
-	compute_unit->vector_mem_unit.mem_buffer = list_create();
+	//compute_unit->vector_mem_unit.mem_buffer = list_create();
 	compute_unit->vector_mem_unit.mem_buffer_list = list_create();
         compute_unit->vector_mem_unit.write_buffer = list_create();
 	compute_unit->vector_mem_unit.compute_unit = compute_unit;
@@ -155,6 +155,7 @@ void si_compute_unit_config_vmb(struct si_compute_unit_t *compute_unit)
     if(si_gpu_vector_mem_mem_buffer_mode == 0)
     {
         struct list_t *list = list_create();
+        compute_unit->vector_mem_unit.mem_buffer = list;
         list_add(compute_unit->vector_mem_unit.mem_buffer_list,list);
         for (int i = 0; i < compute_unit->num_wavefront_pools; i++)
 	{
