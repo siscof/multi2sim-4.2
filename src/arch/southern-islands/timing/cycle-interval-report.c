@@ -140,8 +140,8 @@ void si_spatial_report_config_read(struct config_t *config)
 			fatal("%s: could not open spatial report file", wf_spatial_report_filename);
 	}
 
-	stall_spatial_report_file = file_open_for_write("./stall");
-	fprintf(stall_spatial_report_file, "id, stalls, cycle, esim_time\n");
+	//stall_spatial_report_file = file_open_for_write("./stall");
+	//fprintf(stall_spatial_report_file, "id, stalls, cycle, esim_time\n");
 
 	if(!si_device_spatial_report_active && !si_cu_spatial_report_active)
 		fatal("%s: %s: invalid or missing value for 'device_File' and %s: %s: invalid or missing value for 'cu_File'",

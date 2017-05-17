@@ -170,7 +170,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                                     "stg=\"s\"\n", uop->id_in_compute_unit,
                                     vector_mem->compute_unit->id,
                                     uop->wavefront->id, uop->id_in_wavefront);
-                            break;
+                            list_index++;
+                            continue;
                     }
 
                     /* Sanity check write buffer */
@@ -185,7 +186,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                                     "stg=\"s\"\n", uop->id_in_compute_unit,
                                     vector_mem->compute_unit->id,
                                     uop->wavefront->id, uop->id_in_wavefront);
-                            break;
+                            list_index++;
+                            continue;
                     }
 
                     /* Access complete, remove the uop from the queue */
@@ -251,7 +253,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                                     "stg=\"s\"\n", uop->id_in_compute_unit,
                                     vector_mem->compute_unit->id,
                                     uop->wavefront->id, uop->id_in_wavefront);
-                            break;
+                            list_index++;
+                            continue;
                     }
 
                     /* Sanity check write buffer */
@@ -266,7 +269,7 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                                     "stg=\"s\"\n", uop->id_in_compute_unit,
                                     vector_mem->compute_unit->id,
                                     uop->wavefront->id, uop->id_in_wavefront);
-                            break;
+                            continue;
                     }
 
                     /* Access complete, remove the uop from the queue */
