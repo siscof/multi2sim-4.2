@@ -402,7 +402,7 @@ int si_gpu_vector_mem_read_buffer_size = 1;
 int si_gpu_vector_mem_max_inflight_mem_accesses = 32;
 int si_gpu_vector_mem_write_latency = 1;
 int si_gpu_vector_mem_write_buffer_size = 1;
-int si_gpu_vector_mem_mem_buffer_per_wavefront = 0;
+int si_gpu_vector_mem_mem_buffer_mode = 0;
 //int si_gpu_vector_mem_main_memory_access_order = 0;
 int si_gpu_vector_mem_maximum_wavefronts_in_mem = 32;
 
@@ -1038,14 +1038,14 @@ void si_gpu_read_config(void)
 		fatal("%s: invalid value for 'WriteBufferSize'.\n%s",
 			si_gpu_config_file_name, err_note);
         
-        si_gpu_vector_mem_mem_buffer_per_wavefront = config_read_int(
+        si_gpu_vector_mem_mem_buffer_mode = config_read_int(
 		gpu_config, section, "MemBufferPerWavefront",
-		si_gpu_vector_mem_mem_buffer_per_wavefront);
-	if (si_gpu_vector_mem_mem_buffer_per_wavefront > 1 || si_gpu_vector_mem_mem_buffer_per_wavefront < 0)
+		si_gpu_vector_mem_mem_buffer_mode);
+	if (si_gpu_vector_mem_mem_buffer_mode > 1 || si_gpu_vector_mem_mem_buffer_mode < 0)
 		fatal("%s: invalid value for 'MemBufferPerWavefront'.\n%s",
 			si_gpu_config_file_name, err_note);
 
-        if (si_gpu_vector_mem_mem_buffer_per_wavefront == 1)
+        if (si_gpu_vector_mem_mem_buffer_mode == 1)
             si_gpu_vector_mem_max_inflight_mem_accesses = si_gpu_vector_mem_max_inflight_mem_accesses / si_gpu_num_wavefront_pools;
         
 	/*si_gpu_vector_mem_main_memory_access_order = config_read_int(

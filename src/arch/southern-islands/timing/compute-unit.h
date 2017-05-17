@@ -121,5 +121,6 @@ void si_wavefront_pool_map_wavefronts(struct si_wavefront_pool_t *wavefront_pool
 	struct si_work_group_t *work_group);
 void si_wavefront_pool_unmap_wavefronts(struct si_wavefront_pool_t *wavefront_pool,
 	struct si_work_group_t *work_group);
+void si_compute_unit_config_vmb(struct si_compute_unit_t *compute_unit);
 
 #endif

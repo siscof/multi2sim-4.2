@@ -44,8 +44,6 @@ struct si_wavefront_pool_t *si_wavefront_pool_create()
 			sizeof(struct si_wavefront_pool_entry_t));
 		wavefront_pool->entries[i]->id_in_wavefront_pool = i;
 		wavefront_pool->entries[i]->wavefront_pool = wavefront_pool;
-                //wavefront_pool->entries[i]->mem_buffer = list;
-                //list_add(wavefront_pool->compute_unit->vector_mem_unit->mem_buffer_list,list);
 	}
 
 	/* Return */
