@@ -303,6 +303,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
             fatal("%s: (si_gpu_vector_mem_mem_buffer_mode == %d) is not implemented yet",__FUNCTION__,si_gpu_vector_mem_mem_buffer_mode);
         }
         
+        list_free(wavefronts_waiting);
+        
 }
 
 void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
