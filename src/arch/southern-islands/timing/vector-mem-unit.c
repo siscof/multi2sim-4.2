@@ -116,8 +116,8 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 	/* Sanity check the mem buffer */
 	assert(list_count(vector_mem->mem_buffer) <= si_gpu_vector_mem_max_inflight_mem_accesses);
 
-        if(si_gpu_vector_mem_mem_buffer_mode == 0)
-        {
+       // if(si_gpu_vector_mem_mem_buffer_mode == 0)
+        //{
             for (i = 0; i < list_count(vector_mem->mem_buffer); i++)
             {
                     uop = list_get(vector_mem->mem_buffer, list_index);
@@ -145,7 +145,6 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                     int jump_this_wavefront_pool_entry_waiting = 0;
                     for(int j = 0; j < list_count(wavefronts_waiting); j++)
                     {
-                        
                         if(list_get(wavefronts_waiting,j) == uop->wavefront_pool_entry)
                         {
                             jump_this_wavefront_pool_entry_waiting = 1;
@@ -213,7 +212,7 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                             vector_mem->compute_unit->id, uop->wavefront->id,
                             uop->id_in_wavefront);
             }
-        }
+        /*}
         else if(si_gpu_vector_mem_mem_buffer_mode == 1)
         {
             for(int j = 0; j < list_count(vector_mem->mem_buffer_list);j++)
@@ -229,59 +228,59 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
 
                     mem_buffer = uop->wavefront_pool_entry->mem_buffer;
 
-                    /* Uop is not ready yet */
-                    if (uop->global_mem_witness)
+          */          /* Uop is not ready yet */
+            /*        if (uop->global_mem_witness)
                     {
-                            if(i == 0 && list_count(mem_buffer) == si_gpu_vector_mem_max_inflight_mem_accesses)
-                            {
-                                    add_cycle_vmb_blocked(uop->compute_unit->id, uop->vector_mem_write);
-                                    //add contador tiempo bloqueando
-                            }
+                        if(i == 0 && list_count(mem_buffer) == si_gpu_vector_mem_max_inflight_mem_accesses)
+                        {
+                                add_cycle_vmb_blocked(uop->compute_unit->id, uop->vector_mem_write);
+                                //add contador tiempo bloqueando
+                        }
 
-                            list_index++;
-                            continue;
+                        list_index++;
+                        continue;
                     }
 
-                    /* Stall if the width has been reached. */
-                    if (instructions_processed > si_gpu_vector_mem_width)
+              */      /* Stall if the width has been reached. */
+                /*    if (instructions_processed > si_gpu_vector_mem_width)
                     {
-                            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-                                    "stg=\"s\"\n", uop->id_in_compute_unit,
-                                    vector_mem->compute_unit->id,
-                                    uop->wavefront->id, uop->id_in_wavefront);
-                            list_index++;
-                            continue;
+                        si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                                "stg=\"s\"\n", uop->id_in_compute_unit,
+                                vector_mem->compute_unit->id,
+                                uop->wavefront->id, uop->id_in_wavefront);
+                        list_index++;
+                        continue;
                     }
-
+*/
                     /* Sanity check write buffer */
-                    assert(list_count(vector_mem->write_buffer) <=
+  /*                  assert(list_count(vector_mem->write_buffer) <=
                                     si_gpu_vector_mem_write_buffer_size);
-
+*/
                     /* Stop if the write buffer is full. */
-                    if (list_count(vector_mem->write_buffer) ==
+  /*                  if (list_count(vector_mem->write_buffer) ==
                                     si_gpu_vector_mem_write_buffer_size)
                     {
-                            si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
-                                    "stg=\"s\"\n", uop->id_in_compute_unit,
-                                    vector_mem->compute_unit->id,
-                                    uop->wavefront->id, uop->id_in_wavefront);
-                            continue;
+                        si_trace("si.inst id=%lld cu=%d wf=%d uop_id=%lld "
+                                "stg=\"s\"\n", uop->id_in_compute_unit,
+                                vector_mem->compute_unit->id,
+                                uop->wavefront->id, uop->id_in_wavefront);
+                        continue;
                     }
-
+*/
                     /* Access complete, remove the uop from the queue */
-                    uop->write_ready = asTiming(si_gpu)->cycle +
+  /*                  uop->write_ready = asTiming(si_gpu)->cycle +
                             si_gpu_vector_mem_write_latency;
 
                     gpu_load_finish(asTiming(si_gpu)->cycle - uop->send_cycle, uop->active_work_items);
 
                     add_wavefront_latencias_load(uop->wavefront);
-
+*/
                     /* In the above context, access means any of the
                      * mod_access calls in si_vector_mem_mem. Means all
                      * inflight accesses for uop are done */
                     //if(si_spatial_report_active)
                     //{
-                    si_report_global_mem_finish(uop->compute_unit, uop);
+  /*                  si_report_global_mem_finish(uop->compute_unit, uop);
                     //}
                     list_remove(mem_buffer, uop);
                     list_remove(vector_mem->mem_buffer, uop);
@@ -295,16 +294,12 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
                             uop->id_in_wavefront);
                 }
             }
-                
-            
         }
         else
         {
             fatal("%s: (si_gpu_vector_mem_mem_buffer_mode == %d) is not implemented yet",__FUNCTION__,si_gpu_vector_mem_mem_buffer_mode);
-        }
-        
+        }*/
         list_free(wavefronts_waiting);
-        
 }
 
 void si_vector_mem_mem(struct si_vector_mem_unit_t *vector_mem)
