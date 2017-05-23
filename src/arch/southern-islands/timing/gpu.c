@@ -1041,13 +1041,16 @@ void si_gpu_read_config(void)
         si_gpu_vector_mem_mem_buffer_mode = config_read_int(
 		gpu_config, section, "MemBufferPerWavefront",
 		si_gpu_vector_mem_mem_buffer_mode);
-	if (si_gpu_vector_mem_mem_buffer_mode > 1 || si_gpu_vector_mem_mem_buffer_mode < 0)
+	if (si_gpu_vector_mem_mem_buffer_mode > 2 || si_gpu_vector_mem_mem_buffer_mode < 0)
 		fatal("%s: invalid value for 'MemBufferPerWavefront'.\n%s",
 			si_gpu_config_file_name, err_note);
 
         if (si_gpu_vector_mem_mem_buffer_mode == 1)
             si_gpu_vector_mem_max_inflight_mem_accesses = si_gpu_vector_mem_max_inflight_mem_accesses / si_gpu_num_wavefront_pools;
-        
+        if (si_gpu_vector_mem_mem_buffer_mode == 2)
+            si_gpu_vector_mem_max_inflight_mem_accesses = si_gpu_vector_mem_max_inflight_mem_accesses / (si_gpu_num_wavefront_pools * si_gpu_max_wavefronts_per_wavefront_pool) ;
+
+        assert(si_gpu_vector_mem_max_inflight_mem_accesses > 0);
 	/*si_gpu_vector_mem_main_memory_access_order = config_read_int(
 		gpu_config, section, "MainMemoryAccessOrder",
 		si_gpu_vector_mem_main_memory_access_order);
