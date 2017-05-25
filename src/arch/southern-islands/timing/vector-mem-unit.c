@@ -114,7 +114,7 @@ void si_vector_mem_write(struct si_vector_mem_unit_t *vector_mem)
         struct list_t *wavefronts_waiting = list_create();
 
 	/* Sanity check the mem buffer */
-	assert(list_count(vector_mem->mem_buffer) <= si_gpu_vector_mem_max_inflight_mem_accesses);
+        assert(si_gpu_vector_mem_mem_buffer_mode != 0 || list_count(vector_mem->mem_buffer) <= si_gpu_vector_mem_max_inflight_mem_accesses);
 
        // if(si_gpu_vector_mem_mem_buffer_mode == 0)
         //{

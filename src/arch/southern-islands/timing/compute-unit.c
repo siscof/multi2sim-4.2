@@ -169,6 +169,7 @@ void si_compute_unit_config_vmb(struct si_compute_unit_t *compute_unit)
     //mem_buffer por wavefront_pool
     if(si_gpu_vector_mem_mem_buffer_mode == 1)
     {
+        compute_unit->vector_mem_unit.mem_buffer = list_create();
         for (int i = 0; i < compute_unit->num_wavefront_pools; i++)
 	{
             struct list_t *list = list_create();
@@ -183,6 +184,7 @@ void si_compute_unit_config_vmb(struct si_compute_unit_t *compute_unit)
     //mem_buffer por wavefront_pool_entry
     if(si_gpu_vector_mem_mem_buffer_mode == 2)
     {
+        compute_unit->vector_mem_unit.mem_buffer = list_create();
         for (int i = 0; i < compute_unit->num_wavefront_pools; i++)
 	{
             for(int j = 0; j < si_gpu_max_wavefronts_per_wavefront_pool; j++)
