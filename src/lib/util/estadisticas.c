@@ -223,7 +223,7 @@ for(int i = 0; i < 10; i++)
 
 fran_debug_ipc("gpu_coalesce_load gpu_coalesce_store mem_coalesce_load mem_coalesce_store ");
 
-fran_debug_ipc("evictions_L2 counter_load_action_retry cycles_load_action_retry counter_load_miss_retry cycles_load_miss_retry counter_nc_store_writeback_retry cycles_nc_store_writeback_retry counter_nc_store_action_retry cycles_nc_store_action_retry counter_nc_store_miss_retry cycles_nc_store_miss_retry accesses_with_retries invalidations");
+fran_debug_ipc("evictions_L2 bw_l1 bw_l2 bw_MM counter_load_action_retry cycles_load_action_retry counter_load_miss_retry cycles_load_miss_retry counter_nc_store_writeback_retry cycles_nc_store_writeback_retry counter_nc_store_action_retry cycles_nc_store_action_retry counter_nc_store_miss_retry cycles_nc_store_miss_retry accesses_with_retries invalidations");
 /*
 fran_debug_ipc("gpu_utilization dispatch_branch_instruction_infly dispatch_scalar_instruction_infly dispatch_mem_scalar_instruction_infly dispatch_simd_instruction_infly dispatch_v_mem_instruction_infly dispatch_lds_instruction_infly ");
 
@@ -739,7 +739,9 @@ mem_stats.mod_level[1].coalesce_store = 0;
 
 fran_debug_ipc("%lld ",mem_stats.mod_level[2].evictions - instrucciones_mem_stats_anterior.mod_level[2].evictions);
 
-
+fran_debug_ipc("%lld ",mem_stats.mod_level[1].bytes_served - instrucciones_mem_stats_anterior.mod_level[1].bytes_served);
+fran_debug_ipc("%lld ",mem_stats.mod_level[2].bytes_served - instrucciones_mem_stats_anterior.mod_level[1].bytes_served);
+fran_debug_ipc("%lld ",mem_stats.mod_level[3].bytes_served - instrucciones_mem_stats_anterior.mod_level[1].bytes_served);
 //retries
 fran_debug_ipc("%lld ",mem_stats.retries[load_action_retry].counter - instrucciones_mem_stats_anterior.retries[load_action_retry].counter);
 fran_debug_ipc("%lld ",mem_stats.retries[load_action_retry].cycles - instrucciones_mem_stats_anterior.retries[load_action_retry].cycles);

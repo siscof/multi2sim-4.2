@@ -90,12 +90,13 @@ struct esta_t
   long long coalesce_store;
   long long accesses;
   long long hits;
-	long long misses;
+  long long misses;
   long long loads;
   long long invalidations;
   long long load_invalidation;
   long long store_invalidation;
-	long long evictions;
+  long long evictions;
+  long long bytes_served;
 
   long long uop_load_finish;
 	long long uop_load_latency;

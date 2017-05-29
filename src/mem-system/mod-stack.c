@@ -78,8 +78,13 @@ void mod_stack_return(struct mod_stack_t *stack)
 		assert(list_index_of(mshr->access_list, stack) == -1);
 	}
 	*/
-
-	/*hasta aqui*/
+        
+        if(!stack->coalesced && stack->request_dir==mod_request_up_down)
+        {
+            assert(stack->reply_size > 0);
+            mem_stats.mod_level[stack->target_mod->level].bytes_served += stack->reply_size;
+        }
+        /*hasta aqui*/
 
 	if(stack->ret_stack == 0)
 	{

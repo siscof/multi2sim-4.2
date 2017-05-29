@@ -494,7 +494,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 
 		/* Impose the access latency before continuing */
-
+                stack->reply_size += target_mod->block_size;
+                        
 		stack->event = EV_MOD_NMOESI_LOAD_FINISH;
 		esim_schedule_mod_stack_event(stack, target_mod->latency);
 		//esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack, mod->latency);
@@ -1229,6 +1230,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* Unlock directory entry */
 		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 
+                stack->reply_size = 8;
+                
 		/* Impose the access latency before continuing */
 		stack->event = EV_MOD_NMOESI_NC_STORE_FINISH;
 		esim_schedule_mod_stack_event(stack, target_mod->latency);
@@ -1678,10 +1681,6 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		if (!stack->hit)
 		{
-			if(stack->ret_event == EV_MOD_NMOESI_INVALIDATE_FINISH)
-			{
-
-			}
 			/* Find victim */
 			if (stack->way < 0)
 			{
