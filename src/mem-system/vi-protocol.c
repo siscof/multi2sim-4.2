@@ -593,6 +593,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		stack->event = EV_MOD_VI_LOAD_FINISH;
 
+                stack->reply_size = mod->block_size + 8;
 		if(mod->kind == mod_kind_main_memory
 			&& mod->dram_system)
 		{
@@ -1162,6 +1163,8 @@ void mod_handler_vi_store(int event, void *data)
 
 		dir_entry_unlock(mod->dir, stack->set, stack->way);
 
+                stack->reply_size = 8;
+                
 		int latency = mod->latency;
 		if (mod->kind == mod_kind_main_memory
 			&& mod->dram_system)
