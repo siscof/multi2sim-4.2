@@ -1764,6 +1764,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			ret->port_locked = 0;
 			return;
 		}
+                
+                //lock directory entries for all the stacks belonging to stack->uop
 
 		/* Miss */
 		if (!stack->hit)
