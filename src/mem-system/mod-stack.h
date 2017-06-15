@@ -22,6 +22,7 @@
 
 #include "module.h"
 #include <lib/util/estadisticas.h>
+#include <stdbool.h>
 
 
 /* Current identifier for stack */
@@ -60,6 +61,7 @@ struct mod_stack_t
 	int *witness_ptr;
 
 	//FRAN
+        bool inflight;
 	int main_memory_accessed;
 	int mshr_locked;
 	long long tiempo_acceso;
