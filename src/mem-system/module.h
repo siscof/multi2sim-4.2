@@ -281,6 +281,7 @@ void mod_free(struct mod_t *mod);
 void mod_dump(struct mod_t *mod, FILE *f);
 void mod_stack_set_reply(struct mod_stack_t *stack, int reply);
 struct mod_t *mod_stack_set_peer(struct mod_t *peer, int state);
+struct mod_stack_t *mod_in_flight_address2(struct mod_t *mod, unsigned int addr);
 
 long long mod_access(struct mod_t *mod, enum mod_access_kind_t access_kind,
 	unsigned int addr, int *witness_ptr, struct linked_list_t *event_queue,

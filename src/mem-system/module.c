@@ -768,6 +768,25 @@ struct mod_stack_t *mod_in_flight_address(struct mod_t *mod, unsigned int addr,
 	return NULL;
 }
 
+struct mod_stack_t *mod_in_flight_address2(struct mod_t *mod, unsigned int addr)
+{
+	struct mod_stack_t *stack;
+	int index;
+
+	/* Look for address */
+	index = (addr >> mod->log_block_size) % MOD_ACCESS_HASH_TABLE_SIZE;
+	for (stack = mod->access_hash_table[index].bucket_list_head; stack;
+		stack = stack->bucket_list_next)
+	{
+		/* Address matches */
+		if (stack->inflight && stack->addr >> mod->log_block_size == addr >> mod->log_block_size )
+			return stack;
+	}
+
+	/* Not found */
+	return NULL;
+}
+
 struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod,
 	struct mod_stack_t *stack)
 {

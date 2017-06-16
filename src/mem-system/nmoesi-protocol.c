@@ -262,7 +262,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 
 	if (event == EV_MOD_NMOESI_LOAD_LOCK)
 	{
-	//	struct mod_stack_t *older_stack;
+		struct mod_stack_t *older_stack;
 
 		mem_debug("  %lld %lld 0x%x %s load lock\n", esim_time, stack->id,
 			stack->addr, target_mod->name);
@@ -295,12 +295,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 			return;
 		}*/
                 
-                older_stack = mod_in_flight_address(target_mod, stack->addr, stack);
+                older_stack = mod_in_flight_address2(target_mod, stack->addr);
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for access %lld\n",
 				stack->id, older_stack->id);
-			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_LOCK);
+			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_UNLOCK);
 			return;
 		}
                 
@@ -503,7 +503,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 
 		/* Unlock directory entry */
-		dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+                if(stack->dir_lock)
+                    dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 
 		/* Impose the access latency before continuing */
                 stack->reply_size += target_mod->block_size;
@@ -934,7 +935,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 	if (event == EV_MOD_NMOESI_NC_STORE_LOCK)
 	{
-	//	struct mod_stack_t *older_stack;
+		//struct mod_stack_t *older_stack;
 
 		mem_debug("  %lld %lld 0x%x %s nc store lock\n", esim_time, stack->id,
 			stack->addr, target_mod->name);
@@ -963,7 +964,18 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
 		}*/
-
+                
+                /*older_stack = mod_in_flight_address2(target_mod, stack->addr);
+		if (older_stack)
+		{
+			mem_debug("    %lld wait for access %lld\n",
+				stack->id, older_stack->id);
+			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_LOAD_UNLOCK);
+			return;
+		}*/
+                
+                
+                stack->inflight = true;
 		stack->event = EV_MOD_NMOESI_NC_STORE_LOCK2;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_LOCK2, stack, 0);
