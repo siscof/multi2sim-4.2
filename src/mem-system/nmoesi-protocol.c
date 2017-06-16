@@ -935,7 +935,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 
 	if (event == EV_MOD_NMOESI_NC_STORE_LOCK)
 	{
-		//struct mod_stack_t *older_stack;
+		struct mod_stack_t *older_stack;
 
 		mem_debug("  %lld %lld 0x%x %s nc store lock\n", esim_time, stack->id,
 			stack->addr, target_mod->name);
@@ -947,23 +947,23 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				stack->latencias.start = stack->client_info->arch->timing->cycle;
 
 		/* If there is any older write, wait for it */
-		/*older_stack = mod_in_flight_write(target_mod, stack);
+		older_stack = mod_in_flight_write(target_mod, stack);
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
-		}*/
+		}
 
 		/* If there is any older access to the same address that this access could not
 		 * be coalesced with, wait for it. */
-		/*older_stack = mod_in_flight_address(target_mod, stack->addr, stack);
+		older_stack = mod_in_flight_address(target_mod, stack->addr, stack);
 		if (older_stack)
 		{
 			mem_debug("    %lld wait for write %lld\n", stack->id, older_stack->id);
 			mod_stack_wait_in_stack(stack, older_stack, EV_MOD_NMOESI_NC_STORE_LOCK);
 			return;
-		}*/
+		}
                 
                 /*older_stack = mod_in_flight_address2(target_mod, stack->addr);
 		if (older_stack)
