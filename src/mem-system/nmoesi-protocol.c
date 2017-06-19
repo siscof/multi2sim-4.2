@@ -355,7 +355,9 @@ void mod_handler_nmoesi_load(int event, void *data)
 		//new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_LOAD_ACTION;
-		esim_schedule_mod_stack_event(stack, 0);
+                if(stack->uop->accesses_in_dir == 0)
+                    esim_schedule_mod_stack_event(stack, 0);
+                stack->uop->accesses_in_dir++;
 		//esim_schedule_mod_stack_event(new_stack, 0);
 
 		return;
@@ -1023,7 +1025,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		stack->err = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_NC_STORE_WRITEBACK;
-		esim_schedule_mod_stack_event(stack, 0);
+                if(stack->uop->accesses_in_dir == 0)
+                    esim_schedule_mod_stack_event(stack, 0);
+                stack->uop->accesses_in_dir++;
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -1555,7 +1559,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 {
 	struct mod_stack_t *stack = data;
 	//struct mod_stack_t *ret = stack->ret_stack;
-	struct mod_stack_t *ret = stack;
+	//struct mod_stack_t *ret = stack;
 	struct mod_stack_t *new_stack;
 
 	struct mod_t *target_mod = stack->target_mod;
@@ -1585,35 +1589,44 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 	{
 		struct mod_port_t *port = stack->port;
 		struct dir_lock_t *dir_lock;
+                struct mod_stack_t iter_stack;
 
 		assert(stack->port);
-		mem_debug("  %lld %lld 0x%x %s find and lock port\n", esim_time, stack->id,
-			stack->addr, target_mod->name);
-		mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock_port\"\n",
-			stack->id, target_mod->name);
+		
+            for(int i= 0;i < list_count(stack->uop->mem_accesses_list);i++)
+            {
+                iter_stack = list_get(stack->uop->mem_accesses_list,i);
+          
+                assert(iter_stack->find_and_lock_return_event);
+                
+                mem_debug("  %lld %lld 0x%x %s find and lock port\n", esim_time, iter_stack->id,
+			iter_stackstack->addr, target_mod->name);
+                mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock_port\"\n",
+			iter_stack->id, target_mod->name);
 
 		/* Set parent stack flag expressing that port has already been locked.
 		 * This flag is checked by new writes to find out if it is already too
 		 * late to coalesce. */
-		ret->port_locked = 1;
+                if(iter_stack == stack)
+                    iter_stack->port_locked = 1;
 
 		/* Look for block. */
-		stack->hit = mod_find_block(target_mod, stack->addr, &stack->set,
-			&stack->way, &stack->tag, &stack->state);
+		iter_stack->hit = mod_find_block(target_mod, iter_stack->addr, &iter_stack->set,
+			&iter_stack->way, &iter_stack->tag, &iter_stack->state);
 
 		//fran
-		add_cache_states(stack->state, target_mod->level);
+		add_cache_states(iter_stack->state, target_mod->level);
 
 		/* Debug */
-		if (stack->hit)
-			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
-				stack->tag, target_mod->name, stack->set, stack->way,
-				str_map_value(&cache_block_state_map, stack->state));
+		if (iter_stack->hit)
+			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", iter_stack->id,
+				iter_stack->tag, target_mod->name, iter_stack->set, iter_stack->way,
+				str_map_value(&cache_block_state_map, iter_stack->state));
 
 		/* Statistics */
 		target_mod->accesses++;
 
-		if (stack->hit){
+		if (iter_stack->hit){
 			target_mod->hits++;
 			//sumamos acceso y hit
 			estadisticas(1, target_mod->level);
@@ -1621,43 +1634,43 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			//sumamos acceso
 			estadisticas(0, target_mod->level);
 		}
-		if (stack->read)
+		if (iter_stack->read)
 		{
 			target_mod->reads++;
 			target_mod->effective_reads++;
-			stack->blocking ? target_mod->blocking_reads++ : target_mod->non_blocking_reads++;
-			if (stack->hit)
+			iter_stack->blocking ? target_mod->blocking_reads++ : target_mod->non_blocking_reads++;
+			if (iter_stack->hit)
 				target_mod->read_hits++;
 		}
-		else if (stack->prefetch)
+		else if (iter_stack->prefetch)
 		{
 			target_mod->prefetches++;
 		}
-		else if (stack->nc_write)  /* Must go after read */
+		else if (iter_stack->nc_write)  /* Must go after read */
 		{
 			target_mod->nc_writes++;
 			target_mod->effective_nc_writes++;
-			stack->blocking ? target_mod->blocking_nc_writes++ : target_mod->non_blocking_nc_writes++;
-			if (stack->hit)
+			iter_stack->blocking ? target_mod->blocking_nc_writes++ : target_mod->non_blocking_nc_writes++;
+			if (iter_stack->hit)
 				target_mod->nc_write_hits++;
 		}
-		else if (stack->write)
+		else if (iter_stack->write)
 		{
 			target_mod->writes++;
 			target_mod->effective_writes++;
-			stack->blocking ? target_mod->blocking_writes++ : target_mod->non_blocking_writes++;
+			iter_stack->blocking ? target_mod->blocking_writes++ : target_mod->non_blocking_writes++;
 
 			/* Increment witness variable when port is locked */
-			if (stack->witness_ptr)
+			if (iter_stack->witness_ptr)
 			{
-				(*stack->witness_ptr)++;
-				stack->witness_ptr = NULL;
+				(*iter_stack->witness_ptr)++;
+				iter_stack->witness_ptr = NULL;
 			}
 
-			if (stack->hit)
+			if (iter_stack->hit)
 				target_mod->write_hits++;
 		}
-		else if (stack->message)
+		else if (iter_stack->message)
 		{
 			/* FIXME */
 		}
@@ -1666,35 +1679,35 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			fatal("Unknown memory operation type");
 		}
 
-		if (!stack->retry)
+		if (!iter_stack->retry)
 		{
 			target_mod->no_retry_accesses++;
-			if (stack->hit)
+			if (iter_stack->hit)
 				target_mod->no_retry_hits++;
 
-			if (stack->read)
+			if (iter_stack->read)
 			{
 				target_mod->no_retry_reads++;
-				if (stack->hit)
+				if (iter_stack->hit)
 					target_mod->no_retry_read_hits++;
 			}
-			else if (stack->nc_write)  /* Must go after read */
+			else if (iter_stack->nc_write)  /* Must go after read */
 			{
 				target_mod->no_retry_nc_writes++;
-				if (stack->hit)
+				if (iter_stack->hit)
 					target_mod->no_retry_nc_write_hits++;
 			}
-			else if (stack->write)
+			else if (iter_stack->write)
 			{
 				target_mod->no_retry_writes++;
-				if (stack->hit)
+				if (iter_stack->hit)
 					target_mod->no_retry_write_hits++;
 			}
-			else if (stack->prefetch)
+			else if (iter_stack->prefetch)
 			{
 				/* No retries currently for prefetches */
 			}
-			else if (stack->message)
+			else if (iter_stack->message)
 			{
 				/* FIXME */
 			}
@@ -1704,14 +1717,14 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			}
 		}
 
-		if (!stack->hit)
+		if (!iter_stack->hit)
 		{
 			/* Find victim */
-			if (stack->way < 0)
+			if (iter_stack->way < 0)
 			{
-				stack->way = cache_replace_block(target_mod->cache, stack->set);
+				iter_stack->way = cache_replace_block(target_mod->cache, iter_stack->set);
 			}
-			if(flag_mshr_enabled && stack->request_dir != mod_request_down_up && stack->read && stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
+			if(flag_mshr_enabled && iter_stack->request_dir != mod_request_down_up && iter_stack->read && iter_stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
 			{
 				/*if(mshr_pre_lock(mod->mshr, stack->ret_stack))
 				{
@@ -1724,106 +1737,138 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 					mshr_delay(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
 					return;
 				}*/
-				if(!mshr_lock(target_mod->mshr, stack))
+				if(!mshr_lock(target_mod->mshr, iter_stack))
 				{
-					mod_unlock_port(target_mod, port, stack);
-					ret->port_locked = 0;
-					ret->mshr_locked = 0;
-					if(stack->dir_lock && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 )
-						dir_entry_unlock(target_mod->dir, stack->set, stack->way);
+					mod_unlock_port(target_mod, port, iter_stack);
+					iter_stack->port_locked = 0;
+					iter_stack->mshr_locked = 0;
+					if(iter_stack->dir_lock && iter_stack->dir_lock->lock_queue && iter_stack->dir_lock->lock == 0 )
+						dir_entry_unlock(target_mod->dir, iter_stack->set, iter_stack->way);
 
-					if(!stack->blocking)
+					if(!iter_stack->blocking)
 					{
-						ret->err = 1;
-						stack->event = stack->find_and_lock_return_event;
-						esim_schedule_mod_stack_event(stack, 0);
+						iter_stack->err = 1;
+						iter_stack->event = iter_stack->find_and_lock_return_event;
+						esim_schedule_mod_stack_event(iter_stack, 0);
 						//mod_stack_return(stack);
 					}else{
-						mshr_enqueue(target_mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
+						mshr_enqueue(target_mod->mshr,iter_stack, EV_MOD_NMOESI_FIND_AND_LOCK);
 					}
 					return;
 				}
 
-				if(stack->client_info && stack->client_info->arch){
-					ret->latencias.lock_mshr = stack->client_info->arch->timing->cycle - ret->latencias.start - ret->latencias.queue;
+				if(iter_stack->client_info && iter_stack->client_info->arch){
+					iter_stack->latencias.lock_mshr = iter_stack->client_info->arch->timing->cycle - iter_stack->latencias.start - iter_stack->latencias.queue;
 				}
-				stack->mshr_locked = 1;
+				iter_stack->mshr_locked = 1;
 			}
 		}
-		assert(stack->way >= 0);
+		assert(iter_stack->way >= 0);
+                /*for(int i= 0;i < list_count(stack->uop->mem_accesses_list);i++)
+                {
+                    struct mod_stack_t *next_stack = list_get(stack->uop->mem_accesses_list,i);
+                    if(stack == next_stack)
+                        continue;
+                    if(next_stack->way >= 0)
+                        continue;
+                    
+                    next_stack->hit = mod_find_block(target_mod, next_stack->addr, &next_stack->set,
+			&next_stack->way, &next_stack->tag, &next_stack->state);
+                    //if (next_stack->way < 0)
+                    //{
+                    if(!next_stack->hit)
+                        next_stack->way = cache_replace_block(target_mod->cache, next_stack->set);
+                    //}
+                    dir_entry_lock(target_mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack);
+                        
+                    
+                }*/
+                    
 
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-		dir_lock = dir_lock_get(target_mod->dir, stack->set, stack->way);
-		if (dir_lock->lock && !stack->blocking)
+		dir_lock = dir_lock_get(target_mod->dir, iter_stack->set, iter_stack->way);
+		if (dir_lock->lock && !iter_stack->blocking)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
-				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack_id);
-			ret->err = 1;
-			if (stack->mshr_locked != 0)
+				iter_stack->id, iter_stack->tag, target_mod->name, iter_stack->set, iter_stack->way, dir_lock->stack_id);
+			iter_stack->err = 1;
+			if (iter_stack->mshr_locked != 0)
 			{
-				mshr_unlock(target_mod, stack);
-				stack->mshr_locked = 0;
+				mshr_unlock(target_mod, iter_stack);
+				iter_stack->mshr_locked = 0;
 			}
-			mod_unlock_port(target_mod, port, stack);
-			ret->port_locked = 0;
-			stack->event = stack->find_and_lock_return_event;
-			esim_schedule_mod_stack_event(stack, 0);
-			//mod_stack_return(stack);
+			
+			iter_stack->event = iter_stack->find_and_lock_return_event;
+			esim_schedule_mod_stack_event(iter_stack, 0);
+                        
+                        iter_stack->uop->accesses_in_dir--;
+                        if(iter_stack->uop->accesses_in_dir == 0)
+                        {
+                            mod_unlock_port(target_mod, port, iter_stack);
+                            iter_stack->port_locked = 0;
+                        }
 			return;
 		}
 
 		/* Lock directory entry. If lock fails, port needs to be released to prevent
 		 * deadlock.  When the directory entry is released, locking port and
 		 * directory entry will be retried. */
-		if (!dir_entry_lock(target_mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
+		if (!dir_entry_lock(target_mod->dir, iter_stack->set, iter_stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, iter_stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
-				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack_id);
+				iter_stack->id, iter_stack->tag, target_mod->name, iter_stack->set, iter_stack->way, dir_lock->stack_id);
 			/*if (stack->mshr_locked != 0)
 			{
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
-			}*/
-			mod_unlock_port(target_mod, port, stack);
-			ret->port_locked = 0;
+			}*/                        
+                        
+                        iter_stack->uop->accesses_in_dir--;
+                        if(iter_stack->uop->accesses_in_dir == 0)
+                        {
+                            mod_unlock_port(target_mod, port, iter_stack);
+                            iter_stack->port_locked = 0;
+                        }
 			return;
 		}
                 
                 //lock directory entries for all the stacks belonging to stack->uop
 
 		/* Miss */
-		if (!stack->hit)
+		if (!iter_stack->hit)
 		{
 			/* Find victim */
-			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
-			if(stack->state)
+			cache_get_block(target_mod->cache, iter_stack->set, iter_stack->way, NULL, &iter_stack->state);
+			if(iter_stack->state)
 			{
-				if(stack->read)
+				if(iter_stack->read)
 					add_load_invalidation(target_mod->level);
 				else
 					add_store_invalidation(target_mod->level);
 			}
 
-			assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir,
-				stack->set, stack->way));
+			assert(iter_stack->state || !dir_entry_group_shared_or_owned(target_mod->dir,
+				iter_stack->set, iter_stack->way));
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
-				stack->id, stack->tag, target_mod->name, stack->set, stack->way,
-				str_map_value(&cache_block_state_map, stack->state));
+				iter_stack->id, iter_stack->tag, target_mod->name, iter_stack->set, iter_stack->way,
+				str_map_value(&cache_block_state_map, iter_stack->state));
 		}
 
 
 		/* Entry is locked. Record the transient tag so that a subsequent lookup
 		 * detects that the block is being brought.
 		 * Also, update LRU counters here. */
-		cache_set_transient_tag(target_mod->cache, stack->set, stack->way, stack->tag);
-		cache_access_block(target_mod->cache, stack->set, stack->way);
+		cache_set_transient_tag(target_mod->cache, iter_stack->set, iter_stack->way, iter_stack->tag);
+		cache_access_block(target_mod->cache, iter_stack->set, iter_stack->way);
 
 		/* Access latency */
-		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
-		esim_schedule_mod_stack_event(stack, target_mod->dir_latency);
+		iter_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
+		esim_schedule_mod_stack_event(iter_stack, target_mod->dir_latency);
+                iter_stack->dir_lock = dir_lock;
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
 		return;
+            }
 	}
 
 	if (event == EV_MOD_NMOESI_FIND_AND_LOCK_ACTION)
@@ -1837,10 +1882,16 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->id, target_mod->name);
 
 		/* Release port */
-		mod_unlock_port(target_mod, port, stack);
-		ret->port_locked = 0;
-		if(ret->client_info && ret->client_info->arch){
-			ret->latencias.lock_dir = ret->client_info->arch->timing->cycle - ret->latencias.start - ret->latencias.queue - ret->latencias.lock_mshr;
+                stack->uop->accesses_in_dir--;
+                        if(stack->uop->accesses_in_dir == 0)
+                        {
+                            mod_unlock_port(target_mod, port, stack);
+                            stack->port_locked = 0;
+                        }
+		//mod_unlock_port(target_mod, port, stack);
+		//stack->port_locked = 0;
+		if(stack->client_info && stack->client_info->arch){
+			stack->latencias.lock_dir = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr;
 		}
 		/* On miss, evict if victim is a valid block. */
 		if (!stack->hit && stack->state)
@@ -1887,9 +1938,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
 			assert(stack->state);
 			assert(stack->eviction);
-			ret->err = 1;
+			stack->err = 1;
 			dir_entry_unlock(target_mod->dir, stack->set, stack->way);
-			ret->find_and_lock_stack = NULL;
+                        stack->dir_lock = NULL;
+			stack->find_and_lock_stack = NULL;
 			stack->event = stack->find_and_lock_return_event;
 			stack->find_and_lock_return_event = 0;
 			esim_schedule_mod_stack_event(stack, 0);
