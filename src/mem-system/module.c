@@ -462,10 +462,8 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 	/* Miss */
 	if (way == cache->assoc)
 	{
-	/*
 		PTR_ASSIGN(way_ptr, 0);
 		PTR_ASSIGN(state_ptr, 0);
-	*/
 		return 0;
 	}
 

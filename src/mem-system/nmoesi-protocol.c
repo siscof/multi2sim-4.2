@@ -1828,8 +1828,26 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             mod_unlock_port(target_mod, port, iter_stack);
                             iter_stack->port_locked = 0;
                         }
+                      
 			return;
-		}
+		}  
+                
+                if (iter_stack->hit 
+                        && target_mod->cache->sets[iter_stack->set].blocks[iter_stack->way].transient_tag == 
+                        target_mod->cache->sets[iter_stack->set].blocks[iter_stack->way].tag 
+                        && iter_stack->blocking)
+                {
+                    int event;
+                    if(iter_stack->find_and_lock_return_event == EV_MOD_NMOESI_NC_STORE_WRITEBACK)
+                    {
+                        event = EV_MOD_NMOESI_NC_STORE_FINISH;
+                    }else if(iter_stack->find_and_lock_return_event == EV_MOD_NMOESI_LOAD_FINISH){
+                        event = EV_MOD_NMOESI_NC_STORE_FINISH;
+                    }else{
+                      fatal("invalid iter_stack->find_and_lock_return_event in MOD_HANDLER_NMOESI_FIND_AND_LOCK");  
+                    }
+                    mod_stack_wait_in_stack(stack, dir_lock->stack, event);
+                }
 
 		/* Lock directory entry. If lock fails, port needs to be released to prevent
 		 * deadlock.  When the directory entry is released, locking port and
