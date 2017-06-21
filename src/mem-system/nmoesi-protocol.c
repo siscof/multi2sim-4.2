@@ -355,9 +355,16 @@ void mod_handler_nmoesi_load(int event, void *data)
 		//new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_LOAD_ACTION;
-                if(stack->uop->accesses_in_dir == 0)
+                //if(stack->uop->accesses_in_dir == 0){
                     esim_schedule_mod_stack_event(stack, 0);
-                stack->uop->accesses_in_dir++;
+                    stack->waiting_dir_access = 0;
+                    stack->uop->accesses_in_dir = 1;
+                //}else{
+                //    stack->waiting_dir_access = 1;
+                //}
+                    
+                //stack->uop->accesses_in_dir++;
+                
 		//esim_schedule_mod_stack_event(new_stack, 0);
 
 		return;
@@ -468,6 +475,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
+                        stack->err = 0;
 
 			stack->event = EV_MOD_NMOESI_LOAD_LOCK2;
 			esim_schedule_mod_stack_event(stack, retry_lat);
@@ -505,7 +513,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 
 		/* Unlock directory entry */
-                if(stack->dir_lock)
+                //if(stack->dir_lock)
                     dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 
 		/* Impose the access latency before continuing */
@@ -1025,9 +1033,16 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		stack->err = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_NC_STORE_WRITEBACK;
-                if(stack->uop->accesses_in_dir == 0)
+                //if(stack->uop->accesses_in_dir == 0)
+                //{
                     esim_schedule_mod_stack_event(stack, 0);
-                stack->uop->accesses_in_dir++;
+                    stack->waiting_dir_access = 0;
+                    stack->uop->accesses_in_dir = 1;
+                //}else{
+                //    stack->waiting_dir_access = 1; 
+                //}
+                
+                
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
@@ -1590,18 +1605,26 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		struct mod_port_t *port = stack->port;
 		struct dir_lock_t *dir_lock;
                 struct mod_stack_t *iter_stack = stack;
+                if(target_mod->level == 1)
+                    stack->uop->accesses_in_dir = 0;
 
 		assert(stack->port);
                 assert(stack->uop);
 		assert(list_count(stack->uop->mem_accesses_list));
-            /*for(int i= 0;i < list_count(stack->uop->mem_accesses_list);i++)
+            for(int i= 0;i < list_count(stack->uop->mem_accesses_list);i++)
             {
-                if(target_mod->level > -1)
+                if(target_mod->level > 1 || stack->request_dir == mod_request_down_up)
                 {
                     iter_stack = stack;
                     i = list_count(stack->uop->mem_accesses_list);
                 }else{
                     iter_stack = list_get(stack->uop->mem_accesses_list,i);
+                    if(iter_stack->waiting_dir_access || iter_stack == stack)
+                    {
+                        iter_stack->waiting_dir_access = 0;
+                    }else{
+                        continue;
+                    }
                 }
                 assert(iter_stack->find_and_lock_return_event);
                 
@@ -1609,11 +1632,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			iter_stack->addr, target_mod->name);
                 mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock_port\"\n",
 			iter_stack->id, target_mod->name);
-*/
+
 		/* Set parent stack flag expressing that port has already been locked.
 		 * This flag is checked by new writes to find out if it is already too
 		 * late to coalesce. */
-                //if(iter_stack == stack)
+                if(iter_stack == stack)
                     iter_stack->port_locked = 1;
 
 		/* Look for block. */
@@ -1732,21 +1755,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			}
 			if(flag_mshr_enabled && iter_stack->request_dir != mod_request_down_up && iter_stack->read && iter_stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
 			{
-				/*if(mshr_pre_lock(mod->mshr, stack->ret_stack))
-				{
-					mod_unlock_port(mod, port, stack);
-					ret->port_locked = 0;
-					ret->mshr_locked = 0;
-					if(stack->dir_lock && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 )
-						dir_entry_unlock(mod->dir, stack->set, stack->way);
-
-					mshr_delay(mod->mshr,stack, EV_MOD_NMOESI_FIND_AND_LOCK);
-					return;
-				}*/
 				if(!mshr_lock(target_mod->mshr, iter_stack))
 				{
-					mod_unlock_port(target_mod, port, iter_stack);
+                                    if(iter_stack->port != 0){
+                                        mod_unlock_port(target_mod, port, iter_stack);
 					iter_stack->port_locked = 0;
+                                    }
 					iter_stack->mshr_locked = 0;
 					if(iter_stack->dir_lock && iter_stack->dir_lock->lock_queue && iter_stack->dir_lock->lock == 0 )
 						dir_entry_unlock(target_mod->dir, iter_stack->set, iter_stack->way);
@@ -1808,8 +1822,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			iter_stack->event = iter_stack->find_and_lock_return_event;
 			esim_schedule_mod_stack_event(iter_stack, 0);
                         
-                        iter_stack->uop->accesses_in_dir--;
-                        if(iter_stack->uop->accesses_in_dir == 0)
+                        //iter_stack->uop->accesses_in_dir--;
+                        if(iter_stack->port != 0)
                         {
                             mod_unlock_port(target_mod, port, iter_stack);
                             iter_stack->port_locked = 0;
@@ -1830,8 +1844,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				stack->mshr_locked = 0;
 			}*/                        
                         
-                        iter_stack->uop->accesses_in_dir--;
-                        if(iter_stack->uop->accesses_in_dir == 0)
+                        //iter_stack->uop->accesses_in_dir--;
+                        if(iter_stack->port != 0)
                         {
                             mod_unlock_port(target_mod, port, iter_stack);
                             iter_stack->port_locked = 0;
@@ -1872,24 +1886,25 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		iter_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
 		esim_schedule_mod_stack_event(iter_stack, target_mod->dir_latency);
                 iter_stack->dir_lock = dir_lock;
+                 //stack->uop->accesses_in_dir--;
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
-		return;
-           // }
+		
+            }
+            return;
 	}
 
 	if (event == EV_MOD_NMOESI_FIND_AND_LOCK_ACTION)
 	{
 		struct mod_port_t *port = stack->port;
 
-		assert(port);
+		//assert(port);
 		mem_debug("  %lld %lld 0x%x %s find and lock action\n", esim_time, stack->id,
 			stack->tag, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock_action\"\n",
 			stack->id, target_mod->name);
 
 		/* Release port */
-                stack->uop->accesses_in_dir--;
-                        if(stack->uop->accesses_in_dir == 0)
+                        if(stack->port != 0)
                         {
                             mod_unlock_port(target_mod, port, stack);
                             stack->port_locked = 0;

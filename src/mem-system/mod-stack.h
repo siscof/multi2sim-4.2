@@ -64,6 +64,7 @@ struct mod_stack_t
         bool inflight;
 	int main_memory_accessed;
 	int mshr_locked;
+        int waiting_dir_access;
 	long long tiempo_acceso;
 	long long retry_time_lost;
 	struct retry_stats_t retries_counter[num_retries_kinds];

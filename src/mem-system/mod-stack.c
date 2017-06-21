@@ -86,6 +86,10 @@ void mod_stack_return(struct mod_stack_t *stack)
         }
         /*hasta aqui*/
 
+        if(stack->uop)
+        {
+            list_remove(stack->uop->mem_accesses_list,stack);
+        }
 	if(stack->ret_stack == 0)
 	{
 		free(stack);
