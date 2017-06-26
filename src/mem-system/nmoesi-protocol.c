@@ -355,13 +355,13 @@ void mod_handler_nmoesi_load(int event, void *data)
 		//new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_LOAD_ACTION;
-                //if(stack->uop->accesses_in_dir == 0){
+                if(stack->uop->accesses_in_dir == 0){
                     esim_schedule_mod_stack_event(stack, 0);
                     stack->waiting_dir_access = 0;
                     stack->uop->accesses_in_dir = 1;
-                //}else{
-                //    stack->waiting_dir_access = 1;
-                //}
+                }else{
+                    stack->waiting_dir_access = 1;
+                }
                     
                 //stack->uop->accesses_in_dir++;
                 
@@ -1033,14 +1033,14 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		stack->err = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_NC_STORE_WRITEBACK;
-                //if(stack->uop->accesses_in_dir == 0)
-                //{
+                if(stack->uop->accesses_in_dir == 0)
+                {
                     esim_schedule_mod_stack_event(stack, 0);
                     stack->waiting_dir_access = 0;
                     stack->uop->accesses_in_dir = 1;
-                //}else{
-                //    stack->waiting_dir_access = 1; 
-                //}
+                }else{
+                    stack->waiting_dir_access = 1; 
+                }
                 
                 
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
