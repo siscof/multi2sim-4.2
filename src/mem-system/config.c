@@ -386,6 +386,14 @@ static void mem_config_read_general(struct config_t *config)
 		fatal("%s: mshr protocol: %s : isn't a valid mshr protocol (default, fifo, occupancy)\n",
 				mem_config_file_name, mshr_protocol_str);
 	}
+        	/* cache port per uop */
+	uop_cache_port = config_read_int(config, section, "UopCachePort", 0);
+
+	if(uop_cache_port > 1 || uop_cache_port < 0)
+	{
+		fatal("%s: UopCachePort: %d : isn't a valid uop cache port option (0 = \"enabled\", 1 = \"disabled\")\n",
+				mem_config_file_name, uop_cache_port);
+	}
 }
 
 

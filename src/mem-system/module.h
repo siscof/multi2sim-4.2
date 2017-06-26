@@ -38,6 +38,7 @@ struct mod_port_t
 	int waiting_list_count;
 	int waiting_list_max;
 };
+extern int uop_cache_port;
 
 
 /* String map for access type */
