@@ -23,6 +23,7 @@
 #include <stdio.h>
 #include <stdbool.h>
 #include <arch/southern-islands/emu/wavefront.h>
+#include <lib/util/list.h>
 
 /* Port */
 struct mod_port_t
@@ -30,7 +31,8 @@ struct mod_port_t
 	/* Port lock status */
 	int locked;
 	long long lock_when;  /* Cycle when it was locked */
-	struct mod_stack_t *stack;  /* Access locking port */
+	//struct mod_stack_t *stack;  /* Access locking port */
+        struct list_t *stacks;
 
 	/* Waiting list */
 	struct mod_stack_t *waiting_list_head;
@@ -38,7 +40,7 @@ struct mod_port_t
 	int waiting_list_count;
 	int waiting_list_max;
 };
-extern int uop_cache_port;
+int uop_cache_port;
 
 
 /* String map for access type */
@@ -276,6 +278,8 @@ struct mod_t
 	long long no_retry_nc_write_hits;
 };
 
+void mod_ports_free(struct mod_port_t *ports, int num_ports);
+struct mod_port_t * mod_ports_create(int num_ports);
 struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	int block_size, int latency);
 void mod_free(struct mod_t *mod);

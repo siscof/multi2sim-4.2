@@ -58,6 +58,25 @@
  		{ "Prefetch", mod_access_prefetch }
  	}
  };
+ 
+struct mod_port_t * mod_ports_create(int num_ports)
+{
+    struct mod_port_t *ports = xcalloc(num_ports, sizeof(struct mod_port_t));
+    for(int i = 0; i < num_ports; i++)
+    {
+    ports[i].stacks = list_create(); 
+    }
+    return ports;
+}
+
+void mod_ports_free(struct mod_port_t *ports, int num_ports)
+{
+    for(int i = 0; i < num_ports; i++)
+    {
+        list_free(ports[i].stacks); 
+    }
+    free(ports);
+}
 
 struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	int block_size, int latency)
@@ -72,13 +91,14 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 
 	/* MSHR */
 	mod->mshr = mshr_create();
-  mod->mshr->mod = mod;
+        mod->mshr->mod = mod;
 	//xcalloc(1,sizeof(struct mshr_t));
 	mod->coherence_controller = cc_create();
 
 	/* Ports */
 	mod->num_ports = num_ports;
-	mod->ports = xcalloc(num_ports, sizeof(struct mod_port_t));
+	mod->ports = mod_ports_create(num_ports);
+        //mod->ports = xcalloc(num_ports, sizeof(struct mod_port_t));
 
 	/* Lists */
 	mod->low_mod_list = linked_list_create();
@@ -108,7 +128,7 @@ void mod_free(struct mod_t *mod)
 	if(mod->coherence_controller)
 		cc_free(mod->coherence_controller);
 
-	free(mod->ports);
+	mod_ports_free(mod->ports, mod->num_ports);
 	repos_free(mod->client_info_repos);
 	free(mod->name);
 	free(mod);
@@ -568,9 +588,26 @@ void mod_lock_port(struct mod_t *mod, struct mod_stack_t *stack, int event)
 {
 	struct mod_port_t *port = NULL;
 	int i;
-
+	/* Get free port */
+	for (i = 0; i < mod->num_ports; i++)
+	{
+		port = &mod->ports[i];
+		if (!list_count(port->stacks))
+                {
+                    mod->num_locked_ports++;
+                    break;
+                }else{
+                    struct mod_stack_t *stack_in_port = list_get(port->stacks,0);
+                    if(stack_in_port->target_mod->level == 1 && stack->target_mod->level == 1
+                            && stack_in_port->uop == stack->uop)
+                    {
+                        break;
+                    }
+                }	
+	}
+        
 	/* No free port */
-	if (mod->num_locked_ports >= mod->num_ports)
+	if (i > mod->num_ports)
 	{
 		assert(!DOUBLE_LINKED_LIST_MEMBER(mod, port_waiting, stack));
 
@@ -588,26 +625,20 @@ void mod_lock_port(struct mod_t *mod, struct mod_stack_t *stack, int event)
 		return;
 	}
 
-	/* Get free port */
-	for (i = 0; i < mod->num_ports; i++)
-	{
-		port = &mod->ports[i];
-		if (!port->stack)
-			break;
-	}
+
 
 	/* Lock port */
-	assert(port && i < mod->num_ports);
-	port->stack = stack;
+	//assert(port && i < mod->num_ports);
+	list_add(port->stacks, stack);
 	stack->port = port;
-	mod->num_locked_ports++;
 
+        stack->port_locked = 1;
 	/* Debug */
 	mem_debug("  %lld stack %lld %s port %d locked\n", esim_time, stack->id, mod->name, i);
 
 	/* Schedule event */
-  stack->event = event;
-  esim_schedule_mod_stack_event(stack, 0);
+        stack->event = event;
+        esim_schedule_mod_stack_event(stack, 0);
 	//esim_schedule_event(event, stack, 0);
 }
 
@@ -619,13 +650,15 @@ void mod_unlock_port(struct mod_t *mod, struct mod_port_t *port,
 
 	/* Checks */
 	assert(mod->num_locked_ports > 0);
-	assert(stack->port == port && port->stack == stack);
+	assert(stack->port == port && list_index_of(port->stacks, stack) >= 0);
 	assert(stack->target_mod == mod);
 
 	/* Unlock port */
 	stack->port = NULL;
-	port->stack = NULL;
-	mod->num_locked_ports--;
+        stack->port_locked = 0;
+	list_remove(port->stacks, stack);
+	if(list_count(port->stacks) == 0)
+            mod->num_locked_ports--;
 
 	/* Debug */
 	mem_debug("  %lld %lld %s port unlocked\n", esim_time,

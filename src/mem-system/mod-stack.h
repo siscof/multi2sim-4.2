@@ -180,6 +180,8 @@ struct mod_stack_t
 	/* Master stack that the current access has been coalesced with.
 	 * This field has a value other than NULL only if 'coalesced' is TRUE. */
 	struct mod_stack_t *master_stack;
+        
+        struct mod_stack_t * waiting_stack;
 
 	/* Events waiting in directory lock */
 	int dir_lock_event;

@@ -86,7 +86,7 @@ void mod_stack_return(struct mod_stack_t *stack)
         }
         /*hasta aqui*/
 
-        if(stack->uop)
+        if(stack->target_mod && stack->uop && stack->target_mod->level == 1)
         {
             list_remove(stack->uop->mem_accesses_list,stack);
         }

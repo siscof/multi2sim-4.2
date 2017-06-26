@@ -292,6 +292,8 @@ void mshr_unlock_entry(struct mshr_entry_t *entry)
 
 void mshr_enqueue(struct mshr_t *mshr, struct mod_stack_t *stack, int event)
 {
+        mem_debug("  %lld %lld 0x%x %s mshr entry unlock\n", esim_time, stack->id,
+		stack->tag, stack->target_mod->name);
 	stack->waiting_list_event = event;
 	list_enqueue(mshr->waiting_list, stack);
 }
