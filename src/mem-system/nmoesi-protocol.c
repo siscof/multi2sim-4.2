@@ -1754,19 +1754,19 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 				if(!mshr_lock(target_mod->mshr, stack))
 				{
+                                    mem_debug("  %lld %lld 0x%x %s find and lock port mshr full(blocking=%d)\n",
+			esim_time, stack->id, stack->addr, target_mod->name, stack->blocking);
                                     if(stack->port != 0){
                                         mod_unlock_port(target_mod, port, stack);
 					//stack->port_locked = 0;
                                     }
 					stack->mshr_locked = 0;
-					if(stack->dir_lock && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 )
+					if(stack->dir_lock /* && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 */)
 						dir_entry_unlock(target_mod->dir, stack->set, stack->way);
 
 					if(!stack->blocking)
 					{
-                                            mem_debug("  %lld %lld 0x%x %s find and lock port mshr full(blocking=%d)\n",
-			esim_time, stack->id, stack->addr, target_mod->name, stack->blocking);
-						stack->err = 1;
+                                                stack->err = 1;
 						stack->event = stack->find_and_lock_return_event;
 						esim_schedule_mod_stack_event(stack, 0);
 						//mod_stack_return(stack);

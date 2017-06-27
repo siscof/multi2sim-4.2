@@ -482,8 +482,8 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 	/* Miss */
 	if (way == cache->assoc)
 	{
-		PTR_ASSIGN(way_ptr, 0);
-		PTR_ASSIGN(state_ptr, 0);
+		//PTR_ASSIGN(way_ptr, 0);
+		//PTR_ASSIGN(state_ptr, 0);
 		return 0;
 	}
 
@@ -596,7 +596,7 @@ void mod_lock_port(struct mod_t *mod, struct mod_stack_t *stack, int event)
                 {
                     mod->num_locked_ports++;
                     break;
-                }else{
+                }else if(uop_cache_port){
                     struct mod_stack_t *stack_in_port = list_get(port->stacks,0);
                     if(stack_in_port->target_mod->level == 1 && stack->target_mod->level == 1
                             && stack_in_port->uop == stack->uop)
