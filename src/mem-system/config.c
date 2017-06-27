@@ -732,6 +732,8 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	int dir_assoc;
 	int mshr_size;
 
+        enum cache_policy_t policy;
+        char *policy_str;
 	char *dram_system_name;
 	char *net_name;
 	char *net_node_name;
@@ -746,6 +748,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	config_var_enforce(config, section, "BlockSize");
 	block_size = config_read_int(config, section, "BlockSize", 64);
 	latency = config_read_int(config, section, "Latency", 1);
+        policy_str = config_read_string(config, section, "Policy", "LRU");
 	num_ports = config_read_int(config, section, "Ports", 2);
 	dir_size = config_read_int(config, section, "DirectorySize", 1024);
 	dir_assoc = config_read_int(config, section, "DirectoryAssoc", 8);
@@ -753,6 +756,11 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 	dram_system_name = config_read_string(config, section, "DRAMSystem", "");
 
 	/* Check parameters */
+        policy = str_map_string_case(&cache_policy_map, policy_str);
+	if (policy == cache_policy_invalid)
+		fatal("%s: cache %s: %s: invalid block replacement policy.\n%s",
+			mem_config_file_name, mod_name,
+			policy_str, mem_err_config_note);
 	if (block_size < 1 || (block_size & (block_size - 1)))
 		fatal("%s: %s: block size must be power of two.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
@@ -796,7 +804,8 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 
 	/* Create cache and directory */
 	mod->cache = cache_create(mod->name, dir_size / dir_assoc, block_size,
-		dir_assoc, cache_policy_lru);
+		dir_assoc, policy);
+        mod->cache->mod = mod;
 
 	/* Connect to specified main mem system, if any */
 	mod->dram_system = hash_table_get(mem_system->dram_systems, dram_system_name);

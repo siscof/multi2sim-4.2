@@ -313,23 +313,38 @@ int cache_replace_block(struct cache_t *cache, int set)
 		return way;
 	}
         
-        if(cache->policy == cache_policy_lru_ext ||
-		cache->policy == cache_policy_fifo)
+        if(cache->policy == cache_policy_lru_ext)
 	{
                 struct dir_lock_t *dir_lock;
-		int way = cache->sets[set].way_tail->way;
-                for(int i = 0; i <= cache->assoc; i++)
+                
+                block = cache->sets[set].way_tail;
+                for(; block != NULL; block = block->way_prev)
+                {
+                    dir_lock = dir_lock_get(cache->mod->dir, set, block->way);
+                    if(!dir_lock->lock)
+                        break;
+                    
+		}
+                
+                
+		/*int way = cache->sets[set].way_tail->way;
+                for(; cache->sets[set].blocks[way]->way != null; way = cache->sets[set].blocks[way]->way)
                 {
                     way = (way+i)%cache->assoc;
                     dir_lock = dir_lock_get(cache->mod->dir, set, way);
                     if(!dir_lock->lock)
                         break;
                     
-		}
-                cache_update_waylist(&cache->sets[set], cache->sets[set].way_tail,
+		}*/
+                if(block == NULL)
+                {
+                    block = cache->sets[set].way_tail;
+                }
+                
+                cache_update_waylist(&cache->sets[set], block,
 			cache_waylist_head);
 
-		return way;
+		return block->way;
 	}
 
 	/* Random replacement */
