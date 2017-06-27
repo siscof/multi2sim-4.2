@@ -28,6 +28,7 @@ enum cache_policy_t
 {
 	cache_policy_invalid = 0,
 	cache_policy_lru,
+        cache_policy_lru_ext,
 	cache_policy_fifo,
 	cache_policy_random
 };
@@ -74,6 +75,7 @@ struct cache_t
 	unsigned int block_size;
 	unsigned int assoc;
 	enum cache_policy_t policy;
+        struct mod_t *mod;
 
 	struct cache_set_t *sets;
 	unsigned int block_mask;

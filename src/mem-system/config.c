@@ -705,6 +705,7 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	/* Create cache */
 	mod->cache = cache_create(mod->name, num_sets, block_size, assoc,
 		policy);
+        mod->cache->mod = mod;
 
 	/* Fill in prefetcher parameters */
 	if (enable_prefetcher)
