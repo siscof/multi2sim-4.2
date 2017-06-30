@@ -36,7 +36,8 @@ struct str_map_t cache_policy_map =
 {
 	4, {
 		{ "LRU", cache_policy_lru },
-                { "LRU_EXT", cache_policy_lru_ext},        
+                { "LRU_EXT", cache_policy_lru_ext }, 
+                { "LRU_BASE", cache_policy_lru_base },
 		{ "FIFO", cache_policy_fifo },
 		{ "Random", cache_policy_random }
 	}
@@ -310,6 +311,12 @@ int cache_replace_block(struct cache_t *cache, int set)
 		cache_update_waylist(&cache->sets[set], cache->sets[set].way_tail,
 			cache_waylist_head);
 
+		return way;
+	}
+        
+        if(cache->policy == cache_policy_lru_base)
+	{
+		int way = cache->sets[set].way_tail->way;
 		return way;
 	}
         

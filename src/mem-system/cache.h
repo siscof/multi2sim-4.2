@@ -29,6 +29,7 @@ enum cache_policy_t
 	cache_policy_invalid = 0,
 	cache_policy_lru,
         cache_policy_lru_ext,
+        cache_policy_lru_base,
 	cache_policy_fifo,
 	cache_policy_random
 };
