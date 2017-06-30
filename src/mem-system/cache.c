@@ -273,7 +273,7 @@ void cache_access_block(struct cache_t *cache, int set, int way)
 	/* A block is moved to the head of the list for LRU policy.
 	 * It will also be moved if it is its first access for FIFO policy, i.e., if the
 	 * state of the block was invalid. */
-	move_to_head = cache->policy == cache_policy_lru ||
+	move_to_head = cache->policy == cache_policy_lru || cache_policy_lru_base || cache_policy_lru_ext ||
 		(cache->policy == cache_policy_fifo && !cache->sets[set].blocks[way].state);
 	if (move_to_head && cache->sets[set].blocks[way].way_prev)
 		cache_update_waylist(&cache->sets[set],
