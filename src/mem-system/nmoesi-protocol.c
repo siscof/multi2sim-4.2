@@ -421,23 +421,35 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Miss */
 
 		estadisticas(0, 0);
+                if(super_stack_enabled == 1){
+                    //cuantos accesos debo generar?
+                    mod_stack_t *super_stack = mod_stack_create_super_stack(mod_get_low_mod(target_mod, stack->tag), EV_MOD_NMOESI_LOAD_MISS, stack);
+                    
+                    int mem_accesses_list_count = list_count(stack->uop->mem_accesses_list);
+                    for(int i = 0;i < mem_accesses_list_count;i++)
+                    {
+                        next_stack = list_get( stack->uop->mem_accesses_list,i);
+                        mod_stack_wait_in_stack(next_stack, super_stack, EV_MOD_NMOESI_LOAD_MISS);
+                        
+                    }
+                    
+                }else{
+                    new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
+                            EV_MOD_NMOESI_LOAD_MISS, stack);
+                    //new_stack->peer = mod_stack_set_peer(mod, stack->state);
+                    //new_stack->target_mod = mod_get_low_mod(target_mod, stack->tag);
+                    new_stack->return_mod = target_mod;
+                    new_stack->request_dir = mod_request_up_down;
+                    new_stack->wavefront = stack->wavefront;
+                    new_stack->uop = stack->uop;
+                    new_stack->retry = stack->retry;
+                    new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+                    esim_schedule_mod_stack_event(new_stack, 0);
+                    //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
 
-		new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
-			EV_MOD_NMOESI_LOAD_MISS, stack);
-		//new_stack->peer = mod_stack_set_peer(mod, stack->state);
-		//new_stack->target_mod = mod_get_low_mod(target_mod, stack->tag);
-		new_stack->return_mod = target_mod;
-		new_stack->request_dir = mod_request_up_down;
-		new_stack->wavefront = stack->wavefront;
-		new_stack->uop = stack->uop;
-		new_stack->retry = stack->retry;
-		new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
-		esim_schedule_mod_stack_event(new_stack, 0);
-		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
-
-		/* The prefetcher may be interested in this miss */
-		//prefetcher_access_miss(stack, mod);
-
+                    /* The prefetcher may be interested in this miss */
+                    //prefetcher_access_miss(stack, mod);
+                }
 		return;
 	}
 
@@ -2570,9 +2582,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			src_node = return_mod->high_net_node;
 			dst_node = target_mod->low_net_node;
 		}
-
+                assert(stack->stack_size > 7);
 		/* Send message */
-		stack->msg = net_try_send_ev(net, src_node, dst_node, 8,
+		stack->msg = net_try_send_ev(net, src_node, dst_node, stack->stack_size,
 			EV_MOD_NMOESI_READ_REQUEST_RECEIVE, stack, event, stack);
 		return;
 	}
