@@ -425,13 +425,6 @@ void mod_handler_nmoesi_load(int event, void *data)
                     //cuantos accesos debo generar?
                     mod_stack_t *super_stack = mod_stack_create_super_stack(mod_get_low_mod(target_mod, stack->tag), EV_MOD_NMOESI_LOAD_MISS, stack);
                     
-                    int mem_accesses_list_count = list_count(stack->uop->mem_accesses_list);
-                    for(int i = 0;i < mem_accesses_list_count;i++)
-                    {
-                        next_stack = list_get( stack->uop->mem_accesses_list,i);
-                        mod_stack_wait_in_stack(next_stack, super_stack, EV_MOD_NMOESI_LOAD_MISS);
-                        
-                    }
                     
                 }else{
                     new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,

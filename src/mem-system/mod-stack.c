@@ -182,6 +182,27 @@ void mod_stack_wakeup_port(struct mod_port_t *port)
 	}
 }
 
+struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int event, struct mod_stack_t *stack)
+{
+    struct mod_stack_t *next_stack;
+    struct mod_stack_t *super_stack = xcalloc(1, sizeof(struct mod_stack_t));
+    
+    super_stack->is_super_stack = 1;
+    
+    int mem_accesses_list_count = list_count(stack->uop->mem_accesses_list);
+    for(int i = 0;i < mem_accesses_list_count;i++)
+    {
+        next_stack = list_get( stack->uop->mem_accesses_list,i);
+        //debo añadir next_stack a super_stack?
+        if(next_stack->hit == 0 && next_stack->dir_lock->lock 
+                && next_stack->dir_lock->stack == next_stack && next_stack->waiting_list_master)
+            mod_stack_wait_in_stack(next_stack, super_stack, event);
+    }
+    
+    
+    
+}
+
 
 /* Enqueue access in stack wait list. */
 void mod_stack_wait_in_stack(struct mod_stack_t *stack,
