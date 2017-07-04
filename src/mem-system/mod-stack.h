@@ -76,6 +76,7 @@ struct mod_stack_t
 	long long dramsim_mm_start;
 	int dramsim_accesses;
 	struct mshr_entry_t *mshr_entry;
+        int is_super_stack;
 
 	int find_and_lock_return_event;
 
