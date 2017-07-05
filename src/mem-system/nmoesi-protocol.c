@@ -1588,6 +1588,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock\"\n",
 			stack->id, target_mod->name);
 
+                
+                for(int i = 0;i> super_stack->size;i++)
+                {
+                    
+                }
+                
 		/* Default return values */
 		stack->err = 0;
 		//ret->find_and_lock_stack = stack;
