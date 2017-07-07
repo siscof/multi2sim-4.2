@@ -65,7 +65,7 @@ enum si_arg_scope_t
 
 enum si_arg_data_type_t
 {
-	si_ar:qg_data_type_invalid = 0,
+	si_arg_data_type_invalid = 0,
 	si_arg_i1,
 	si_arg_i8,
 	si_arg_i16,

@@ -252,8 +252,14 @@ void si_compute_unit_free(struct si_compute_unit_t *compute_unit)
 	list_free(compute_unit->lds_unit.read_buffer);
 	list_free(compute_unit->lds_unit.mem_buffer);
 	list_free(compute_unit->lds_unit.write_buffer);
-
-	for (i = 0; i < compute_unit->num_wavefront_pools; i++)
+           
+        while(0 < list_count(compute_unit->vector_mem_unit.mem_buffer_list))
+        {
+                list_free(list_pop(compute_unit->vector_mem_unit.mem_buffer_list));
+        }
+        list_free(compute_unit->vector_mem_unit.mem_buffer_list);
+	
+        for (i = 0; i < compute_unit->num_wavefront_pools; i++)
 	{
 		/* SIMDs */
 		si_uop_list_free(compute_unit->simd_units[i]->issue_buffer);
@@ -277,8 +283,7 @@ void si_compute_unit_free(struct si_compute_unit_t *compute_unit)
 
 		si_uop_list_free(compute_unit->fetch_buffers[i]);
 
-		list_free(compute_unit->fetch_buffers[i]);
-
+		list_free(compute_unit->fetch_buffers[i]);           
 		si_wavefront_pool_free(compute_unit->wavefront_pools[i]);
 	}
 	free(compute_unit->simd_units);

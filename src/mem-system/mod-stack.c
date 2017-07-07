@@ -199,7 +199,7 @@ struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int e
             mod_stack_wait_in_stack(next_stack, super_stack, event);
     }
     
-    
+    return super_stack;
     
 }
 

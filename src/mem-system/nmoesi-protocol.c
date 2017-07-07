@@ -423,8 +423,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		estadisticas(0, 0);
                 if(super_stack_enabled == 1){
                     //cuantos accesos debo generar?
-                    mod_stack_t *super_stack = mod_stack_create_super_stack(mod_get_low_mod(target_mod, stack->tag), EV_MOD_NMOESI_LOAD_MISS, stack);
-                    
+                    struct mod_stack_t *super_stack = mod_stack_create_super_stack(mod_get_low_mod(target_mod, stack->tag), EV_MOD_NMOESI_LOAD_MISS, stack);
+                    //falta acabar esto
+                    super_stack->stack_size = 8;
+                    esim_schedule_mod_stack_event(super_stack, 0);
                     
                 }else{
                     new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
@@ -437,6 +439,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                     new_stack->uop = stack->uop;
                     new_stack->retry = stack->retry;
                     new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+                    new_stack->stack_size = 8;
                     esim_schedule_mod_stack_event(new_stack, 0);
                     //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
 
@@ -1182,6 +1185,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			new_stack->message = message_clear_owner;
 			new_stack->return_mod = target_mod;
 			new_stack->event = EV_MOD_NMOESI_MESSAGE;
+                        new_stack->stack_size = 8;
 			esim_schedule_mod_stack_event(new_stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_MESSAGE, new_stack, 0);
 		}
@@ -1199,6 +1203,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			new_stack->nc_write = 1;
 			new_stack->return_mod = target_mod;
 			new_stack->request_dir = mod_request_up_down;
+                        new_stack->stack_size = 8;
 			new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
 			esim_schedule_mod_stack_event(new_stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
@@ -1588,10 +1593,13 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock\"\n",
 			stack->id, target_mod->name);
 
-                
-                for(int i = 0;i> super_stack->size;i++)
+                if(stack->is_super_stack)
+                {
+                /*for(int i = 0;i> stack->size;i++)
                 {
                     
+                }*/
+                    fatal("implementar superstack");
                 }
                 
 		/* Default return values */
@@ -2741,7 +2749,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				}*/
 				new_stack->return_mod = target_mod;
 				new_stack->request_dir = mod_request_down_up;
-
+                                new_stack->stack_size = 8;
 				new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
 				esim_schedule_mod_stack_event(new_stack, 0);
 				//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
@@ -2777,7 +2785,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			new_stack->uop = stack->uop;
 			/* Peer is NULL since we keep going up-down */
 			new_stack->request_dir = mod_request_up_down;
-
+                        new_stack->stack_size = 8;
 			new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
 			esim_schedule_mod_stack_event(new_stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
@@ -3032,6 +3040,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			new_stack->uop = stack->uop;
 			new_stack->return_mod = target_mod;
 			new_stack->request_dir = mod_request_down_up;
+                        new_stack->stack_size = 8;
 			new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
 			esim_schedule_mod_stack_event(new_stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);

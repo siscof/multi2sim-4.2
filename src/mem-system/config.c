@@ -394,6 +394,14 @@ static void mem_config_read_general(struct config_t *config)
 		fatal("%s: UopCachePort: %d : isn't a valid uop cache port option (0 = \"enabled\", 1 = \"disabled\")\n",
 				mem_config_file_name, uop_cache_port);
 	}
+        /* super stack*/
+        super_stack_enabled = config_read_int(config, section, "SuperStackEnabled", 0);
+
+	if(super_stack_enabled > 1 || super_stack_enabled < 0)
+	{
+		fatal("%s: flag_super_stack_enabled: %d : isn't a valid (1 = \"enabled\", 0 = \"disabled\")\n",
+				mem_config_file_name, super_stack_enabled);
+	}
 }
 
 

@@ -215,5 +215,6 @@ void mod_stack_add_word_dirty(struct mod_stack_t *stack, unsigned int addr, int 
 void mod_stack_add_word(struct mod_stack_t *stack, unsigned int addr, int words);
 void mod_stack_merge_valid_mask(struct mod_stack_t *stack, unsigned int mask);
 void mod_stack_wakeup_mod_head(struct mod_t *mod);
+struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int event, struct mod_stack_t *stack);
 
 #endif

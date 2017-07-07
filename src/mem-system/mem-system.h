@@ -76,6 +76,7 @@ extern int mem_domain_index;
 extern struct mem_system_t *mem_system;
 
 extern int flag_mshr_enabled;
+extern int super_stack_enabled;
 extern int flag_coalesce_gpu_enabled;
 extern int flag_no_blocking_store;
 

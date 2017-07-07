@@ -56,7 +56,6 @@ void si_wavefront_pool_free(struct si_wavefront_pool_t *wavefront_pool)
 
 	for (i = 0; i < si_gpu_max_wavefronts_per_wavefront_pool; i++)
         {
-            list_free(wavefront_pool->entries[i]->mem_buffer);
             free(wavefront_pool->entries[i]);
         }
 
