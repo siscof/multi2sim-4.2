@@ -216,6 +216,44 @@ void mod_stack_wait_in_stack(struct mod_stack_t *stack,
 	//DOUBLE_LINKED_LIST_INSERT_TAIL(master_stack, waiting, stack);
 }
 
+void mod_stack_wakeup_super_stack(struct mod_stack_t *master_stack)
+{
+	struct mod_stack_t *stack;
+	int event;
+
+	/* No access to wake up */
+	assert(master_stack->waiting_list_count);
+
+	/* Debug */
+	mem_debug("  %lld %lld 0x%x wake up accesses:", esim_time,
+		master_stack->id, master_stack->addr);
+
+	/* Wake up all coalesced accesses */
+	while (master_stack->waiting_list_head)
+	{
+		stack = master_stack->waiting_list_head;
+		event = stack->waiting_list_event;
+		stack->waiting_list_event = 0;
+		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
+
+		stack->waiting_list_master = NULL;
+
+                struct mod_stack_t *new_stack = mod_stack_create(stack->id,master_stack->target_mod, stack->addr, event, stack);
+
+		new_stack->event = master_stack->event;
+		new_stack->return_mod = master_stack->return_mod;
+                new_stack->request_dir = master_stack->request_dir;
+                new_stack->wavefront = stack->wavefront;
+                new_stack->uop = stack->uop;
+                new_stack->retry = master_stack->retry;
+                new_stack->stack_size = 8;
+                esim_schedule_mod_stack_event(new_stack, 0);
+	}
+        free(master_stack);
+
+	/* Debug */
+	mem_debug("\n");
+}
 
 /* Wake up access waiting in a stack's wait list. */
 void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)

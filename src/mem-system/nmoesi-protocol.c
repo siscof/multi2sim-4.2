@@ -1595,17 +1595,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
                 if(stack->is_super_stack)
                 {
-                /*for(int i = 0;i> stack->size;i++)
-                {
-                    
-                }*/
-                    fatal("implementar superstack");
+                    mod_stack_wakeup_super_stack(stack);
                 }
                 
 		/* Default return values */
 		stack->err = 0;
-		//ret->find_and_lock_stack = stack;
-		//assert(ret->id == stack->id);
 
 		/* If this stack has already been assigned a way, keep using it */
 		//stack->way = ret->way;
