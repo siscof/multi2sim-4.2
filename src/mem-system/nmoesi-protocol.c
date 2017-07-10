@@ -425,7 +425,14 @@ void mod_handler_nmoesi_load(int event, void *data)
                     //cuantos accesos debo generar?
                     struct mod_stack_t *super_stack = mod_stack_create_super_stack(mod_get_low_mod(target_mod, stack->tag), EV_MOD_NMOESI_LOAD_MISS, stack);
                     //falta acabar esto
-                    super_stack->stack_size = 8;
+                    //super_stack->stack_size = 8;
+                    super_stack->return_mod = target_mod;
+                    super_stack->addr = stack->addr;
+                    super_stack->request_dir = mod_request_up_down;
+                    super_stack->wavefront = stack->wavefront;
+                    super_stack->uop = stack->uop;
+                    super_stack->retry = stack->retry;
+                    super_stack->event = EV_MOD_NMOESI_READ_REQUEST;
                     esim_schedule_mod_stack_event(super_stack, 0);
                     
                 }else{
@@ -1596,6 +1603,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 if(stack->is_super_stack)
                 {
                     mod_stack_wakeup_super_stack(stack);
+                    return;
                 }
                 
 		/* Default return values */
@@ -2560,8 +2568,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->id, return_mod->name);
 
 		/* Default return values*/
-		ret->shared = 0;
-		ret->err = 0;
+		if(!stack->is_super_stack)
+                {
+                    ret->shared = 0;
+                    ret->err = 0;
+                }
 
 		/* Checks */
 		assert(stack->request_dir);

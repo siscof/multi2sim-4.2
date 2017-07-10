@@ -189,14 +189,20 @@ struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int e
     
     super_stack->is_super_stack = 1;
     
+    super_stack->stack_size = 8;
+    super_stack->target_mod = target_mod;
+    
     int mem_accesses_list_count = list_count(stack->uop->mem_accesses_list);
     for(int i = 0;i < mem_accesses_list_count;i++)
     {
         next_stack = list_get( stack->uop->mem_accesses_list,i);
         //debo añadir next_stack a super_stack?
         if(next_stack->hit == 0 && next_stack->dir_lock->lock 
-                && next_stack->dir_lock->stack == next_stack && next_stack->waiting_list_master)
+                && next_stack->dir_lock->stack == next_stack && target_mod == mod_get_low_mod(next_stack->target_mod, next_stack->tag))
+        {/*next_stack->waiting_list_master)*/
             mod_stack_wait_in_stack(next_stack, super_stack, event);
+            super_stack->stack_size += 4;
+        }
     }
     
     return super_stack;
@@ -240,6 +246,7 @@ void mod_stack_wakeup_super_stack(struct mod_stack_t *master_stack)
 
                 struct mod_stack_t *new_stack = mod_stack_create(stack->id,master_stack->target_mod, stack->addr, event, stack);
 
+                new_stack->find_and_lock_return_event = master_stack->find_and_lock_return_event;
 		new_stack->event = master_stack->event;
 		new_stack->return_mod = master_stack->return_mod;
                 new_stack->request_dir = master_stack->request_dir;
