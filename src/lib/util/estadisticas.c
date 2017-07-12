@@ -102,7 +102,7 @@ for (k = 0; k < list_count(mem_system->mod_list); k++)
         {
 	        for (y = 0; y < dir->ysize; y++)
         	{
-			 struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
+			 struct dir_lock_t *dir_lock =  &dir->dir_lock_file[x * dir->ysize + y];
 
                         if(dir_lock->lock)
                                 locked[mod->level]++;
@@ -705,7 +705,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     {
       for (int y = 0; y < dir->ysize; y++)
       {
-        struct dir_lock_t *dir_lock =  &dir->dir_lock[x * dir->ysize + y];
+        struct dir_lock_t *dir_lock =  &dir->dir_lock_file[x * dir->ysize + y];
         if(dir_lock->lock)
           locked[mod->level]++;
       }

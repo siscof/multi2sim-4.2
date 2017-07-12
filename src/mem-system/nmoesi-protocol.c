@@ -1815,7 +1815,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (dir_lock->lock && !stack->blocking)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
-				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack_id);
+				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
 			stack->err = 1;
 			if (stack->mshr_locked != 0)
 			{
@@ -1858,7 +1858,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (!dir_entry_lock(target_mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
-				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack_id);
+				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
 			/*if (stack->mshr_locked != 0)
 			{
 				mshr_unlock2(mod);

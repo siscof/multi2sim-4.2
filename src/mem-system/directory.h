@@ -26,9 +26,10 @@
 struct dir_lock_t
 {
 	int lock;
-	long long stack_id;
+	//long long stack_id;
 	struct mod_stack_t *stack;
 	struct mod_stack_t *lock_queue;
+        //struct list_t *dir_entry_list;
 };
 
 #define DIR_ENTRY_OWNER_NONE  (-1)
@@ -36,9 +37,13 @@ struct dir_lock_t
 
 struct dir_entry_t
 {
-	int owner;  /* Node owning the block (-1 = No owner)*/
+        int set;
+        int way;
+        int owner;  /* Node owning the block (-1 = No owner)*/
 	int num_sharers;  /* Number of 1s in next field */
-	unsigned char sharer[0];  /* Bitmap of sharers (must be last field) */
+	//unsigned char sharer[0];   /* Bitmap of sharers (must be last field) */
+        unsigned char *sharer;
+        struct dir_lock_t *dir_lock;
 };
 
 struct dir_t
@@ -58,11 +63,12 @@ struct dir_t
 
 	/* Array of xsize * ysize locks. Each lock corresponds to a
 	 * block, i.e. a set of zsize directory entries */
-	struct dir_lock_t *dir_lock;
+	struct dir_lock_t *dir_lock_file;
 
 	/* Last field. This is an array of xsize*ysize*zsize elements of type
 	 * dir_entry_t, which have likewise variable size. */
-	unsigned char data[0];
+	//unsigned char data[0];
+        struct dir_entry_t *dir_entry_file;
 };
 
 enum dir_type_t
@@ -88,7 +94,6 @@ void dir_entry_dump_sharers(struct dir_t *dir, int x, int y, int z);
 struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y);
 int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack);
 void dir_entry_unlock(struct dir_t *dir, int x, int y);
-void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *unlock_stack);
 
 
 #endif

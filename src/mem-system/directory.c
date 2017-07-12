@@ -41,37 +41,46 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 {
 	struct dir_t *dir;
 	struct dir_entry_t *dir_entry;
+        struct dir_lock_t *dir_lock;
 
-	int dir_size;
-	int dir_entry_size;
-
+	//int dir_size;
+	//int dir_entry_size;
+        int sharer_size;
+        
 	int x;
 	int y;
 	int z;
 
 	/* Calculate sizes */
 	assert(num_nodes > 0);
-	dir_entry_size = sizeof(struct dir_entry_t) + (num_nodes + 7) / 8;
-	dir_size = sizeof(struct dir_t) + dir_entry_size * xsize * ysize * zsize;
+	//dir_entry_size = sizeof(struct dir_entry_t) + (num_nodes + 7) / 8;
+	sharer_size = (num_nodes + 7) / 8;
+        //dir_size = sizeof(struct dir_t) + dir_entry_size * xsize * ysize * zsize;
 
 	/* Initialize */
-	dir = xcalloc(1, dir_size);
-	dir->name = xstrdup(name);
-	dir->dir_lock = xcalloc(xsize * ysize, sizeof(struct dir_lock_t));
+	//dir = xcalloc(1, dir_size);
+	dir = xcalloc(1,sizeof(struct dir_t));
+        dir->name = xstrdup(name);
+	dir->dir_lock_file = xcalloc(xsize * ysize, sizeof(struct dir_lock_t));
+        dir->dir_entry_file = xcalloc(xsize * ysize * zsize, sizeof(struct dir_entry_t));
 	dir->num_nodes = num_nodes;
 	dir->xsize = xsize;
 	dir->ysize = ysize;
 	dir->zsize = zsize;
+        
 
 	/* Reset all owners */
 	for (x = 0; x < xsize; x++)
 	{
 		for (y = 0; y < ysize; y++)
 		{
+                    dir_lock = dir_lock_get(dir,x,y);
 			for (z = 0; z < zsize; z++)
 			{
 				dir_entry = dir_entry_get(dir, x, y, z);
 				dir_entry->owner = DIR_ENTRY_OWNER_NONE;
+                                dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
+                                dir_entry->dir_lock = dir_lock;
 			}
 		}
 	}
@@ -84,7 +93,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 void dir_free(struct dir_t *dir)
 {
 	free(dir->name);
-	free(dir->dir_lock);
+	free(dir->dir_lock_file);
 	free(dir);
 }
 
@@ -94,7 +103,8 @@ struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z)
 	assert(IN_RANGE(x, 0, dir->xsize - 1));
 	assert(IN_RANGE(y, 0, dir->ysize - 1));
 	assert(IN_RANGE(z, 0, dir->zsize - 1));
-	return DIR_ENTRY(x, y, z);
+	//return DIR_ENTRY(x, y, z);
+        return dir->dir_entry_file + (x * dir->ysize * dir->zsize + y * dir->zsize + z);
 }
 
 
@@ -202,7 +212,7 @@ int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y)
 	int z;
 	for (z = 0; z < dir->zsize; z++)
 	{
-		dir_entry = DIR_ENTRY(x, y, z);
+		dir_entry = dir_entry_get(dir, x, y, z);//DIR_ENTRY(x, y, z);
 		if (dir_entry->num_sharers || DIR_ENTRY_VALID_OWNER(dir_entry))
 			return 1;
 	}
@@ -215,7 +225,7 @@ struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y)
 	struct dir_lock_t *dir_lock;
 
 	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
-	dir_lock = &dir->dir_lock[x * dir->ysize + y];
+	dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
 	//mem_debug("  dir_lock retrieve\n");
 	return dir_lock;
 }
@@ -228,7 +238,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 
 	/* Get lock */
 	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
-	dir_lock = &dir->dir_lock[x * dir->ysize + y];
+	dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
 
 	/* If the entry is already locked, enqueue a new waiter and
 	 * return failure to lock. */
@@ -310,7 +320,7 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 
 	/* Lock entry */
 	dir_lock->lock = 1;
-	dir_lock->stack_id = stack->id;
+	//dir_lock->stack_id = stack->id;
 	//dir_lock->stack = stack->ret_stack;
 	//stack->ret_stack->dir_lock = dir_lock;
 	dir_lock->stack = stack;
@@ -327,7 +337,7 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 
 	/* Get lock */
 	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
-	dir_lock = &dir->dir_lock[x * dir->ysize + y];
+	dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
 
 	/* Wake up first waiter */
 	if (dir_lock->lock_queue)
@@ -360,56 +370,13 @@ void dir_entry_unlock(struct dir_t *dir, int x, int y)
 
 	/* Trace */
 	mem_trace("mem.end_access_block cache=\"%s\" access=\"A-%lld\" set=%d way=%d\n",
-		dir->name, dir_lock->stack_id, x, y);
+		dir->name, dir_lock->stack->id, x, y);
 
 	/* Unlock entry */
 	dir_lock->lock = 0;
-	dir_lock->stack_id = 0;
-	if(dir_lock->stack)
-		dir_lock->stack->dir_lock = NULL;
+	//dir_lock->stack_id = 0;
+	//if(dir_lock->stack)
+	dir_lock->stack->dir_lock = NULL;
 	dir_lock->stack = NULL;
 }
 
-void dir_entry_unlock_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *unlock_stack)
-{
-	struct dir_lock_t *dir_lock;
-	struct mod_stack_t *stack;
-	FILE *f;
-
-	/* Get lock */
-	assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
-	dir_lock = &dir->dir_lock[x * dir->ysize + y];
-
-	/* Wake up first waiter */
-	if (dir_lock->lock_queue)
-	{
-		/* Debug */
-		f = debug_file(mem_debug_category);
-		if (f)
-		{
-			mem_debug("    A-%lld resumed", dir_lock->lock_queue->id);
-			if (dir_lock->lock_queue->dir_lock_next)
-			{
-				mem_debug(" - {");
-				for (stack = dir_lock->lock_queue->dir_lock_next; stack;
-						stack = stack->dir_lock_next)
-					mem_debug(" A-%lld", stack->id);
-				mem_debug(" } still waiting");
-			}
-			mem_debug("\n");
-		}
-
-		/* Wake up access */
-		esim_schedule_event(dir_lock->lock_queue->dir_lock_event, dir_lock->lock_queue, 1);
-		dir_lock->lock_queue = dir_lock->lock_queue->dir_lock_next;
-	}
-
-	/* Trace */
-	mem_trace("mem.end_access_block cache=\"%s\" access=\"A-%lld\" set=%d way=%d\n",
-		dir->name, dir_lock->stack_id, x, y);
-
-	/* Unlock entry */
-	dir_lock->lock = 0;
-	dir_lock->stack_id = 0;
-	unlock_stack->dir_lock = NULL;
-}

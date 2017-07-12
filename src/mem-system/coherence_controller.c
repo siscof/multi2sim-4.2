@@ -47,7 +47,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 
 	struct dir_lock_t *dir_lock = dir_lock_get(mod->dir, stack->find_and_lock_stack->set, stack->find_and_lock_stack->way);
 
-	assert(stack->id != dir_lock->stack_id);
+	assert(stack->id != dir_lock->stack->id);
 
 	if(dir_lock->lock)
 	{
@@ -68,7 +68,7 @@ int cc_add_transaction(struct coherence_controller_t *cc, struct mod_stack_t *st
 		}else if(stack->target_mod->level != 1){
 			//else down-up
 
-			stack_locked = cc_search_transaction(cc,dir_lock->stack_id);
+			stack_locked = cc_search_transaction(cc,dir_lock->stack->id);
 			//the transaction is blocking other transaction
 			stack_locked->transaction_blocking = 1;
 			//stack->high_priority_transaction = 1;

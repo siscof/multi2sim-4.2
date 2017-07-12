@@ -1482,7 +1482,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_VI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
-				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack_id);
+				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack->id);
 
 			mod_unlock_port(mod, port, stack);
 			ret->port_locked = 0;
