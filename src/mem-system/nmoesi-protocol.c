@@ -369,7 +369,11 @@ void mod_handler_nmoesi_load(int event, void *data)
 	if (event == EV_MOD_NMOESI_LOAD_ACTION)
 	{
 		int retry_lat;
-
+                    
+                if(stack->waiting_list_master)
+                {
+                    return;
+                }
 		mem_debug("  %lld %lld 0x%x %s load action\n", esim_time, stack->id,
 			stack->addr, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_action\"\n",

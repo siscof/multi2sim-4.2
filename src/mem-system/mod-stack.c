@@ -31,6 +31,7 @@
 #include "mshr.h"
 
 long long mod_stack_id;
+long long super_stack_id = 0;
 
 struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 	unsigned int addr, int ret_event, struct mod_stack_t *ret_stack)
@@ -187,9 +188,10 @@ struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int e
     struct mod_stack_t *next_stack;
     struct mod_stack_t *super_stack = xcalloc(1, sizeof(struct mod_stack_t));
     
+    super_stack->id = super_stack_id++;
     super_stack->is_super_stack = 1;
     
-    super_stack->stack_size = 8;
+    super_stack->stack_size = 4;
     super_stack->target_mod = target_mod;
     
     int mem_accesses_list_count = list_count(stack->uop->mem_accesses_list);
@@ -197,9 +199,17 @@ struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int e
     {
         next_stack = list_get( stack->uop->mem_accesses_list,i);
         //debo añadir next_stack a super_stack?
-        if(next_stack->hit == 0 && next_stack->dir_lock->lock 
+        if(next_stack->hit == 0 && next_stack->dir_lock && next_stack->dir_lock->lock 
                 && next_stack->dir_lock->stack == next_stack && target_mod == mod_get_low_mod(next_stack->target_mod, next_stack->tag))
         {/*next_stack->waiting_list_master)*/
+            if(next_stack->waiting_list_master)
+            {
+                if(next_stack->waiting_list_master->is_super_stack)
+                    continue;
+                
+                DOUBLE_LINKED_LIST_REMOVE(next_stack->waiting_list_master, waiting, next_stack)
+                next_stack->waiting_list_master = NULL;
+            }
             mod_stack_wait_in_stack(next_stack, super_stack, event);
             super_stack->stack_size += 4;
         }
@@ -215,7 +225,7 @@ void mod_stack_wait_in_stack(struct mod_stack_t *stack,
 	struct mod_stack_t *master_stack, int event)
 {
 	assert(master_stack != stack);
-	assert(!DOUBLE_LINKED_LIST_MEMBER(master_stack, waiting, stack));
+	//assert(!DOUBLE_LINKED_LIST_MEMBER(master_stack, waiting, stack));
 
 	stack->waiting_list_event = event;
 	DOUBLE_LINKED_LIST_INSERT_BY_ID(master_stack,  stack);
@@ -228,7 +238,7 @@ void mod_stack_wakeup_super_stack(struct mod_stack_t *master_stack)
 	int event;
 
 	/* No access to wake up */
-	assert(master_stack->waiting_list_count);
+	assert(master_stack->waiting_list_count && (master_stack->waiting_list_count*4 + 4) == master_stack->stack_size );
 
 	/* Debug */
 	mem_debug("  %lld %lld 0x%x wake up accesses:", esim_time,
@@ -244,7 +254,7 @@ void mod_stack_wakeup_super_stack(struct mod_stack_t *master_stack)
 
 		stack->waiting_list_master = NULL;
 
-                struct mod_stack_t *new_stack = mod_stack_create(stack->id,master_stack->target_mod, stack->addr, event, stack);
+                struct mod_stack_t *new_stack = mod_stack_create(stack->id,master_stack->target_mod, stack->tag, event, stack);
 
                 new_stack->find_and_lock_return_event = master_stack->find_and_lock_return_event;
 		new_stack->event = master_stack->event;
@@ -254,6 +264,7 @@ void mod_stack_wakeup_super_stack(struct mod_stack_t *master_stack)
                 new_stack->uop = stack->uop;
                 new_stack->retry = master_stack->retry;
                 new_stack->stack_size = 8;
+                new_stack->read = master_stack->read;
                 esim_schedule_mod_stack_event(new_stack, 0);
 	}
         free(master_stack);
