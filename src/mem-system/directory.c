@@ -92,8 +92,22 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 
 void dir_free(struct dir_t *dir)
 {
+        struct dir_entry_t *dir_entry;
+   
+    	for (x = 0; x < xsize; x++)
+	{
+		for (y = 0; y < ysize; y++)
+		{
+			for (z = 0; z < zsize; z++)
+			{
+				dir_entry = dir_entry_get(dir, x, y, z);
+                                free(dir_entry->sharer);
+                        }
+                }
+        }
 	free(dir->name);
 	free(dir->dir_lock_file);
+        free(dir->dir_entry_file);
 	free(dir);
 }
 
