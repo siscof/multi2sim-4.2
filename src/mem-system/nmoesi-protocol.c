@@ -1825,8 +1825,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			
 			stack->event = stack->find_and_lock_return_event;
 			esim_schedule_mod_stack_event(stack, 0);
-                        
-                        //iter_stack->uop->accesses_in_dir--;
+                 
                         if(stack->port != 0)
                         {
                             mod_unlock_port(target_mod, port, stack);
