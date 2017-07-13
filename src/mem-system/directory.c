@@ -94,11 +94,11 @@ void dir_free(struct dir_t *dir)
 {
         struct dir_entry_t *dir_entry;
    
-    	for (x = 0; x < xsize; x++)
+    	for (int x = 0; x < dir->xsize; x++)
 	{
-		for (y = 0; y < ysize; y++)
+		for (int y = 0; y < dir->ysize; y++)
 		{
-			for (z = 0; z < zsize; z++)
+			for (int z = 0; z < dir->zsize; z++)
 			{
 				dir_entry = dir_entry_get(dir, x, y, z);
                                 free(dir_entry->sharer);

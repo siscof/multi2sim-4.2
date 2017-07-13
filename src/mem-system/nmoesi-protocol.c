@@ -1812,7 +1812,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
 		dir_lock = dir_lock_get(target_mod->dir, stack->set, stack->way);
-		if (dir_lock->lock && !stack->blocking)
+		if (dir_lock->lock && !stack->blocking && stack->hit)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
