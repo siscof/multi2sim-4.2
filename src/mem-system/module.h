@@ -24,6 +24,7 @@
 #include <stdbool.h>
 #include <arch/southern-islands/emu/wavefront.h>
 #include <lib/util/list.h>
+#include <stdbool.h>
 
 /* Port */
 struct mod_port_t
@@ -106,6 +107,7 @@ struct mod_t
 	struct reg_rank_t *regs_rank; // ranks which this channels connects with
 	int num_regs_rank;
 	int num_req_input_buffer;
+        bool allow_cache_by_passing;
 
 	/* Mem controller associated to mm */
 	struct mem_controller_t *mem_controller; /* DEPRECATED */

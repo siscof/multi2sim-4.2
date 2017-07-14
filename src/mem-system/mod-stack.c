@@ -45,6 +45,7 @@ struct mod_stack_t *mod_stack_create(long long id, struct mod_t *mod,
 	stack->addr = addr;
 	stack->ret_event = ret_event;
 	stack->ret_stack = ret_stack;
+        stack->uncacheable = false;
 	if (ret_stack != NULL)
 	{
 		stack->client_info = ret_stack->client_info;

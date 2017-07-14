@@ -77,6 +77,7 @@ struct mod_stack_t
 	int dramsim_accesses;
 	struct mshr_entry_t *mshr_entry;
         int is_super_stack;
+        bool uncacheable;
 
 	int find_and_lock_return_event;
 
