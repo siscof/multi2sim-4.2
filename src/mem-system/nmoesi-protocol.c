@@ -2748,8 +2748,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		if (stack->state)
 		{
 			/*estadisticas*/
-            if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
-            {
+                        if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
+                        {
 				add_CoalesceHit(target_mod->level);
 			}
 			/* Status = M/O/E/S/N
@@ -2832,9 +2832,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			/* State = I */
 
 
-            if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
-            {
-            	add_CoalesceMiss(target_mod->level);
+                        if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
+                        {
+                            add_CoalesceMiss(target_mod->level);
 			}
 
 			assert(!dir_entry_group_shared_or_owned(target_mod->dir,
