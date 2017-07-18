@@ -220,7 +220,6 @@ void mod_handler_nmoesi_load(int event, void *data)
 			return_event = EV_MOD_NMOESI_LOAD_RECEIVE;
 			stack->msg = net_try_send_ev(net, src_node, dst_node, msg_size,
 			return_event, stack, event, stack);
-
 		}
 		else if(stack->request_dir == mod_request_down_up)
 		{
@@ -338,31 +337,14 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 		/* Call find and lock */
 
-
-		//new_stack = mod_stack_create(stack->id, mod, stack->addr,
-		//	EV_MOD_NMOESI_LOAD_ACTION, stack);
-		//new_stack->wavefront = stack->wavefront;
 		//new_stack->uop = stack->uop;
-		//new_stack->blocking = 1;
 		stack->blocking = 1;
-		//new_stack->read = 1;
                 stack->uncacheable = false;
 		stack->read = 1;
-		//new_stack->tiempo_acceso = stack->tiempo_acceso;
-		//new_stack->retry = stack->retry;
-		//stack->find_and_lock_stack = new_stack;
                 stack->eviction = 0;
-
-		//new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_LOAD_ACTION;
-                //if(!uop_cache_port || stack->uop->accesses_in_dir == 0){
-                    esim_schedule_mod_stack_event(stack, 0);
-                /*    stack->waiting_dir_access = 0;
-                    stack->uop->accesses_in_dir++;
-                }else{
-                    stack->waiting_dir_access = 1;
-                }*/
+                esim_schedule_mod_stack_event(stack, 0);
                    
 		return;
 	}
@@ -373,6 +355,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                     
                 if(stack->waiting_list_master)
                 {
+                    fatal("???");
                     return;
                 }
 		mem_debug("  %lld %lld 0x%x %s load action\n", esim_time, stack->id,
@@ -399,7 +382,6 @@ void mod_handler_nmoesi_load(int event, void *data)
 			mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 			stack->err = 0;
-
 			stack->event = EV_MOD_NMOESI_LOAD_LOCK2;
 			esim_schedule_mod_stack_event(stack, retry_lat);
 			//esim_schedule_event(EV_MOD_NMOESI_LOAD_LOCK, stack, retry_lat);
@@ -1853,7 +1835,6 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         {
                             mod_unlock_port(target_mod, port, stack);
                         }
-                      
 			return;
 		}  
                 
@@ -1861,6 +1842,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 {
                     stack->uncacheable = true;
                     stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
+                    stack->way = -1;
                     esim_schedule_mod_stack_event(stack, target_mod->dir_latency);    
                     return;
                 }
@@ -1965,7 +1947,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->latencias.lock_dir = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr;
 		}
 		/* On miss, evict if victim is a valid block. */
-		if (!stack->hit && stack->state)
+		if (!stack->uncacheable && !stack->hit && stack->state)
 		{
 			stack->eviction = 1;
 			//mod_get_low_mod(target_mod, stack->tag)
@@ -2039,7 +2021,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* If this is a main memory, the block is here. A previous miss was just a miss
 		 * in the directory. */
-		if (target_mod->kind == mod_kind_main_memory && !stack->state)
+		if (!stack->uncacheable && target_mod->kind == mod_kind_main_memory && !stack->state)
 		{
 			stack->state = cache_block_exclusive;
 			cache_set_block(target_mod->cache, stack->set, stack->way,
@@ -2058,14 +2040,14 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* Return */
 		stack->err = 0;
-		stack->hit = stack->hit;
+		//stack->hit = stack->hit;
 		//ret->dir_lock = stack->dir_lock;
-		stack->set = stack->set;
-		stack->way = stack->way;
-		stack->state = stack->state;
-		stack->tag = stack->tag;
-		stack->mshr_locked = stack->mshr_locked;
-		stack->find_and_lock_stack = NULL;
+		//stack->set = stack->set;
+		//stack->way = stack->way;
+		//stack->state = stack->state;
+		//stack->tag = stack->tag;
+		//stack->mshr_locked = stack->mshr_locked;
+		//stack->find_and_lock_stack = NULL;
 		stack->event = stack->find_and_lock_return_event;
 		stack->find_and_lock_return_event = 0;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -2686,7 +2668,12 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
 		stack->read = 1;
-		stack->blocking = stack->request_dir == mod_request_down_up;
+                if(stack->ret_stack->uncacheable)
+                {   
+                    assert(stack->request_dir == mod_request_up_down);
+                    stack->blocking = 1;
+                }else
+                    stack->blocking = stack->request_dir == mod_request_down_up;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_READ_REQUEST_ACTION;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -2783,8 +2770,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 					continue;
 
 				/* Owner is mod */
-				if (dir_entry->owner == return_mod->low_net_node->index)
-					continue;
+                                
+				//if (dir_entry->owner == return_mod->low_net_node->index)
+				//	continue;
 
 				/* Get owner mod */
 				node = list_get(target_mod->high_net->node_list, dir_entry->owner);
@@ -2830,7 +2818,6 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 		{
 			/* State = I */
-
 
                         if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
                         {
@@ -2893,7 +2880,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		/* Set block state to excl/shared depending on the return value 'shared'
 		 * that comes from a read request into the next cache level.
 		 * Also set the tag of the block. */
-		cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
+                if(!stack->uncacheable)
+                    cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
 			stack->shared ? cache_block_shared : cache_block_exclusive);
 
 		stack->event = EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH;
@@ -2946,37 +2934,34 @@ void mod_handler_nmoesi_read_request(int event, void *data)
         !stack->main_memory_accessed &&
         stack->reply != reply_ack_data_sent_to_peer)
     {
-      struct dram_system_t *ds = target_mod->dram_system;
-      //struct x86_ctx_t *ctx = stack->client_info->ctx;
-      //assert(ctx);
-      assert(ds);
+        struct dram_system_t *ds = target_mod->dram_system;
+        //struct x86_ctx_t *ctx = stack->client_info->ctx;
+        //assert(ctx);
+        assert(ds);
 
-			if (stack->mshr_locked != 0)
-			{
-				mshr_unlock(target_mod, stack);
-				stack->mshr_locked = 0;
-			}
+	if (stack->mshr_locked != 0)
+	{
+            mshr_unlock(target_mod, stack);
+            stack->mshr_locked = 0;
+	}
 
-      //if (!dram_system_will_accept_trans(ds->handler, stack->tag >> 2))
-      if (!dram_system_will_accept_trans(ds->handler, stack->addr))
-			{
-        stack->err = 1;
-        ret->err = 1;
-        ret->retry |= 1 << target_mod->level;
-        mod_stack_set_reply(ret, reply_ack_error);
-        stack->reply_size = 8;
+        //if (!dram_system_will_accept_trans(ds->handler, stack->tag >> 2))
+        if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+        {
+            stack->err = 1;
+            ret->err = 1;
+            //ret->retry |= 1 << target_mod->level;
+            mod_stack_set_reply(ret, reply_ack_error);
+            stack->reply_size = 8;
         
-        if(stack->dir_lock)
-            dir_entry_unlock(dir, stack->set, stack->way);
-        else
-            assert(stack->uncacheable);
+            if(stack->dir_lock)
+                dir_entry_unlock(dir, stack->set, stack->way);
+            else
+                assert(stack->uncacheable);
         
-
-        mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, target_mod->name);
-
-        esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
-
-        return;
+            mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, target_mod->name);
+            esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+            return;
       }
 
       /* Access main memory system */
@@ -3013,45 +2998,50 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 
 		/* For each sub-block requested by mod, set mod as sharer, and
 		 * check whether there is other cache sharing it. */
-		for (z = 0; z < dir->zsize; z++)
-		{
-			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
-			if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
-				continue;
-			dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-			dir_entry_set_sharer(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
-			if (dir_entry->num_sharers > 1 || stack->nc_write || stack->shared)
-				shared = 1;
+                if(!stack->ret_stack->uncacheable)
+                {
+                    for (z = 0; z < dir->zsize; z++)
+                    {
+                            dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+                            if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
+                                    continue;
+                            dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                            dir_entry_set_sharer(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                            if (dir_entry->num_sharers > 1 || stack->nc_write || stack->shared)
+                                    shared = 1;
 
-			/* If the block is owned, non-coherent, or shared,
-			 * mod (the higher-level cache) should never be exclusive */
-			if (stack->state == cache_block_owned ||
-				stack->state == cache_block_noncoherent ||
-				stack->state == cache_block_shared )
-				shared = 1;
-		}
+                            /* If the block is owned, non-coherent, or shared,
+                             * mod (the higher-level cache) should never be exclusive */
+                            if (stack->state == cache_block_owned ||
+                                    stack->state == cache_block_noncoherent ||
+                                    stack->state == cache_block_shared )
+                                    shared = 1;
+                    }
+                
 
-		/* If no sub-block requested by mod is shared by other cache, set mod
-		 * as owner of all of them. Otherwise, notify requester that the block is
-		 * shared by setting the 'shared' return value to true. */
-		ret->shared = shared;
-		if (!shared)
-		{
-			for (z = 0; z < dir->zsize; z++)
-			{
-				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
-				if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
-					continue;
-				dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-				dir_entry_set_owner(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
-			}
-		}
+                    /* If no sub-block requested by mod is shared by other cache, set mod
+                     * as owner of all of them. Otherwise, notify requester that the block is
+                     * shared by setting the 'shared' return value to true. */
+                    ret->shared = shared;
+                    if (!shared)
+                    {
+                            for (z = 0; z < dir->zsize; z++)
+                            {
+                                    dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+                                    if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
+                                            continue;
+                                    dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                                    dir_entry_set_owner(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                            }
+                    }
+                }
 
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(target_mod, stack);
 			stack->mshr_locked = 0;
 		}
+                
                 if(stack->dir_lock)
                     dir_entry_unlock(dir, stack->set, stack->way);
                 else
