@@ -94,7 +94,7 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
         mod->mshr->mod = mod;
 	//xcalloc(1,sizeof(struct mshr_t));
 	mod->coherence_controller = cc_create();
-        mod->allow_cache_by_passing = false;
+        mod->allow_cache_by_passing = true;
 
 	/* Ports */
 	mod->num_ports = num_ports;

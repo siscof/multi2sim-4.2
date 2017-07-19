@@ -2824,7 +2824,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             add_CoalesceMiss(target_mod->level);
 			}
 
-			assert(!dir_entry_group_shared_or_owned(target_mod->dir,
+			assert(stack->uncacheable || !dir_entry_group_shared_or_owned(target_mod->dir,
 				stack->set, stack->way));
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
 				EV_MOD_NMOESI_READ_REQUEST_UPDOWN_MISS, stack);
@@ -2982,24 +2982,25 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       return;
     }
 
-		shared = 0;
-		/* With the Owned state, the directory entry may remain owned by the sender */
-		if (!stack->retain_owner)
-		{
-			/* Set owner to 0 for all directory entries not owned by mod. */
-			for (z = 0; z < dir->zsize; z++)
-			{
-				dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-				if (dir_entry->owner != return_mod->low_net_node->index)
-					dir_entry_set_owner(dir, stack->set, stack->way, z,
-						DIR_ENTRY_OWNER_NONE);
-			}
-		}
-
-		/* For each sub-block requested by mod, set mod as sharer, and
-		 * check whether there is other cache sharing it. */
+		shared = 0; 
                 if(!stack->ret_stack->uncacheable)
                 {
+                    /* With the Owned state, the directory entry may remain owned by the sender */
+                    if (!stack->retain_owner)
+                    {
+                            /* Set owner to 0 for all directory entries not owned by mod. */
+                            for (z = 0; z < dir->zsize; z++)
+                            {
+                                    dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                                    if (dir_entry->owner != return_mod->low_net_node->index)
+                                            dir_entry_set_owner(dir, stack->set, stack->way, z,
+                                                    DIR_ENTRY_OWNER_NONE);
+                            }
+                    }
+
+                    /* For each sub-block requested by mod, set mod as sharer, and
+                     * check whether there is other cache sharing it. */
+               
                     for (z = 0; z < dir->zsize; z++)
                     {
                             dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
