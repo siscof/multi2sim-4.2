@@ -2753,58 +2753,61 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
 				assert(dir_entry->owner != return_mod->low_net_node->index);
 			}
+                        
+                        if(!ret->uncacheable)
+                        {
 
-			/* TODO If there is only sharers, should one of them
-			 *      send the data to mod instead of having target_mod do it? */
+                            /* TODO If there is only sharers, should one of them
+                             *      send the data to mod instead of having target_mod do it? */
 
-			/* Send read request to owners other than mod for all sub-blocks. */
-			for (z = 0; z < dir->zsize; z++)
-			{
-				struct net_node_t *node;
+                            /* Send read request to owners other than mod for all sub-blocks. */
+                            for (z = 0; z < dir->zsize; z++)
+                            {
+                                    struct net_node_t *node;
 
-				dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+                                    dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                                    dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 
-				/* No owner */
-				if (!DIR_ENTRY_VALID_OWNER(dir_entry))
-					continue;
+                                    /* No owner */
+                                    if (!DIR_ENTRY_VALID_OWNER(dir_entry))
+                                            continue;
 
-				/* Owner is mod */
-                                
-				//if (dir_entry->owner == return_mod->low_net_node->index)
-				//	continue;
+                                    /* Owner is mod */
 
-				/* Get owner mod */
-				node = list_get(target_mod->high_net->node_list, dir_entry->owner);
-				assert(node->kind == net_node_end);
-				owner = node->user_data;
-				assert(owner);
+                                    //if (dir_entry->owner == return_mod->low_net_node->index)
+                                    //	continue;
 
-				/* Not the first sub-block */
-				if (dir_entry_tag % owner->block_size)
-					continue;
+                                    /* Get owner mod */
+                                    node = list_get(target_mod->high_net->node_list, dir_entry->owner);
+                                    assert(node->kind == net_node_end);
+                                    owner = node->user_data;
+                                    assert(owner);
 
-				/* Send read request */
-				stack->pending++;
-				new_stack = mod_stack_create(stack->id, owner, dir_entry_tag,
-					EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH, stack);
-				new_stack->wavefront = stack->wavefront;
-				new_stack->retry = stack->retry;
-				new_stack->uop = stack->uop;
-				/* Only set peer if its a subblock that was requested */
-				/*if (dir_entry_tag >= stack->addr &&
-					dir_entry_tag < stack->addr + mod->block_size)
-				{
-					new_stack->peer = mod_stack_set_peer(mod, stack->state);
-				}*/
-				new_stack->return_mod = target_mod;
-				new_stack->request_dir = mod_request_down_up;
-                                new_stack->stack_size = 8;
-				new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
-				esim_schedule_mod_stack_event(new_stack, 0);
-				//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
-			}
+                                    /* Not the first sub-block */
+                                    if (dir_entry_tag % owner->block_size)
+                                            continue;
 
+                                    /* Send read request */
+                                    stack->pending++;
+                                    new_stack = mod_stack_create(stack->id, owner, dir_entry_tag,
+                                            EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH, stack);
+                                    new_stack->wavefront = stack->wavefront;
+                                    new_stack->retry = stack->retry;
+                                    new_stack->uop = stack->uop;
+                                    /* Only set peer if its a subblock that was requested */
+                                    /*if (dir_entry_tag >= stack->addr &&
+                                            dir_entry_tag < stack->addr + mod->block_size)
+                                    {
+                                            new_stack->peer = mod_stack_set_peer(mod, stack->state);
+                                    }*/
+                                    new_stack->return_mod = target_mod;
+                                    new_stack->request_dir = mod_request_down_up;
+                                    new_stack->stack_size = 8;
+                                    new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+                                    esim_schedule_mod_stack_event(new_stack, 0);
+                                    //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+                            }
+                        }
 			stack->event = EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH;
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH, stack, 0);
