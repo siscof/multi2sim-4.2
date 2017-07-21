@@ -340,6 +340,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		//new_stack->uop = stack->uop;
 		stack->blocking = 1;
                 stack->uncacheable = false;
+                stack->allow_cache_by_passing = true;
 		stack->read = 1;
                 stack->eviction = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
@@ -433,6 +434,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                     new_stack->uop = stack->uop;
                     new_stack->retry = stack->retry;
                     new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+                    new_stack->allow_cache_by_passing = true;
                     new_stack->stack_size = 8;
                     esim_schedule_mod_stack_event(new_stack, 0);
                     //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
@@ -1041,6 +1043,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		stack->nc_write = 1;
                 stack->eviction = 0;
                 stack->uncacheable = false;
+                stack->allow_cache_by_passing = false;
 		stack->err = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		stack->find_and_lock_return_event = EV_MOD_NMOESI_NC_STORE_WRITEBACK;
@@ -1206,6 +1209,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			new_stack->wavefront = stack->wavefront;
 			new_stack->retry = stack->retry;
 			new_stack->uop = stack->uop;
+                        new_stack->allow_cache_by_passing = false;
 			//new_stack->peer = mod_stack_set_peer(target_mod, stack->state);
 			new_stack->nc_write = 1;
 			new_stack->return_mod = target_mod;
@@ -1838,9 +1842,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			return;
 		}  
                 
-                if(dir_lock->lock && !stack->hit && target_mod->allow_cache_by_passing)
+                if(stack->allow_cache_by_passing && dir_lock->lock && !stack->hit && target_mod->allow_cache_by_passing)
                 {
                     stack->uncacheable = true;
+                    
                     stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
                     stack->way = -1;
                     esim_schedule_mod_stack_event(stack, target_mod->dir_latency);    
@@ -2835,6 +2840,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			new_stack->return_mod = target_mod;
 			new_stack->retry = stack->retry;
 			new_stack->uop = stack->uop;
+                        new_stack->allow_cache_by_passing = stack->allow_cache_by_passing;
 			/* Peer is NULL since we keep going up-down */
 			new_stack->request_dir = mod_request_up_down;
                         new_stack->stack_size = 8;
@@ -2985,8 +2991,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
       return;
     }
 
+                if(stack->uncacheable)
+                    ret->uncacheable = true;
+                
 		shared = 0; 
-                if(!stack->ret_stack->uncacheable)
+                if(!ret->uncacheable)
                 {
                     /* With the Owned state, the directory entry may remain owned by the sender */
                     if (!stack->retain_owner)

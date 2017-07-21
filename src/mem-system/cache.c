@@ -34,7 +34,7 @@
 
 struct str_map_t cache_policy_map =
 {
-	4, {
+	5, {
 		{ "LRU", cache_policy_lru },
                 { "LRU_EXT", cache_policy_lru_ext }, 
                 { "LRU_BASE", cache_policy_lru_base },

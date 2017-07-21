@@ -78,6 +78,7 @@ struct mod_stack_t
 	struct mshr_entry_t *mshr_entry;
         int is_super_stack;
         bool uncacheable;
+        bool allow_cache_by_passing;
 
 	int find_and_lock_return_event;
 
