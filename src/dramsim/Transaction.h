@@ -68,10 +68,12 @@ public:
 
 	static uint64_t next_id;
 	uint64_t id;
+        void *stack;
 
 
 	friend ostream &operator<<(ostream &os, const Transaction &t);
 	//functions
+        Transaction(TransactionType transType, uint64_t addr, void *data, int core=-1, int thread=-1, void *stack);
 	Transaction(TransactionType transType, uint64_t addr, void *data, int core=-1, int thread=-1);
 	Transaction(const Transaction &t);
 

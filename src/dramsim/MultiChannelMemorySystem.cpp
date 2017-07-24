@@ -460,6 +460,12 @@ bool MultiChannelMemorySystem::addTransaction(bool isWrite, uint64_t addr, int c
 	return channels[channelNumber]->addTransaction(isWrite, addr, core, thread);
 }
 
+bool MultiChannelMemorySystem::addTransaction(bool isWrite, uint64_t addr,void *stack, int core, int thread)
+{
+	unsigned channelNumber = findChannelNumber(addr);
+	return channels[channelNumber]->addTransaction(isWrite, addr, core, thread, stack);
+}
+
 /*
 	This function has two flavors: one with and without the address.
 	If the simulator won't give us an address and we have multiple channels,

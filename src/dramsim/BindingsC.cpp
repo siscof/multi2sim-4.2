@@ -39,15 +39,15 @@ void dram_system_free(struct dram_system_handler_t *ds)
 }
 
 
-bool dram_system_add_read_trans(struct dram_system_handler_t *ds, unsigned long long addr, int core, int thread)
+bool dram_system_add_read_trans(struct dram_system_handler_t *ds, unsigned long long addr, int core, int thread, void *stack)
 {
-	return ds->addTransaction(false, (uint64_t) addr, core, thread);
+	return ds->addTransaction(false, (uint64_t) addr, core, thread, stack);
 }
 
 
-bool dram_system_add_write_trans(struct dram_system_handler_t *ds, unsigned long long addr, int core, int thread)
+bool dram_system_add_write_trans(struct dram_system_handler_t *ds, unsigned long long addr, int core, int thread, void *stack)
 {
-	return ds->addTransaction(true, (uint64_t) addr, core, thread);
+	return ds->addTransaction(true, (uint64_t) addr, core, thread, stack);
 }
 
 
@@ -99,7 +99,7 @@ void dram_system_register_callbacks(
 		void(*write_done)(unsigned int, uint64_t, uint64_t),
 		void(*report_power)(double bgpower, double burstpower, double refreshpower, double actprepower))
 {
-	typedef SimpleCallback<void, unsigned, uint64_t, uint64_t> SC;
+	typedef SimpleCallback<void, unsigned, uint64_t, uint64_t, void> SC;
 
 	SC read_cb = SC(read_done);
 	SC write_cb = SC(write_done);
@@ -111,11 +111,11 @@ void dram_system_register_callbacks(
 void dram_system_register_payloaded_callbacks(
 		struct dram_system_handler_t *ds,
 		void *payload,
-		void(*read_done)(void*, unsigned int, uint64_t, uint64_t),
-		void(*write_done)(void*, unsigned int, uint64_t, uint64_t),
+		void(*read_done)(void*, unsigned int, uint64_t, uint64_t, void*),
+		void(*write_done)(void*, unsigned int, uint64_t, uint64_t, void*),
 		void(*report_power)(double bgpower, double burstpower, double refreshpower, double actprepower))
 {
-	typedef SimplePayloadedCallback<void*, void, unsigned, uint64_t, uint64_t> SPC;
+	typedef SimplePayloadedCallback<void*, void, unsigned int, uint64_t, uint64_t, void> SPC;
 
 	SPC read_cb = SPC(read_done, payload);
 	SPC write_cb = SPC(write_done, payload);
