@@ -649,6 +649,7 @@ void mem_system_dump_report(void)
 
 void main_memory_power_callback(double a, double b, double c, double d)
 {
+    
 }
 
 
@@ -705,6 +706,43 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 
 void main_memory_write_callback(void *payload, unsigned int id, uint64_t address, uint64_t clock_cycle)
 {
+    	int found = 0;
+	//int cpu_freq; /* In MHz */
+	//int dram_freq; /* In MHz */
+	//struct x86_uop_t *uop;
+	struct mod_stack_t *stack = NULL;
+	struct dram_system_t *dram_system = (struct dram_system_t *) payload;
+
+	/* You cannnot use LINKED_LIST_FOR_EACH if you plan to remove elements */
+	linked_list_head(dram_system->pending_reads);
+	while(!linked_list_is_end(dram_system->pending_reads))
+	{
+		stack = linked_list_get(dram_system->pending_reads);
+		if (stack->addr == address)
+		{
+			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
+			stack->main_memory_accessed = 1;
+
+			if(stack->uop)
+			{
+				stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
+				stack->uop->mem_mm_accesses++;
+			}
+
+			if(directory_type == dir_type_nmoesi)
+			{
+				dir_entry_unlock(stack->target_mod->dir, stack->set, stack->way);
+				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
+			}else{
+				esim_schedule_mod_stack_event(stack, 0);
+			}
+			linked_list_remove(dram_system->pending_reads);
+			found++;
+		}
+		else
+			linked_list_next(dram_system->pending_reads);
+	}
+	assert(found == 1);
 }
 
 

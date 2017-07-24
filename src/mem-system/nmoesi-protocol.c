@@ -1204,20 +1204,35 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		 * before it becomes non-coherent */
 		else
 		{
-			new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
-				EV_MOD_NMOESI_NC_STORE_MISS, stack);
-			new_stack->wavefront = stack->wavefront;
-			new_stack->retry = stack->retry;
-			new_stack->uop = stack->uop;
-                        new_stack->allow_cache_by_passing = false;
-			//new_stack->peer = mod_stack_set_peer(target_mod, stack->state);
-			new_stack->nc_write = 1;
-			new_stack->return_mod = target_mod;
-			new_stack->request_dir = mod_request_up_down;
-                        new_stack->stack_size = 8;
-			new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
-			esim_schedule_mod_stack_event(new_stack, 0);
-			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+                        if(stack->state == cache_block_invalid && stack->uncacheable){
+                            new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
+                                    EV_MOD_NMOESI_NC_STORE_MISS, stack);
+                            new_stack->wavefront = stack->wavefront;
+                            new_stack->retry = stack->retry;
+                            new_stack->uop = stack->uop;
+                            new_stack->allow_cache_by_passing = true;
+                            new_stack->nc_write = 1;
+                            new_stack->return_mod = target_mod;
+                            new_stack->request_dir = mod_request_up_down;
+                            new_stack->stack_size = 72;
+                            new_stack->event = EV_MOD_NMOESI_NC_STORE_SEND;
+                            esim_schedule_mod_stack_event(new_stack, 0);
+                        }else{
+                            new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
+                                    EV_MOD_NMOESI_NC_STORE_MISS, stack);
+                            new_stack->wavefront = stack->wavefront;
+                            new_stack->retry = stack->retry;
+                            new_stack->uop = stack->uop;
+                            new_stack->allow_cache_by_passing = false;
+                            //new_stack->peer = mod_stack_set_peer(target_mod, stack->state);
+                            new_stack->nc_write = 1;
+                            new_stack->return_mod = target_mod;
+                            new_stack->request_dir = mod_request_up_down;
+                            new_stack->stack_size = 8;
+                            new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+                            esim_schedule_mod_stack_event(new_stack, 0);
+                            //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
+                        }
 		}
 
 		return;
@@ -1844,8 +1859,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 
                 if(stack->allow_cache_by_passing && dir_lock->lock && !stack->hit && target_mod->allow_cache_by_passing)
                 {
+                    assert(stack->state == cache_block_invalid);
                     stack->uncacheable = true;
-                    
                     stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
                     stack->way = -1;
                     esim_schedule_mod_stack_event(stack, target_mod->dir_latency);    
@@ -1882,7 +1897,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 				stack->mshr_locked = 0;
 			}*/ 
                         // enviar mensaje para abortar el acceso anterior
-                        if(stack->request_dir == mod_request_down_up)
+                        bool allow_abort_accesses = false;
+                        if(allow_abort_accesses && stack->request_dir == mod_request_down_up)
                         {
                             struct mod_stack_t *retry_stack;
                             retry_stack = dir_lock->stack;
@@ -1894,7 +1910,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             new_stack->wavefront = retry_stack->wavefront;
                             new_stack->uop = retry_stack->uop;
                             new_stack->event = EV_MOD_NMOESI_MESSAGE;
-                            new_stack->message == message_abort_access;
+                            new_stack->message = message_abort_access;
                             new_stack->stack_size = 8;
                             esim_schedule_mod_stack_event(new_stack, 0);
                         }
@@ -2043,8 +2059,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		/* If this is a main memory, the block is here. A previous miss was just a miss
 		 * in the directory. */
-		if (!stack->uncacheable && target_mod->kind == mod_kind_main_memory && !stack->state)
+		if (target_mod->kind == mod_kind_main_memory && !stack->state)
 		{
+                    assert(!stack->uncacheable);
 			stack->state = cache_block_exclusive;
 			cache_set_block(target_mod->cache, stack->set, stack->way,
 				stack->tag, stack->state);
@@ -2776,6 +2793,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				assert(dir_entry->owner != return_mod->low_net_node->index);
 			}
                         
+                        assert(!ret->uncacheable);
                         if(!ret->uncacheable)
                         {
 
@@ -3551,19 +3569,25 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			return;
 		}
 
-		/* Invalidate the rest of upper level sharers */
-		new_stack = mod_stack_create(stack->id, target_mod, 0,
-			EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE, stack);
-		new_stack->wavefront = stack->wavefront;
-		new_stack->retry = stack->retry;
-		new_stack->uop = stack->uop;
-		new_stack->except_mod = return_mod;
-		new_stack->set = stack->set;
-		new_stack->way = stack->way;
-		//ew_stack->peer = mod_stack_set_peer(stack->peer, stack->state);
-		new_stack->event = EV_MOD_NMOESI_INVALIDATE;
-		esim_schedule_mod_stack_event(new_stack, 0);
-		//esim_schedule_event(EV_MOD_NMOESI_INVALIDATE, new_stack, 0);
+                if(stack->state == cache_block_invalid && stack->uncacheable)
+                {
+                    stack->event = EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE;
+                    esim_schedule_mod_stack_event(stack, 0);
+                }else{
+                    /* Invalidate the rest of upper level sharers */
+                    new_stack = mod_stack_create(stack->id, target_mod, 0,
+                            EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE, stack);
+                    new_stack->wavefront = stack->wavefront;
+                    new_stack->retry = stack->retry;
+                    new_stack->uop = stack->uop;
+                    new_stack->except_mod = return_mod;
+                    new_stack->set = stack->set;
+                    new_stack->way = stack->way;
+                    //ew_stack->peer = mod_stack_set_peer(stack->peer, stack->state);
+                    new_stack->event = EV_MOD_NMOESI_INVALIDATE;
+                    esim_schedule_mod_stack_event(new_stack, 0);
+                    //esim_schedule_event(EV_MOD_NMOESI_INVALIDATE, new_stack, 0);
+                }
 		return;
 	}
 
@@ -3610,6 +3634,12 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			new_stack->wavefront = stack->wavefront;
 			new_stack->retry = stack->retry;
 			new_stack->uop = stack->uop;
+                        
+                        if(stack->allow_cache_by_passing && stack->uncacheable)
+                            new_stack->allow_cache_by_passing = true;
+                        else
+                            new_stack->allow_cache_by_passing = false;
+                        
 			//new_stack->peer = mod_stack_set_peer(mod, stack->state);
 			new_stack->return_mod = target_mod;
 			new_stack->request_dir = mod_request_up_down;
@@ -3718,7 +3748,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, 	stack->target_mod->dram_system->name);
 			linked_list_add(ds->pending_reads, stack);
 			//dram_system_add_read_trans(ds->handler, stack->tag >> 2, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
-			dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+			dram_system_add_write_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 
 			stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 			/* Ctx main memory stats */
@@ -3730,40 +3760,43 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 
 		/* Check that addr is a multiple of mod.block_size.
 		 * Set mod as sharer and owner. */
-		dir = target_mod->dir;
-		for (z = 0; z < dir->zsize; z++)
-		{
-			assert(stack->addr % return_mod->block_size == 0);
-			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
-			assert(dir_entry_tag < stack->tag + target_mod->block_size);
-			if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
-				continue;
-			dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-			dir_entry_set_sharer(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
-			dir_entry_set_owner(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
-			assert(dir_entry->num_sharers == 1);
-		}
+                if(!stack->uncacheable)
+                {
+                    dir = target_mod->dir;
+                    for (z = 0; z < dir->zsize; z++)
+                    {
+                            assert(stack->addr % return_mod->block_size == 0);
+                            dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
+                            assert(dir_entry_tag < stack->tag + target_mod->block_size);
+                            if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
+                                    continue;
+                            dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                            dir_entry_set_sharer(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                            dir_entry_set_owner(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                            assert(dir_entry->num_sharers == 1);
+                    }
 
-		/* Set state to exclusive */
-		cache_set_block(target_mod->cache, stack->set, stack->way,
-			stack->tag, cache_block_exclusive);
+                    /* Set state to exclusive */
+                    cache_set_block(target_mod->cache, stack->set, stack->way,
+                            stack->tag, cache_block_exclusive);
 
-		/* If blocks were sent directly to the peer, the reply size would
-		 * have been decreased.  Based on the final size, we can tell whether
-		 * to send more data up or simply ack */
-		if (stack->reply_size == 8)
-		{
-			mod_stack_set_reply(ret, reply_ack);
-		}
-		else if (stack->reply_size > 8)
-		{
-			mod_stack_set_reply(ret, reply_ack_data);
-		}
-		else
-		{
-			fatal("Invalid reply size: %d", stack->reply_size);
-		}
-
+                    /* If blocks were sent directly to the peer, the reply size would
+                     * have been decreased.  Based on the final size, we can tell whether
+                     * to send more data up or simply ack */
+                    if (stack->reply_size == 8)
+                    {
+                            mod_stack_set_reply(ret, reply_ack);
+                    }
+                    else if (stack->reply_size > 8)
+                    {
+                            mod_stack_set_reply(ret, reply_ack_data);
+                    }
+                    else
+                    {
+                            fatal("Invalid reply size: %d", stack->reply_size);
+                    }
+                }
+                
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(target_mod, stack);
@@ -4199,7 +4232,9 @@ void mod_handler_nmoesi_message(int event, void *data)
 		*/
                 if (stack->message == message_abort_access)
 		{
-                    target_mod->
+                    /*struct dir_lock_t *dir_lock;
+                    struct mod_t *mod = stack->target_mod; 
+                    int set;
                     tag = addr & ~cache->block_mask;
                     if (mod->range_kind == mod_range_interleaved)
                     {
@@ -4214,8 +4249,10 @@ void mod_handler_nmoesi_message(int event, void *data)
                     {
                             panic("%s: invalid range kind (%d)", __FUNCTION__, mod->range_kind);
                     }
-			/* Remove owner */
-			dir = target_mod->dir;
+                    
+                        dir_lock = dir_lock_get(target_mod->dir, set, stack->way);
+			
+			struct dir_t *dir = target_mod->dir;
 			for (z = 0; z < dir->zsize; z++)
 			{
                                 dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
@@ -4226,7 +4263,7 @@ void mod_handler_nmoesi_message(int event, void *data)
                                 dir_lock->lock_queue = stack->dir_lock_next;
                                 stack->dir_lock_next = NULL;
                                 esim_schedule_mod_stack_event(stack, 1);
-			}
+			}*/
 		}
 
 		stack->blocking = 0;
