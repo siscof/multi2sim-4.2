@@ -50,7 +50,8 @@ enum mod_reply_type_t
 enum mod_message_type_t
 {
 	message_none = 0,
-	message_clear_owner
+	message_clear_owner,
+        message_abort_access
 };
 
 /* Stack */

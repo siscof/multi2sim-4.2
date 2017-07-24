@@ -1880,7 +1880,24 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 				mshr_unlock2(mod);
 				stack->mshr_locked = 0;
-			}*/                        
+			}*/ 
+                        // enviar mensaje para abortar el acceso anterior
+                        if(stack->request_dir == mod_request_down_up)
+                        {
+                            struct mod_stack_t *retry_stack;
+                            retry_stack = dir_lock->stack;
+                            new_stack = mod_stack_create(retry_stack->id, mod_get_low_mod(target_mod, retry_stack->tag), retry_stack->tag,
+                            NULL, NULL);
+                            
+                            new_stack->return_mod = target_mod;
+                            new_stack->request_dir = mod_request_up_down;
+                            new_stack->wavefront = retry_stack->wavefront;
+                            new_stack->uop = retry_stack->uop;
+                            new_stack->event = EV_MOD_NMOESI_MESSAGE;
+                            new_stack->message == message_abort_access;
+                            new_stack->stack_size = 8;
+                            esim_schedule_mod_stack_event(new_stack, 0);
+                        }
                         
                         //iter_stack->uop->accesses_in_dir--;
                         if(stack->port != 0)
