@@ -2825,7 +2825,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                                     new_stack->return_mod = target_mod;
                                     new_stack->request_dir = mod_request_down_up;
                                     new_stack->stack_size = 8;
-                                    new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
+                                       new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
                                     esim_schedule_mod_stack_event(new_stack, 0);
                                     //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
                             }
@@ -4178,7 +4178,6 @@ void mod_handler_nmoesi_message(int event, void *data)
 			EV_MOD_NMOESI_MESSAGE_RECEIVE, stack, event, stack);
 		return;
 	}
-
 	if (event == EV_MOD_NMOESI_MESSAGE_RECEIVE)
 	{
 		mem_debug("  %lld %lld 0x%x %s message receive\n", esim_time, stack->id,
@@ -4198,6 +4197,37 @@ void mod_handler_nmoesi_message(int event, void *data)
 		new_stack->blocking = 0;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
+                if (stack->message == message_abort_access)
+		{
+                    target_mod->
+                    tag = addr & ~cache->block_mask;
+                    if (mod->range_kind == mod_range_interleaved)
+                    {
+                            unsigned int num_mods = mod->range.interleaved.mod;
+                            set = ((tag >> cache->log_block_size) / num_mods) % cache->num_sets;
+                    }
+                    else if (mod->range_kind == mod_range_bounds)
+                    {
+                            set = (tag >> cache->log_block_size) % cache->num_sets;
+                    }
+                    else
+                    {
+                            panic("%s: invalid range kind (%d)", __FUNCTION__, mod->range_kind);
+                    }
+			/* Remove owner */
+			dir = target_mod->dir;
+			for (z = 0; z < dir->zsize; z++)
+			{
+                                dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                                       
+                                struct mod_stack_t * stack = dir_lock->lock_queue;
+                                stack->event = stack->dir_lock_event;
+                                stack->dir_lock_event = 0;
+                                dir_lock->lock_queue = stack->dir_lock_next;
+                                stack->dir_lock_next = NULL;
+                                esim_schedule_mod_stack_event(stack, 1);
+			}
+		}
 
 		stack->blocking = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
@@ -4207,7 +4237,6 @@ void mod_handler_nmoesi_message(int event, void *data)
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK, new_stack, 0);
 		return;
 	}
-
 	if (event == EV_MOD_NMOESI_MESSAGE_ACTION)
 	{
 		mem_debug("  %lld %lld 0x%x %s clear owner action\n", esim_time, stack->id,
@@ -4232,7 +4261,6 @@ void mod_handler_nmoesi_message(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_MESSAGE_REPLY, stack, 0);
 			return;
 		}
-
 		if (stack->message == message_clear_owner)
 		{
 			/* Remove owner */
@@ -4249,7 +4277,6 @@ void mod_handler_nmoesi_message(int event, void *data)
 						DIR_ENTRY_OWNER_NONE);
 				}
 			}
-
 		}
 		else
 		{
