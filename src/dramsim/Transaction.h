@@ -73,7 +73,7 @@ public:
 
 	friend ostream &operator<<(ostream &os, const Transaction &t);
 	//functions
-        Transaction(TransactionType transType, uint64_t addr, void *data, int core=-1, int thread=-1, void *stack);
+        Transaction(TransactionType transType, uint64_t addr, void *data, int core=-1, int thread=-1, void *stack=NULL);
 	Transaction(TransactionType transType, uint64_t addr, void *data, int core=-1, int thread=-1);
 	Transaction(const Transaction &t);
 

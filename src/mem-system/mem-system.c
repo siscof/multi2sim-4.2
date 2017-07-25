@@ -653,17 +653,28 @@ void main_memory_power_callback(double a, double b, double c, double d)
 }
 
 
-void main_memory_read_callback(void *payload, unsigned int id, uint64_t address, uint64_t interthread_penalty)
+void main_memory_read_callback(void *payload, unsigned int id, uint64_t address, uint64_t interthread_penalty, void *stack)
 {
-	int found = 0;
+	//int found = 0;
 	//int cpu_freq; /* In MHz */
 	//int dram_freq; /* In MHz */
 	//struct x86_uop_t *uop;
-	struct mod_stack_t *stack = NULL;
-	struct dram_system_t *dram_system = (struct dram_system_t *) payload;
+	struct mod_stack_t *next_stack = (struct mod_stack_t *) stack;
+        
+        mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, next_stack->id, next_stack->tag, next_stack->target_mod->dram_system->name);
+	
+        if(next_stack->uop)
+        {
+                next_stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - next_stack->dramsim_mm_start;
+                next_stack->uop->mem_mm_accesses++;
+        }
+        
+        esim_schedule_mod_stack_event(next_stack, 0);
+        
+        //struct dram_system_t *dram_system = (struct dram_system_t *) payload;
 
 	/* You cannnot use LINKED_LIST_FOR_EACH if you plan to remove elements */
-	linked_list_head(dram_system->pending_reads);
+	/*linked_list_head(dram_system->pending_reads);
 	while(!linked_list_is_end(dram_system->pending_reads))
 	{
 		stack = linked_list_get(dram_system->pending_reads);
@@ -691,7 +702,7 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 		else
 			linked_list_next(dram_system->pending_reads);
 	}
-	assert(found == 1);
+	assert(found == 1);*/
 /*
 	cpu_freq = arch_x86->frequency;
 	dram_freq = esim_domain_frequency(dram_system->dram_domain_index);
@@ -707,18 +718,18 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 void main_memory_write_callback(void *payload, unsigned int id, uint64_t address, uint64_t clock_cycle, void *stack)
 {
     	
-	struct mod_stack_t *stack = (struct mod_stack_t *) stack;
+	struct mod_stack_t *next_stack = (struct mod_stack_t *) stack;
         
-        mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
-        stack->main_memory_accessed = 1;
+        mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time,next_stack->id, next_stack->tag, next_stack->target_mod->dram_system->name);
+        next_stack->main_memory_accessed = 1;
 
-        if(stack->uop)
+        if(next_stack->uop)
         {
-                stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
-                stack->uop->mem_mm_accesses++;
+                next_stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - next_stack->dramsim_mm_start;
+                next_stack->uop->mem_mm_accesses++;
         }
         
-        esim_schedule_mod_stack_event(stack, 0);
+        esim_schedule_mod_stack_event(next_stack, 0);
 
         /*if(directory_type == dir_type_nmoesi)
         {

@@ -50,7 +50,7 @@ class MultiChannelMemorySystem : public SimulatorObject
 		bool addTransaction(Transaction *trans);
 		bool addTransaction(const Transaction &trans);
 		bool addTransaction(bool isWrite, uint64_t addr, int core=-1, int thread=-1);
-                bool addTransaction(bool isWrite, uint64_t addr,void *stack, int core=-1, int thread=-1);
+                bool addTransaction(bool isWrite, uint64_t addr, int core=-1, int thread=-1, void *stack=NULL);
 		bool willAcceptTransaction();
 		bool willAcceptTransaction(uint64_t addr);
 		void update(); /* If CPU ticks used, called every CPU cycle */

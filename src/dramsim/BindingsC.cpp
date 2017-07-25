@@ -95,8 +95,8 @@ bool dram_system_will_accept_trans(struct dram_system_handler_t *ds, unsigned lo
 
 void dram_system_register_callbacks(
 		struct dram_system_handler_t *ds,
-		void(*read_done)(unsigned int, uint64_t, uint64_t),
-		void(*write_done)(unsigned int, uint64_t, uint64_t),
+		void(*read_done)(unsigned int, uint64_t, uint64_t, void*),
+		void(*write_done)(unsigned int, uint64_t, uint64_t, void*),
 		void(*report_power)(double bgpower, double burstpower, double refreshpower, double actprepower))
 {
 	typedef SimpleCallback<void, unsigned, uint64_t, uint64_t, void> SC;
@@ -111,11 +111,11 @@ void dram_system_register_callbacks(
 void dram_system_register_payloaded_callbacks(
 		struct dram_system_handler_t *ds,
 		void *payload,
-		void(*read_done)(void*, unsigned int, uint64_t, uint64_t, void*),
-		void(*write_done)(void*, unsigned int, uint64_t, uint64_t, void*),
+		void(*read_done)(void*, unsigned, uint64_t, uint64_t, void*),
+		void(*write_done)(void*, unsigned, uint64_t, uint64_t, void*),
 		void(*report_power)(double bgpower, double burstpower, double refreshpower, double actprepower))
 {
-	typedef SimplePayloadedCallback<void*, void, unsigned int, uint64_t, uint64_t, void> SPC;
+	typedef SimplePayloadedCallback<void*, void, unsigned, uint64_t, uint64_t, void> SPC;
 
 	SPC read_cb = SPC(read_done, payload);
 	SPC write_cb = SPC(write_done, payload);

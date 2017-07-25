@@ -73,8 +73,8 @@ void dram_system_register_callbacks(
 void dram_system_register_payloaded_callbacks(
 		struct dram_system_handler_t *ds,
 		void *payload,
-		void(*read_done)(void*, unsigned int, uint64_t, uint64_t),
-		void(*write_done)(void*, unsigned int, uint64_t, uint64_t),
+		void(*read_done)(void*, unsigned int, uint64_t, uint64_t, void*),
+		void(*write_done)(void*, unsigned int, uint64_t, uint64_t, void*),
 		void(*report_power)(double bgpower, double burstpower, double refreshpower, double actprepower));
 
 #ifdef __cplusplus
