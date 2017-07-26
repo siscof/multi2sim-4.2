@@ -1859,10 +1859,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 
                 if(stack->allow_cache_by_passing && dir_lock->lock && !stack->hit && target_mod->allow_cache_by_passing)
                 {
-                    assert(stack->state == cache_block_invalid);
                     stack->uncacheable = true;
                     stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
                     stack->way = -1;
+                    stack->state = cache_block_invalid;
                     esim_schedule_mod_stack_event(stack, target_mod->dir_latency);    
                     return;
                 }
@@ -2793,7 +2793,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				assert(dir_entry->owner != return_mod->low_net_node->index);
 			}
                         
-                        assert(!ret->uncacheable);
+                        assert(!stack->uncacheable);
                         if(!ret->uncacheable)
                         {
 
