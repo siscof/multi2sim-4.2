@@ -148,6 +148,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 	//assert(!(assoc & (assoc - 1)));
 	cache->log_block_size = log_base2(block_size);
 	cache->block_mask = block_size - 1;
+        cache->extra_dir_entry_size = 2;
 
 	/* Initialize array of sets */
 	cache->sets = xcalloc(num_sets, sizeof(struct cache_set_t));
@@ -161,8 +162,18 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 		for (way = 0; way < assoc; way++)
 		{
 			block = &cache->sets[set].blocks[way];
+                        block->extra_dir_entry_size = 2;
 			block->way = way;
-                        //block->dir_entry = xcalloc(assoc, sizeof(struct cache_block_t));
+                        block->dir_entry = xcalloc(block->extra_dir_entry_size, sizeof(struct dir_entry_t));
+                        for(int i = 0; i > block->extra_dir_entry_size; i++)
+                        {
+                            block->dir_entry[i].owner = DIR_ENTRY_OWNER_NONE;
+                            block->dir_entry[i].sharer = xcalloc(2,sizeof(unsigned char));
+                            block->dir_entry[i].dir_lock = xcalloc(1, sizeof(struct dir_lock_t));;
+                            block->dir_entry[i].cache_block = block;
+                            block->dir_entry[i].set = set;
+                            block->dir_entry[i].way = way;
+                        }
 			block->transient_tag = -1;
 			block->way_prev = way ? &cache->sets[set].blocks[way - 1] : NULL;
 			block->way_next = way < assoc - 1 ? &cache->sets[set].blocks[way + 1] : NULL;

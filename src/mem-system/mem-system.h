@@ -21,6 +21,7 @@
 #define MEM_SYSTEM_MEM_SYSTEM_H
 
 #include <dramsim/bindings-c.h>
+#include <stdbool.h>
 
 /*
  * Memory System Object
@@ -79,7 +80,7 @@ extern int flag_mshr_enabled;
 extern int super_stack_enabled;
 extern int flag_coalesce_gpu_enabled;
 extern int flag_no_blocking_store;
-extern int multidir_enabled;
+extern bool multidir_enabled;
 
 /* Event for dramsim clock tics */
 extern int EV_MAIN_MEMORY_TIC;

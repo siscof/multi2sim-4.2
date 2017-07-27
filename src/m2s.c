@@ -157,6 +157,7 @@ int flag_mshr_enabled = 0;
 int flag_mshr_dynamic_enabled = 0;
 int flag_coalesce_gpu_enabled = 0;
 int flag_no_blocking_store = 0;
+bool multidir_enabled = false;
 long long ventana_muestreo = 10000;
 int forzar_mshr_test = 0;
 bool ESIM_PROCESS_EV_IN_ORDER = true;

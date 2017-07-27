@@ -1835,7 +1835,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
          
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-		dir_lock = dir_lock_get(target_mod->dir, stack->set, stack->way);
+		dir_lock = dir_lock_get_by_stack(target_mod->dir, stack->set, stack->way, stack);
                 
 		if (dir_lock->lock && !stack->blocking && stack->hit)
 		{
@@ -1858,7 +1858,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         }
 			return;
 		}  
-                bool avoid_dir_entry_lock = false;
+                //bool avoid_dir_entry_lock = false;
                 //buscar en extra_dir_entries
                 /*if(dir_lock->lock && !stack->hit && multidir_enabled)
                 {
@@ -1915,59 +1915,66 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 /* Lock directory entry. If lock fails, port needs to be released to prevent
                  * deadlock.  When the directory entry is released, locking port and
                  * directory entry will be retried. */
-                if (!avoid_dir_entry_lock)
+         
+                if (!dir_entry_lock(target_mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
                 {
-                    if (!dir_entry_lock(target_mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
-                    {
-                            mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
-                                    stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
-                            /*if (stack->mshr_locked != 0)
-                            {
-                                    mshr_unlock2(mod);
-                                    stack->mshr_locked = 0;
-                            }*/ 
-                            // enviar mensaje para abortar el acceso anterior
-                            bool allow_abort_accesses = false;
-                            if(allow_abort_accesses && stack->request_dir == mod_request_down_up)
-                            {
-                                struct mod_stack_t *retry_stack;
-                                retry_stack = dir_lock->stack;
-                                new_stack = mod_stack_create(retry_stack->id, mod_get_low_mod(target_mod, retry_stack->tag), retry_stack->tag,
-                                NULL, NULL);
+                        mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
+                                stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
+                        /*if (stack->mshr_locked != 0)
+                        {
+                                mshr_unlock2(mod);
+                                stack->mshr_locked = 0;
+                        }*/ 
+                        // enviar mensaje para abortar el acceso anterior
+                        bool allow_abort_accesses = false;
+                        if(allow_abort_accesses && stack->request_dir == mod_request_down_up)
+                        {
+                            struct mod_stack_t *retry_stack;
+                            retry_stack = dir_lock->stack;
+                            new_stack = mod_stack_create(retry_stack->id, mod_get_low_mod(target_mod, retry_stack->tag), retry_stack->tag,
+                                0, NULL);
 
-                                new_stack->return_mod = target_mod;
-                                new_stack->request_dir = mod_request_up_down;
-                                new_stack->wavefront = retry_stack->wavefront;
-                                new_stack->uop = retry_stack->uop;
-                                new_stack->event = EV_MOD_NMOESI_MESSAGE;
-                                new_stack->message = message_abort_access;
-                                new_stack->stack_size = 8;
-                                esim_schedule_mod_stack_event(new_stack, 0);
-                            }
+                            new_stack->return_mod = target_mod;
+                            new_stack->request_dir = mod_request_up_down;
+                            new_stack->wavefront = retry_stack->wavefront;
+                            new_stack->uop = retry_stack->uop;
+                            new_stack->event = EV_MOD_NMOESI_MESSAGE;
+                            new_stack->message = message_abort_access;
+                            new_stack->stack_size = 8;
+                            esim_schedule_mod_stack_event(new_stack, 0);
+                        }
 
-                            //iter_stack->uop->accesses_in_dir--;
-                            if(stack->port != 0)
-                            {
-                                mod_unlock_port(target_mod, port, stack);
-                                //stack->stack = 0;
-                            }
-                            return;
-                    }
+                        //iter_stack->uop->accesses_in_dir--;
+                        if(stack->port != 0)
+                        {
+                            mod_unlock_port(target_mod, port, stack);
+                            //stack->stack = 0;
+                        }
+                        return;
                 }
+                
                 
                 //lock directory entries for all the stacks belonging to stack->uop
 
 		/* Miss */
 		if (!stack->hit)
 		{
+                    
 			/* Find victim */
 			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
+                        stack->dir_entry->state
 			if(stack->state)
 			{
-				if(stack->read)
-					add_load_invalidation(target_mod->level);
-				else
-					add_store_invalidation(target_mod->level);
+                            for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
+                            {                            for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
+
+                                assert(stack->dir_lock != target_mod->cache->sets[stack->set].blocks[stack->way].extra_dir_entry[i].dir_lock);
+                            }
+                            
+                            if(stack->read)
+                                    add_load_invalidation(target_mod->level);
+                            else
+                                    add_store_invalidation(target_mod->level);
 			}
 
 			assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir,
