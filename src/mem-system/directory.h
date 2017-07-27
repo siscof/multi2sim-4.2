@@ -21,6 +21,7 @@
 #define MEM_SYSTEM_DIRECTORY_H
 
 #include "module.h"
+#include "cache.h"
 
 
 struct dir_lock_t
@@ -37,6 +38,9 @@ struct dir_lock_t
 
 struct dir_entry_t
 {
+        int tag;
+        int transient_tag;
+        enum cache_block_state_t state;
         int set;
         int way;
         int owner;  /* Node owning the block (-1 = No owner)*/
@@ -44,7 +48,9 @@ struct dir_entry_t
 	//unsigned char sharer[0];   /* Bitmap of sharers (must be last field) */
         unsigned char *sharer;
         struct dir_lock_t *dir_lock;
+        struct cache_block_t *cache_block;
 };
+
 
 struct dir_t
 {

@@ -466,15 +466,31 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 
 	for (way = 0; way < cache->assoc; way++)
 	{
-		blk = &cache->sets[set].blocks[way];
-		if (blk->tag == tag && blk->state)
+            struct dir_entry_t *dir_entry;
+            blk = &cache->sets[set].blocks[way];
+            if (blk->tag == tag && blk->state)
+                break;
+            if (blk->transient_tag == tag)
+            {
+                dir_lock = dir_lock_get(mod->dir, set, way);
+			if (dir_lock->lock)
+				break;
+            }
+                    
+            for(int i = 0; i < cache->extra_dir_entry_size; i++)
+            {
+		dir_entry = &cache->sets[set].blocks[way].dir_entry[i];
+                assert(dir_entry->state != cache_block_noncoherent && dir_entry->state != cache_block_modified);
+		if (dir_entry->tag == tag && dir_entry->state)
 			break;
-		if (blk->transient_tag == tag)
+		if (dir_entry->transient_tag == tag)
 		{
-			dir_lock = dir_lock_get(mod->dir, set, way);
+			dir_lock = dir_entry->dir_lock;
 			if (dir_lock->lock)
 				break;
 		}
+            }
+                
 	}
 
 	PTR_ASSIGN(set_ptr, set);

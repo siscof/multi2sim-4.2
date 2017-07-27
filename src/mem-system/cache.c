@@ -157,10 +157,12 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 		cache->sets[set].blocks = xcalloc(assoc, sizeof(struct cache_block_t));
 		cache->sets[set].way_head = &cache->sets[set].blocks[0];
 		cache->sets[set].way_tail = &cache->sets[set].blocks[assoc - 1];
+                
 		for (way = 0; way < assoc; way++)
 		{
 			block = &cache->sets[set].blocks[way];
 			block->way = way;
+                        //block->dir_entry = xcalloc(assoc, sizeof(struct cache_block_t));
 			block->transient_tag = -1;
 			block->way_prev = way ? &cache->sets[set].blocks[way - 1] : NULL;
 			block->way_next = way < assoc - 1 ? &cache->sets[set].blocks[way + 1] : NULL;

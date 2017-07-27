@@ -57,6 +57,10 @@ struct cache_block_t
 	int prefetched;
 	unsigned int dirty_mask;
 	unsigned int valid_mask;
+        struct dir_entry_t *dir_entry_selected;
+        struct dir_entry_t *dir_entry;
+        struct dir_entry_t *extra_dir_entry;
+        int extra_dir_entry_size;
 
 	enum cache_block_state_t state;
 };
@@ -81,6 +85,7 @@ struct cache_t
 	struct cache_set_t *sets;
 	unsigned int block_mask;
 	int log_block_size;
+        int extra_dir_entry_size;
 
 	struct prefetcher_t *prefetcher;
 };

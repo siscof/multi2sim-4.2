@@ -79,6 +79,7 @@ extern int flag_mshr_enabled;
 extern int super_stack_enabled;
 extern int flag_coalesce_gpu_enabled;
 extern int flag_no_blocking_store;
+extern int multidir_enabled;
 
 /* Event for dramsim clock tics */
 extern int EV_MAIN_MEMORY_TIC;

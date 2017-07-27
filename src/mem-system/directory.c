@@ -245,6 +245,58 @@ struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y)
 }
 
 
+struct dir_lock_t *dir_lock_get_by_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *stack)
+{
+        assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize); 
+        struct dir_lock_t *dir_lock;
+        if(!multidir_enabled)
+        {
+            dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
+            return dir_lock;
+        }else{
+        
+            struct dir_entry_t *dir_entry;
+            int z = 1;
+            assert(dir->zsize == 1);
+            if(stack->hit)
+            {
+                
+                dir_entry = dir->dir_entry_file + (x * dir->ysize * dir->zsize + y * dir->zsize + z);
+                if(dir_entry->tag == stack->tag)
+                {
+                    dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
+                    return dir_lock;
+                }else{
+                    for(int i = 0; i < dir_entry->cache_block->extra_dir_entry_size; i++)
+                    {
+                        if(stack->tag == dir_entry->cache_block->extra_dir_entry[i].tag)
+                        {
+                            dir_lock = dir_entry->cache_block->extra_dir_entry[i].dir_lock;
+                            return dir_lock;
+                        }
+                    }
+                    fatal("dir_lock_get_by_stack");
+                }
+            }else{
+                dir_entry = dir->dir_entry_file + (x * dir->ysize * dir->zsize + y * dir->zsize + z);
+                if(dir_entry->dir_lock->lock)
+                {
+                    for(int i = 0; i < dir_entry->cache_block->extra_dir_entry_size; i++)
+                    {
+                        if(!dir_entry->cache_block->extra_dir_entry[i].dir_lock->lock)
+                        {
+                            return dir_entry->cache_block->extra_dir_entry[i].dir_lock;
+                        }
+                    }
+                }
+                return dir_entry->dir_lock;
+            }
+        }
+        fatal("dir_lock_get_by_stack");
+        return NULL;
+}
+
+
 int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack)
 {
 	struct dir_lock_t *dir_lock;

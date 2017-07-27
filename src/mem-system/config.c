@@ -402,6 +402,15 @@ static void mem_config_read_general(struct config_t *config)
 		fatal("%s: flag_super_stack_enabled: %d : isn't a valid (1 = \"enabled\", 0 = \"disabled\")\n",
 				mem_config_file_name, super_stack_enabled);
 	}
+        
+        
+        multidir_enabled = config_read_int(config, section, "MultiDirEnabled", 0);
+
+	if(multidir_enabled != true && multidir_enabled != false)
+	{
+		fatal("%s: multidir_enabled: %d : isn't a valid (1 = \"enabled\", 0 = \"disabled\")\n",
+				mem_config_file_name, multidir_enabled);
+	}
 }
 
 
