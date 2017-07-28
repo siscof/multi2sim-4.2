@@ -173,6 +173,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
                             block->dir_entry[i].cache_block = block;
                             block->dir_entry[i].set = set;
                             block->dir_entry[i].way = way;
+                            block->dir_entry[i].dir_lock->dir_entry = &block->dir_entry[i];
                         }
 			block->transient_tag = -1;
 			block->way_prev = way ? &cache->sets[set].blocks[way - 1] : NULL;

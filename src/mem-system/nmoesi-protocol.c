@@ -1961,9 +1961,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
                     
 			/* Find victim */
-			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
-                        stack->dir_entry->state
-			if(stack->state)
+			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
+                        if(stack->dir_lock->dir_entry->state)
+			//if(stack->state)
 			{
                             for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
                             {                            for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)

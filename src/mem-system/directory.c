@@ -81,6 +81,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 				dir_entry->owner = DIR_ENTRY_OWNER_NONE;
                                 dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
                                 dir_entry->dir_lock = dir_lock;
+                                dir_lock->dir_entry = dir_entry;
 			}
 		}
 	}
