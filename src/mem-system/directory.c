@@ -42,7 +42,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 	struct dir_t *dir;
 	struct dir_entry_t *dir_entry;
         struct dir_lock_t *dir_lock;
-        struct cache_block_t* cache_block;
+        struct cache_block_t *cache_block;
 
 	//int dir_size;
 	//int dir_entry_size;
