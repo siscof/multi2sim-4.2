@@ -1839,7 +1839,6 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 
 		if (dir_lock->lock && !stack->blocking && stack->hit)
 		{
-                    
                         mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
 			stack->err = 1;
@@ -1962,7 +1961,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                     
 			/* Find victim */
 			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
-                        if(stack->dir_lock->dir_entry->state)
+                        if(dir_lock->dir_entry->state)
 			//if(stack->state)
 			{
                             for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
@@ -1977,18 +1976,19 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     add_store_invalidation(target_mod->level);
 			}
 
-			assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir,
-				stack->set, stack->way));
+			//assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir,
+			//	stack->set, stack->way));
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way,
-				str_map_value(&cache_block_state_map, stack->state));
+				str_map_value(&cache_block_state_map, dir_lock->dir_entry->state));
 		}
 
 
 		/* Entry is locked. Record the transient tag so that a subsequent lookup
 		 * detects that the block is being brought.
 		 * Also, update LRU counters here. */
-		cache_set_transient_tag(target_mod->cache, stack->set, stack->way, stack->tag);
+		//cache_set_transient_tag(target_mod->cache, stack->set, stack->way, stack->tag);
+                dir_lock->dir_entry->transient_tag = stack->tag;
 		cache_access_block(target_mod->cache, stack->set, stack->way);
 
 		/* Access latency */

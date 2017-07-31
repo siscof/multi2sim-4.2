@@ -52,7 +52,6 @@ struct dir_entry_t
         struct cache_block_t *cache_block;
 };
 
-
 struct dir_t
 {
 	char *name;
@@ -76,6 +75,7 @@ struct dir_t
 	 * dir_entry_t, which have likewise variable size. */
 	//unsigned char data[0];
         struct dir_entry_t *dir_entry_file;
+        struct mod_t *mod;
 };
 
 enum dir_type_t
@@ -103,5 +103,23 @@ int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_
 void dir_entry_unlock(struct dir_t *dir, int x, int y);
 struct dir_lock_t *dir_lock_get_by_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *stack);
 
+struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes);
+void dir_free(struct dir_t *dir);
+
+struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z);
+
+void dir_entry_set_owner(struct dir_t *dir, int x, int y, int z, int node);
+void dir_entry_set_sharer(struct dir_t *dir, int x, int y, int z, int node);
+void dir_entry_clear_sharer(struct dir_t *dir, int x, int y, int z, int node);
+void dir_entry_clear_all_sharers(struct dir_t *dir, int x, int y, int z);
+int dir_entry_is_sharer(struct dir_t *dir, int x, int y, int z, int node);
+int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y);
+
+void dir_entry_dump_sharers(struct dir_t *dir, int x, int y, int z);
+
+struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y);
+int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack);
+void dir_entry_unlock(struct dir_t *dir, int x, int y);
+struct dir_lock_t *dir_lock_get_by_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *stack);
 
 #endif

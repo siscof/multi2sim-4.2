@@ -51,16 +51,17 @@ struct cache_block_t
 	struct cache_block_t *way_next;
 	struct cache_block_t *way_prev;
 
-	int tag;
-	int transient_tag;
+	//int tag;
+	//int transient_tag;
 	int way;
 	int prefetched;
-	unsigned int dirty_mask;
+	
+        unsigned int dirty_mask;
 	unsigned int valid_mask;
         struct dir_entry_t *dir_entry_selected;
         struct dir_entry_t *dir_entry;
-        struct dir_entry_t *extra_dir_entry;
-        int extra_dir_entry_size;
+        //struct dir_entry_t *extra_dir_entry;
+        int dir_entry_size;
 
 	enum cache_block_state_t state;
 };
@@ -85,7 +86,7 @@ struct cache_t
 	struct cache_set_t *sets;
 	unsigned int block_mask;
 	int log_block_size;
-        int extra_dir_entry_size;
+        int dir_entry_per_block;
 
 	struct prefetcher_t *prefetcher;
 };
@@ -97,7 +98,7 @@ enum cache_waylist_enum
 };
 
 struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int block_size,
-	unsigned int assoc, enum cache_policy_t policy);
+	unsigned int assoc, enum cache_policy_t policy, int dir_entry_per_block);
 void cache_free(struct cache_t *cache);
 
 void cache_decode_address(struct cache_t *cache, unsigned int addr,
@@ -106,11 +107,13 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 	int *state_ptr);
 void cache_set_block(struct cache_t *cache, int set, int way, int tag, int state);
 void cache_get_block(struct cache_t *cache, int set, int way, int *tag_ptr, int *state_ptr);
+struct cache_block_t *cache_get_block_new(struct cache_t *cache, int set, int way);
 
 void cache_access_block(struct cache_t *cache, int set, int way);
 int cache_replace_block(struct cache_t *cache, int set);
 void cache_set_transient_tag(struct cache_t *cache, int set, int way, int tag);
 void cache_update_waylist(struct cache_set_t *set, struct cache_block_t *blk, enum cache_waylist_enum where);
+
 //fran 
 void cache_write_block_dirty_mask(struct cache_t *cache, int set, int way, unsigned int dirty_mask);
 void cache_write_block_valid_mask(struct cache_t *cache, int set, int way, unsigned int mask);

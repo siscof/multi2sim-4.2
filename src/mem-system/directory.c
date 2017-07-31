@@ -37,11 +37,12 @@
 	((X) * dir->ysize * dir->zsize + (Y) * dir->zsize + (Z))))
 
 
-struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes)
+struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes, struct mod_t *mod)
 {
 	struct dir_t *dir;
 	struct dir_entry_t *dir_entry;
         struct dir_lock_t *dir_lock;
+        struct cache_block_t* cache_block;
 
 	//int dir_size;
 	//int dir_entry_size;
@@ -67,6 +68,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 	dir->xsize = xsize;
 	dir->ysize = ysize;
 	dir->zsize = zsize;
+        dir->mod = mod;
         
 
 	/* Reset all owners */
@@ -75,13 +77,18 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 		for (y = 0; y < ysize; y++)
 		{
                     dir_lock = dir_lock_get(dir,x,y);
+                    assert(zsize == 1);
 			for (z = 0; z < zsize; z++)
 			{
+                            for(int w = 0; w < mod->cache->dir_entry_per_block ;w++)
+                            {
 				dir_entry = dir_entry_get(dir, x, y, z);
 				dir_entry->owner = DIR_ENTRY_OWNER_NONE;
                                 dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
                                 dir_entry->dir_lock = dir_lock;
                                 dir_lock->dir_entry = dir_entry;
+                                cache_block = cache_get_block_new(mod->cache,x,y);
+                               
 			}
 		}
 	}

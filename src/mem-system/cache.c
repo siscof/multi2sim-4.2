@@ -128,7 +128,7 @@ void cache_update_waylist(struct cache_set_t *set,
 
 
 struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int block_size,
-	unsigned int assoc, enum cache_policy_t policy)
+	unsigned int assoc, enum cache_policy_t policy, int dir_entry_per_block)
 {
 	struct cache_t *cache;
 	struct cache_block_t *block;
@@ -148,7 +148,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 	//assert(!(assoc & (assoc - 1)));
 	cache->log_block_size = log_base2(block_size);
 	cache->block_mask = block_size - 1;
-        cache->extra_dir_entry_size = 2;
+        cache->dir_entry_per_block = dir_entry_per_block;
 
 	/* Initialize array of sets */
 	cache->sets = xcalloc(num_sets, sizeof(struct cache_set_t));
@@ -162,10 +162,10 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 		for (way = 0; way < assoc; way++)
 		{
 			block = &cache->sets[set].blocks[way];
-                        block->extra_dir_entry_size = 2;
+                        block->dir_entry_size = 2;
 			block->way = way;
-                        block->dir_entry = xcalloc(block->extra_dir_entry_size, sizeof(struct dir_entry_t));
-                        for(int i = 0; i > block->extra_dir_entry_size; i++)
+                        block->dir_entry = xcalloc(block->dir_entry_size, sizeof(struct dir_entry_t));
+                        for(int i = 0; i > block->dir_entry_size; i++)
                         {
                             block->dir_entry[i].owner = DIR_ENTRY_OWNER_NONE;
                             block->dir_entry[i].sharer = xcalloc(2,sizeof(unsigned char));
@@ -175,7 +175,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
                             block->dir_entry[i].way = way;
                             block->dir_entry[i].dir_lock->dir_entry = &block->dir_entry[i];
                         }
-			block->transient_tag = -1;
+			//block->transient_tag = -1;
 			block->way_prev = way ? &cache->sets[set].blocks[way - 1] : NULL;
 			block->way_next = way < assoc - 1 ? &cache->sets[set].blocks[way + 1] : NULL;
 		}
@@ -274,6 +274,12 @@ void cache_get_block(struct cache_t *cache, int set, int way, int *tag_ptr, int 
 	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
 }
 
+struct cache_block_t *cache_get_block_new(struct cache_t *cache, int set, int way)
+{
+	assert(set >= 0 && set < cache->num_sets);
+	assert(way >= 0 && way < cache->assoc);
+	return cache->sets[set].blocks[way];
+}
 
 /* Update LRU counters, i.e., rearrange linked list in case
  * replacement policy is LRU. */
@@ -343,8 +349,7 @@ int cache_replace_block(struct cache_t *cache, int set)
                 {
                     dir_lock = dir_lock_get(cache->mod->dir, set, block->way);
                     if(!dir_lock->lock)
-                        break;
-                    
+                        break; 
 		}
                 
                 

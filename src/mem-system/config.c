@@ -591,6 +591,7 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	int dir_latency;
 
 	char *policy_str;
+        int dir_entry_per_block;
 	enum cache_policy_t policy;
 
 	int mshr_size;
@@ -720,8 +721,9 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	mod->low_net_node = net_node;
 
 	/* Create cache */
+        dir_entry_per_block = config_read_int(config, buf, "dir_entry_per_block", 1);
 	mod->cache = cache_create(mod->name, num_sets, block_size, assoc,
-		policy);
+		policy, dir_entry_per_block);
         mod->cache->mod = mod;
 
 	/* Fill in prefetcher parameters */
