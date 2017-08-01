@@ -1835,7 +1835,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
          
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-		dir_lock = dir_lock_get_by_stack(target_mod->dir, stack->set, stack->way, stack);
+		dir_lock = dir_lock_get(target_mod->dir, stack->set, stack->way, 0);
                 
 		if (dir_lock->lock && !stack->blocking && stack->hit)
 		{
@@ -1915,7 +1915,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                  * deadlock.  When the directory entry is released, locking port and
                  * directory entry will be retried. */
          
-                if (!dir_entry_lock(target_mod->dir, stack->set, stack->way, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
+                if (!dir_entry_lock(stack->dir_entry, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
                 {
                         mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
                                 stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
@@ -1961,14 +1961,13 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                     
 			/* Find victim */
 			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
-                        if(dir_lock->dir_entry->state)
+                        if(stack->dir_entry->state)
 			//if(stack->state)
 			{
-                            for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
-                            {                            for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
-
+                            /*for(int i = 0; i < target_mod->cache->extra_dir_entry_size; i++)
+                            {                
                                 assert(stack->dir_lock != target_mod->cache->sets[stack->set].blocks[stack->way].extra_dir_entry[i].dir_lock);
-                            }
+                            }*/
                             
                             if(stack->read)
                                     add_load_invalidation(target_mod->level);
@@ -1980,7 +1979,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			//	stack->set, stack->way));
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way,
-				str_map_value(&cache_block_state_map, dir_lock->dir_entry->state));
+				str_map_value(&cache_block_state_map, stack->dir_entry->state));
 		}
 
 
@@ -1988,7 +1987,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		 * detects that the block is being brought.
 		 * Also, update LRU counters here. */
 		//cache_set_transient_tag(target_mod->cache, stack->set, stack->way, stack->tag);
-                dir_lock->dir_entry->transient_tag = stack->tag;
+                stack->dir_entry->transient_tag = stack->tag;
 		cache_access_block(target_mod->cache, stack->set, stack->way);
 
 		/* Access latency */
@@ -2158,8 +2157,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 		/* Get block info */
 		cache_get_block(return_mod->cache, stack->set, stack->way, &stack->tag, &stack->state);
-		assert(stack->state || !dir_entry_group_shared_or_owned(return_mod->dir,
-			stack->set, stack->way));
+		assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry->x, stack->dir_entry->y, stack->dir_entry->w));
 		mem_debug("  %lld %lld 0x%x %s evict (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
 			stack->tag, return_mod->name, stack->set, stack->way,
 			str_map_value(&cache_block_state_map, stack->state));
@@ -2573,13 +2571,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 				continue;
 			}
 
-			dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-			dir_entry_clear_sharer(dir, stack->set, stack->way, z,
-				return_mod->low_net_node->index);
+			dir_entry = dir_entry_get(dir, stack->set, stack->way, z, 0);
+			dir_entry_clear_sharer(dir_entry, return_mod->low_net_node->index);
 			if (dir_entry->owner == return_mod->low_net_node->index)
 			{
-				dir_entry_set_owner(dir, stack->set, stack->way, z,
-					DIR_ENTRY_OWNER_NONE);
+				dir_entry_set_owner(dir_entry, DIR_ENTRY_OWNER_NONE);
 			}
 		}
 
@@ -2634,7 +2630,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
 				0, cache_block_invalid);
 
-		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->src_set, stack->src_way));
+		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->dir_entry->x, stack->dir_entry->y, stack->dir_entry->w));
 		stack->event = EV_MOD_NMOESI_EVICT_FINISH;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_EVICT_FINISH, stack, 0);
@@ -2825,7 +2821,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				assert(dir_entry_tag < stack->tag + target_mod->block_size);
 				if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
 					continue;
-				dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+				dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
 				assert(dir_entry->owner != return_mod->low_net_node->index);
 			}
                         
@@ -2841,7 +2837,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             {
                                     struct net_node_t *node;
 
-                                    dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                                    dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
                                     dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 
                                     /* No owner */
@@ -2904,7 +2900,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			}
 
 			assert(stack->uncacheable || !dir_entry_group_shared_or_owned(target_mod->dir,
-				stack->set, stack->way));
+				stack->set, stack->way, stack->dir_entry->w));
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
 				EV_MOD_NMOESI_READ_REQUEST_UPDOWN_MISS, stack);
 			new_stack->wavefront = stack->wavefront;
