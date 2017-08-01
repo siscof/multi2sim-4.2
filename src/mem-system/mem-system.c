@@ -680,7 +680,7 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 
 			if(directory_type == dir_type_nmoesi)
 			{
-				dir_entry_unlock(stack->target_mod->dir, stack->set, stack->way);
+				dir_entry_unlock(stack->dir_entry);
 				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
 			}else{
 				esim_schedule_mod_stack_event(stack, 0);
@@ -731,7 +731,7 @@ void main_memory_write_callback(void *payload, unsigned int id, uint64_t address
 
 			if(directory_type == dir_type_nmoesi)
 			{
-				dir_entry_unlock(stack->target_mod->dir, stack->set, stack->way);
+				dir_entry_unlock(stack->dir_entry);
 				esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
 			}else{
 				esim_schedule_mod_stack_event(stack, 0);

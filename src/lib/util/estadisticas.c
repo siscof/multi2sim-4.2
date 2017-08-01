@@ -23,9 +23,7 @@ bool statistics_event_paused = true;
 
 void estadisticas_por_intervalos(long long intervalo){
 
-//double latencia;
-int z, x, y, k, i;
-//long long ipc;
+//int z, x, y, k, i;
 
 if((intervalo_anterior + ventana_muestreo) > intervalo )
 	return;
@@ -81,17 +79,17 @@ fran_debug_general("%lld ",mem_stats.mod_level[2].latencia_red_cont - ciclos_mem
 memcpy(&ciclos_mem_stats_anterior,&mem_stats,sizeof(struct mem_system_stats));
 
 
-int tag_ptr;
-int state_ptr;
+//int tag_ptr;
+//int state_ptr;
 contador = 0;
 long long locked[5] = {0,0,0,0,0};
-struct mod_t *mod;
-struct cache_t *cache;
-struct dir_t *dir;
+//struct mod_t *mod;
+//struct cache_t *cache;
+//struct dir_t *dir;
 long long replica = 0;
 long long compartido = 0;
 
-for (k = 0; k < list_count(mem_system->mod_list); k++)
+/*for (k = 0; k < list_count(mem_system->mod_list); k++)
 {
 	mod = list_get(mem_system->mod_list, k);
 
@@ -136,7 +134,7 @@ for (k = 0; k < list_count(mem_system->mod_list); k++)
                         }
                 }
         }
-}
+}*/
 
 fran_debug_general("%lld ",compartido);
 fran_debug_general("%lld ",replica);

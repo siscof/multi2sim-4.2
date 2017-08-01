@@ -148,7 +148,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 	//assert(!(assoc & (assoc - 1)));
 	cache->log_block_size = log_base2(block_size);
 	cache->block_mask = block_size - 1;
-        cache->dir_entry_per_block = dir_entry_per_block;
+        cache->dir_entry_per_line = dir_entry_per_block;
 
 	/* Initialize array of sets */
 	cache->sets = xcalloc(num_sets, sizeof(struct cache_set_t));
@@ -162,10 +162,10 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 		for (way = 0; way < assoc; way++)
 		{
 			block = &cache->sets[set].blocks[way];
-                        block->dir_entry_size = 2;
+                        block->dir_entry_size = dir_entry_per_block;
 			block->way = way;
-                        block->dir_entry = xcalloc(block->dir_entry_size, sizeof(struct dir_entry_t));
-                        for(int i = 0; i > block->dir_entry_size; i++)
+                        //block->dir_entry = xcalloc(block->dir_entry_size, sizeof(struct dir_entry_t));
+                        /*for(int i = 0; i > block->dir_entry_size; i++)
                         {
                             block->dir_entry[i].owner = DIR_ENTRY_OWNER_NONE;
                             block->dir_entry[i].sharer = xcalloc(2,sizeof(unsigned char));
@@ -174,7 +174,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
                             block->dir_entry[i].set = set;
                             block->dir_entry[i].way = way;
                             block->dir_entry[i].dir_lock->dir_entry = &block->dir_entry[i];
-                        }
+                        }*/
 			//block->transient_tag = -1;
 			block->way_prev = way ? &cache->sets[set].blocks[way - 1] : NULL;
 			block->way_next = way < assoc - 1 ? &cache->sets[set].blocks[way + 1] : NULL;
@@ -224,7 +224,7 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 	PTR_ASSIGN(set_ptr, set);
 	PTR_ASSIGN(state_ptr, 0);  /* Invalid */
 	for (way = 0; way < cache->assoc; way++)
-		if (cache->sets[set].blocks[way].tag == tag && cache->sets[set].blocks[way].state)
+		if (cache->sets[set].blocks[way].dir_entry_selected->tag == tag && cache->sets[set].blocks[way].dir_entry_selected->state)
 			break;
 
 	/* Block not found */
@@ -233,7 +233,7 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 
 	/* Block found */
 	PTR_ASSIGN(way_ptr, way);
-	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
+	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].dir_entry_selected->state);
 	return 1;
 }
 
@@ -251,16 +251,16 @@ void cache_set_block(struct cache_t *cache, int set, int way, int tag, int state
 			str_map_value(&cache_block_state_map, state));
 
 	if (cache->policy == cache_policy_fifo
-		&& cache->sets[set].blocks[way].tag != tag)
+		&& cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
 		cache_update_waylist(&cache->sets[set],
 			&cache->sets[set].blocks[way],
 			cache_waylist_head);
 
-	if(tag == cache->sets[set].blocks[way].transient_tag)
-		cache->sets[set].blocks[way].transient_tag = 0;
+	if(tag == cache->sets[set].blocks[way].dir_entry_selected->transient_tag)
+		cache->sets[set].blocks[way].dir_entry_selected->transient_tag = 0;
 
-	cache->sets[set].blocks[way].tag = tag;
-	cache->sets[set].blocks[way].state = state;
+	cache->sets[set].blocks[way].dir_entry_selected->tag = tag;
+	cache->sets[set].blocks[way].dir_entry_selected->state = state;
 	cache->sets[set].blocks[way].dirty_mask = 0;
 	cache->sets[set].blocks[way].valid_mask = 0;
 }
@@ -270,15 +270,15 @@ void cache_get_block(struct cache_t *cache, int set, int way, int *tag_ptr, int 
 {
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
-	PTR_ASSIGN(tag_ptr, cache->sets[set].blocks[way].tag);
-	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
+	PTR_ASSIGN(tag_ptr, cache->sets[set].blocks[way].dir_entry_selected->tag);
+	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].dir_entry_selected->state);
 }
 
 struct cache_block_t *cache_get_block_new(struct cache_t *cache, int set, int way)
 {
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
-	return cache->sets[set].blocks[way];
+	return &cache->sets[set].blocks[way];
 }
 
 /* Update LRU counters, i.e., rearrange linked list in case
@@ -294,7 +294,7 @@ void cache_access_block(struct cache_t *cache, int set, int way)
 	 * It will also be moved if it is its first access for FIFO policy, i.e., if the
 	 * state of the block was invalid. */
 	move_to_head = cache->policy == cache_policy_lru || cache_policy_lru_base || cache_policy_lru_ext ||
-		(cache->policy == cache_policy_fifo && !cache->sets[set].blocks[way].state);
+		(cache->policy == cache_policy_fifo && !cache->sets[set].blocks[way].dir_entry_selected->state);
 	if (move_to_head && cache->sets[set].blocks[way].way_prev)
 		cache_update_waylist(&cache->sets[set],
 			&cache->sets[set].blocks[way],
@@ -314,7 +314,7 @@ int cache_replace_block(struct cache_t *cache, int set)
 
 	for (block = cache->sets[set].way_tail; block; block = block->way_prev)
 	{
-		if (!block->state && block->transient_tag == 0)
+		if (!block->dir_entry_selected->state && block->dir_entry_selected->transient_tag == 0)
 		{
 			cache_update_waylist(&cache->sets[set], block,
 				cache_waylist_head);
@@ -342,13 +342,13 @@ int cache_replace_block(struct cache_t *cache, int set)
         
         if(cache->policy == cache_policy_lru_ext)
 	{
-                struct dir_lock_t *dir_lock;
+                //struct dir_lock_t *dir_lock;
                 
                 block = cache->sets[set].way_tail;
                 for(; block != NULL; block = block->way_prev)
                 {
-                    dir_lock = dir_lock_get(cache->mod->dir, set, block->way);
-                    if(!dir_lock->lock)
+                    //dir_lock = dir_lock_get(cache->mod->dir, set, block->way);
+                    if(!block->dir_entry_selected->dir_lock->lock)
                         break; 
 		}
                 
@@ -385,7 +385,7 @@ void cache_set_transient_tag(struct cache_t *cache, int set, int way, int tag)
 
 	/* Set transient tag */
 	block = &cache->sets[set].blocks[way];
-	block->transient_tag = tag;
+	block->dir_entry_selected->transient_tag = tag;
 }
 void cache_clean_block_dirty(struct cache_t *cache, int set, int way)
 {
@@ -404,7 +404,7 @@ unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
 	unsigned int addr = -1;
 	int words = 0;
 
-	assert(cache->sets[set].blocks[way].state);
+	assert(cache->sets[set].blocks[way].dir_entry_selected->state);
 
 	if(mask)
 	{
@@ -415,7 +415,7 @@ unsigned int cache_clean_word_dirty(struct cache_t *cache, int set, int way)
 		}
 		while(!dirty);
 
-		addr = cache->sets[set].blocks[way].tag + ((words - 1) * 4);
+		addr = cache->sets[set].blocks[way].dir_entry_selected->tag + ((words - 1) * 4);
 		cache->sets[set].blocks[way].dirty_mask &= (~dirty);
 
 	}

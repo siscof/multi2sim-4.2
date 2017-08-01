@@ -301,8 +301,8 @@ int mod_can_access(struct mod_t *mod, unsigned int addr);
 
 int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr, int *way_ptr,
 	int *tag_ptr, int *state_ptr);
-int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int dirty_mask, int *set_ptr, int *way_ptr,
-	int *tag_ptr, int *state_ptr);
+//int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int dirty_mask, int *set_ptr, int *way_ptr,
+//	int *tag_ptr, int *state_ptr);
 
 void mod_block_set_prefetched(struct mod_t *mod, unsigned int addr, int val);
 int mod_block_get_prefetched(struct mod_t *mod, unsigned int addr);
@@ -339,7 +339,7 @@ void mod_coalesce(struct mod_t *mod, struct mod_stack_t *master_stack,
 
 struct mod_client_info_t *mod_client_info_create(struct mod_t *mod);
 void mod_client_info_free(struct mod_t *mod, struct mod_client_info_t *client_info);
-int mod_replace_block(struct mod_t *mod, int set);
+//int mod_replace_block(struct mod_t *mod, int set);
 unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way);
 bool mod_is_vector_cache(struct mod_t *mod);
 struct mod_stack_t *mod_global_in_flight_address(struct mod_t *mod, struct mod_stack_t *current_stack);

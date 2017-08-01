@@ -22,6 +22,7 @@
 
 #include "module.h"
 #include "cache.h"
+#include "lib/util/list.h"
 
 
 struct dir_lock_t
@@ -30,8 +31,9 @@ struct dir_lock_t
 	//long long stack_id;
 	struct mod_stack_t *stack;
 	struct mod_stack_t *lock_queue;
-        struct dir_entry_t *dir_entry;
-        //struct list_t *dir_entry_list;
+        //struct dir_entry_t *dir_entry;
+        struct list_t *dir_entry_list;
+        struct dir_t *dir;
 };
 
 #define DIR_ENTRY_OWNER_NONE  (-1)
@@ -42,8 +44,12 @@ struct dir_entry_t
         int tag;
         int transient_tag;
         enum cache_block_state_t state;
-        int set;
-        int way;
+        int set; 
+        int way; 
+        int x;
+        int y;
+        int w;
+        int z;
         int owner;  /* Node owning the block (-1 = No owner)*/
 	int num_sharers;  /* Number of 1s in next field */
 	//unsigned char sharer[0];   /* Bitmap of sharers (must be last field) */
@@ -65,7 +71,8 @@ struct dir_t
 	 * sets, YSize is the number of ways of the cache, and ZSize
 	 * is the number of sub-blocks of size 'cache_min_block_size'
 	 * that fit within a block. */
-	int xsize, ysize, zsize;
+	int xsize, ysize, zsize, wsize;
+        int dir_entry_sharers_size;
 
 	/* Array of xsize * ysize locks. Each lock corresponds to a
 	 * block, i.e. a set of zsize directory entries */
@@ -84,42 +91,23 @@ enum dir_type_t
 	dir_type_vi
 };
 
-struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes);
+struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes, struct mod_t *mod);
 void dir_free(struct dir_t *dir);
 
-struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z);
+struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z, int w);
 
-void dir_entry_set_owner(struct dir_t *dir, int x, int y, int z, int node);
-void dir_entry_set_sharer(struct dir_t *dir, int x, int y, int z, int node);
-void dir_entry_clear_sharer(struct dir_t *dir, int x, int y, int z, int node);
-void dir_entry_clear_all_sharers(struct dir_t *dir, int x, int y, int z);
-int dir_entry_is_sharer(struct dir_t *dir, int x, int y, int z, int node);
-int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y);
+void dir_entry_set_owner(struct dir_entry_t *dir_entry, int node);
+void dir_entry_set_sharer(struct dir_entry_t *dir_entry, int node);
+void dir_entry_clear_sharer(struct dir_entry_t *dir_entry, int node);
+void dir_entry_clear_all_sharers(struct dir_entry_t *dir_entry);
+int dir_entry_is_sharer(struct dir_entry_t *dir_entry, int node);
+int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y, int w);
 
-void dir_entry_dump_sharers(struct dir_t *dir, int x, int y, int z);
+void dir_entry_dump_sharers(struct dir_entry_t *dir_entry);
 
-struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y);
-int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack);
-void dir_entry_unlock(struct dir_t *dir, int x, int y);
-struct dir_lock_t *dir_lock_get_by_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *stack);
-
-struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_nodes);
-void dir_free(struct dir_t *dir);
-
-struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z);
-
-void dir_entry_set_owner(struct dir_t *dir, int x, int y, int z, int node);
-void dir_entry_set_sharer(struct dir_t *dir, int x, int y, int z, int node);
-void dir_entry_clear_sharer(struct dir_t *dir, int x, int y, int z, int node);
-void dir_entry_clear_all_sharers(struct dir_t *dir, int x, int y, int z);
-int dir_entry_is_sharer(struct dir_t *dir, int x, int y, int z, int node);
-int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y);
-
-void dir_entry_dump_sharers(struct dir_t *dir, int x, int y, int z);
-
-struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y);
-int dir_entry_lock(struct dir_t *dir, int x, int y, int event, struct mod_stack_t *stack);
-void dir_entry_unlock(struct dir_t *dir, int x, int y);
-struct dir_lock_t *dir_lock_get_by_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *stack);
+struct dir_lock_t *dir_lock_get(struct dir_t *dir, int x, int y, int w);
+int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t *stack);
+void dir_entry_unlock(struct dir_entry_t *dir_entry);
+//struct dir_lock_t *dir_lock_get_by_stack(struct dir_t *dir, int x, int y, struct mod_stack_t *stack);
 
 #endif

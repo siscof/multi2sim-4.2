@@ -468,18 +468,18 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 	{
             struct dir_entry_t *dir_entry;
             blk = &cache->sets[set].blocks[way];
-            if (blk->tag == tag && blk->state)
+            if (blk->dir_entry_selected->tag == tag && blk->dir_entry_selected->state)
                 break;
-            if (blk->transient_tag == tag)
+            if (blk->dir_entry_selected->transient_tag == tag)
             {
-                dir_lock = dir_lock_get(mod->dir, set, way);
-			if (dir_lock->lock)
-				break;
+                if (blk->dir_entry_selected->dir_lock->lock)
+                    break;
             }
                     
-            for(int i = 0; i < cache->extra_dir_entry_size; i++)
+            for(int i = 0; i < cache->dir_entry_per_line; i++)
             {
-		dir_entry = &cache->sets[set].blocks[way].dir_entry[i];
+		dir_entry = &cache->sets[set].blocks[way].dir_entries[i];
+                assert(dir_entry->z == 0);
                 assert(dir_entry->state != cache_block_noncoherent && dir_entry->state != cache_block_modified);
 		if (dir_entry->tag == tag && dir_entry->state)
 			break;
@@ -506,70 +506,7 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 
 	/* Hit */
 	PTR_ASSIGN(way_ptr, way);
-	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
-	return 1;
-}
-
-int mod_find_block_fran(struct mod_t *mod, unsigned int addr, unsigned int valid_mask, int *set_ptr,
-	int *way_ptr, int *tag_ptr, int *state_ptr)
-{
-	struct cache_t *cache = mod->cache;
-	struct cache_block_t *blk;
-	//struct dir_lock_t *dir_lock;
-
-	int set;
-	int way;
-	int tag;
-
-	/* A transient tag is considered a hit if the block is
-	 * locked in the corresponding directory. */
-	tag = addr & ~cache->block_mask;
-	if (mod->range_kind == mod_range_interleaved)
-	{
-		unsigned int num_mods = mod->range.interleaved.mod;
-		set = ((tag >> cache->log_block_size) / num_mods) % cache->num_sets;
-	}
-	else if (mod->range_kind == mod_range_bounds)
-	{
-		set = (tag >> cache->log_block_size) % cache->num_sets;
-	}
-	else
-	{
-		panic("%s: invalid range kind (%d)", __FUNCTION__, mod->range_kind);
-	}
-
-	for (way = 0; way < cache->assoc; way++)
-	{
-		blk = &cache->sets[set].blocks[way];
-		if (blk->tag == tag && blk->state)
-			break;
-
-
-
-/*		if (blk->transient_tag == tag)
-		{
-			dir_lock = dir_lock_get(mod->dir, set, way);
-			if (dir_lock->lock)
-				break;
-		}*/
-	}
-
-	PTR_ASSIGN(set_ptr, set);
-	PTR_ASSIGN(tag_ptr, tag);
-
-	/* Miss */
-	if (way == cache->assoc || (valid_mask & cache->sets[set].blocks[way].valid_mask))
-	{
-	/*
-		PTR_ASSIGN(way_ptr, 0);
-		PTR_ASSIGN(state_ptr, 0);
-	*/
-		return 0;
-	}
-
-	/* Hit */
-	PTR_ASSIGN(way_ptr, way);
-	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].state);
+	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].dir_entry_selected->state);
 	return 1;
 }
 
@@ -1274,7 +1211,7 @@ void mod_client_info_free(struct mod_t *mod, struct mod_client_info_t *client_in
 }
 
 //FRAN - este metodo sustituye a cache_replace_block()
-int mod_replace_block(struct mod_t *mod, int set)
+/*int mod_replace_block(struct mod_t *mod, int set)
 {
 	uint8_t is_shared = 0;
 	uint32_t way;
@@ -1322,11 +1259,11 @@ int mod_replace_block(struct mod_t *mod, int set)
 
 		return way;
 	}
-
+*/
 	/* Random replacement */
-	assert(mod->cache->policy == cache_policy_random);
+/*	assert(mod->cache->policy == cache_policy_random);
 	return random() % mod->cache->assoc;
-}
+}*/
 
 unsigned int mod_get_valid_mask(struct mod_t *mod, int set, int way)
 {

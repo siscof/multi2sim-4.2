@@ -308,6 +308,7 @@ static enum mod_access_kind_t mem_system_command_get_mod_access(struct list_t *t
 void mem_system_command_handler(int event, void *data)
 {
 	struct list_t *token_list;
+        struct dir_entry_t *dir_entry;
 
 	char *command_line = data;
 	char command[MAX_STRING_SIZE];
@@ -398,7 +399,8 @@ void mem_system_command_handler(int event, void *data)
 
 		/* Set owner */
 		owner_index = owner ? owner->low_net_node->index : -1;
-		dir_entry_set_owner(mod->dir, set, way, sub_block, owner_index);
+                dir_entry = dir_entry_get(mod->dir, set, way, sub_block, 0);
+		dir_entry_set_owner(dir_entry, owner_index);
 	}
 
 	/* Command 'SetSharers' */
@@ -419,7 +421,8 @@ void mem_system_command_handler(int event, void *data)
 
 		/* Get sharers */
 		mem_system_command_expect(token_list, command_line);
-		dir_entry_clear_all_sharers(mod->dir, set, way, sub_block);
+                dir_entry = dir_entry_get(mod->dir, set, way, sub_block, 0);
+		dir_entry_clear_all_sharers(dir_entry);
 		while (list_count(token_list))
 		{
 			/* Get sharer */
@@ -433,7 +436,7 @@ void mem_system_command_handler(int event, void *data)
 					__FUNCTION__, sharer->name, mod->name, command_line);
 
 			/* Set sharer */
-			dir_entry_set_sharer(mod->dir, set, way, sub_block, sharer->low_net_node->index);
+			dir_entry_set_sharer(dir_entry, sharer->low_net_node->index);
 		}
 	}
 
@@ -587,7 +590,7 @@ void mem_system_end_command_handler(int event, void *data)
 		owner_check = NULL;
 		if (mod->dir)
 		{
-			dir_entry = dir_entry_get(mod->dir, set, way, sub_block);
+			dir_entry = dir_entry_get(mod->dir, set, way, sub_block, 0);
 			if (dir_entry->owner >= 0)
 			{
 				assert(mod->high_net);
@@ -619,6 +622,7 @@ void mem_system_end_command_handler(int event, void *data)
 		struct mod_t *sharer;
 
 		struct net_node_t *node;
+                struct dir_entry_t *dir_entry;
 
 		int set;
 		int way;
@@ -660,7 +664,8 @@ void mem_system_end_command_handler(int event, void *data)
 		assert(mod->high_net);
 		for (node_index = 0; node_index < mod->high_net->node_count; node_index++)
 		{
-			if (!dir_entry_is_sharer(mod->dir, set, way, sub_block, node_index))
+                        dir_entry = dir_entry_get(mod->dir, set, way, sub_block, 0);
+			if (!dir_entry_is_sharer(dir_entry, node_index))
 				continue;
 			node = list_get(mod->high_net->node_list, node_index);
 			sharer = node->user_data;
