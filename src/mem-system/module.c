@@ -34,7 +34,7 @@
 #include "mem-system.h"
 #include "mod-stack.h"
 #include "nmoesi-protocol.h"
-#include "coherence_controller.h"
+//#include "coherence_controller.h"
 
 //fran
 #include <lib/util/estadisticas.h>
@@ -93,7 +93,7 @@ struct mod_t *mod_create(char *name, enum mod_kind_t kind, int num_ports,
 	mod->mshr = mshr_create();
         mod->mshr->mod = mod;
 	//xcalloc(1,sizeof(struct mshr_t));
-	mod->coherence_controller = cc_create();
+	//mod->coherence_controller = cc_create();
         mod->allow_cache_by_passing = true;
 
 	/* Ports */
@@ -126,8 +126,8 @@ void mod_free(struct mod_t *mod)
 	if (mod->mshr)
 		mshr_free(mod->mshr);
 
-	if(mod->coherence_controller)
-		cc_free(mod->coherence_controller);
+	//if(mod->coherence_controller)
+	//	cc_free(mod->coherence_controller);
 
 	mod_ports_free(mod->ports, mod->num_ports);
 	repos_free(mod->client_info_repos);

@@ -48,10 +48,7 @@ libmemsystem_a_SOURCES = \
 	prefetch-history.h \
 	\
 	prefetcher.c \
-	prefetcher.h \
-	\
-	coherence_controller.c \
-	coherence_controller.h
+	prefetcher.h 
 
 INCLUDES = @M2S_INCLUDES@
 

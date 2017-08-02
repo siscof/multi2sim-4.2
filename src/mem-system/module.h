@@ -116,7 +116,7 @@ struct mod_t
 	int mc_id; /* If dramsim enabled, in main memory modules this field stores the id of the memory controller attached */
 	struct dram_system_t *dram_system;
 	int mshr_count;
-	struct coherence_controller_t *coherence_controller;
+	//struct coherence_controller_t *coherence_controller;
 	struct mshr_t *mshr;
 	struct si_compute_unit_t *compute_unit;
 

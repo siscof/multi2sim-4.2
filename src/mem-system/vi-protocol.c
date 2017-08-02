@@ -587,7 +587,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		}
 
 		/* Unlock directory entry */
-		dir_entry_unlock(mod->dir, stack->set, stack->way);
+		dir_entry_unlock(stack->dir_entry);
 
 		/* Impose the access latency before continuing */
 
@@ -1161,7 +1161,7 @@ void mod_handler_vi_store(int event, void *data)
 			stack->mshr_locked = 0;
 		}
 
-		dir_entry_unlock(mod->dir, stack->set, stack->way);
+		dir_entry_unlock(stack->dir_entry);
 
                 stack->reply_size = 8;
                 
@@ -1434,7 +1434,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 					ret->port_locked = 0;
 					ret->mshr_locked = 0;
 					if(stack->dir_lock && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 )
-						dir_entry_unlock(mod->dir, stack->set, stack->way);
+						dir_entry_unlock(stack->dir_entry);
 
 					mshr_enqueue(mod->mshr,stack, EV_MOD_VI_FIND_AND_LOCK);
 					return;
@@ -1451,7 +1451,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-		dir_lock = dir_lock_get(mod->dir, stack->set, stack->way);
+		dir_lock = dir_lock_get(mod->dir, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w);
 		/*if (dir_lock->lock && !stack->blocking)
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
@@ -1479,7 +1479,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 		stack->dir_lock = dir_lock;
 
-		if (!dir_entry_lock(mod->dir, stack->set, stack->way, EV_MOD_VI_FIND_AND_LOCK, stack))
+		if (!dir_entry_lock(stack->dir_entry, EV_MOD_VI_FIND_AND_LOCK, stack))
 		{
 			mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way, dir_lock->stack->id);

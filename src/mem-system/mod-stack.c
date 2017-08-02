@@ -27,7 +27,7 @@
 #include "cache.h"
 #include "mem-system.h"
 #include "mod-stack.h"
-#include "coherence_controller.h"
+//#include "coherence_controller.h"
 #include "mshr.h"
 
 long long mod_stack_id;
