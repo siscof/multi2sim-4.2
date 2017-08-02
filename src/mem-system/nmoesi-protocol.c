@@ -3070,10 +3070,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             /* Set owner to 0 for all directory entries not owned by mod. */
                             for (z = 0; z < dir->zsize; z++)
                             {
-                                    dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+                                    dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
                                     if (dir_entry->owner != return_mod->low_net_node->index)
-                                            dir_entry_set_owner(dir, stack->set, stack->way, z,
-                                                    DIR_ENTRY_OWNER_NONE);
+                                            dir_entry_set_owner(dir_entry, DIR_ENTRY_OWNER_NONE);
                             }
                     }
 
@@ -3085,8 +3084,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
                             if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
                                     continue;
-                            dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-                            dir_entry_set_sharer(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                            dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
+                            dir_entry_set_sharer(dir_entry, return_mod->low_net_node->index);
                             if (dir_entry->num_sharers > 1 || stack->nc_write || stack->shared)
                                     shared = 1;
 
@@ -3110,8 +3109,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                                     dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
                                     if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
                                             continue;
-                                    dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-                                    dir_entry_set_owner(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                                    dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
+                                    dir_entry_set_owner(dir_entry, return_mod->low_net_node->index);
                             }
                     }
                 }
@@ -3162,7 +3161,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 
 			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 			assert(dir_entry_tag < stack->tag + target_mod->block_size);
-			dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+			dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
 
 			/* No owner */
 			if (!DIR_ENTRY_VALID_OWNER(dir_entry))
@@ -3283,9 +3282,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				{
 					dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 					assert(dir_entry_tag < stack->tag + target_mod->block_size);
-					dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-					dir_entry_set_owner(dir, stack->set, stack->way, z,
-						DIR_ENTRY_OWNER_NONE);
+					dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
+					dir_entry_set_owner(dir_entry, DIR_ENTRY_OWNER_NONE);
 				}
 
 				stack->reply_size = target_mod->block_size + 8;
@@ -3307,9 +3305,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			{
 				dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 				assert(dir_entry_tag < stack->tag + target_mod->block_size);
-				dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-				dir_entry_set_owner(dir, stack->set, stack->way, z,
-					DIR_ENTRY_OWNER_NONE);
+				dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
+				dir_entry_set_owner(dir_entry, DIR_ENTRY_OWNER_NONE);
 			}
 
 			/*if (stack->peer)
@@ -3802,9 +3799,9 @@ void mod_handler_nmoesi_write_request(int event, void *data)
                             assert(dir_entry_tag < stack->tag + target_mod->block_size);
                             if (dir_entry_tag < stack->addr || dir_entry_tag >= stack->addr + return_mod->block_size)
                                     continue;
-                            dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
-                            dir_entry_set_sharer(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
-                            dir_entry_set_owner(dir, stack->set, stack->way, z, return_mod->low_net_node->index);
+                            dir_entry = dir_entry_get(dir, stack->set, stack->way, z, stack->dir_entry->w);
+                            dir_entry_set_sharer(dir_entry, return_mod->low_net_node->index);
+                            dir_entry_set_owner(dir_entry, return_mod->low_net_node->index);
                             assert(dir_entry->num_sharers == 1);
                     }
 
@@ -3859,7 +3856,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			stack->id, target_mod->name);
 
 		assert(stack->state != cache_block_invalid);
-		assert(!dir_entry_group_shared_or_owned(target_mod->dir, stack->set, stack->way));
+		assert(!dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry->set ,stack->dir_entry->way, stack->dir_entry->w));
 
 		/* Compute reply size */
 		if (stack->state == cache_block_exclusive ||
@@ -4123,13 +4120,13 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 		{
 			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 			assert(dir_entry_tag < stack->tag + target_mod->block_size);
-			dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+			dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z,stack->dir_entry->w);
 			for (i = 0; i < dir->num_nodes; i++)
 			{
 				struct net_node_t *node;
 
 				/* Skip non-sharers and 'except_mod' */
-				if (!dir_entry_is_sharer(dir, stack->set, stack->way, z, i))
+				if (!dir_entry_is_sharer(dir_entry, i))
 					continue;
 
 				node = list_get(target_mod->high_net->node_list, i);
@@ -4138,9 +4135,9 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 					continue;
 
 				/* Clear sharer and owner */
-				dir_entry_clear_sharer(dir, stack->set, stack->way, z, i);
+				dir_entry_clear_sharer(dir_entry, i);
 				if (dir_entry->owner == i)
-					dir_entry_set_owner(dir, stack->set, stack->way, z, DIR_ENTRY_OWNER_NONE);
+					dir_entry_set_owner(dir_entry, DIR_ENTRY_OWNER_NONE);
 
 				/* Send write request upwards if beginning of block */
 				if (dir_entry_tag % sharer->block_size)
@@ -4340,10 +4337,9 @@ void mod_handler_nmoesi_message(int event, void *data)
 				if (stack->addr == stack->tag + z * target_mod->sub_block_size)
 				{
 					/* Clear the owner */
-					dir_entry = dir_entry_get(dir, stack->set, stack->way, z);
+					dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z, stack->dir_entry->w);
 					assert(dir_entry->owner == return_mod->low_net_node->index);
-					dir_entry_set_owner(dir, stack->set, stack->way, z,
-						DIR_ENTRY_OWNER_NONE);
+					dir_entry_set_owner(dir_entry, DIR_ENTRY_OWNER_NONE);
 				}
 			}
 		}
