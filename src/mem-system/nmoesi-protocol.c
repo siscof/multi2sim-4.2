@@ -1109,6 +1109,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			new_stack->uop = stack->uop;
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
+                        new_stack->dir_entry = stack->dir_entry;
 
 			new_stack->event = EV_MOD_NMOESI_EVICT;
 			esim_schedule_mod_stack_event(new_stack, 0);
@@ -1204,7 +1205,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		 * before it becomes non-coherent */
 		else
 		{
-                        if(stack->state == cache_block_invalid && stack->uncacheable){
+                        if(stack->dir_entry->state == cache_block_invalid && stack->uncacheable){
                             new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
                                     EV_MOD_NMOESI_NC_STORE_MISS, stack);
                             new_stack->wavefront = stack->wavefront;
@@ -1488,7 +1489,7 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 		}
 
 		/* Hit */
-		if (stack->state)
+		if (stack->dir_entry->state)
 		{
 			/* block already in the cache */
 			mem_debug("  %lld %lld 0x%x %s useless prefetch - cache hit\n",
@@ -1835,8 +1836,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
          
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-		dir_lock = dir_lock_get(target_mod->dir, stack->set, stack->way, 0);
-                
+		
+                stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
+                stack->dir_entry = stack->cache_block->dir_entry_selected;
+                dir_lock = stack->dir_entry->dir_lock;
 		if (dir_lock->lock && !stack->blocking && stack->hit)
 		{
                         mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
@@ -1960,7 +1963,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
                     
 			/* Find victim */
-			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
+			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
                         if(stack->dir_entry->state)
 			//if(stack->state)
 			{
@@ -2022,7 +2025,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			stack->latencias.lock_dir = stack->client_info->arch->timing->cycle - stack->latencias.start - stack->latencias.queue - stack->latencias.lock_mshr;
 		}
 		/* On miss, evict if victim is a valid block. */
-		if (!stack->uncacheable && !stack->hit && stack->state)
+		if (!stack->uncacheable && !stack->hit && stack->dir_entry->state)
 		{
 			stack->eviction = 1;
 			//mod_get_low_mod(target_mod, stack->tag)
@@ -2034,6 +2037,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			new_stack->set = stack->set;
 			new_stack->way = stack->way;
 			new_stack->event = EV_MOD_NMOESI_EVICT;
+                        new_stack->dir_entry = stack->dir_entry;
 			new_stack->return_mod = target_mod;
 			esim_schedule_mod_stack_event(new_stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
@@ -2159,7 +2163,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		cache_get_block(return_mod->cache, stack->set, stack->way, &stack->tag, &stack->state);
 		assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry->x, stack->dir_entry->y, stack->dir_entry->w));
 		mem_debug("  %lld %lld 0x%x %s evict (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
-			stack->tag, return_mod->name, stack->set, stack->way,
+			stack->tag, return_mod->name, stack->dir_entry->set, stack->dir_entry->way,
 			str_map_value(&cache_block_state_map, stack->state));
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict\"\n",
 			stack->id, return_mod->name);
@@ -2178,6 +2182,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		new_stack->except_mod = NULL;
 		new_stack->set = stack->set;
 		new_stack->way = stack->way;
+                new_stack->dir_entry = stack->dir_entry;
 
 		new_stack->event = EV_MOD_NMOESI_INVALIDATE;
 		esim_schedule_mod_stack_event(new_stack, 0);
@@ -2630,7 +2635,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
 				0, cache_block_invalid);
 
-		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->dir_entry->x, stack->dir_entry->y, stack->dir_entry->w));
+		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->ret_stack->dir_entry->x, stack->ret_stack->dir_entry->y, stack->ret_stack->dir_entry->w));
 		stack->event = EV_MOD_NMOESI_EVICT_FINISH;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_EVICT_FINISH, stack, 0);
@@ -3612,6 +3617,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
                     new_stack->except_mod = return_mod;
                     new_stack->set = stack->set;
                     new_stack->way = stack->way;
+                    new_stack->dir_entry = stack->dir_entry;
                     //ew_stack->peer = mod_stack_set_peer(stack->peer, stack->state);
                     new_stack->event = EV_MOD_NMOESI_INVALIDATE;
                     esim_schedule_mod_stack_event(new_stack, 0);

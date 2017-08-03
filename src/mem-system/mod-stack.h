@@ -98,6 +98,7 @@ struct mod_stack_t
 	int work_group_id_in_cu;
 	struct dir_lock_t *dir_lock;
         struct dir_entry_t *dir_entry;
+        struct cache_block_t *cache_block;
 
 	struct linked_list_t *event_queue;
 	void *event_queue_item;

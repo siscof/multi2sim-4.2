@@ -92,13 +92,21 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                                         dir_entry->owner = DIR_ENTRY_OWNER_NONE;
                                         dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
                                         dir_entry->dir_lock = dir_lock;
+                                        dir_entry->set = x;
+                                        dir_entry->way = y;
                                         dir_entry->w = w;
                                         dir_entry->x = x;
                                         dir_entry->y = y;
                                         dir_entry->z = z;
                                         list_add(dir_lock->dir_entry_list, dir_entry);
-                                        cache_block = cache_get_block_new(mod->cache,x,y);
-                                        cache_block->dir_entries = dir_entry_get(dir, x, y, 0, 0);
+                                        if(z == 0)
+                                        {
+                                            cache_block = cache_get_block_new(mod->cache,x,y);
+                                            cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
+                                            if(w == 0)
+                                                cache_block->dir_entry_selected = dir_entry;
+                                        }
+                                        
                                 }
                         }
 		}

@@ -119,10 +119,10 @@ void mod_free(struct mod_t *mod)
 {
 	linked_list_free(mod->low_mod_list);
 	linked_list_free(mod->high_mod_list);
+        if (mod->dir)
+		dir_free(mod->dir);
 	if (mod->cache)
 		cache_free(mod->cache);
-	if (mod->dir)
-		dir_free(mod->dir);
 	if (mod->mshr)
 		mshr_free(mod->mshr);
 
@@ -441,7 +441,7 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 {
 	struct cache_t *cache = mod->cache;
 	struct cache_block_t *blk;
-	struct dir_lock_t *dir_lock;
+	//struct dir_lock_t *dir_lock;
 
 	int set;
 	int way;
@@ -466,7 +466,7 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 
 	for (way = 0; way < cache->assoc; way++)
 	{
-            struct dir_entry_t *dir_entry;
+            //struct dir_entry_t *dir_entry;
             blk = &cache->sets[set].blocks[way];
             if (blk->dir_entry_selected->tag == tag && blk->dir_entry_selected->state)
                 break;
@@ -476,7 +476,7 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
                     break;
             }
                     
-            for(int i = 0; i < cache->dir_entry_per_line; i++)
+            /*for(int i = 0; i < cache->dir_entry_per_line; i++)
             {
 		dir_entry = &cache->sets[set].blocks[way].dir_entries[i];
                 assert(dir_entry->z == 0);
@@ -489,7 +489,7 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 			if (dir_lock->lock)
 				break;
 		}
-            }
+            }*/
                 
 	}
 
