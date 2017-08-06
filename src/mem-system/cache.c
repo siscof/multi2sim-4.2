@@ -237,6 +237,58 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 	return 1;
 }
 
+void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int state)
+{
+    int set = stack->dir_entry->set;
+    int way = stack->dir_entry->way;
+    int tag = stack->tag;
+	assert(set >= 0 && set < cache->num_sets);
+	assert(way >= 0 && way < cache->assoc);
+
+	mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
+			cache->name, set, way, tag,
+			str_map_value(&cache_block_state_map, state));
+
+	if (cache->policy == cache_policy_fifo
+		&& cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
+		cache_update_waylist(&cache->sets[set],
+			&cache->sets[set].blocks[way],
+			cache_waylist_head);
+
+	if(tag == stack->dir_entry->transient_tag)
+		stack->dir_entry->transient_tag = -1;
+        
+        assert(stack->dir_entry->transient_tag == -1)
+        assert(stack->dir_entry->state == cache_block_invalid)
+
+	stack->dir_entry->tag = tag;
+	stack->dir_entry->state = state;
+	cache->sets[set].blocks[way].dirty_mask = 0;
+	cache->sets[set].blocks[way].valid_mask = 0;
+        
+        //hacer evict!!! de dir_entry_selected
+        if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+        {
+            if(cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock)
+            {
+            	struct mod_stack_t *new_stack = mod_stack_create(stack->id, stack->target_mod, 0, NULL, NULL);
+		new_stack->retry = stack->retry;
+		new_stack->uop = stack->uop;
+		new_stack->set = stack->set;
+		new_stack->way = stack->way;
+                new_stack->dir_entry = stack->dir_entry;
+
+		new_stack->event = EV_MOD_NMOESI_INVALIDATE;
+		esim_schedule_mod_stack_event(new_stack, 0);
+            }else{
+                
+            }
+        }
+        
+        
+        cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry;
+}
+
 
 /* Set the tag and state of a block.
  * If replacement policy is FIFO, update linked list in case a new

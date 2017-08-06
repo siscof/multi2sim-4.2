@@ -30,7 +30,9 @@ struct dir_lock_t
 	int lock;
 	//long long stack_id;
 	struct mod_stack_t *stack;
-	struct mod_stack_t *lock_queue;
+	//struct mod_stack_t *lock_queue;
+        struct list_t *lock_queue_up_down;
+        struct list_t *lock_queue_down_up;
         //struct dir_entry_t *dir_entry;
         struct list_t *dir_entry_list;
         struct dir_t *dir;

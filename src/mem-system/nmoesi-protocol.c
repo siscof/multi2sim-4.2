@@ -1300,8 +1300,10 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* Set block state to excl/shared depending on return var 'shared'.
 		 * Also set the tag of the block. */
 		if(!stack->uncacheable)
-                    cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
-			cache_block_noncoherent);
+                {
+                    cache_set_block_new(target_mod->cache, stack, cache_block_noncoherent);
+                    
+                }
 
 		if (stack->mshr_locked != 0)
 		{
@@ -1836,9 +1838,41 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
          
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-		
-                stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
-                stack->dir_entry = stack->cache_block->dir_entry_selected;
+                struct dir_entry_t *dir_entry;
+                if(!stack->hit)
+                {
+                    dir_entry = stack->cache_block->dir_entry_selected;
+                    if(dir_entry->dir_lock->lock)
+                    {
+                        int w;
+                        struct dir_entry_t *dir_entry_aux;
+                        for(int i = 1; i < target_mod->dir->wsize ;i++)
+                        {
+                            w = (dir_entry->w + i) % target_mod->dir->wsize;
+                            dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                            if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                            {
+                                dir_entry = dir_entry_aux;
+                                break;
+                            }
+                        }
+                    }
+                }else{
+                    dir_entry = stack->cache_block->dir_entry_selected;
+                    int w;
+                    for(w = 0; w < target_mod->dir->wsize ;w++)
+                    {
+                        dir_entry = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                        if(dir_entry->tag == stack->tag || dir_entry->transient_tag == stack->tag)
+                        {
+                            break;
+                        }
+                    }
+                    assert(w < target_mod->dir->wsize);
+                }
+                
+                stack->dir_entry = dir_entry;
+                //stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
                 dir_lock = stack->dir_entry->dir_lock;
 		if (dir_lock->lock && !stack->blocking && stack->hit)
 		{
@@ -2153,6 +2187,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 	uint32_t dir_entry_tag, z;
 
+        if (event == EV_MOD_NMOESI_EVICT_FIND_AND_LOCK)
+	{
+            if miss 
+                mod_stack_return(stack);
+        }
 
 	if (event == EV_MOD_NMOESI_EVICT)
 	{
@@ -4333,6 +4372,24 @@ void mod_handler_nmoesi_message(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_MESSAGE_REPLY, stack, 0);
 			return;
 		}
+                if (stack->message == message_evict_block)
+                {
+                    if(stack->err)
+                    {
+                        stack->err = 0;
+			stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
+			stack->find_and_lock_return_event = EV_MOD_NMOESI_MESSAGE_ACTION;
+                        esim_schedule_mod_stack_event(stack, 5);                        
+                    }
+                    
+                    if(stack->hit)
+                    {
+                        stack->event = EV_MOD_NMOESI_EVICT;
+                        esim_schedule_mod_stack_event(new_stack, 0);
+                    }else{
+                        mod_stack_return(stack);
+                    } 
+                }
 		if (stack->message == message_clear_owner)
 		{
 			/* Remove owner */
