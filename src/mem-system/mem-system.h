@@ -27,6 +27,18 @@
  * Memory System Object
  */
 
+enum cache_block_state_t
+{
+	cache_block_invalid = 0,
+	cache_block_noncoherent,
+	cache_block_modified,
+	cache_block_owned,
+	cache_block_exclusive,
+	cache_block_shared,
+	cache_block_valid,
+	cache_block_state_size
+};
+
 struct mem_system_t
 {
 	/* List of modules and networks */

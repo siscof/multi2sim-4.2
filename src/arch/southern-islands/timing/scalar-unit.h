@@ -20,6 +20,8 @@
 #ifndef ARCH_SOUTHERN_ISLANDS_TIMING_SCALAR_UNIT_H
 #define ARCH_SOUTHERN_ISLANDS_TIMING_SCALAR_UNIT_H
 
+#include <mem-system/directory.h>
+
 struct si_scalar_unit_t
 {
 	struct list_t *issue_buffer;  /* Issued instructions */

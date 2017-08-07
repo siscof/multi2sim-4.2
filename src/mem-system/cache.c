@@ -19,6 +19,7 @@
 #include <assert.h>
 
 #include <lib/esim/trace.h>
+#include <lib/esim/esim.h>
 #include <lib/mhandle/mhandle.h>
 #include <lib/util/misc.h>
 #include <lib/util/string.h>
@@ -26,7 +27,7 @@
 #include "cache.h"
 #include "mem-system.h"
 #include "prefetcher.h"
-
+#include "nmoesi-protocol.h"
 
 /*
  * Public Variables
@@ -258,35 +259,35 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 	if(tag == stack->dir_entry->transient_tag)
 		stack->dir_entry->transient_tag = -1;
         
-        assert(stack->dir_entry->transient_tag == -1)
-        assert(stack->dir_entry->state == cache_block_invalid)
+        assert(stack->dir_entry->transient_tag == -1);
+        assert(stack->dir_entry->state == cache_block_invalid);
 
-	stack->dir_entry->tag = tag;
+        if(state != cache_block_invalid)
+            stack->dir_entry->tag = tag;
+        
 	stack->dir_entry->state = state;
 	cache->sets[set].blocks[way].dirty_mask = 0;
 	cache->sets[set].blocks[way].valid_mask = 0;
         
         //hacer evict!!! de dir_entry_selected
-        if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+        if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry 
+                && cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
         {
-            if(cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock)
-            {
-            	struct mod_stack_t *new_stack = mod_stack_create(stack->id, stack->target_mod, 0, NULL, NULL);
-		new_stack->retry = stack->retry;
-		new_stack->uop = stack->uop;
-		new_stack->set = stack->set;
-		new_stack->way = stack->way;
-                new_stack->dir_entry = stack->dir_entry;
+            struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, 0, NULL, NULL);
+            new_stack1->set = stack->set;
+            new_stack1->way = stack->way;
+            new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;  
 
-		new_stack->event = EV_MOD_NMOESI_INVALIDATE;
-		esim_schedule_mod_stack_event(new_stack, 0);
-            }else{
-                
-            }
-        }
-        
-        
-        cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry;
+            struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, stack->target_mod, 0, EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
+            new_stack2->set = new_stack1->set;
+            new_stack2->way = new_stack1->way;
+            new_stack2->dir_entry = new_stack1->dir_entry;
+
+            new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
+            esim_schedule_mod_stack_event(new_stack2, 0);
+
+            cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
+        }     
 }
 
 

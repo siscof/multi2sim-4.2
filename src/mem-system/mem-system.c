@@ -309,6 +309,10 @@ void mem_system_init(void)
 	EV_MOD_NMOESI_FIND_AND_LOCK_FINISH = esim_register_event_with_name(mod_handler_nmoesi_find_and_lock,
 			mem_domain_index, "mod_nmoesi_find_and_lock_finish");
 
+        EV_MOD_NMOESI_EVICT_CHECK = esim_register_event_with_name(mod_handler_nmoesi_evict,
+			mem_domain_index, "mod_nmoesi_evict_check");
+        EV_MOD_NMOESI_EVICT_LOCK_DIR = esim_register_event_with_name(mod_handler_nmoesi_evict,
+			mem_domain_index, "mod_nmoesi_evict_lock_dir");
 	EV_MOD_NMOESI_EVICT = esim_register_event_with_name(mod_handler_nmoesi_evict,
 			mem_domain_index, "mod_nmoesi_evict");
 	EV_MOD_NMOESI_EVICT_INVALID = esim_register_event_with_name(mod_handler_nmoesi_evict,

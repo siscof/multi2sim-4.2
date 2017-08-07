@@ -559,7 +559,7 @@ void add_eviction(int level)
 
 void add_cache_states(int state, int level)
 {
-	mem_stats.mod_level[level].cache_state[state]++;
+	//mem_stats.mod_level[level].cache_state[state]++;
 }
 
 void add_inst_to_vmb()
@@ -710,7 +710,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     }
 }
 
-print_cache_states(mem_stats.mod_level[1].cache_state);
+//print_cache_states(mem_stats.mod_level[1].cache_state);
 
 fran_debug_ipc("%lld ",gpu_stats.vmb_inst_counter);
 gpu_stats.vmb_inst_counter = 0;

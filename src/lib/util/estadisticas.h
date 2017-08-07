@@ -3,7 +3,7 @@
 #define LIB_UTIL_ESTADISTICAS_H
 
 #include <mem-system/mem-system.h>
-#include <mem-system/directory.h>
+//#include <mem-system/directory.h>
 #include <mem-system/module.h>
 #include <lib/util/debug.h>
 #include <arch/southern-islands/emu/emu.h>
@@ -11,7 +11,7 @@
 #include <arch/southern-islands/timing/uop.h>
 #include <arch/southern-islands/timing/wavefront-pool.h>
 #include <arch/southern-islands/emu/wavefront.h>
-#include <mem-system/cache.h>
+//#include <mem-system/cache.h>
 
 #define cache_hit 1
 #define cache_accesses 0

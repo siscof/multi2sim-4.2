@@ -87,8 +87,8 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                                 dir_lock = dir_lock_get(dir,x,y,w);
                                 dir_lock->dir_entry_list = list_create();
                                 dir_lock->dir = dir;
-                                dir_lock->lock_queue_up_down = lock_queue_up_down;
-                                dir_lock->lock_queue_down_up = lock_queue_down_up;
+                                dir_lock->lock_list_up_down = lock_queue_up_down;
+                                dir_lock->lock_list_down_up = lock_queue_down_up;
                                 assert(zsize == 1);
                                 for (z = 0; z < zsize; z++)
                                 {
@@ -139,8 +139,8 @@ void dir_free(struct dir_t *dir)
                                         list_free(dir_entry->dir_lock->dir_entry_list);
                                         if(w == 0)
                                         {
-                                            list_free(dir_entry->dir_lock->dir_entry_list_up_down);  
-                                            list_free(dir_entry->dir_lock->dir_entry_list_down_up);
+                                            list_free(dir_entry->dir_lock->lock_list_up_down);  
+                                            list_free(dir_entry->dir_lock->lock_list_down_up);
                                         }
                                         free(dir_entry->sharer);
                                 }
@@ -285,9 +285,9 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
         
         if(stack->request_dir == mod_request_down_up)
         {
-            lock_queue = dir_lock->lock_queue_down_up;
+            lock_queue = dir_lock->lock_list_down_up;
         }else{
-            lock_queue = dir_lock->lock_queue_up_down;
+            lock_queue = dir_lock->lock_list_up_down;
         }
         
 	/* If the entry is already locked, enqueue a new waiter and
@@ -295,7 +295,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	if (dir_lock->lock)
 	{
 		/* Enqueue the stack to the end of the lock queue */
-		stack->dir_lock_next = NULL;
+		//stack->dir_lock_next = NULL;
 		stack->dir_lock_event = event;
                 list_add(lock_queue,stack);
                 mem_debug("    0x%x access suspended\n", stack->tag);
@@ -329,13 +329,13 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
         dir_lock = dir_entry->dir_lock;
         
 	/* Wake up first waiter */
-        if(list_count(dir_lock->lock_queue_down_up) > 0)
+        if(list_count(dir_lock->lock_list_down_up) > 0)
         {
-            stack = list_pop(dir_lock->lock_queue_down_up);
+            stack = list_pop(dir_lock->lock_list_down_up);
         }
-        else if(list_count(dir_lock->lock_queue_up_down) > 0)
+        else if(list_count(dir_lock->lock_list_up_down) > 0)
         {
-            stack = list_pop(dir_lock->lock_queue_up_down); 
+            stack = list_pop(dir_lock->lock_list_up_down); 
         }
         
         
@@ -347,17 +347,17 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 		{
                     struct mod_stack_t *stack_aux;
 			mem_debug("    A-%lld resumed", stack->id);
-			if (list_count(dir_lock->lock_queue_down_up) > 0 || list_count(dir_lock->lock_queue_up_down) > 0)
+			if (list_count(dir_lock->lock_list_down_up) > 0 || list_count(dir_lock->lock_list_up_down) > 0)
 			{
 				mem_debug(" - {");
-				for (int i = 0; i < list_count(dir_lock->lock_queue_down_up); i++)
+				for (int i = 0; i < list_count(dir_lock->lock_list_down_up); i++)
                                 {
-                                        stack_aux = list_get(dir_lock->lock_queue_down_up,i);
+                                        stack_aux = list_get(dir_lock->lock_list_down_up,i);
 					mem_debug(" A-%lld", stack_aux->id);
                                 }
-                                for (int i = 0; i < list_count(dir_lock->lock_queue_up_down); i++)
+                                for (int i = 0; i < list_count(dir_lock->lock_list_up_down); i++)
                                 {
-                                        stack_aux = list_get(dir_lock->lock_queue_up_down,i);
+                                        stack_aux = list_get(dir_lock->lock_list_up_down,i);
 					mem_debug(" A-%lld", stack_aux->id);
                                 }
 				mem_debug(" } still waiting");

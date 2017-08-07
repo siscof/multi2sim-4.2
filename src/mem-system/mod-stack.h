@@ -20,8 +20,8 @@
 #ifndef MEM_SYSTEM_MOD_STACK_H
 #define MEM_SYSTEM_MOD_STACK_H
 
-#include "module.h"
 #include <lib/util/estadisticas.h>
+#include "module.h"
 #include <stdbool.h>
 
 

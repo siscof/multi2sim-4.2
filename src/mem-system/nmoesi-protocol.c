@@ -86,6 +86,8 @@ int EV_MOD_NMOESI_FIND_AND_LOCK_PORT;
 int EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
 int EV_MOD_NMOESI_FIND_AND_LOCK_FINISH;
 
+int EV_MOD_NMOESI_EVICT_CHECK;
+int EV_MOD_NMOESI_EVICT_LOCK_DIR;
 int EV_MOD_NMOESI_EVICT;
 int EV_MOD_NMOESI_EVICT_INVALID;
 int EV_MOD_NMOESI_EVICT_ACTION;
@@ -1836,6 +1838,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		}
 		assert(stack->way >= 0);
          
+                stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
                 struct dir_entry_t *dir_entry;
@@ -2187,12 +2190,48 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 	uint32_t dir_entry_tag, z;
 
-        if (event == EV_MOD_NMOESI_EVICT_FIND_AND_LOCK)
+        if (event == EV_MOD_NMOESI_EVICT_CHECK)
 	{
-            if miss 
-                mod_stack_return(stack);
+            mem_debug("  %lld %lld 0x%x %s evict check (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
+			stack->tag, return_mod->name, stack->dir_entry->set, stack->dir_entry->way,
+			str_map_value(&cache_block_state_map, stack->state));
+            if(stack->err)
+            {        
+                stack->err = 0;
+                struct mod_stack_t *new_stack = mod_stack_create(stack->id, stack->target_mod, 0, EV_MOD_NMOESI_EVICT_CHECK, stack);
+                new_stack->set = stack->set;
+                new_stack->way = stack->way;
+                new_stack->return_mod = stack->target_mod;
+                new_stack->dir_entry = stack->dir_entry;
+               
+                new_stack->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
+                esim_schedule_mod_stack_event(new_stack, 0);
+                return;
+            }           
+            mod_stack_return(stack);
+            return;
         }
-
+        if(event == EV_MOD_NMOESI_EVICT_LOCK_DIR)
+        {
+            mem_debug("  %lld %lld 0x%x %s evict lock dir (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
+			stack->tag, return_mod->name, stack->dir_entry->set, stack->dir_entry->way,
+			str_map_value(&cache_block_state_map, stack->state));
+            assert(!stack->dir_entry->dir_lock->lock);
+            if(stack->dir_entry->tag != stack->tag)
+            {
+                    mod_stack_return(stack);
+                    return;
+            }
+            
+            if(dir_entry_lock(stack->dir_entry, EV_MOD_NMOESI_EVICT_LOCK_DIR, stack))
+            {
+                assert(stack->dir_entry->dir_lock->stack == stack);
+                stack->event = EV_MOD_NMOESI_EVICT;
+                esim_schedule_mod_stack_event(stack, 0);
+            }
+            return;
+            
+        }
 	if (event == EV_MOD_NMOESI_EVICT)
 	{
 		/* Default return value */
@@ -4372,7 +4411,7 @@ void mod_handler_nmoesi_message(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_MESSAGE_REPLY, stack, 0);
 			return;
 		}
-                if (stack->message == message_evict_block)
+                /*if (stack->message == message_evict_block)
                 {
                     if(stack->err)
                     {
@@ -4389,7 +4428,7 @@ void mod_handler_nmoesi_message(int event, void *data)
                     }else{
                         mod_stack_return(stack);
                     } 
-                }
+                }*/
 		if (stack->message == message_clear_owner)
 		{
 			/* Remove owner */

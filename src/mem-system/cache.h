@@ -20,6 +20,8 @@
 #ifndef MEM_SYSTEM_CACHE_H
 #define MEM_SYSTEM_CACHE_H
 
+#include "mod-stack.h"
+#include "directory.h"
 
 extern struct str_map_t cache_policy_map;
 extern struct str_map_t cache_block_state_map;
@@ -32,18 +34,6 @@ enum cache_policy_t
         cache_policy_lru_base,
 	cache_policy_fifo,
 	cache_policy_random
-};
-
-enum cache_block_state_t
-{
-	cache_block_invalid = 0,
-	cache_block_noncoherent,
-	cache_block_modified,
-	cache_block_owned,
-	cache_block_exclusive,
-	cache_block_shared,
-	cache_block_valid,
-	cache_block_state_size
 };
 
 struct cache_block_t
@@ -106,6 +96,7 @@ void cache_decode_address(struct cache_t *cache, unsigned int addr,
 int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int *pway, 
 	int *state_ptr);
 void cache_set_block(struct cache_t *cache, int set, int way, int tag, int state);
+void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int state);
 void cache_get_block(struct cache_t *cache, int set, int way, int *tag_ptr, int *state_ptr);
 struct cache_block_t *cache_get_block_new(struct cache_t *cache, int set, int way);
 
