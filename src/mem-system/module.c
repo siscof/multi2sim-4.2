@@ -509,6 +509,74 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].dir_entry_selected->state);
 	return 1;
 }
+int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
+{
+	struct cache_t *cache = mod->cache;
+	
+	int set;
+	int way;
+	int tag;
+
+	/* A transient tag is considered a hit if the block is
+	 * locked in the corresponding directory. */
+	tag = stack->addr & ~cache->block_mask;
+	if (mod->range_kind == mod_range_interleaved)
+	{
+		unsigned int num_mods = mod->range.interleaved.mod;
+		set = ((tag >> cache->log_block_size) / num_mods) % cache->num_sets;
+	}
+	else if (mod->range_kind == mod_range_bounds)
+	{
+		set = (tag >> cache->log_block_size) % cache->num_sets;
+	}
+	else
+	{
+		panic("%s: invalid range kind (%d)", __FUNCTION__, mod->range_kind);
+	}
+        //assert(stack->dir_entry == NULL);
+	struct dir_entry_t *dir_entry_found = NULL;
+        for (way = 0; way < cache->assoc; way++)
+	{
+            struct dir_entry_t *dir_entry;
+         //   blk = &cache->sets[set].blocks[way];
+            for(int  w = 0; w < cache->dir_entry_per_line; w++)
+            {
+                dir_entry = dir_entry_get(mod->dir, set, way, 0, w);
+                          
+            
+                if (dir_entry->tag == tag && dir_entry->state)
+                {
+                    dir_entry_found = dir_entry;
+                    break;
+                }
+                if (dir_entry->transient_tag == tag && dir_entry->dir_lock->lock)
+                {
+                    dir_entry_found = dir_entry;
+                    break;
+                }
+            }        
+            if(dir_entry_found != NULL)
+                break;
+	}
+        if(dir_entry_found)
+            stack->dir_entry = dir_entry_found;
+        
+	stack->set = set;
+	stack->tag = tag;
+
+	/* Miss */
+	if (way == cache->assoc)
+	{
+		//PTR_ASSIGN(way_ptr, 0);
+		//PTR_ASSIGN(state_ptr, 0);
+		return 0;
+	}
+
+	/* Hit */
+	stack->way = way;
+	stack->state = cache->sets[set].blocks[way].dir_entry_selected->state;
+        return 1;
+}
 
 void mod_block_set_prefetched(struct mod_t *mod, unsigned int addr, int val)
 {

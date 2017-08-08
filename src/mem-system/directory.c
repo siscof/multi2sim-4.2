@@ -108,7 +108,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                                         if(z == 0)
                                         {
                                             cache_block = cache_get_block_new(mod->cache,x,y);
-                                            cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
+                                            //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
                                             if(w == 0)
                                                 cache_block->dir_entry_selected = dir_entry;
                                         }

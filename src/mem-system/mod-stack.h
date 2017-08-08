@@ -81,6 +81,7 @@ struct mod_stack_t
         bool uncacheable;
         bool allow_cache_by_passing;
 
+        struct mod_stack_t *src_stack;
 	int find_and_lock_return_event;
 
 	struct latenciometro latencias;

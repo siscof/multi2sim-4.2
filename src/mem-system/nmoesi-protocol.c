@@ -500,9 +500,11 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Set block state to excl/shared depending on return var 'shared'.
 		 * Also set the tag of the block. */
                 if(!stack->uncacheable)
-                    cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
-			stack->shared ? cache_block_shared : cache_block_exclusive);
-
+                {
+                    //cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
+		//	stack->shared ? cache_block_shared : cache_block_exclusive);
+                    cache_set_block_new(target_mod->cache, stack, stack->shared ? cache_block_shared : cache_block_exclusive);
+                }
 		/* Continue */
 		stack->event = EV_MOD_NMOESI_LOAD_UNLOCK;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -809,8 +811,9 @@ void mod_handler_nmoesi_store(int event, void *data)
 		}
 
 		/* Update tag/state and unlock */
-		cache_set_block(target_mod->cache, stack->set, stack->way,
-			stack->tag, cache_block_modified);
+		//cache_set_block(target_mod->cache, stack->set, stack->way,
+		//	stack->tag, cache_block_modified);
+                cache_set_block_new(target_mod->cache, stack, cache_block_modified);
                 
 		dir_entry_unlock(stack->dir_entry);
 
@@ -1304,7 +1307,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if(!stack->uncacheable)
                 {
                     cache_set_block_new(target_mod->cache, stack, cache_block_noncoherent);
-                    
+                   
                 }
 
 		if (stack->mshr_locked != 0)
@@ -1546,8 +1549,10 @@ void mod_handler_nmoesi_prefetch(int event, void *data)
 
 		/* Set block state to excl/shared depending on return var 'shared'.
 		 * Also set the tag of the block. */
-		cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
-			stack->shared ? cache_block_shared : cache_block_exclusive);
+		//cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
+		//	stack->shared ? cache_block_shared : cache_block_exclusive);
+                    cache_set_block_new(target_mod->cache, stack,
+                            stack->shared ? cache_block_shared : cache_block_exclusive);
 
 		/* Mark the prefetched block as prefetched. This is needed to let the
 		 * prefetcher know about an actual access to this block so that it
@@ -1690,9 +1695,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                     //stack->port_locked = 1;
 
 		/* Look for block. */
-		stack->hit = mod_find_block(target_mod, stack->addr, &stack->set,
-			&stack->way, &stack->tag, &stack->state);
-
+		//stack->hit = mod_find_block(target_mod, stack->addr, &stack->set,
+		//	&stack->way, &stack->tag, &stack->state);
+                stack->hit = mod_find_block_new(target_mod, stack);
 		//fran
 		add_cache_states(stack->state, target_mod->level);
 
@@ -2141,8 +2146,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
                     assert(!stack->uncacheable);
 			stack->state = cache_block_exclusive;
-			cache_set_block(target_mod->cache, stack->set, stack->way,
-				stack->tag, stack->state);
+			//cache_set_block(target_mod->cache, stack->set, stack->way,
+			//	stack->tag, stack->state);
+                        cache_set_block_new(target_mod->cache, stack, stack->state);
 		}
 
 		if(!stack->retry && (stack->origin || !stack->blocking))
@@ -2193,12 +2199,12 @@ void mod_handler_nmoesi_evict(int event, void *data)
         if (event == EV_MOD_NMOESI_EVICT_CHECK)
 	{
             mem_debug("  %lld %lld 0x%x %s evict check (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
-			stack->tag, return_mod->name, stack->dir_entry->set, stack->dir_entry->way,
+			stack->tag, target_mod->name, stack->dir_entry->set, stack->dir_entry->way,
 			str_map_value(&cache_block_state_map, stack->state));
             if(stack->err)
             {        
                 stack->err = 0;
-                struct mod_stack_t *new_stack = mod_stack_create(stack->id, stack->target_mod, 0, EV_MOD_NMOESI_EVICT_CHECK, stack);
+                struct mod_stack_t *new_stack = mod_stack_create(stack->id, mod_get_low_mod(stack->target_mod,stack->addr), stack->addr, EV_MOD_NMOESI_EVICT_CHECK, stack);
                 new_stack->set = stack->set;
                 new_stack->way = stack->way;
                 new_stack->return_mod = stack->target_mod;
@@ -2250,6 +2256,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		stack->src_set = stack->set;
 		stack->src_way = stack->way;
 		stack->src_tag = stack->tag;
+                stack->src_stack = mod_stack_create(stack->id, stack->target_mod, stack->addr, 0, NULL);
+                stack->src_stack->dir_entry = stack->dir_entry; 
 		stack->target_mod = mod_get_low_mod(return_mod, stack->tag);
 
 		/* Send write request to all sharers */
@@ -2279,8 +2287,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		 * and finish. */
 		if (return_mod->kind == mod_kind_main_memory)
 		{
-			cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
-				0, cache_block_invalid);
+			//cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
+			//	0, cache_block_invalid);
+                        cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
 			stack->event = EV_MOD_NMOESI_EVICT_FINISH;
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_EVICT_FINISH, stack, 0);
@@ -2477,8 +2486,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
     	}
 			if (stack->state == cache_block_exclusive)
 			{
-				cache_set_block(target_mod->cache, stack->set, stack->way,
-					stack->tag, cache_block_modified);
+				//cache_set_block(target_mod->cache, stack->set, stack->way,
+				//	stack->tag, cache_block_modified);
+                                cache_set_block_new(target_mod->cache, stack, cache_block_modified);
 			}
 			else if (stack->state == cache_block_modified)
 			{
@@ -2615,8 +2625,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 			if (stack->state == cache_block_exclusive)
 			{
-				cache_set_block(target_mod->cache, stack->set, stack->way,
-					stack->tag, cache_block_modified);
+				//cache_set_block(target_mod->cache, stack->set, stack->way,
+				//	stack->tag, cache_block_modified);
+                                cache_set_block_new(target_mod->cache, stack, cache_block_modified);
 			}
 			else if (stack->state == cache_block_owned ||
 				stack->state == cache_block_modified)
@@ -2628,6 +2639,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			{
 				cache_set_block(target_mod->cache, stack->set, stack->way,
 					stack->tag, cache_block_noncoherent);
+                                cache_set_block_new(target_mod->cache, stack, cache_block_noncoherent);
 			}
 			else
 			{
@@ -2710,9 +2722,12 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 		/* Invalidate block if there was no error. */
 		if (!stack->err)
-			cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
-				0, cache_block_invalid);
-
+                {
+			//cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
+			//	0, cache_block_invalid);
+                        cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
+                }
+                
 		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->ret_stack->dir_entry->x, stack->ret_stack->dir_entry->y, stack->ret_stack->dir_entry->w));
 		stack->event = EV_MOD_NMOESI_EVICT_FINISH;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -2726,7 +2741,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, return_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_finish\"\n",
 			stack->id, return_mod->name);
-
+                free(stack->src_stack);
 		mod_stack_return(stack);
 		return;
 	}
@@ -3040,9 +3055,12 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		 * that comes from a read request into the next cache level.
 		 * Also set the tag of the block. */
                 if(!stack->uncacheable)
-                    cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
-			stack->shared ? cache_block_shared : cache_block_exclusive);
-
+                {
+                    //cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
+		//	stack->shared ? cache_block_shared : cache_block_exclusive);
+                    cache_set_block_new(target_mod->cache, stack, stack->shared ? cache_block_shared : cache_block_exclusive);
+                }
+                
 		stack->event = EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH, stack, 0);
@@ -3356,8 +3374,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			else
 			{*/
 				/* Set state to shared */
-				cache_set_block(target_mod->cache, stack->set, stack->way,
-					stack->tag, cache_block_shared);
+				//cache_set_block(target_mod->cache, stack->set, stack->way,
+				//	stack->tag, cache_block_shared);
+                                cache_set_block_new(target_mod->cache, stack, cache_block_shared);
 
 				/* State is changed to shared, set owner of sub-blocks to 0. */
 				dir = target_mod->dir;
@@ -3379,8 +3398,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->reply_size = 8;
 
 			/* Set state to shared */
-			cache_set_block(target_mod->cache, stack->set, stack->way,
-				stack->tag, cache_block_shared);
+			//cache_set_block(target_mod->cache, stack->set, stack->way,
+			//	stack->tag, cache_block_shared);
+                        cache_set_block_new(target_mod->cache, stack, cache_block_shared);
 
 			/* State is changed to shared, set owner of sub-blocks to 0. */
 			dir = target_mod->dir;
@@ -3462,8 +3482,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				}
 
 				/* Set block to shared */
-				cache_set_block(target_mod->cache, stack->set, stack->way,
-					stack->tag, cache_block_shared);
+				//cache_set_block(target_mod->cache, stack->set, stack->way,
+				//	stack->tag, cache_block_shared);
+                                cache_set_block_new(target_mod->cache, stack, cache_block_shared);
 			//}
 		}
 		else
@@ -3890,8 +3911,9 @@ void mod_handler_nmoesi_write_request(int event, void *data)
                     }
 
                     /* Set state to exclusive */
-                    cache_set_block(target_mod->cache, stack->set, stack->way,
-                            stack->tag, cache_block_exclusive);
+                    //cache_set_block(target_mod->cache, stack->set, stack->way,
+                    //        stack->tag, cache_block_exclusive);
+                    cache_set_block_new(target_mod->cache, stack, cache_block_exclusive);
 
                     /* If blocks were sent directly to the peer, the reply size would
                      * have been decreased.  Based on the final size, we can tell whether
@@ -4012,8 +4034,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		}
 
 		/* Set state to I, unlock*/
-		cache_set_block(target_mod->cache, stack->set, stack->way, 0, cache_block_invalid);
-		
+		//cache_set_block(target_mod->cache, stack->set, stack->way, 0, cache_block_invalid);
+		cache_set_block_new(target_mod->cache, stack, cache_block_invalid);
                 if(stack->dir_lock)
                     dir_entry_unlock(stack->dir_entry);
                 else
@@ -4266,9 +4288,11 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 			stack->id, target_mod->name);
 
 		if (stack->reply == reply_ack_data)
-			cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
-				cache_block_modified);
-
+                {
+			//cache_set_block(target_mod->cache, stack->set, stack->way, stack->tag,
+			//	cache_block_modified);
+                        cache_set_block_new(target_mod->cache, stack, cache_block_modified);
+                }
 		/* Ignore while pending */
 		assert(stack->pending > 0);
 		stack->pending--;
