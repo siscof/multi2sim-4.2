@@ -673,7 +673,7 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 		stack = linked_list_get(dram_system->pending_reads);
 		if (stack->addr == address)
 		{
-			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
+			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->addr, stack->target_mod->dram_system->name);
 			stack->main_memory_accessed = 1;
 
 			if(stack->uop)
@@ -724,7 +724,7 @@ void main_memory_write_callback(void *payload, unsigned int id, uint64_t address
 		stack = linked_list_get(dram_system->pending_reads);
 		if (stack->addr == address)
 		{
-			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
+			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->addr, stack->target_mod->dram_system->name);
 			stack->main_memory_accessed = 1;
 
 			if(stack->uop)

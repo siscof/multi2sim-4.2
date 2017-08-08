@@ -242,11 +242,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 {
         int set = stack->dir_entry->set;
         int way = stack->dir_entry->way;
-        int tag;
-        if(stack->tag == -1)
-            tag = stack->addr & ~cache->block_mask;
-        else
-            tag = stack->tag;
+        int tag = stack->addr & ~cache->block_mask;
     
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
@@ -283,17 +279,15 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             int addr = cache->sets[set].blocks[way].dir_entry_selected->tag;
             struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, addr, 0, NULL);
             //new_stack1->return_mod = target_mod;
-            new_stack1->dir_entry = stack->dir_entry;
-            new_stack1->set = stack->set;
-            new_stack1->way = stack->way;
+            //new_stack1->set = stack->set;
+            //new_stack1->way = stack->way;
             new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;  
 
             struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, mod_get_low_mod(stack->target_mod, addr), addr, EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
             new_stack2->return_mod = stack->target_mod;
-            new_stack2->dir_entry = stack->dir_entry;
-            new_stack2->set = new_stack1->set;
-            new_stack2->way = new_stack1->way;
-            new_stack2->dir_entry = new_stack1->dir_entry;
+            //new_stack2->set = new_stack1->set;
+            //new_stack2->way = new_stack1->way;
+            new_stack2->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;
 
             new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
             esim_schedule_mod_stack_event(new_stack2, 0);

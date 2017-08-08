@@ -311,7 +311,7 @@ void mod_handler_local_mem_find_and_lock(int event, void *data)
 
 		assert(port);
 		mem_debug("  %lld %lld 0x%x %s find and lock action\n", esim_time, stack->id,
-			stack->tag, mod->name);
+			stack->addr, mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock_action\"\n",
 			stack->id, mod->name);
 
@@ -326,7 +326,7 @@ void mod_handler_local_mem_find_and_lock(int event, void *data)
 	if (event == EV_MOD_LOCAL_MEM_FIND_AND_LOCK_FINISH)
 	{
 		mem_debug("  %lld %lld 0x%x %s find and lock finish (err=%d)\n", esim_time, stack->id,
-			stack->tag, mod->name, stack->err);
+			stack->addr, mod->name, stack->err);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:find_and_lock_finish\"\n",
 			stack->id, mod->name);
 

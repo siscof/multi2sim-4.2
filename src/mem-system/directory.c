@@ -276,8 +276,6 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	//struct mod_stack_t *lock_queue_iter;
         struct list_t *lock_queue;
         
-        
-
 	/* Get lock */
 	//assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	//dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
@@ -298,7 +296,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 		//stack->dir_lock_next = NULL;
 		stack->dir_lock_event = event;
                 list_add(lock_queue,stack);
-                mem_debug("    0x%x access suspended\n", stack->tag);
+                mem_debug("    0x%x access suspended\n", stack->addr);
 		return 0;
 	}
 

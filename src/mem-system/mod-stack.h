@@ -81,7 +81,6 @@ struct mod_stack_t
         bool uncacheable;
         bool allow_cache_by_passing;
 
-        struct mod_stack_t *src_stack;
 	int find_and_lock_return_event;
 
 	struct latenciometro latencias;
@@ -117,12 +116,13 @@ struct mod_stack_t
 	int tag;
 	int set;
 	int way;
-	int state;
+//	int state;
 
-	int src_set;
-	int src_way;
-	int src_tag;
-
+//	int src_set;
+//	int src_way;
+//	int src_tag;
+        struct mod_stack_t *src_stack;
+        
 	enum mod_request_dir_t request_dir;
 	enum mod_message_type_t message;
 	enum mod_reply_type_t reply;
