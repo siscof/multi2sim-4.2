@@ -574,7 +574,7 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
 
 	/* Hit */
 	stack->way = way;
-	stack->state = cache->sets[set].blocks[way].dir_entry_selected->state;
+	stack->state = stack->dir_entry->state;
         return 1;
 }
 

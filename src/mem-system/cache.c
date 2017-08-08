@@ -240,9 +240,14 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 
 void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int state)
 {
-    int set = stack->dir_entry->set;
-    int way = stack->dir_entry->way;
-    int tag = stack->tag;
+        int set = stack->dir_entry->set;
+        int way = stack->dir_entry->way;
+        int tag;
+        if(stack->tag == -1)
+            tag = stack->addr & ~cache->block_mask;
+        else
+            tag = stack->tag;
+    
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
 
@@ -259,7 +264,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 	if(tag == stack->dir_entry->transient_tag)
 		stack->dir_entry->transient_tag = -1;
         
-        assert(stack->dir_entry->transient_tag == -1);
+        //assert(stack->dir_entry->transient_tag == -1);
         //(stack->dir_entry->state == cache_block_invalid);
 
         if(state != cache_block_invalid)

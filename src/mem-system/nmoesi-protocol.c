@@ -1850,7 +1850,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 if(!stack->hit)
                 {
                     dir_entry = stack->cache_block->dir_entry_selected;
-                    if(dir_entry->dir_lock->lock)
+                    //if(dir_entry->dir_lock->lock)
+                    if(dir_entry->state)
                     {
                         int w;
                         struct dir_entry_t *dir_entry_aux;
@@ -1865,8 +1866,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             }
                         }
                     }
+                    stack->dir_entry = dir_entry;
                 }else{
-                    dir_entry = stack->cache_block->dir_entry_selected;
+                    /*dir_entry = stack->cache_block->dir_entry_selected;
                     int w;
                     for(w = 0; w < target_mod->dir->wsize ;w++)
                     {
@@ -1875,11 +1877,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         {
                             break;
                         }
-                    }
-                    assert(w < target_mod->dir->wsize);
+                    }*/
+                    assert(stack->dir_entry != NULL);
+                    //assert(w < target_mod->dir->wsize);
                 }
                 
-                stack->dir_entry = dir_entry;
+                //stack->dir_entry = dir_entry;
                 //stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
                 dir_lock = stack->dir_entry->dir_lock;
 		if (dir_lock->lock && !stack->blocking && stack->hit)
@@ -2005,7 +2008,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
                     
 			/* Find victim */
-			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
+			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
                         if(stack->dir_entry->state)
 			//if(stack->state)
 			{
@@ -2136,8 +2139,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		{
 			target_mod->evictions++;
 			add_eviction(target_mod->level);
-			cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
-			assert(!stack->state);
+			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
+			assert(!stack->dir_entry->state);
 		}
 
 		/* If this is a main memory, the block is here. A previous miss was just a miss
@@ -2222,7 +2225,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
             mem_debug("  %lld %lld 0x%x %s evict lock dir (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
 			stack->tag, return_mod->name, stack->dir_entry->set, stack->dir_entry->way,
 			str_map_value(&cache_block_state_map, stack->state));
-            assert(!stack->dir_entry->dir_lock->lock);
+            //assert(!stack->dir_entry->dir_lock->lock);
             if(stack->dir_entry->tag != stack->tag)
             {
                     mod_stack_return(stack);
@@ -2256,7 +2259,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		stack->src_set = stack->set;
 		stack->src_way = stack->way;
 		stack->src_tag = stack->tag;
-                stack->src_stack = mod_stack_create(stack->id, stack->target_mod, stack->addr, 0, NULL);
+                stack->src_stack = mod_stack_create(stack->id, stack->target_mod, stack->dir_entry->tag, 0, NULL);
                 stack->src_stack->dir_entry = stack->dir_entry; 
 		stack->target_mod = mod_get_low_mod(return_mod, stack->tag);
 
@@ -2741,7 +2744,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, return_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_finish\"\n",
 			stack->id, return_mod->name);
-                free(stack->src_stack);
+                mod_stack_return(stack->src_stack);
+                stack->src_stack = NULL;
 		mod_stack_return(stack);
 		return;
 	}
