@@ -120,7 +120,7 @@ struct mod_stack_t
 
 //	int src_set;
 //	int src_way;
-//	int src_tag;
+	int src_tag;
         struct mod_stack_t *src_stack;
         
 	enum mod_request_dir_t request_dir;

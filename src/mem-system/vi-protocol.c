@@ -380,7 +380,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* MISS */
 //		cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_invalid);
-		stack->state = 0;
+		stack->dir_entry->state = 0;
 
 		//add_miss(mod->level);
 		estadisticas(0, 0);
@@ -938,7 +938,7 @@ void mod_handler_vi_store(int event, void *data)
 
 			if(stack->glc == 0 && (~stack->dirty_mask) == 0)
 			{
-				if(stack->hit && stack->state)
+				if(stack->hit && stack->dir_entry->state)
 					add_store_invalidation(1);
 
 				//cache_set_block(mod->cache, stack->set, stack->way, stack->tag, cache_block_valid);
@@ -1275,11 +1275,12 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		ret->port_locked = 1;
 
 		/* Look for block. */
-		stack->hit = mod_find_block(mod, stack->addr, &stack->set,
-			&stack->way, &stack->tag, &stack->state);
+		//stack->hit = mod_find_block(mod, stack->addr, &stack->set,
+		//	&stack->way, &stack->tag, &stack->state);
+                stack->hit = mod_find_block_new(mod, stack);
 
 		//fran
-		add_cache_states(stack->state, mod->level);
+		add_cache_states(stack->dir_entry->state, mod->level);
 
 		//implementacion de valid mask
 		if(stack->hit && stack->read)
@@ -1293,7 +1294,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		if (stack->hit)
 			mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, state=%s\n", stack->id,
 				stack->tag, mod->name, stack->set, stack->way,
-				str_map_value(&cache_block_state_map, stack->state));
+				str_map_value(&cache_block_state_map, stack->dir_entry->state));
 
 		/* Statistics */
 		mod->accesses++;
@@ -1494,8 +1495,8 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		if (!stack->hit)
 		{
 			/* Find victim */
-			cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
-			if(stack->state)
+			//cache_get_block(mod->cache, stack->set, stack->way, NULL, &stack->state);
+			if(stack->dir_entry->state)
 			{
 				if(stack->read)
 					add_load_invalidation(mod->level);
@@ -1507,7 +1508,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
 				stack->id, stack->tag, mod->name, stack->set, stack->way,
-				str_map_value(&cache_block_state_map, stack->state));
+				str_map_value(&cache_block_state_map, stack->dir_entry->state));
 		}
 
 
@@ -1579,13 +1580,14 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		 * in the directory. */
 		if (mod->kind == mod_kind_main_memory)
 		{
-			stack->state = cache_block_valid;
+			//stack->state = cache_block_valid;
 			stack->hit = 1;
-			cache_set_block(mod->cache, stack->set, stack->way,
-				stack->tag, stack->state);
+			//cache_set_block_new(mod->cache, stack->set, stack->way,
+			//	stack->tag, stack->state);
+                        cache_set_block_new(mod->cache, stack, cache_block_valid);
 		}
 
-		if (!stack->hit && stack->state && cache_get_block_dirty_mask(mod->cache, stack->set, stack->way))
+		if (!stack->hit && stack->dir_entry->state && cache_get_block_dirty_mask(mod->cache, stack->set, stack->way))
 		{
 			stack->eviction = 1;
 		}
@@ -1614,7 +1616,7 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		ret->eviction = stack->eviction;
 		ret->way = stack->way;
 		ret->hit = stack->hit;
-		ret->state = stack->state;
+		//ret->state = stack->state;
 		ret->tag = stack->tag;
 		ret->mshr_locked = stack->mshr_locked;
 		ret->find_and_lock_stack = NULL;

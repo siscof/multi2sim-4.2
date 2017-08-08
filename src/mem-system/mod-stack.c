@@ -301,7 +301,7 @@ void mod_stack_wakeup_stack(struct mod_stack_t *master_stack)
 		event = stack->waiting_list_event;
 		stack->waiting_list_event = 0;
 		DOUBLE_LINKED_LIST_REMOVE(master_stack, waiting, stack);
-        stack->state = master_stack->state;
+                //stack->state = master_stack->state;
 
 		stack->waiting_list_master = NULL;
 
