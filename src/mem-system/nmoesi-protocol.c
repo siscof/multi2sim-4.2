@@ -2026,8 +2026,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     add_store_invalidation(target_mod->level);
 			}
 
-			//assert(stack->state || !dir_entry_group_shared_or_owned(target_mod->dir,
-			//	stack->set, stack->way));
+			assert(stack->dir_entry->state || !dir_entry_group_shared_or_owned(target_mod->dir,
+				stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w));
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way,
 				str_map_value(&cache_block_state_map, stack->dir_entry->state));
