@@ -1032,6 +1032,7 @@ static void mem_config_read_dram_systems(struct config_t *config)
 		dram_system->name = xstrdup(dram_system_name);
 		dram_system->handler = handler;
 		dram_system->pending_reads = linked_list_create();
+                dram_system->pending_writes = linked_list_create();
 
 		/* Configure dramsim using the handler */
 		dram_system_set_cpu_freq(handler, (long long) asTiming(si_gpu)->frequency * 1000000); /* Freq must be in Hz */

@@ -2204,9 +2204,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
         if (event == EV_MOD_NMOESI_EVICT_CHECK)
 	{
-            mem_debug("  %lld %lld 0x%x %s evict check (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
+            mem_debug("  %lld %lld 0x%x %s evict check (set=%d, way=%d, state=%s) err=%d\n", esim_time, stack->id,
 			stack->tag, target_mod->name, stack->dir_entry->set, stack->dir_entry->way,
-			str_map_value(&cache_block_state_map, stack->dir_entry->state));
+			str_map_value(&cache_block_state_map, stack->dir_entry->state), stack->err);
             if(stack->err)
             {        
                 stack->err = 0;
@@ -2423,7 +2423,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_process\"\n",
 			stack->id, target_mod->name);
-
+                assert(stack->hit);
 		/* Error locking block */
 		if (stack->err)
 		{
@@ -2448,12 +2448,12 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		else if (stack->reply == reply_ack_data)
 		{
 			if(target_mod->kind == mod_kind_main_memory &&
-        target_mod->dram_system)
-      {
-        struct dram_system_t *ds = target_mod->dram_system;
-        //struct x86_ctx_t *ctx = stack->client_info->ctx;
-        assert(ds);
-        //assert(ctx);
+                            target_mod->dram_system)
+                        {
+                                struct dram_system_t *ds = target_mod->dram_system;
+                                //struct x86_ctx_t *ctx = stack->client_info->ctx;
+                                assert(ds);
+                                //assert(ctx);
 
 				if (stack->mshr_locked != 0)
 				{
@@ -2461,37 +2461,41 @@ void mod_handler_nmoesi_evict(int event, void *data)
 					stack->mshr_locked = 0;
 				}
 
-        /* Retry if memory controller cannot accept transaction */
-        //if (!dram_system_will_accept_trans(ds->handler, stack->tag >> 2))
-				if (!dram_system_will_accept_trans(ds->handler, stack->addr))
-        {
-          stack->err = 1;
-          ret->err = 1;
-          ret->retry |= 1 << target_mod->level;
+                                /* Retry if memory controller cannot accept transaction */
+                                //if (!dram_system_will_accept_trans(ds->handler, stack->tag >> 2))
+                                if (!dram_system_will_accept_trans(ds->handler, stack->addr))
+                                {
+                                        stack->err = 1;
+                                        ret->err = 1;
+                                        ret->retry |= 1 << target_mod->level;
 
-          dir = target_mod->dir;
-          
-        if(stack->dir_lock)
-            dir_entry_unlock(stack->dir_entry);
-        else
-            assert(stack->uncacheable);
-          
-          mem_debug("    %lld 0x%x %s mc queue full, retrying write...\n", stack->id, stack->tag, target_mod->name);
+                                        dir = target_mod->dir;
 
-          esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
-          return;
-        }
+                                        if(stack->dir_lock)
+                                            dir_entry_unlock(stack->dir_entry);
+                                        else
+                                            assert(stack->uncacheable);
 
-        /* Access main memory system */
-        //dram_system_add_write_trans(ds->handler, stack->tag >> 2, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
+                                        mem_debug("    %lld 0x%x %s mc queue full, retrying write...\n", stack->id, stack->tag, target_mod->name);
+
+                                        esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
+                                        return;
+                                }
+
+                                /* Access main memory system */
+                                //dram_system_add_write_trans(ds->handler, stack->tag >> 2, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 				if(stack->wavefront == NULL){
 					dram_system_add_write_trans(ds->handler, stack->addr, 0, 0);
 				}else{
 					dram_system_add_write_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 				}
-        /* Ctx main memory stats */
-        //ctx->mm_write_accesses++;
-    	}
+                                /*mem_debug("  %lld %lld 0x%x %s dram access enqueued\n", esim_time, stack->id, stack->tag, stack->target_mod->dram_system->name);
+          
+                                linked_list_add(ds->pending_writes, stack);
+                                return;*/
+                                /* Ctx main memory stats */
+                        //ctx->mm_write_accesses++;
+                        }
 			if (stack->dir_entry->state == cache_block_exclusive)
 			{
 				//cache_set_block(target_mod->cache, stack->set, stack->way,
@@ -2566,6 +2570,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_process_noncoherent\"\n",
 			stack->id, target_mod->name);
+                assert(stack->hit);
 
 		/* Error locking block */
 		if (stack->err)
@@ -4078,8 +4083,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		if(stack->main_memory_accessed != 1)
 		{
 			stack->main_memory_accessed = 1;
-			stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
-			stack->uop->mem_mm_accesses++;
+			if(stack->uop)
+                        {
+                            stack->uop->mem_mm_latency += asTiming(si_gpu)->cycle  - stack->dramsim_mm_start;
+                            stack->uop->mem_mm_accesses++;
+                        }
 		}
 
 		/* Get network and nodes */
@@ -4220,6 +4228,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 
 		/* Get block info */
 		//cache_get_block(target_mod->cache, stack->set, stack->way, &stack->tag, NULL);
+                stack->addr = stack->dir_entry->tag;
                 stack->tag = stack->dir_entry->tag;
 		mem_debug("  %lld %lld 0x%x %s invalidate (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
 			stack->tag, target_mod->name, stack->set, stack->way,

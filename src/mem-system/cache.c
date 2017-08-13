@@ -247,7 +247,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
         mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
-				stack->tag, stack->target_mod->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
+				stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
 				str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, cache->sets[set].blocks[way].dir_entry_selected->w,
                                 str_map_value(&cache_block_state_map, cache->sets[set].blocks[way].dir_entry_selected->state));
 	
@@ -269,7 +269,6 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 
         if(state != cache_block_invalid)
         {
-            assert(tag != 0);
             stack->dir_entry->tag = tag;
         }
         else
@@ -286,14 +285,14 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
             {
                     int addr = cache->sets[set].blocks[way].dir_entry_selected->tag;
-            struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, 0, 0, NULL);
+            struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, addr, 0, NULL);
             //new_stack1->return_mod = target_mod;
             //new_stack1->set = stack->set;
             //new_stack1->way = stack->way;
             new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;  
 
             struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, 
-                    mod_get_low_mod(stack->target_mod, addr), 0,
+                    mod_get_low_mod(stack->target_mod, addr), addr,
                     EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
             new_stack2->return_mod = stack->target_mod;
             //new_stack2->set = new_stack1->set;

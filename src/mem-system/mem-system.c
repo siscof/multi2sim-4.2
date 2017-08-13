@@ -113,6 +113,7 @@ void mem_system_free(struct mem_system_t *mem_system)
 		free(dram_system->name);
 		assert(linked_list_count(dram_system->pending_reads) == 0);
 		linked_list_free(dram_system->pending_reads);
+                linked_list_free(dram_system->pending_writes);
 		dram_system_free(dram_system->handler);
 		free(dram_system);
 	}
@@ -710,18 +711,15 @@ void main_memory_read_callback(void *payload, unsigned int id, uint64_t address,
 
 void main_memory_write_callback(void *payload, unsigned int id, uint64_t address, uint64_t clock_cycle)
 {
-    	int found = 0;
-	//int cpu_freq; /* In MHz */
-	//int dram_freq; /* In MHz */
-	//struct x86_uop_t *uop;
+    	/*int found = 0;
 	struct mod_stack_t *stack = NULL;
-	struct dram_system_t *dram_system = (struct dram_system_t *) payload;
+	struct dram_system_t *dram_system = (struct dram_system_t *) payload;*/
 
 	/* You cannnot use LINKED_LIST_FOR_EACH if you plan to remove elements */
-	linked_list_head(dram_system->pending_reads);
-	while(!linked_list_is_end(dram_system->pending_reads))
+	/*linked_list_head(dram_system->pending_writes);
+	while(!linked_list_is_end(dram_system->pending_writes))
 	{
-		stack = linked_list_get(dram_system->pending_reads);
+		stack = linked_list_get(dram_system->pending_writes);
 		if (stack->addr == address)
 		{
 			mem_debug("  %lld %lld 0x%x %s dram access completed\n", esim_time, stack->id, stack->addr, stack->target_mod->dram_system->name);
@@ -740,13 +738,13 @@ void main_memory_write_callback(void *payload, unsigned int id, uint64_t address
 			}else{
 				esim_schedule_mod_stack_event(stack, 0);
 			}
-			linked_list_remove(dram_system->pending_reads);
+			linked_list_remove(dram_system->pending_writes);
 			found++;
 		}
 		else
-			linked_list_next(dram_system->pending_reads);
+			linked_list_next(dram_system->pending_writes);
 	}
-	assert(found == 1);
+	assert(found == 1);*/
 }
 
 
