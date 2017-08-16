@@ -1858,14 +1858,30 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                     {
                         int w;
                         struct dir_entry_t *dir_entry_aux;
-                        for(int i = 1; i < target_mod->dir->wsize ;i++)
+                        if(extra_dir_structure == extra_dir_per_cache_line)
                         {
-                            w = (dir_entry->w + i) % target_mod->dir->wsize;
-                            dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                            if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                            for(int i = 1; i < target_mod->dir->wsize ;i++)
                             {
-                                dir_entry = dir_entry_aux;
-                                break;
+                                w = (dir_entry->w + i) % target_mod->dir->wsize;
+                                dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                                {
+                                    dir_entry = dir_entry_aux;
+                                    break;
+                                }
+                            }
+                        }
+                        else if(extra_dir_structure == extra_dir_per_cache)
+                        {  
+                            for(int w = 0; w < target_mod->dir->wsize ;w++)
+                            {
+                                //w = (dir_entry->w + i) % target_mod->dir->wsize;
+                                dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                                {
+                                    dir_entry = dir_entry_aux;
+                                    break;
+                                }
                             }
                         }
                     }
