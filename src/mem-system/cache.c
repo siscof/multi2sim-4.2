@@ -129,7 +129,7 @@ void cache_update_waylist(struct cache_set_t *set,
 
 
 struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int block_size,
-	unsigned int assoc, enum cache_policy_t policy, int dir_entry_per_block)
+	unsigned int assoc, enum cache_policy_t policy, int dir_entry_per_block, int extra_dir_structure_type)
 {
 	struct cache_t *cache;
 	struct cache_block_t *block;
@@ -142,6 +142,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 	cache->block_size = block_size;
 	cache->assoc = assoc;
 	cache->policy = policy;
+        cache->extra_dir_structure_type = extra_dir_structure_type;
 
 	/* Derived fields */
 	assert(!(num_sets & (num_sets - 1)));

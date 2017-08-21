@@ -74,49 +74,120 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
         dir->mod = mod;
         dir->dir_entry_sharers_size = sharer_size;
         
+        if(dir->extra_dir_structure_type == extra_dir_per_cache_line)
+        {
+            /* Reset all owners */
+            for (x = 0; x < xsize; x++)
+            {
+                    for (y = 0; y < ysize; y++)
+                    {
+                            struct list_t *lock_queue_up_down = list_create();
+                            struct list_t *lock_queue_down_up = list_create();
+                            for (w = 0; w < wsize ; w++)
+                            {
+                                    dir_lock = dir_lock_get(dir,x,y,w);
+                                    dir_lock->dir_entry_list = list_create();
+                                    dir_lock->dir = dir;
+                                    dir_lock->lock_list_up_down = lock_queue_up_down;
+                                    dir_lock->lock_list_down_up = lock_queue_down_up;
+                                    assert(zsize == 1);
+                                    for (z = 0; z < zsize; z++)
+                                    {
+                                            dir_entry = dir_entry_get(dir, x, y, z, w);
+                                            dir_entry->owner = DIR_ENTRY_OWNER_NONE;
+                                            dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
+                                            dir_entry->dir_lock = dir_lock;
+                                            dir_entry->set = x;
+                                            dir_entry->way = y;
+                                            dir_entry->w = w;
+                                            dir_entry->x = x;
+                                            dir_entry->y = y;
+                                            dir_entry->z = z;
+                                            dir_entry->tag = -1;
+                                            dir_entry->transient_tag = -1;
+                                            list_add(dir_lock->dir_entry_list, dir_entry);
+                                            if(z == 0)
+                                            {
+                                                cache_block = cache_get_block_new(mod->cache,x,y);
+                                                //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
+                                                if(w == 0)
+                                                    cache_block->dir_entry_selected = dir_entry;
+                                            }
 
-	/* Reset all owners */
-	for (x = 0; x < xsize; x++)
-	{
-		for (y = 0; y < ysize; y++)
-		{
-                        struct list_t *lock_queue_up_down = list_create();
-                        struct list_t *lock_queue_down_up = list_create();
-                        for (w = 0; w < wsize ; w++)
-                        {
-                                dir_lock = dir_lock_get(dir,x,y,w);
-                                dir_lock->dir_entry_list = list_create();
-                                dir_lock->dir = dir;
-                                dir_lock->lock_list_up_down = lock_queue_up_down;
-                                dir_lock->lock_list_down_up = lock_queue_down_up;
-                                assert(zsize == 1);
-                                for (z = 0; z < zsize; z++)
-                                {
-                                        dir_entry = dir_entry_get(dir, x, y, z, w);
-                                        dir_entry->owner = DIR_ENTRY_OWNER_NONE;
-                                        dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
-                                        dir_entry->dir_lock = dir_lock;
-                                        dir_entry->set = x;
-                                        dir_entry->way = y;
-                                        dir_entry->w = w;
-                                        dir_entry->x = x;
-                                        dir_entry->y = y;
-                                        dir_entry->z = z;
-                                        dir_entry->tag = -1;
-                                        dir_entry->transient_tag = -1;
-                                        list_add(dir_lock->dir_entry_list, dir_entry);
-                                        if(z == 0)
-                                        {
-                                            cache_block = cache_get_block_new(mod->cache,x,y);
-                                            //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
-                                            if(w == 0)
-                                                cache_block->dir_entry_selected = dir_entry;
-                                        }
-                                        
-                                }
-                        }
-		}
-	}
+                                    }
+                            }
+                    }
+            }
+        }else if(dir->extra_dir_structure_type == extra_dir_per_cache){
+            /* Reset all owners */
+            struct list_t *lock_queue_up_down = list_create();
+            struct list_t *lock_queue_down_up = list_create();
+            dir->extra_dir_entries = xcalloc(zsize * wsize, sizeof(struct dir_entry_t));
+            for (int w = 0; w < wsize; w++)
+            {
+                dir_lock = xcalloc(1, sizeof(struct dir_lock_t));
+                dir_lock->dir_entry_list = list_create();
+                dir_lock->dir = dir;
+                dir_lock->lock_list_up_down = lock_queue_up_down;
+                dir_lock->lock_list_down_up = lock_queue_down_up;
+                assert(zsize == 1);
+                for (z = 0; z < zsize; z++)
+                {
+                    dir_entry = dir->extra_dir_entries + (w * zsize) + z;
+                    dir_entry->owner = DIR_ENTRY_OWNER_NONE;
+                    dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
+                    dir_entry->dir_lock = dir_lock;
+                    dir_entry->set = -1;
+                    dir_entry->way = -1;
+                    dir_entry->w = w;
+                    dir_entry->x = -1;
+                    dir_entry->y = -1;
+                    dir_entry->z = z;
+                    dir_entry->tag = -1;
+                    dir_entry->transient_tag = -1;
+                    list_add(dir_lock->dir_entry_list, dir_entry);
+                }
+            }
+            
+            for (x = 0; x < xsize; x++)
+            {
+                    for (y = 0; y < ysize; y++)
+                    {
+                            lock_queue_up_down = list_create();
+                            lock_queue_down_up = list_create();
+                          
+                            dir_lock = dir_lock_get(dir,x,y,w);
+                            dir_lock->dir_entry_list = list_create();
+                            dir_lock->dir = dir;
+                            dir_lock->lock_list_up_down = lock_queue_up_down;
+                            dir_lock->lock_list_down_up = lock_queue_down_up;
+                            assert(zsize == 1);
+                            for (z = 0; z < zsize; z++)
+                            {
+                                    dir_entry = dir_entry_get(dir, x, y, z, w);
+                                    dir_entry->owner = DIR_ENTRY_OWNER_NONE;
+                                    dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
+                                    dir_entry->dir_lock = dir_lock;
+                                    dir_entry->set = x;
+                                    dir_entry->way = y;
+                                    dir_entry->w = w;
+                                    dir_entry->x = x;
+                                    dir_entry->y = y;
+                                    dir_entry->z = z;
+                                    dir_entry->tag = -1;
+                                    dir_entry->transient_tag = -1;
+                                    list_add(dir_lock->dir_entry_list, dir_entry);
+                                    if(z == 0)
+                                    {
+                                        cache_block = cache_get_block_new(mod->cache,x,y);
+                                        //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
+                                        if(w == 0)
+                                            cache_block->dir_entry_selected = dir_entry;
+                                    }
+                            }
+                    }
+            }
+        }
 
 	/* Return */
 	return dir;
@@ -147,6 +218,25 @@ void dir_free(struct dir_t *dir)
                         }
                 }
         }
+        
+        if(dir->extra_dir_structure_type == extra_dir_per_cache)
+        {
+            struct dir_entry_t *dir_entry;
+            for (int w = 0; w < dir->wsize; w++)
+            {
+                for (int z = 0; z < dir->zsize; z++)
+                {
+                    dir_entry = dir->extra_dir_entries + (w * dir->zsize) + z;
+                    free(dir_entry->sharer);                  
+                }
+                free(dir_entry->dir_lock->dir_entry_list);
+                free(dir_entry->dir_lock->lock_list_up_down);
+                free(dir_entry->dir_lock->lock_list_down_up);
+                free(dir_entry->dir_lock);
+            }
+            free(dir->extra_dir_entries);
+        }
+        
 	free(dir->name);
 	free(dir->dir_lock_file);
         free(dir->dir_entry_file);

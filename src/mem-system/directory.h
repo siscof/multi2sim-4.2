@@ -24,6 +24,10 @@
 #include "cache.h"
 #include "lib/util/list.h"
 
+enum extra_dir_structure_t{
+    extra_dir_per_cache_line = 0,
+    extra_dir_per_cache
+};
 
 struct dir_lock_t
 {
@@ -75,10 +79,12 @@ struct dir_t
 	 * that fit within a block. */
 	int xsize, ysize, zsize, wsize;
         int dir_entry_sharers_size;
-
+        
+        int extra_dir_structure_type;
+        struct dir_entry_t *extra_dir_entries;
 	/* Array of xsize * ysize locks. Each lock corresponds to a
 	 * block, i.e. a set of zsize directory entries */
-	struct dir_lock_t *dir_lock_file;
+        struct dir_lock_t *dir_lock_file;
 
 	/* Last field. This is an array of xsize*ysize*zsize elements of type
 	 * dir_entry_t, which have likewise variable size. */
