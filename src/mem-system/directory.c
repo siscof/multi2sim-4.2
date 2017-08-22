@@ -207,11 +207,16 @@ void dir_free(struct dir_t *dir)
 
 struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z, int w)
 {
-	assert(IN_RANGE(x, 0, dir->xsize - 1));
-	assert(IN_RANGE(y, 0, dir->ysize - 1));
+	assert(IN_RANGE(x, 0, dir->xsize - 1) || (x == -1 && y == -1 && dir->extra_dir_structure_type == extra_dir_per_cache));
+	assert(IN_RANGE(y, 0, dir->ysize - 1) || (x == -1 && y == -1 && dir->extra_dir_structure_type == extra_dir_per_cache));
 	assert(IN_RANGE(z, 0, dir->zsize - 1));
         assert(IN_RANGE(w, 0, dir->mod->cache->dir_entry_per_line - 1));
-        return dir->dir_entry_file + (x * dir->ysize * dir->zsize * dir->mod->cache->dir_entry_per_line + y * dir->zsize * dir->mod->cache->dir_entry_per_line + w * dir->zsize + z);
+        if(x == -1 && y == -1)
+        {
+            return dir->extra_dir_entries + w * dir->zsize + z; 
+        }else{
+            return dir->dir_entry_file + (x * dir->ysize * dir->zsize * dir->mod->cache->dir_entry_per_line + y * dir->zsize * dir->mod->cache->dir_entry_per_line + w * dir->zsize + z);
+        }
 }
 
 
@@ -300,6 +305,7 @@ int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y, int w)
 {
 	struct dir_entry_t *dir_entry;
 	int z;
+        
 	for (z = 0; z < dir->zsize; z++)
 	{
 		dir_entry = dir_entry_get(dir, x, y, z, w);

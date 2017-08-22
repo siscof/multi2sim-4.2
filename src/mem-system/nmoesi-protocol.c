@@ -1858,7 +1858,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                     {
                         int w;
                         struct dir_entry_t *dir_entry_aux;
-                        if(extra_dir_structure == extra_dir_per_cache_line)
+                        if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
                         {
                             for(int i = 1; i < target_mod->dir->wsize ;i++)
                             {
@@ -1871,7 +1871,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                 }
                             }
                         }
-                        else if(extra_dir_structure == extra_dir_per_cache)
+                        else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache)
                         {  
                             for(int w = 0; w < target_mod->dir->wsize ;w++)
                             {
@@ -1883,6 +1883,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     break;
                                 }
                             }
+                        }else{
+                            fatal("wrong target_mod->dir->extra_dir_structure_type");
                         }
                     }
                     stack->dir_entry = dir_entry;
@@ -2042,8 +2044,13 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     add_store_invalidation(target_mod->level);
 			}
 
-			assert(stack->dir_entry->state || !dir_entry_group_shared_or_owned(target_mod->dir,
+                        if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
+                        {
+                            assert(stack->dir_entry->state || !dir_entry_group_shared_or_owned(target_mod->dir,
 				stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w));
+                        }else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache){
+                            assert(!stack->dir_entry->state);
+                        }
 			mem_debug("    %lld 0x%x %s miss -> lru: set=%d, way=%d, state=%s\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way,
 				str_map_value(&cache_block_state_map, stack->dir_entry->state));
@@ -2055,6 +2062,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		 * Also, update LRU counters here. */
 		//cache_set_transient_tag(target_mod->cache, stack->set, stack->way, stack->tag);
                 stack->dir_entry->transient_tag = stack->tag;
+                
+                //actualizar way solo con hit?
 		cache_access_block(target_mod->cache, stack->set, stack->way);
 
 		/* Access latency */
