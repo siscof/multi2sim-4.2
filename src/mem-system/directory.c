@@ -73,6 +73,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
         dir->wsize = wsize;
         dir->mod = mod;
         dir->dir_entry_sharers_size = sharer_size;
+        dir->extra_dir_structure_type = mod->cache->extra_dir_structure_type;
         
         if(dir->extra_dir_structure_type == extra_dir_per_cache_line)
         {
@@ -148,47 +149,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                     list_add(dir_lock->dir_entry_list, dir_entry);
                 }
             }
-            
-            for (x = 0; x < xsize; x++)
-            {
-                    for (y = 0; y < ysize; y++)
-                    {
-                            lock_queue_up_down = list_create();
-                            lock_queue_down_up = list_create();
-                          
-                            dir_lock = dir_lock_get(dir,x,y,w);
-                            dir_lock->dir_entry_list = list_create();
-                            dir_lock->dir = dir;
-                            dir_lock->lock_list_up_down = lock_queue_up_down;
-                            dir_lock->lock_list_down_up = lock_queue_down_up;
-                            assert(zsize == 1);
-                            for (z = 0; z < zsize; z++)
-                            {
-                                    dir_entry = dir_entry_get(dir, x, y, z, w);
-                                    dir_entry->owner = DIR_ENTRY_OWNER_NONE;
-                                    dir_entry->sharer = xcalloc(sharer_size,sizeof(unsigned char));
-                                    dir_entry->dir_lock = dir_lock;
-                                    dir_entry->set = x;
-                                    dir_entry->way = y;
-                                    dir_entry->w = w;
-                                    dir_entry->x = x;
-                                    dir_entry->y = y;
-                                    dir_entry->z = z;
-                                    dir_entry->tag = -1;
-                                    dir_entry->transient_tag = -1;
-                                    list_add(dir_lock->dir_entry_list, dir_entry);
-                                    if(z == 0)
-                                    {
-                                        cache_block = cache_get_block_new(mod->cache,x,y);
-                                        //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
-                                        if(w == 0)
-                                            cache_block->dir_entry_selected = dir_entry;
-                                    }
-                            }
-                    }
-            }
         }
-
 	/* Return */
 	return dir;
 }

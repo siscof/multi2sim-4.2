@@ -819,6 +819,18 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
         if (dir_entry_per_block < 1)
 		fatal("%s: %s: invalid value for variable 'dir_entry_per_line'.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
+        
+        char *extra_dir_structure_type_str = config_read_string(config, section, "extra_dir_structure_type", "per_line");
+        int extra_dir_structure_type;
+        if (!strcmp(extra_dir_structure_type_str,"per_line"))
+        {
+            extra_dir_structure_type = extra_dir_per_cache_line;
+        }else if(!strcmp(extra_dir_structure_type_str,"per_cache")){
+            extra_dir_structure_type = extra_dir_per_cache;
+        }else{
+		fatal("%s: cache %s: invalid value for variable 'extra_dir_structure_type'. (valid values: per_line, per_cache)\n%s",
+			mem_config_file_name, mod_name, mem_err_config_note);
+	}
 
 	/* Create module */
 	mod = mod_create(mod_name, mod_kind_main_memory, num_ports,
@@ -843,7 +855,7 @@ static struct mod_t *mem_config_read_main_memory(struct config_t *config,
 
 	/* Create cache and directory */
 	mod->cache = cache_create(mod->name, dir_size / dir_assoc, block_size,
-		dir_assoc, policy, dir_entry_per_block);
+		dir_assoc, policy, dir_entry_per_block, extra_dir_structure_type);
         mod->cache->mod = mod;
 
 	/* Connect to specified main mem system, if any */

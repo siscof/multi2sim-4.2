@@ -77,6 +77,7 @@ struct cache_t
 	unsigned int block_mask;
 	int log_block_size;
         int dir_entry_per_line;
+        int extra_dir_structure_type;
 
 	struct prefetcher_t *prefetcher;
 };
@@ -88,7 +89,7 @@ enum cache_waylist_enum
 };
 
 struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int block_size,
-	unsigned int assoc, enum cache_policy_t policy, int dir_entry_per_block);
+	unsigned int assoc, enum cache_policy_t policy, int dir_entry_per_block, int extra_dir_structure_type);
 void cache_free(struct cache_t *cache);
 
 void cache_decode_address(struct cache_t *cache, unsigned int addr,
