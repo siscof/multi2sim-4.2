@@ -103,6 +103,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 void dir_free(struct dir_t *dir);
 
 struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z, int w);
+struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entry_t *dir_entry);
 
 void dir_entry_set_owner(struct dir_entry_t *dir_entry, int node);
 void dir_entry_set_sharer(struct dir_entry_t *dir_entry, int node);

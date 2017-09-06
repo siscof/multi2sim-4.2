@@ -154,6 +154,42 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 	return dir;
 }
 
+struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entry_t *dir_entry)
+{
+    struct mod_t *target_mod = dir->mod; 
+    if(dir_entry->state)
+    {
+        int w;
+        struct dir_entry_t *dir_entry_aux;
+        if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
+        {
+            for(int i = 1; i < target_mod->dir->wsize ;i++)
+            {
+                w = (dir_entry->w + i) % target_mod->dir->wsize;
+                dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                {
+                    return dir_entry_aux;
+                }
+            }
+        }
+        else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache)
+        {  
+            for(int w = 0; w < target_mod->dir->wsize ;w++)
+            {
+                //w = (dir_entry->w + i) % target_mod->dir->wsize;
+                dir_entry_aux = target_mod->dir->extra_dir_entries + (w * target_mod->dir->zsize);
+                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                {
+                    return dir_entry_aux;
+                }
+            }
+        }else{
+            fatal("wrong target_mod->dir->extra_dir_structure_type");
+        }
+    }
+    return dir_entry;
+}
 
 void dir_free(struct dir_t *dir)
 {
@@ -371,6 +407,15 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	return 1;
 }
 
+void dir_entry_update(struct dir_entry_t *entry_dst, struct dir_entry_t *entry_src)
+{
+    if(entry_dst->dir_lock->dir->extra_dir_structure_type == extra_dir_per_cache)
+    {
+        entry_dst = entry_src;
+    }else if(entry_dst->dir_lock->dir->extra_dir_structure_type == extra_dir_per_cache){
+        entry
+    }
+}
 
 void dir_entry_unlock(struct dir_entry_t *dir_entry)
 {

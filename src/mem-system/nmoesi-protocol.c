@@ -1849,45 +1849,16 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
-                struct dir_entry_t *dir_entry;
+                //struct dir_entry_t *dir_entry;
                 if(!stack->hit)
                 {
-                    dir_entry = stack->cache_block->dir_entry_selected;
-                    //if(dir_entry->dir_lock->lock)
-                    if(dir_entry->state)
+                    stack->dir_entry = dir_entry_find_free_entry(target_mod->dir, stack->cache_block->dir_entry_selected);
+                    /*if(dir_entry != NULL)
                     {
-                        int w;
-                        struct dir_entry_t *dir_entry_aux;
-                        if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
-                        {
-                            for(int i = 1; i < target_mod->dir->wsize ;i++)
-                            {
-                                w = (dir_entry->w + i) % target_mod->dir->wsize;
-                                dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
-                                {
-                                    dir_entry = dir_entry_aux;
-                                    break;
-                                }
-                            }
-                        }
-                        else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache)
-                        {  
-                            for(int w = 0; w < target_mod->dir->wsize ;w++)
-                            {
-                                //w = (dir_entry->w + i) % target_mod->dir->wsize;
-                                dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
-                                {
-                                    dir_entry = dir_entry_aux;
-                                    break;
-                                }
-                            }
-                        }else{
-                            fatal("wrong target_mod->dir->extra_dir_structure_type");
-                        }
-                    }
-                    stack->dir_entry = dir_entry;
+                        stack->dir_entry = dir_entry;
+                    }else{
+                        stack->dir_entry = stack->cache_block->dir_entry_selected;
+                    }*/
                 }else{
                     /*dir_entry = stack->cache_block->dir_entry_selected;
                     int w;
