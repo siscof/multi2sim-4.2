@@ -245,8 +245,9 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
         int way = stack->dir_entry->way;
         int tag = stack->addr & ~cache->block_mask;
     
-	assert(set >= 0 && set < cache->num_sets);
-	assert(way >= 0 && way < cache->assoc);
+	//assert(set >= 0 && set < cache->num_sets);
+	//assert(way >= 0 && way < cache->assoc);
+        if(set != -1){
         mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
                         stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
                         str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
@@ -256,7 +257,17 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 	mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
 			cache->name, set, way, tag,
 			str_map_value(&cache_block_state_map, state));
-
+        }else{
+        /*mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
+            stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
+            str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
+            cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
+            cache->sets[set].blocks[way].dir_entry_selected->state));
+	
+	mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
+			cache->name, set, way, tag,
+			str_map_value(&cache_block_state_map, state));*/
+        }
 	if (cache->policy == cache_policy_fifo && cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
 		cache_update_waylist(&cache->sets[set], &cache->sets[set].blocks[way], cache_waylist_head);
 
@@ -296,8 +307,8 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                 new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
                 esim_schedule_mod_stack_event(new_stack2, 0);
             }
-            dir_update_dir_entry(cache->sets[set].blocks[way].dir_entry_selected,stack->dir_entry)
-            cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
+            dir_entry_update(&cache->sets[set].blocks[way].dir_entry_selected,stack->dir_entry);
+            //cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
         }     
 }
 

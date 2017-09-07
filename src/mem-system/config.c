@@ -591,11 +591,12 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	int dir_latency;
 
 	char *policy_str;
-        int dir_entry_per_block;
 	enum cache_policy_t policy;
 
 	int mshr_size;
 	int num_ports;
+        char *extra_dir_structure_type_str;
+        int dir_entry_per_block;
 
 	int enable_prefetcher;
 	char *prefetcher_type_str;
@@ -631,6 +632,8 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	policy_str = config_read_string(config, buf, "Policy", "LRU");
 	mshr_size = config_read_int(config, buf, "MSHR", 16);
 	num_ports = config_read_int(config, buf, "Ports", 2);
+        extra_dir_structure_type_str = config_read_string(config, buf, "extra_dir_structure_type", "per_line");
+        dir_entry_per_block = config_read_int(config, buf, "dir_entry_per_line", 1);
 	enable_prefetcher = config_read_bool(config, buf,
 		"EnablePrefetcher", 0);
 	prefetcher_type_str = config_read_string(config, buf,
@@ -721,11 +724,11 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	mod->low_net_node = net_node;
 
 	/* Create cache */
-        dir_entry_per_block = config_read_int(config, buf, "dir_entry_per_line", 1);
+        
         if (dir_entry_per_block < 1)
 		fatal("%s: cache %s: invalid value for variable 'dir_entry_per_line'.\n%s",
 			mem_config_file_name, mod_name, mem_err_config_note);
-        char *extra_dir_structure_type_str = config_read_string(config, section, "extra_dir_structure_type", "per_line");
+        
         int extra_dir_structure_type;
         if (!strcmp(extra_dir_structure_type_str,"per_line"))
         {

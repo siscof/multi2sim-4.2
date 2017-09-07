@@ -104,13 +104,14 @@ void dir_free(struct dir_t *dir);
 
 struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z, int w);
 struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entry_t *dir_entry);
+void dir_entry_update(struct dir_entry_t **entry_dst, struct dir_entry_t *entry_src);
 
 void dir_entry_set_owner(struct dir_entry_t *dir_entry, int node);
 void dir_entry_set_sharer(struct dir_entry_t *dir_entry, int node);
 void dir_entry_clear_sharer(struct dir_entry_t *dir_entry, int node);
 void dir_entry_clear_all_sharers(struct dir_entry_t *dir_entry);
 int dir_entry_is_sharer(struct dir_entry_t *dir_entry, int node);
-int dir_entry_group_shared_or_owned(struct dir_t *dir, int x, int y, int w);
+int dir_entry_group_shared_or_owned(struct dir_t *dir, struct dir_entry_t *dir_entry);
 
 void dir_entry_dump_sharers(struct dir_entry_t *dir_entry);
 

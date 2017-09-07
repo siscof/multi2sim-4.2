@@ -2018,7 +2018,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
                         {
                             assert(stack->dir_entry->state || !dir_entry_group_shared_or_owned(target_mod->dir,
-				stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w));
+				stack->dir_entry));
                         }else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache){
                             assert(!stack->dir_entry->state);
                         }
@@ -2248,7 +2248,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		/* Get block info */
 		//cache_get_block(return_mod->cache, stack->set, stack->way, &stack->tag, &stack->dir_entry->state);
                 stack->tag = stack->dir_entry->tag;
-		assert(stack->dir_entry->state || !dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry->x, stack->dir_entry->y, stack->dir_entry->w));
+		assert(stack->dir_entry->state || !dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry));
 		//assert(stack->dir_entry->set == stack->set && stack->dir_entry->way == stack->way);
                 mem_debug("  %lld %lld 0x%x %s evict (set=%d, way=%d, state=%s)\n", esim_time, stack->id,
 			stack->tag, return_mod->name, stack->dir_entry->set, stack->dir_entry->way,
@@ -2737,7 +2737,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
                         cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
                 }
                 
-		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->ret_stack->dir_entry->x, stack->ret_stack->dir_entry->y, stack->ret_stack->dir_entry->w));
+		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->ret_stack->dir_entry));
 		stack->event = EV_MOD_NMOESI_EVICT_FINISH;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_EVICT_FINISH, stack, 0);
@@ -3007,8 +3007,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             add_CoalesceMiss(target_mod->level);
 			}
 
-			assert(stack->uncacheable || !dir_entry_group_shared_or_owned(target_mod->dir,
-				stack->set, stack->way, stack->dir_entry->w));
+			assert(stack->uncacheable || !dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry));
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
 				EV_MOD_NMOESI_READ_REQUEST_UPDOWN_MISS, stack);
 			new_stack->wavefront = stack->wavefront;
@@ -3972,7 +3971,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			stack->id, target_mod->name);
 
 		assert(stack->dir_entry->state != cache_block_invalid);
-		assert(!dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry->set ,stack->dir_entry->way, stack->dir_entry->w));
+		assert(!dir_entry_group_shared_or_owned(target_mod->dir, stack->dir_entry));
 
 		/* Compute reply size */
 		if (stack->dir_entry->state == cache_block_exclusive ||
