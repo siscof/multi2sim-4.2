@@ -307,6 +307,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                 new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
                 esim_schedule_mod_stack_event(new_stack2, 0);
             }
+            //dir_entry_write mejor que update?
             dir_entry_update(&cache->sets[set].blocks[way].dir_entry_selected,stack->dir_entry);
             //cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
         }     
