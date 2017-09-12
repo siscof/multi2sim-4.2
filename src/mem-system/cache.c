@@ -244,72 +244,117 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
         int set = stack->dir_entry->set;
         int way = stack->dir_entry->way;
         int tag = stack->addr & ~cache->block_mask;
-    
-	//assert(set >= 0 && set < cache->num_sets);
-	//assert(way >= 0 && way < cache->assoc);
-        if(set != -1){
-        mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
-                        stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
-                        str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
-                        cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
-                        cache->sets[set].blocks[way].dir_entry_selected->state));
-	
-	mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
-			cache->name, set, way, tag,
-			str_map_value(&cache_block_state_map, state));
-        }else{
-        /*mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
-            stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
-            str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
-            cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
-            cache->sets[set].blocks[way].dir_entry_selected->state));
-	
-	mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
-			cache->name, set, way, tag,
-			str_map_value(&cache_block_state_map, state));*/
-        }
-	if (cache->policy == cache_policy_fifo && cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
-		cache_update_waylist(&cache->sets[set], &cache->sets[set].blocks[way], cache_waylist_head);
-
-	if(tag == stack->dir_entry->transient_tag)
-		stack->dir_entry->transient_tag = -1;
-        
-        //assert(stack->dir_entry->transient_tag == -1);
-        //(stack->dir_entry->state == cache_block_invalid);
-
-        if(state != cache_block_invalid)
+     
+        if(cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
         {
-            stack->dir_entry->tag = tag;
-        }
-        else
-            stack->dir_entry->tag = -1;
-        
-	stack->dir_entry->state = state;
-	cache->sets[set].blocks[way].dirty_mask = 0;
-	cache->sets[set].blocks[way].valid_mask = 0;
-        
-        //hacer evict!!! de dir_entry_selected
-        if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry ) 
-            //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
-        {
-            if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+            assert(set >= 0 && set < cache->num_sets);
+            assert(way >= 0 && way < cache->assoc);
+            //if(set != -1){
+            mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
+                            stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
+                            str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
+                            cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
+                            cache->sets[set].blocks[way].dir_entry_selected->state));
+
+            mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
+                            cache->name, set, way, tag,
+                            str_map_value(&cache_block_state_map, state));
+            //}else{
+            /*mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
+                stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
+                str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
+                cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
+                cache->sets[set].blocks[way].dir_entry_selected->state));
+
+            mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
+                            cache->name, set, way, tag,
+                            str_map_value(&cache_block_state_map, state));*/
+            //}
+       if (cache->policy == cache_policy_fifo && cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
+                    cache_update_waylist(&cache->sets[set], &cache->sets[set].blocks[way], cache_waylist_head);
+
+            if(state == cache_block_invalid || stack->dir_entry->tag != tag)
             {
-                int addr = cache->sets[set].blocks[way].dir_entry_selected->tag;
-                struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, addr, 0, NULL);
-                new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;  
-
-                struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, 
-                        mod_get_low_mod(stack->target_mod, addr), addr,
-                        EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
-                new_stack2->return_mod = stack->target_mod;
-                new_stack2->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;
-
-                new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
-                esim_schedule_mod_stack_event(new_stack2, 0);
+                cache->sets[set].blocks[way].dirty_mask = 0;
+                cache->sets[set].blocks[way].valid_mask = 0;
             }
-            //dir_entry_write mejor que update?
-            dir_entry_update(&cache->sets[set].blocks[way].dir_entry_selected,stack->dir_entry);
-            //cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
+            
+            if(tag == stack->dir_entry->transient_tag)
+                    stack->dir_entry->transient_tag = -1;
+            
+            if(state != cache_block_invalid)
+            {
+                stack->dir_entry->tag = tag;
+            }
+            else
+                stack->dir_entry->tag = -1;
+
+            stack->dir_entry->state = state;
+
+            //hacer evict!!! de dir_entry_selected
+            if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry ) 
+                //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+            {
+                if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+                {
+                    int addr = cache->sets[set].blocks[way].dir_entry_selected->tag;
+                    struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, addr, 0, NULL);
+                    new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;  
+
+                    struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, 
+                            mod_get_low_mod(stack->target_mod, addr), addr,
+                            EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
+                    new_stack2->return_mod = stack->target_mod;
+                    new_stack2->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;
+
+                    new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
+                    esim_schedule_mod_stack_event(new_stack2, 0);
+                }
+                cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
+            }
+        }else if(cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache){
+            
+            if (cache->policy == cache_policy_fifo && cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
+                    cache_update_waylist(&cache->sets[set], &cache->sets[set].blocks[way], cache_waylist_head);
+
+            if(state == cache_block_invalid || stack->dir_entry->tag != tag)
+            {
+                cache->sets[set].blocks[way].dirty_mask = 0;
+                cache->sets[set].blocks[way].valid_mask = 0;
+            }
+            
+            if(tag == stack->dir_entry->transient_tag)
+                    stack->dir_entry->transient_tag = -1;
+            
+            if(state != cache_block_invalid)
+            {
+                stack->dir_entry->tag = tag;
+            }
+            else
+                stack->dir_entry->tag = -1;
+
+            stack->dir_entry->state = state;
+            
+            if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry ) 
+                //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+            {
+                dir_entry_swap(cache->sets[set].blocks[way].dir_entry_selected, stack->dir_entry); 
+                if(stack->dir_entry->state != cache_block_invalid)
+                {
+                    int addr = stack->dir_entry->tag;
+                    struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, addr, 0, NULL);
+                    new_stack1->dir_entry = stack->dir_entry;  
+
+                    struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, 
+                            mod_get_low_mod(stack->target_mod, addr), addr,
+                            EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
+                    new_stack2->return_mod = stack->target_mod;
+                    new_stack2->dir_entry = stack->dir_entry;
+
+                    new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
+                    esim_schedule_mod_stack_event(new_stack2, 0);
+                }
+            }
         }     
 }
 

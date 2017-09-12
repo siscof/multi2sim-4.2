@@ -104,7 +104,10 @@ void dir_free(struct dir_t *dir);
 
 struct dir_entry_t *dir_entry_get(struct dir_t *dir, int x, int y, int z, int w);
 struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entry_t *dir_entry);
-void dir_entry_update(struct dir_entry_t **entry_dst, struct dir_entry_t *entry_src);
+void dir_entry_copy(struct dir_entry_t *entry_dst, struct dir_entry_t *entry_src);
+void dir_entry_swap(struct dir_entry_t *entry_dst, struct dir_entry_t *entry_src);
+struct dir_entry_t *dir_entry_create(struct dir_t *dir);
+void dir_entry_free(struct dir_entry_t *dir_entry);
 
 void dir_entry_set_owner(struct dir_entry_t *dir_entry, int node);
 void dir_entry_set_sharer(struct dir_entry_t *dir_entry, int node);

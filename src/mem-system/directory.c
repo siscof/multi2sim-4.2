@@ -189,6 +189,29 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
 	return dir;
 }
 
+struct dir_entry_t *dir_entry_create(struct dir_t *dir)
+{
+    struct dir_entry_t *dir_entry = xcalloc(1, sizeof(struct dir_entry_t));
+    dir_entry->owner = DIR_ENTRY_OWNER_NONE;
+    dir_entry->sharer = xcalloc(dir->dir_entry_sharers_size, sizeof(unsigned char));
+    dir_entry->dir_lock = xcalloc(1, sizeof(struct dir_lock_t));
+    dir_entry->dir_lock->dir = dir;
+    dir_entry->tag = -1;
+    dir_entry->transient_tag = -1;
+    return dir_entry;
+}
+
+void dir_entry_free(struct dir_entry_t *dir_entry)
+{
+    if(dir_entry->dir_lock)
+        free(dir_entry->dir_lock);
+    
+    if(dir_entry->sharer)
+        free(dir_entry->sharer);
+    
+    free(dir_entry);
+}
+
 struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entry_t *dir_entry)
 {
     struct mod_t *target_mod = dir->mod; 
@@ -214,11 +237,13 @@ struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entr
             {
                 //w = (dir_entry->w + i) % target_mod->dir->wsize;
                 dir_entry_aux = target_mod->dir->extra_dir_entries + (w * target_mod->dir->zsize);
+                assert(!(dir_entry_aux->dir_lock->lock == 0 && dir_entry_aux->state != cache_block_invalid));
                 if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
                 {
                     return dir_entry_aux;
                 }
             }
+            return target_mod->dir->extra_dir_entries;
         }else{
             fatal("wrong target_mod->dir->extra_dir_structure_type");
         }
@@ -463,27 +488,30 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	return 1;
 }
 
-void dir_entry_update(struct dir_entry_t **entry_dst, struct dir_entry_t *entry_src)
+void dir_entry_copy(struct dir_entry_t *entry_dst, struct dir_entry_t *entry_src)
 {
-    if((*entry_dst)->dir_lock->dir->extra_dir_structure_type == extra_dir_per_cache)
-    {
-        (*entry_dst) = entry_src;
-    }else if((*entry_dst)->dir_lock->dir->extra_dir_structure_type == extra_dir_per_cache){
-        (*entry_dst)->tag = entry_src->tag;
-        (*entry_dst)->transient_tag = entry_src->transient_tag;
-        (*entry_dst)->state = entry_src->state;
-        (*entry_dst)->set = entry_src->set; 
-        (*entry_dst)->way = entry_src->way; 
-        (*entry_dst)->x = entry_src->x;
-        (*entry_dst)->y = entry_src->y;
-        (*entry_dst)->w = entry_src->w;
-        (*entry_dst)->z = entry_src->z;
-        (*entry_dst)->owner = entry_src->owner;
-	(*entry_dst)->num_sharers = entry_src->num_sharers;
-        memcpy((*entry_dst)->sharer,entry_src->sharer, entry_src->dir_lock->dir->dir_entry_sharers_size);
-    }else{
-        fatal("tunk");
-    }
+
+        entry_dst->tag = entry_src->tag;
+        entry_dst->transient_tag = entry_src->transient_tag;
+        entry_dst->state = entry_src->state;
+        entry_dst->set = entry_src->set; 
+        entry_dst->way = entry_src->way; 
+        //entry_dst->x = entry_src->x;
+        //entry_dst->y = entry_src->y;
+        //entry_dst->w = entry_src->w;
+        entry_dst->z = entry_src->z;
+        entry_dst->owner = entry_src->owner;
+	entry_dst->num_sharers = entry_src->num_sharers;
+        memcpy(entry_dst->sharer,entry_src->sharer, entry_src->dir_lock->dir->dir_entry_sharers_size);
+}
+
+void dir_entry_swap(struct dir_entry_t *entry_dst, struct dir_entry_t *entry_src)
+{
+    struct dir_entry_t *dir_entry = dir_entry_create(entry_src->dir_lock->dir);
+    dir_entry_copy(dir_entry, entry_dst);
+    dir_entry_copy(entry_dst, entry_src);
+    dir_entry_copy(entry_src, dir_entry);
+    dir_entry_free(dir_entry);
 }
 
 void dir_entry_unlock(struct dir_entry_t *dir_entry)
