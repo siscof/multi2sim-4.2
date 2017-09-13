@@ -229,6 +229,20 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 		if (cache->sets[set].blocks[way].dir_entry_selected->tag == tag && cache->sets[set].blocks[way].dir_entry_selected->state)
 			break;
 
+        if(cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache )
+        {
+            for (int w = 0; w < cache->mod->dir->wsize ; w++ )
+            {
+               if (cache->mod->dir->extra_dir_entries[w].tag == tag && cache->mod->dir->extra_dir_entries[w].state)
+               {
+                    PTR_ASSIGN(set_ptr, -1);
+                    PTR_ASSIGN(way_ptr, -1);
+                    PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].dir_entry_selected->state);
+                    return 1;
+               }
+            }
+        }
+
 	/* Block not found */
 	if (way == cache->assoc)
 		return 0;
@@ -241,10 +255,13 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 
 void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int state)
 {
+    
         int set = stack->dir_entry->set;
         int way = stack->dir_entry->way;
         int tag = stack->addr & ~cache->block_mask;
-     
+        
+        //assert(stack->dir_entry->set == stack->set && stack->dir_entry->way == stack->way);     
+        
         if(cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
         {
             assert(set >= 0 && set < cache->num_sets);
@@ -338,7 +355,9 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry ) 
                 //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
             {
+                assert(!cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock);
                 dir_entry_swap(cache->sets[set].blocks[way].dir_entry_selected, stack->dir_entry); 
+                stack->dir_lock = NULL;
                 if(stack->dir_entry->state != cache_block_invalid)
                 {
                     int addr = stack->dir_entry->tag;
@@ -350,8 +369,8 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                             EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
                     new_stack2->return_mod = stack->target_mod;
                     new_stack2->dir_entry = stack->dir_entry;
-
-                    new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
+                    new_stack2->dir_lock = stack->dir_entry->dir_lock;
+                    new_stack2->event = EV_MOD_NMOESI_EVICT;
                     esim_schedule_mod_stack_event(new_stack2, 0);
                 }
             }

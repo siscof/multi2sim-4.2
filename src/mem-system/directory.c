@@ -255,30 +255,48 @@ void dir_free(struct dir_t *dir)
 {
         struct dir_entry_t *dir_entry;
    
-    	for (int x = 0; x < dir->xsize; x++)
-	{
-		for (int y = 0; y < dir->ysize; y++)
-		{
-                        for (int w = 0; w < dir->wsize ; w++)
-                        {
-                                for (int z = 0; z < dir->zsize; z++)
-                                {
-                                        dir_entry = dir_entry_get(dir, x, y, z, w);
-                                        list_free(dir_entry->dir_lock->dir_entry_list);
-                                        if(w == 0)
-                                        {
-                                            list_free(dir_entry->dir_lock->lock_list_up_down);  
-                                            list_free(dir_entry->dir_lock->lock_list_down_up);
-                                        }
-                                        free(dir_entry->sharer);
-                                }
-                        }
-                }
+        if(dir->extra_dir_structure_type == extra_dir_per_cache_line)
+        {
+            for (int x = 0; x < dir->xsize; x++)
+            {
+                    for (int y = 0; y < dir->ysize; y++)
+                    {
+                            for (int w = 0; w < dir->wsize ; w++)
+                            {
+                                    for (int z = 0; z < dir->zsize; z++)
+                                    {
+                                            dir_entry = dir_entry_get(dir, x, y, z, w);
+                                            list_free(dir_entry->dir_lock->dir_entry_list);
+                                            if(w == 0)
+                                            {
+                                                list_free(dir_entry->dir_lock->lock_list_up_down);  
+                                                list_free(dir_entry->dir_lock->lock_list_down_up);
+                                            }
+                                            free(dir_entry->sharer);
+                                    }
+                            }
+                    }
+            }
         }
         
         if(dir->extra_dir_structure_type == extra_dir_per_cache)
         {
-            struct dir_entry_t *dir_entry;
+            for (int x = 0; x < dir->xsize; x++)
+            {
+                    for (int y = 0; y < dir->ysize; y++)
+                    {
+                            for (int z = 0; z < dir->zsize; z++)
+                            {
+                                    dir_entry = dir_entry_get(dir, x, y, z, 0);
+                                    list_free(dir_entry->dir_lock->dir_entry_list);
+                                    list_free(dir_entry->dir_lock->lock_list_up_down);  
+                                    list_free(dir_entry->dir_lock->lock_list_down_up);
+                                    free(dir_entry->sharer);
+                            }
+                    }
+            }
+            
+            //struct dir_entry_t *dir_entry;
             for (int w = 0; w < dir->wsize; w++)
             {
                 for (int z = 0; z < dir->zsize; z++)

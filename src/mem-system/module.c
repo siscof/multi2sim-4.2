@@ -554,10 +554,27 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
                     dir_entry_found = dir_entry;
                     break;
                 }
-            }        
+            }   
+            
+
+            
             if(dir_entry_found != NULL)
                 break;
 	}
+        
+        if(!dir_entry_found && cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache )
+        {
+            for (int w = 0; w < cache->mod->dir->wsize ; w++ )
+            {
+               if (cache->mod->dir->extra_dir_entries[w].tag == tag && cache->mod->dir->extra_dir_entries[w].state)
+               {
+                    set = -1;
+                    way = -1;
+                    break;
+               }
+            }
+        }
+        
         if(dir_entry_found)
             stack->dir_entry = dir_entry_found;
         
