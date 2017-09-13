@@ -357,9 +357,11 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             {
                 assert(!cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock);
                 dir_entry_swap(cache->sets[set].blocks[way].dir_entry_selected, stack->dir_entry); 
-                stack->dir_lock = NULL;
+                
                 if(stack->dir_entry->state != cache_block_invalid)
                 {
+                    stack->dir_lock = NULL;
+                    
                     int addr = stack->dir_entry->tag;
                     struct mod_stack_t *new_stack1 = mod_stack_create(stack->id, stack->target_mod, addr, 0, NULL);
                     new_stack1->dir_entry = stack->dir_entry;  
@@ -370,6 +372,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                     new_stack2->return_mod = stack->target_mod;
                     new_stack2->dir_entry = stack->dir_entry;
                     new_stack2->dir_lock = stack->dir_entry->dir_lock;
+                    stack->dir_entry->dir_lock->stack = new_stack2;
                     new_stack2->event = EV_MOD_NMOESI_EVICT;
                     esim_schedule_mod_stack_event(new_stack2, 0);
                 }
