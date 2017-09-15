@@ -123,7 +123,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
             struct list_t *lock_queue_up_down;
             struct list_t *lock_queue_down_up;
             
-            wsize = mod->cache->dir_entry_per_line;;
+            wsize = mod->cache->dir_entry_per_line;
             
             dir->name = xstrdup(name);
             dir->dir_lock_file = xcalloc(xsize * ysize, sizeof(struct dir_lock_t));
