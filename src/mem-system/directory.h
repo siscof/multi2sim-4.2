@@ -79,6 +79,7 @@ struct dir_t
 	 * that fit within a block. */
 	int xsize, ysize, zsize, wsize;
         int dir_entry_sharers_size;
+        int extra_dir_entries_size;
         
         int extra_dir_structure_type;
         struct dir_entry_t *extra_dir_entries;
