@@ -256,8 +256,8 @@ int cache_find_block(struct cache_t *cache, unsigned int addr, int *set_ptr, int
 void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int state)
 {
     
-        int set = stack->dir_entry->set;
-        int way = stack->dir_entry->way;
+        int set = stack->set;
+        int way = stack->way;
         int tag = stack->addr & ~cache->block_mask;
         
         //assert(stack->dir_entry->set == stack->set && stack->dir_entry->way == stack->way);     
@@ -331,8 +331,17 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             }
         }else if(cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache){
             
+            mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
+                            stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
+                            str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
+                            cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
+                            cache->sets[set].blocks[way].dir_entry_selected->state));
+            
             if (cache->policy == cache_policy_fifo && cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
                     cache_update_waylist(&cache->sets[set], &cache->sets[set].blocks[way], cache_waylist_head);
+            
+           
+            
 
             if(state == cache_block_invalid || stack->dir_entry->tag != tag)
             {
@@ -375,6 +384,8 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                     stack->dir_entry->dir_lock->stack = new_stack2;
                     new_stack2->event = EV_MOD_NMOESI_EVICT;
                     esim_schedule_mod_stack_event(new_stack2, 0);
+                }else{
+                    dir_entry_unlock(stack->dir_entry);
                 }
             }
         }     
