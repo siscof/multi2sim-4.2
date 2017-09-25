@@ -569,7 +569,7 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
                if (cache->mod->dir->extra_dir_entries[w].tag == tag && cache->mod->dir->extra_dir_entries[w].state)
                {
                     set = -1;
-                    way = -1;
+                    way = cache->assoc;
                     break;
                }
             }
@@ -582,7 +582,7 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
 	stack->tag = tag;
 
 	/* Miss */
-	if (way == cache->assoc)
+	if (way == cache->assoc )
 	{
 		//PTR_ASSIGN(way_ptr, 0);
 		//PTR_ASSIGN(state_ptr, 0);

@@ -1807,7 +1807,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (!stack->hit)
 		{
 			/* Find victim */
-			if (stack->way < 0)
+			if (stack->way < 0 )
 			{
 				stack->way = cache_replace_block(target_mod->cache, stack->set);
 			}
@@ -1846,7 +1846,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		}
 		assert(stack->way >= 0  || target_mod->dir->extra_dir_structure_type == extra_dir_per_cache);
          
-                if(stack->set != -1 && stack->way != -1)
+                if(stack->set != -1 /*&& stack->way != -1*/)
                 stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
@@ -2202,7 +2202,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
         if (event == EV_MOD_NMOESI_EVICT_CHECK)
 	{
             mem_debug("  %lld %lld 0x%x %s evict check (set=%d, way=%d, state=%s) err=%d\n", esim_time, stack->id,
-			stack->tag, target_mod->name, stack->dir_entry->set, stack->dir_entry->way,
+			stack->addr, target_mod->name, stack->dir_entry->set, stack->dir_entry->way,
 			str_map_value(&cache_block_state_map, stack->dir_entry->state), stack->err);
             if(stack->err)
             {        
@@ -2275,7 +2275,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		new_stack->except_mod = NULL;
 		new_stack->set = stack->dir_entry->set;
 		new_stack->way = stack->dir_entry->way;
-                new_stack->dir_entry = stack->dir_entry;
+                //new_stack->dir_entry = stack->dir_entry;
 
 		new_stack->event = EV_MOD_NMOESI_INVALIDATE;
 		esim_schedule_mod_stack_event(new_stack, 0);
