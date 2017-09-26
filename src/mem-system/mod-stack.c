@@ -200,8 +200,8 @@ struct mod_stack_t *mod_stack_create_super_stack(struct mod_t *target_mod, int e
     {
         next_stack = list_get( stack->uop->mem_accesses_list,i);
         //debo añadir next_stack a super_stack?
-        if(next_stack->hit == 0 && next_stack->dir_lock && next_stack->dir_lock->lock 
-                && next_stack->dir_lock->stack == next_stack && target_mod == mod_get_low_mod(next_stack->target_mod, next_stack->tag))
+        if(next_stack->hit == 0 && next_stack->dir_entry && next_stack->dir_entry->dir_lock->lock 
+                && next_stack->dir_entry->dir_lock->stack == next_stack && target_mod == mod_get_low_mod(next_stack->target_mod, next_stack->tag))
         {/*next_stack->waiting_list_master)*/
             if(next_stack->waiting_list_master)
             {

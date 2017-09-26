@@ -523,7 +523,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	//dir_lock->stack = stack->ret_stack;
 	//stack->ret_stack->dir_lock = dir_lock;
 	dir_lock->stack = stack;
-	stack->dir_lock = dir_lock;
+	//stack->dir_lock = dir_lock;
 	return 1;
 }
 
@@ -622,7 +622,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 	dir_lock->lock = false;
 	//dir_lock->stack_id = 0;
 	//if(dir_lock->stack)
-	dir_lock->stack->dir_lock = NULL;
+	//dir_lock->stack->dir_lock = NULL;
 	dir_lock->stack = NULL;
 }
 
