@@ -364,8 +364,20 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry ) 
                 //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
             {
-                assert(!cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock);
+                assert(!(cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock && cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid));
+                
                 dir_entry_swap(cache->sets[set].blocks[way].dir_entry_selected, stack->dir_entry); 
+                if(cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock)
+                {
+                    
+                    stack->dir_entry->dir_lock->stack = cache->sets[set].blocks[way].dir_entry_selected->dir_lock->stack;
+                    stack->dir_entry->dir_lock->stack->dir_entry = stack->dir_entry;
+                    stack->dir_entry->dir_lock->stack->dir_lock = stack->dir_entry->dir_lock;
+                    
+                    stack->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;
+                    cache->sets[set].blocks[way].dir_entry_selected->dir_lock->stack = stack;
+                    stack->dir_lock = cache->sets[set].blocks[way].dir_entry_selected->dir_lock;
+                }
                 
                 if(stack->dir_entry->state != cache_block_invalid)
                 {
@@ -384,9 +396,10 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                     stack->dir_entry->dir_lock->stack = new_stack2;
                     new_stack2->event = EV_MOD_NMOESI_EVICT;
                     esim_schedule_mod_stack_event(new_stack2, 0);
-                }else{
-                    dir_entry_unlock(stack->dir_entry);
                 }
+                /*else{
+                    dir_entry_unlock(stack->dir_entry);
+                }*/
             }
         }     
 }

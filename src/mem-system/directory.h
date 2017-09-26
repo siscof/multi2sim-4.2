@@ -23,6 +23,7 @@
 #include "module.h"
 #include "cache.h"
 #include "lib/util/list.h"
+#include <stdbool.h>
 
 enum extra_dir_structure_t{
     extra_dir_per_cache_line = 0,
@@ -31,7 +32,7 @@ enum extra_dir_structure_t{
 
 struct dir_lock_t
 {
-	int lock;
+	bool lock;
 	//long long stack_id;
 	struct mod_stack_t *stack;
 	//struct mod_stack_t *lock_queue;
@@ -56,6 +57,7 @@ struct dir_entry_t
         int y;
         int w;
         int z;
+        bool is_extra;
         int owner;  /* Node owning the block (-1 = No owner)*/
 	int num_sharers;  /* Number of 1s in next field */
 	//unsigned char sharer[0];   /* Bitmap of sharers (must be last field) */
@@ -80,6 +82,7 @@ struct dir_t
 	int xsize, ysize, zsize, wsize;
         int dir_entry_sharers_size;
         int extra_dir_entries_size;
+        int last_extra_entries_assigned;
         
         int extra_dir_structure_type;
         struct dir_entry_t *extra_dir_entries;

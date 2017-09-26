@@ -1846,13 +1846,16 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		}
 		assert(stack->way >= 0  || target_mod->dir->extra_dir_structure_type == extra_dir_per_cache);
          
-                if(stack->set != -1 /*&& stack->way != -1*/)
-                stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
+                
+                //if(stack->set != -1 /*&& stack->way != -1*/)
+                    //stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
 		/* If directory entry is locked and the call to FIND_AND_LOCK is not
 		 * blocking, release port and return error. */
                 //struct dir_entry_t *dir_entry;
                 if(!stack->hit)
                 {
+                    stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
+                    
                     stack->dir_entry = dir_entry_find_free_entry(target_mod->dir, stack->cache_block->dir_entry_selected);
                     /*if(dir_entry != NULL)
                     {
@@ -1871,7 +1874,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             break;
                         }
                     }*/
-                    assert(stack->dir_entry != NULL || target_mod->dir->extra_dir_structure_type == extra_dir_per_cache );
+                    assert(stack->dir_entry != NULL /*|| target_mod->dir->extra_dir_structure_type == extra_dir_per_cache */);
                     //assert(w < target_mod->dir->wsize);
                 }
                 
@@ -2268,14 +2271,15 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		assert(stack->target_mod == mod_get_low_mod(return_mod, stack->tag));
 
 		/* Send write request to all sharers */
-		new_stack = mod_stack_create(stack->id, return_mod, 0, EV_MOD_NMOESI_EVICT_INVALID, stack);
+		new_stack = mod_stack_create(stack->id, return_mod, stack->addr, EV_MOD_NMOESI_EVICT_INVALID, stack);
 		new_stack->wavefront = stack->wavefront;
 		new_stack->retry = stack->retry;
 		new_stack->uop = stack->uop;
 		new_stack->except_mod = NULL;
+                new_stack->tag = stack->dir_entry->tag;
 		new_stack->set = stack->dir_entry->set;
 		new_stack->way = stack->dir_entry->way;
-                //new_stack->dir_entry = stack->dir_entry;
+                new_stack->dir_entry = stack->dir_entry;
 
 		new_stack->event = EV_MOD_NMOESI_INVALIDATE;
 		esim_schedule_mod_stack_event(new_stack, 0);
@@ -4243,7 +4247,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 		{
 			dir_entry_tag = stack->tag + z * target_mod->sub_block_size;
 			assert(dir_entry_tag < stack->tag + target_mod->block_size);
-			dir_entry = dir_entry_get(dir, stack->dir_entry->set, stack->dir_entry->way, z,stack->dir_entry->w);
+                        dir_entry = dir_entry_get(dir, stack->dir_entry->x, stack->dir_entry->y, z,stack->dir_entry->w);
 			for (i = 0; i < dir->num_nodes; i++)
 			{
 				struct net_node_t *node;

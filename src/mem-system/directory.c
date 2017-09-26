@@ -103,16 +103,17 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                                             dir_entry->x = x;
                                             dir_entry->y = y;
                                             dir_entry->z = z;
+                                            dir_entry->is_extra = false;
                                             dir_entry->tag = -1;
                                             dir_entry->transient_tag = -1;
                                             list_add(dir_lock->dir_entry_list, dir_entry);
-                                            if(z == 0)
+                                            
+                                            cache_block = cache_get_block_new(mod->cache,x,y);
+                                            if(z == 0 && w == 0)
                                             {
-                                                cache_block = cache_get_block_new(mod->cache,x,y);
-                                                //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
-                                                if(w == 0)
-                                                    cache_block->dir_entry_selected = dir_entry;
+                                                cache_block->dir_entry_selected = dir_entry;
                                             }
+                                            cache_block->dir_entry_selected->cache_block = cache_block;
 
                                     }
                             }
@@ -162,12 +163,15 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                             dir_entry->x = x;
                             dir_entry->y = y;
                             dir_entry->z = z;
+                            dir_entry->is_extra = false;
                             dir_entry->tag = -1;
                             dir_entry->transient_tag = -1;
                             list_add(dir_lock->dir_entry_list, dir_entry);
                     }
                     cache_block = cache_get_block_new(mod->cache,x,y);
+                    
                     cache_block->dir_entry_selected = dir_entry_get(dir, x, y, 0, 0);
+                    cache_block->dir_entry_selected->cache_block = cache_block;
                     
                     
                     
@@ -195,6 +199,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                     dir_entry->x = -1;
                     dir_entry->y = -1;
                     dir_entry->z = z;
+                    dir_entry->is_extra = true;
                     dir_entry->tag = -1;
                     dir_entry->transient_tag = -1;
                     list_add(dir_lock->dir_entry_list, dir_entry);
@@ -231,7 +236,7 @@ void dir_entry_free(struct dir_entry_t *dir_entry)
 struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entry_t *dir_entry)
 {
     struct mod_t *target_mod = dir->mod; 
-    if(dir_entry->state)
+    if(dir_entry->state || dir_entry->dir_lock->lock)
     {
         int w;
         struct dir_entry_t *dir_entry_aux;
@@ -251,15 +256,15 @@ struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entr
         {  
             for(int w = 0; w < target_mod->dir->wsize ;w++)
             {
-                //w = (dir_entry->w + i) % target_mod->dir->wsize;
                 dir_entry_aux = target_mod->dir->extra_dir_entries + (w * target_mod->dir->zsize);
-                assert(!(dir_entry_aux->dir_lock->lock == 0 && dir_entry_aux->state != cache_block_invalid));
+                assert(!(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state != cache_block_invalid));
                 if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
                 {
                     return dir_entry_aux;
                 }
             }
-            return target_mod->dir->extra_dir_entries;
+            target_mod->dir->last_extra_entries_assigned = ((target_mod->dir->last_extra_entries_assigned + 1) * target_mod->dir->zsize) % target_mod->dir->wsize;
+            return target_mod->dir->extra_dir_entries + target_mod->dir->last_extra_entries_assigned;
         }else{
             fatal("wrong target_mod->dir->extra_dir_structure_type");
         }
@@ -511,7 +516,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 		dir_lock->dir->name, stack->id, dir_entry->x, dir_entry->y, dir_entry->w);
 
 	/* Lock entry */
-	dir_lock->lock = 1;
+	dir_lock->lock = true;
         dir_entry->set = stack->set;
         dir_entry->way = stack->way;
 	//dir_lock->stack_id = stack->id;
@@ -558,6 +563,12 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 	//assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	//dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
         dir_lock = dir_entry->dir_lock;
+        
+        if(!dir_lock->lock)
+        {
+            assert(dir_lock->stack == NULL && list_count(dir_lock->lock_list_down_up) == 0 && list_count(dir_lock->lock_list_up_down) == 0);
+            return;
+        }
         
 	/* Wake up first waiter */
         if(list_count(dir_lock->lock_list_down_up) > 0)
@@ -608,7 +619,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 		dir_lock->dir->name, dir_lock->stack->id, dir_entry->x, dir_entry->y, dir_entry->w);
 
 	/* Unlock entry */
-	dir_lock->lock = 0;
+	dir_lock->lock = false;
 	//dir_lock->stack_id = 0;
 	//if(dir_lock->stack)
 	dir_lock->stack->dir_lock = NULL;

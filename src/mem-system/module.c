@@ -535,9 +535,10 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
 	}
         //assert(stack->dir_entry == NULL);
 	struct dir_entry_t *dir_entry_found = NULL;
+        struct dir_entry_t *dir_entry;
         for (way = 0; way < cache->assoc; way++)
 	{
-            struct dir_entry_t *dir_entry;
+            
          //   blk = &cache->sets[set].blocks[way];
             for(int  w = 0; w < cache->dir_entry_per_line; w++)
             {
@@ -556,8 +557,6 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
                 }
             }   
             
-
-            
             if(dir_entry_found != NULL)
                 break;
 	}
@@ -568,31 +567,28 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
             {
                if (cache->mod->dir->extra_dir_entries[w].tag == tag && cache->mod->dir->extra_dir_entries[w].state)
                {
-                    set = -1;
-                    way = cache->assoc;
+                    dir_entry_found = &(cache->mod->dir->extra_dir_entries[w]);
+                    assert(dir_entry_found->is_extra && dir_entry_found->dir_lock->lock);
+                    way = dir_entry_found->way;
                     break;
                }
             }
         }
-        
-        if(dir_entry_found)
-            stack->dir_entry = dir_entry_found;
-        
+
 	stack->set = set;
 	stack->tag = tag;
-
-	/* Miss */
-	if (way == cache->assoc )
-	{
+        
+        if(dir_entry_found)// Hit
+        {
+            stack->dir_entry = dir_entry_found;
+            stack->way = way;
+            return 1;
+        }else{ /* Miss */
 		//PTR_ASSIGN(way_ptr, 0);
 		//PTR_ASSIGN(state_ptr, 0);
 		return 0;
 	}
-
-	/* Hit */
-	stack->way = way;
-	//stack->state = stack->dir_entry->state;
-        return 1;
+        return 0;
 }
 
 void mod_block_set_prefetched(struct mod_t *mod, unsigned int addr, int val)
