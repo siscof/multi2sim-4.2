@@ -475,11 +475,11 @@ void mod_handler_nmoesi_load(int event, void *data)
 				stack->mshr_locked = 0;
 			}
 
-                        //if(stack->dir_lock)
+                        if(stack->dir_entry->dir_lock->stack == stack)
                             dir_entry_unlock(stack->dir_entry);
-                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                             assert(stack->uncacheable);
-                        */
+                        
                         mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 		
                         stack->retry = 1;
@@ -526,11 +526,11 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 
 		/* Unlock directory entry */
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-*/
+
 		/* Impose the access latency before continuing */
                 stack->reply_size += target_mod->block_size;
                         
@@ -1272,11 +1272,11 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 				stack->mshr_locked = 0;
 			}
 
-                        //if(stack->dir_lock)
+                        if(stack->dir_entry->dir_lock->stack == stack)
                             dir_entry_unlock(stack->dir_entry);
-                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                             assert(stack->uncacheable);
-                        */
+                        
                         mem_debug("    lock error, retrying in %d cycles\n", retry_lat);
 			stack->retry = 1;
 
@@ -1317,11 +1317,11 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		}
 
 		/* Unlock directory entry */
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-*/
+
                 stack->reply_size = 8;
                 
 		/* Impose the access latency before continuing */
@@ -1823,7 +1823,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     }
 					stack->mshr_locked = 0;
 					
-                                       // if(stack->dir_lock /* && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 */)
+                                        if(stack->dir_entry->dir_lock->stack == stack /* && stack->dir_lock->lock_queue && stack->dir_lock->lock == 0 */)
 						dir_entry_unlock(stack->dir_entry);
 
 					if(!stack->blocking)
@@ -2120,11 +2120,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			assert(stack->eviction);
 			stack->err = 1;
 			
-                        //if(stack->dir_lock)
+                        if(stack->dir_entry->dir_lock->stack == stack)
                             dir_entry_unlock(stack->dir_entry);
-                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                             assert(stack->uncacheable);
-                        */
+                        
                         //stack->dir_lock = NULL;
 			stack->find_and_lock_stack = NULL;
 			stack->event = stack->find_and_lock_return_event;
@@ -2219,7 +2219,9 @@ void mod_handler_nmoesi_evict(int event, void *data)
                 new_stack->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
                 esim_schedule_mod_stack_event(new_stack, 0);
                 return;
-            }           
+            }   
+            assert(stack->dir_entry->dir_lock->stack == stack);
+            dir_entry_unlock(stack->dir_entry);
             mod_stack_return(stack);
             return;
         }
@@ -2474,11 +2476,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
                                         dir = target_mod->dir;
 
-                                        //if(stack->dir_lock)
+                                        if(stack->dir_entry->dir_lock->stack == stack)
                                             dir_entry_unlock(stack->dir_entry);
-                                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                                             assert(stack->uncacheable);
-*/
+
                                         mem_debug("    %lld 0x%x %s mc queue full, retrying write...\n", stack->id, stack->tag, target_mod->name);
 
                                         esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
@@ -2551,11 +2553,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->mshr_locked = 0;
 		}
 
-                 //if(stack->dir_lock)
+                 if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-                */
+                
 		
 
 		stack->event = EV_MOD_NMOESI_EVICT_REPLY;
@@ -2620,11 +2622,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 
 					dir = target_mod->dir;
                                         
-                                       //if(stack->dir_lock)
+                                        if(stack->dir_entry->dir_lock->stack == stack)
                                             dir_entry_unlock(stack->dir_entry);
-                                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                                             assert(stack->uncacheable);
-					*/
+					
 
 					mem_debug("    %lld 0x%x %s mc queue full, retrying write...\n", stack->id, stack->tag, target_mod->name);
 
@@ -2699,11 +2701,11 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->mshr_locked = 0;
 		}
 
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-		*/
+		
 
 		stack->event = EV_MOD_NMOESI_EVICT_REPLY;
 		esim_schedule_mod_stack_event(stack, target_mod->kind == mod_kind_main_memory ? 0 : target_mod->latency);
@@ -3052,11 +3054,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				stack->mshr_locked = 0;
 			}
 
-                        //if(stack->dir_lock)
+                        if(stack->dir_entry->dir_lock->stack == stack)
                             dir_entry_unlock(stack->dir_entry);
-                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                             assert(stack->uncacheable);
-			*/
+			
 			ret->err = 1;
 			mod_stack_set_reply(ret, reply_ack_error);
 			stack->reply_size = 8;
@@ -3147,11 +3149,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
             mod_stack_set_reply(ret, reply_ack_error);
             stack->reply_size = 8;
         
-            //if(stack->dir_lock)
+            if(stack->dir_entry->dir_lock->stack == stack)
                 dir_entry_unlock(stack->dir_entry);
-            /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+            else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                 assert(stack->uncacheable);
-        */
+        
             mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, target_mod->name);
             esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
             return;
@@ -3238,11 +3240,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->mshr_locked = 0;
 		}
                 
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*lse if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-                */
+                
 		
 		stack->dramsim_mm_start = asTiming(si_gpu)->cycle;
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
@@ -3514,11 +3516,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->mshr_locked = 0;
 		}
 
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-*/
+
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
 
@@ -3843,11 +3845,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			mod_stack_set_reply(ret, reply_ack_error);
 			stack->reply_size = 8;
                         
-                        //if(stack->dir_lock)
+                        if(stack->dir_entry->dir_lock->stack == stack)
                             dir_entry_unlock(stack->dir_entry);
-                        /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                        else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                             assert(stack->uncacheable);
-			*/
+			
 			stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 0);
@@ -3883,11 +3885,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 				mod_stack_set_reply(ret, reply_ack_error);
 				stack->reply_size = 8;
 
-                                //if(stack->dir_lock)
+                                if(stack->dir_entry->dir_lock->stack == stack)
                                     dir_entry_unlock(stack->dir_entry);
-                                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                                     assert(stack->uncacheable);
-*/
+
 				mem_debug("    %lld 0x%x %s mc queue full, retrying...\n", stack->id, stack->tag, target_mod->name);
 
 				esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST_REPLY, stack, 0);
@@ -3955,11 +3957,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		}
 
 		/* Unlock, reply_size is the data of the size of the requester's block. */
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-*/
+
 		stack->dramsim_mm_start = asTiming(si_gpu)->cycle ;
 
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
@@ -4052,11 +4054,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		/* Set state to I, unlock*/
 		//cache_set_block(target_mod->cache, stack->set, stack->way, 0, cache_block_invalid);
 		cache_set_block_new(target_mod->cache, stack, cache_block_invalid);
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-*/
+
 		//int latency = ret->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
 		stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
@@ -4502,11 +4504,11 @@ void mod_handler_nmoesi_message(int event, void *data)
 		}
 
 		/* Unlock the directory entry */
-                //if(stack->dir_lock)
+                if(stack->dir_entry->dir_lock->stack == stack)
                     dir_entry_unlock(stack->dir_entry);
-                /*else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
+                else if(target_mod->cache->extra_dir_structure_type == extra_dir_per_cache_line)
                     assert(stack->uncacheable);
-*/
+
 		stack->event = EV_MOD_NMOESI_MESSAGE_REPLY;
 		esim_schedule_mod_stack_event(stack, 0);
 		//esim_schedule_event(EV_MOD_NMOESI_MESSAGE_REPLY, stack, 0);

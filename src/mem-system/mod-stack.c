@@ -91,7 +91,16 @@ void mod_stack_return(struct mod_stack_t *stack)
         if(stack->target_mod && stack->uop && stack->target_mod->level == 1)
         {
             list_remove(stack->uop->mem_accesses_list,stack);
+        }      
+        
+        if(stack->dir_entry && stack->dir_entry->dir_lock->stack == stack){
+            printf("/n tunk /n");
+            if(stack->ret_stack)
+                stack->dir_entry->dir_lock->stack = stack->ret_stack;
+            else
+                dir_entry_unlock(stack->dir_entry);
         }
+        
 	if(stack->ret_stack == 0)
 	{
 		free(stack);
@@ -104,7 +113,7 @@ void mod_stack_return(struct mod_stack_t *stack)
 	if(ret_stack && ret_stack->find_and_lock_stack == stack)
 		ret_stack->find_and_lock_stack = NULL;
 
-	/* Free */
+            /* Free */
 	/*int aux;
 
 	if(stack->target_mod)

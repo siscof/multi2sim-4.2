@@ -257,7 +257,8 @@ struct dir_entry_t *dir_entry_find_free_entry(struct dir_t *dir, struct dir_entr
             for(int w = 0; w < target_mod->dir->wsize ;w++)
             {
                 dir_entry_aux = target_mod->dir->extra_dir_entries + (w * target_mod->dir->zsize);
-                assert(!(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state != cache_block_invalid));
+                //assert(!(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state != cache_block_invalid));
+                
                 if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
                 {
                     return dir_entry_aux;
@@ -562,10 +563,14 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 	/* Get lock */
 	//assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	//dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
+        if(dir_entry == NULL)
+            return;
+        
         dir_lock = dir_entry->dir_lock;
         
         if(!dir_lock->lock)
         {
+            fatal("tunk");
             assert(dir_lock->stack == NULL && list_count(dir_lock->lock_list_down_up) == 0 && list_count(dir_lock->lock_list_up_down) == 0);
             return;
         }

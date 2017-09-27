@@ -355,10 +355,15 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             if(state != cache_block_invalid)
             {
                 stack->dir_entry->tag = tag;
-            }
-            else
+            }else{
+                if(stack->dir_entry->is_extra)
+                {
+                    stack->dir_entry->way = -1;
+                    stack->dir_entry->set = -1;
+                }
                 stack->dir_entry->tag = -1;
-
+            }
+            
             stack->dir_entry->state = state;
             
             if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry ) 
@@ -375,6 +380,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                     
                     stack->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;
                     cache->sets[set].blocks[way].dir_entry_selected->dir_lock->stack = stack;
+                    return;
                     
                 }
                 
@@ -393,6 +399,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                     stack->dir_entry->dir_lock->stack = new_stack2;
                     new_stack2->event = EV_MOD_NMOESI_EVICT;
                     esim_schedule_mod_stack_event(new_stack2, 0);
+                    
                 }
                 /*else{
                     dir_entry_unlock(stack->dir_entry);
