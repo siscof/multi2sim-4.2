@@ -94,7 +94,7 @@ void mod_stack_return(struct mod_stack_t *stack)
         }      
         
         if(stack->dir_entry && stack->dir_entry->dir_lock->stack == stack){
-            printf("/n tunk /n");
+            printf("/n tunk %lld /n",stack->id);
             if(stack->ret_stack)
                 stack->dir_entry->dir_lock->stack = stack->ret_stack;
             else

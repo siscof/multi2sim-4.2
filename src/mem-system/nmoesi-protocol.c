@@ -2220,8 +2220,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
                 esim_schedule_mod_stack_event(new_stack, 0);
                 return;
             }   
-            assert(stack->dir_entry->dir_lock->stack == stack);
-            dir_entry_unlock(stack->dir_entry);
+            //assert(stack->dir_entry->dir_lock->stack == stack);
+            //dir_entry_unlock(stack->dir_entry);
             mod_stack_return(stack);
             return;
         }
@@ -2268,6 +2268,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		stack->src_tag = stack->tag;
                 stack->src_stack = mod_stack_create(stack->id, stack->target_mod, stack->dir_entry->tag, 0, NULL);
                 stack->src_stack->dir_entry = stack->dir_entry; 
+                if(stack->dir_entry->dir_lock->stack == stack)
+                    stack->dir_entry->dir_lock->stack = stack->src_stack;
                 stack->src_stack->set = stack->dir_entry->set;
                 stack->src_stack->way = stack->dir_entry->way;
 		assert(stack->target_mod == mod_get_low_mod(return_mod, stack->tag));
@@ -2275,6 +2277,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		/* Send write request to all sharers */
 		new_stack = mod_stack_create(stack->id, return_mod, stack->addr, EV_MOD_NMOESI_EVICT_INVALID, stack);
 		new_stack->wavefront = stack->wavefront;
+                
 		new_stack->retry = stack->retry;
 		new_stack->uop = stack->uop;
 		new_stack->except_mod = NULL;
@@ -2432,7 +2435,10 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		/* Error locking block */
 		if (stack->err)
 		{
-			if (stack->mshr_locked != 0)
+
+                    if(!(stack->dir_entry->transient_state == dir_entry_invalidating && stack->tag == stack->dir_entry->tag))
+                    {
+                        if (stack->mshr_locked != 0)
 			{
 				mshr_unlock(target_mod, stack);
 				stack->mshr_locked = 0;
@@ -2443,6 +2449,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
 			return;
+                    }
 		}
 
 		/* If data was received, set the block to modified */
@@ -2580,6 +2587,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 		/* Error locking block */
 		if (stack->err)
 		{
+                    if(!(stack->dir_entry->transient_state == dir_entry_invalidating && stack->tag == stack->dir_entry->tag))
+                    {
 			if (stack->mshr_locked != 0)
 			{
 				mshr_unlock(target_mod, stack);
@@ -2592,6 +2601,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_EVICT_REPLY, stack, 0);
 			return;
+                    }
 		}
 
 		/* If data was received, set the block to modified */
@@ -2744,6 +2754,17 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			//cache_set_block(return_mod->cache, stack->src_set, stack->src_way,
 			//	0, cache_block_invalid);
                         cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
+                }
+                
+                for(int i = 0; i < list_count(stack->dir_entry->dir_lock->lock_list_down_up);i++)
+                {
+                    struct mod_stack_t *inv_stack = list_get(stack->dir_entry->dir_lock->lock_list_down_up,i);
+                    if(inv_stack->hit && inv_stack->blocking && inv_stack->tag == stack->tag)
+                    {
+                        list_remove_at(stack->dir_entry->dir_lock->lock_list_down_up,i);
+                        inv_stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
+                        esim_schedule_mod_stack_event(inv_stack, 0);
+                    }
                 }
                 
 		assert(!dir_entry_group_shared_or_owned(return_mod->dir, stack->ret_stack->dir_entry));
@@ -4294,6 +4315,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 				esim_schedule_mod_stack_event(new_stack, 0);
 				//esim_schedule_event(EV_MOD_NMOESI_WRITE_REQUEST, new_stack, 0);
 				stack->pending++;
+                                stack->dir_entry->transient_state = dir_entry_invalidating;
 			}
 		}
 			stack->event = EV_MOD_NMOESI_INVALIDATE_FINISH;
@@ -4323,6 +4345,7 @@ void mod_handler_nmoesi_invalidate(int event, void *data)
 		{
 			return;
 		}
+                stack->dir_entry->transient_state = dir_entry_none;
 		mod_stack_return(stack);
 		return;
 	}

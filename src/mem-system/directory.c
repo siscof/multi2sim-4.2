@@ -570,7 +570,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
         
         if(!dir_lock->lock)
         {
-            fatal("tunk");
+            fatal("tunk dir_entry_unlock");
             assert(dir_lock->stack == NULL && list_count(dir_lock->lock_list_down_up) == 0 && list_count(dir_lock->lock_list_up_down) == 0);
             return;
         }

@@ -30,6 +30,13 @@ enum extra_dir_structure_t{
     extra_dir_per_cache
 };
 
+enum dir_entry_state_t{
+    dir_entry_none = 0,
+    dir_entry_invalidating,
+    dir_entry_evicting
+};
+
+
 struct dir_lock_t
 {
 	bool lock;
@@ -57,6 +64,7 @@ struct dir_entry_t
         int y;
         int w;
         int z;
+        enum dir_entry_state_t transient_state;
         bool is_extra;
         int owner;  /* Node owning the block (-1 = No owner)*/
 	int num_sharers;  /* Number of 1s in next field */
