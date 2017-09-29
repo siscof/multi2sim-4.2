@@ -504,6 +504,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	 * return failure to lock. */
 	if (dir_lock->lock)
 	{
+                           
 		/* Enqueue the stack to the end of the lock queue */
 		//stack->dir_lock_next = NULL;
 		stack->dir_lock_event = event;
@@ -623,6 +624,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 	mem_trace("mem.end_access_block cache=\"%s\" access=\"A-%lld\" set=%d way=%d  w=%d\n",
 		dir_lock->dir->name, dir_lock->stack->id, dir_entry->x, dir_entry->y, dir_entry->w);
 
+        assert(!dir_entry->is_extra || (dir_entry->is_extra && dir_entry->state == cache_block_invalid));
 	/* Unlock entry */
 	dir_lock->lock = false;
 	//dir_lock->stack_id = 0;
