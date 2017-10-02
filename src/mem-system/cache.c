@@ -331,11 +331,19 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
             }
         }else if(cache->mod->dir->extra_dir_structure_type == extra_dir_per_cache){
             
+            if(stack->uncacheable &&  stack->ret_stack/*|| (cache->sets[set].blocks[way].dir_entry_selected->dir_lock->lock && state != cache_block_invalid && stack->dir_entry->is_extra )*/)
+            {
+                mem_debug("  set ret_stack uncacheable \n");
+                stack->ret_stack->uncacheable = true;
+                return;
+            }
+            
             mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
                             stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
                             str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, 
                             cache->sets[set].blocks[way].dir_entry_selected->w, str_map_value(&cache_block_state_map, 
                             cache->sets[set].blocks[way].dir_entry_selected->state));
+          
             
             if (cache->policy == cache_policy_fifo && cache->sets[set].blocks[way].dir_entry_selected->tag != tag)
                     cache_update_waylist(&cache->sets[set], &cache->sets[set].blocks[way], cache_waylist_head);
@@ -384,6 +392,13 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                     stack->dir_entry->dir_lock->stack = new_stack2;
                     new_stack2->event = EV_MOD_NMOESI_EVICT;
                     esim_schedule_mod_stack_event(new_stack2, 0);
+                    if(stack->ret_stack)
+                    {
+                        mem_debug("  set ret_stack uncacheable \n");
+                        stack->ret_stack->uncacheable = true;
+   
+                    }
+                    
                     return;
                 }else{
                     dir_entry_swap(cache->sets[set].blocks[way].dir_entry_selected, stack->dir_entry);

@@ -1806,6 +1806,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		if (!stack->hit)
 		{
+                    if(stack->ret_event == EV_MOD_NMOESI_INVALIDATE_FINISH)
+                    {
+                        stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_FINISH;
+                        esim_schedule_mod_stack_event(stack, 0);
+                        return;
+                    }
 			/* Find victim */
 			if (stack->way < 0 )
 			{
@@ -1881,10 +1887,13 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 //stack->dir_entry = dir_entry;
                 //stack->cache_block = cache_get_block_new(target_mod->cache, stack->set, stack->way);
                 dir_lock = stack->dir_entry->dir_lock;
-		if (dir_lock->lock && !stack->blocking && stack->hit && stack->dir_entry->transient_state != dir_entry_invalidating)
+		if (dir_lock->lock && !stack->blocking && stack->hit /*&& stack->dir_entry->transient_state != dir_entry_invalidating*/)
 		{
                     if(stack->dir_entry->transient_state != dir_entry_invalidating)
                     {
+                        mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - is invalidating\n",
+                                stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
+                    }
                         mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - aborting\n",
 				stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
 			stack->err = 1;
@@ -1902,10 +1911,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             mod_unlock_port(target_mod, port, stack);
                         }
 			return;
-                    }else{
+                    /*}else{
                         mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - is invalidating\n",
                                 stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
-                    }
+                    }*/
                       
 		}  
                 //bool avoid_dir_entry_lock = false;
@@ -2774,17 +2783,17 @@ void mod_handler_nmoesi_evict(int event, void *data)
                             inv_stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
                             esim_schedule_mod_stack_event(inv_stack, 0);
                         }
-                        if(found_inv_stack)
-                        {
-                            mem_debug(" found!!!!\n");
-                            cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
-                            stack->err = 0;
-                        }else{
-                            
-                            mem_debug("no found :( !!!!\n");
-                        }
                     }
-                    
+                    if(found_inv_stack)
+                    {
+                        mem_debug(" found!!!!\n");
+                        cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
+                        stack->err = 0;
+                    }else{
+                        cache_set_block_new(return_mod->cache, stack->src_stack, cache_block_invalid);
+                        stack->err = 0;
+                        mem_debug("no found :( !!!!\n");
+                    }
                     
                     //stack->err = 0;
                     //stack->event = EV_MOD_NMOESI_EVICT_ACTION;
@@ -2816,8 +2825,14 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, return_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_finish\"\n",
 			stack->id, return_mod->name);
-                mod_stack_return(stack->src_stack);
-                stack->src_stack = NULL;
+                //if(!stack->src_stack->dir_entry->is_extra)
+                //{
+                    mod_stack_return(stack->src_stack);
+                    stack->src_stack = NULL;
+                /*}else{
+                    assert(!stack->ret_stack->src_stack);
+                    stack->ret_stack->src_stack = stack->src_stack
+                }*/
 		mod_stack_return(stack);
 		return;
 	}
@@ -3777,10 +3792,16 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			return;
 		}
 
-                if(stack->dir_entry->state == cache_block_invalid && stack->uncacheable)
+                if(!stack->hit || (stack->dir_entry->state == cache_block_invalid && stack->uncacheable))
                 {
-                    stack->event = EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE;
-                    esim_schedule_mod_stack_event(stack, 0);
+                    if(!stack->hit)
+                    {
+                        stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
+                        esim_schedule_mod_stack_event(stack, 0);
+                    }else{
+                        stack->event = EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE;
+                        esim_schedule_mod_stack_event(stack, 0);
+                    }
                 }else{
                     /* Invalidate the rest of upper level sharers */
                     new_stack = mod_stack_create(stack->id, target_mod, 0,
