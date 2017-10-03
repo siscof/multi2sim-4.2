@@ -56,6 +56,7 @@ struct dir_entry_t
         int y;
         int w;
         int z;
+        bool is_extra;
         int owner;  /* Node owning the block (-1 = No owner)*/
 	int num_sharers;  /* Number of 1s in next field */
 	//unsigned char sharer[0];   /* Bitmap of sharers (must be last field) */
@@ -79,6 +80,9 @@ struct dir_t
 	 * that fit within a block. */
 	int xsize, ysize, zsize, wsize;
         int dir_entry_sharers_size;
+        
+        int extra_dir_used;
+        int extra_dir_max;
         
         int extra_dir_structure_type;
         struct dir_entry_t *extra_dir_entries;

@@ -1858,16 +1858,22 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                     {
                         int w;
                         struct dir_entry_t *dir_entry_aux;
-                        if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line)
+                        if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line )
                         {
-                            for(int i = 1; i < target_mod->dir->wsize ;i++)
+                            if( target_mod->dir->extra_dir_used < target_mod->dir->extra_dir_max)
                             {
-                                w = (dir_entry->w + i) % target_mod->dir->wsize;
-                                dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                                if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                                for(int i = 1; i < target_mod->dir->wsize ;i++)
                                 {
-                                    dir_entry = dir_entry_aux;
-                                    break;
+                                    w = (dir_entry->w + i) % target_mod->dir->wsize;
+                                    dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                                    if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                                    {
+                                        target_mod->dir->extra_dir_used++;
+                                        dir_entry_aux->is_extra = true;
+                                        dir_entry = dir_entry_aux;
+                                        printf("%d\n",target_mod->dir->extra_dir_used);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -1987,7 +1993,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 if (!dir_entry_lock(stack->dir_entry, EV_MOD_NMOESI_FIND_AND_LOCK, stack))
                 {
                         mem_debug("    %lld 0x%x %s block locked at set=%d, way=%d by A-%lld - waiting\n",
-                                stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack->id);
+                                stack->id, stack->tag, target_mod->name, stack->set, stack->way, dir_lock->stack ? dir_lock->stack->id:-1);
                         /*if (stack->mshr_locked != 0)
                         {
                                 mshr_unlock2(mod);

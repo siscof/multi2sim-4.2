@@ -74,6 +74,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
         dir->mod = mod;
         dir->dir_entry_sharers_size = sharer_size;
         dir->extra_dir_structure_type = mod->cache->extra_dir_structure_type;
+        //dir->extra_dir_max = 512;
         
         if(dir->extra_dir_structure_type == extra_dir_per_cache_line)
         {
@@ -110,11 +111,11 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
                                             if(z == 0)
                                             {
                                                 cache_block = cache_get_block_new(mod->cache,x,y);
+                                                dir_entry->cache_block = cache_block;
                                                 //cache_block->dir_entries = dir_entry_get(dir, x, y, 0, w);
                                                 if(w == 0)
                                                     cache_block->dir_entry_selected = dir_entry;
                                             }
-
                                     }
                             }
                     }
@@ -338,6 +339,9 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 	//dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
         dir_lock = dir_entry->dir_lock;
         
+        
+ 
+        
         if(stack->request_dir == mod_request_down_up)
         {
             lock_queue = dir_lock->lock_list_down_up;
@@ -347,7 +351,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
         
 	/* If the entry is already locked, enqueue a new waiter and
 	 * return failure to lock. */
-	if (dir_lock->lock)
+	if (dir_lock->lock /*|| (dir_entry->cache_block->dir_entry_selected != dir_entry && dir_lock->dir->extra_dir_used >= dir_lock->dir->extra_dir_max && stack->hit)*/)
 	{
 		/* Enqueue the stack to the end of the lock queue */
 		//stack->dir_lock_next = NULL;
@@ -356,7 +360,16 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
                 mem_debug("    0x%x access suspended\n", stack->addr);
 		return 0;
 	}
-
+        
+        //dir_lock extra?
+        /*assert(dir_lock->dir->extra_dir_used >= 0);
+        if(dir_entry->cache_block->dir_entry_selected != dir_entry && stack->hit == 0)
+        {
+            dir_entry->is_extra = true;
+            dir_lock->dir->extra_dir_used++;
+            printf("%d\n",dir_lock->dir->extra_dir_used);
+        }*/
+       
 	/* Trace */
 	mem_trace("mem.new_access_block cache=\"%s\" access=\"A-%lld\" set=%d way=%d  w=%d\n",
 		dir_lock->dir->name, stack->id, dir_entry->x, dir_entry->y, dir_entry->w);
@@ -382,6 +395,10 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 	//assert(x >= 0 && x < dir->xsize && y >= 0 && y < dir->ysize);
 	//dir_lock = &dir->dir_lock_file[x * dir->ysize + y];
         dir_lock = dir_entry->dir_lock;
+        if(dir_entry->is_extra){
+            dir_entry->is_extra = false;
+            dir_lock->dir->extra_dir_used--;
+        }
         
 	/* Wake up first waiter */
         if(list_count(dir_lock->lock_list_down_up) > 0)

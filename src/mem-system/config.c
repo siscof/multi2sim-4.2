@@ -721,6 +721,8 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 	mod->low_net_node = net_node;
 
 	/* Create cache */
+        int dir_entry_per_block_max = config_read_int(config, buf, "dir_entry_per_line_max", 1);
+        
         dir_entry_per_block = config_read_int(config, buf, "dir_entry_per_line", 1);
         if (dir_entry_per_block < 1)
 		fatal("%s: cache %s: invalid value for variable 'dir_entry_per_line'.\n%s",
@@ -739,6 +741,7 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
         
         mod->cache = cache_create(mod->name, num_sets, block_size, assoc,
 		policy, dir_entry_per_block, extra_dir_structure_type);
+        mod->cache->dir_entry_per_line_max = dir_entry_per_block_max;
         mod->cache->mod = mod;
 
 	/* Fill in prefetcher parameters */
@@ -1540,6 +1543,7 @@ static void mem_config_calculate_sub_block_sizes(void)
 		/* Create directory */
 		mod->num_sub_blocks = mod->block_size / mod->sub_block_size;
 		mod->dir = dir_create(mod->name, mod->dir_num_sets, mod->dir_assoc, mod->num_sub_blocks, num_nodes, mod);
+                mod->dir->extra_dir_max = mod->cache->dir_entry_per_line_max;
 		mem_debug("\t%s - %dx%dx%d (%dx%dx%d effective) - %d entries, %d sub-blocks\n",
 			mod->name, mod->dir_num_sets, mod->dir_assoc, num_nodes,
 			mod->dir_num_sets, mod->dir_assoc, linked_list_count(mod->high_mod_list),

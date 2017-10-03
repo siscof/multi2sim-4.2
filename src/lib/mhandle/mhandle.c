@@ -493,13 +493,23 @@ void *__xstrdup(const char *s, char *at)
 
 void __mhandle_done()
 {
-	int i;
+	int i,j;
 	
 	/* Visit whole hash table to look for not freed pointers */
 	for (i = 0; i < mhandle_hash_table_size; i++)
-		if (mhandle_hash_table[i].active && !mhandle_hash_table[i].removed)
-			fprintf(stderr, "\nwarning: %s: pointer not freed", mhandle_hash_table[i].at);
-	
+        {
+            if (mhandle_hash_table[i].active && !mhandle_hash_table[i].removed && j < 10)
+            {
+		fprintf(stderr, "\nwarning: %s: pointer not freed", mhandle_hash_table[i].at);
+                j++;
+            }
+            if(j >=10)
+                break;
+        }
+        
+        if(j >= 10)
+            fprintf(stderr, "\n and more ....");
+        
 	/* Summary message */
 	if (mhandle_hash_table_count)
 		fprintf(stderr, "\n** %d pointers not freed (%lu bytes) **\n",
