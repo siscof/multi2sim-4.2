@@ -74,6 +74,7 @@ struct si_compute_unit_t
 
 	/* Statistics */
         struct si_gpu_unit_stats *interval_statistics;
+        long long accesses_L1_to_l2;
 	long long cycle;
 	long long mapped_work_groups;
 	long long wavefront_count;

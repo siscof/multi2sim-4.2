@@ -409,7 +409,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		}
 
 		/* Miss */
-
+                //añadir_acceso L1 -> L2
+                if(target_mod->level == 1)
+                        target_mod->compute_unit->accesses_L1_to_l2++;
+                
 		estadisticas(0, 0);
                 if(super_stack_enabled == 1){
                     //cuantos accesos debo generar?
@@ -426,6 +429,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                     esim_schedule_mod_stack_event(super_stack, 0);
                     
                 }else{
+                    
                     new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
                             EV_MOD_NMOESI_LOAD_MISS, stack);
                     //new_stack->peer = mod_stack_set_peer(mod, stack->state);
@@ -455,7 +459,12 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->addr, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_miss\"\n",
 			stack->id, target_mod->name);
-
+                
+                //resta accesos L1 -> L2
+                if(target_mod->level == 1)
+                        target_mod->compute_unit->accesses_L1_to_l2--;
+                
+                
 		/* Error on read request. Unlock block and retry load. */
 		if (stack->err)
 		{
@@ -1193,6 +1202,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* E state must tell the lower-level module to remove this module as an owner */
 		else if (stack->dir_entry->state == cache_block_exclusive)
 		{
+                        if(target_mod->level == 1)
+                            target_mod->compute_unit->accesses_L1_to_l2++;
+                    
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
 			new_stack->wavefront = stack->wavefront;
@@ -1210,6 +1222,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		 * before it becomes non-coherent */
 		else
 		{
+                        if(target_mod->level == 1)
+                            target_mod->compute_unit->accesses_L1_to_l2++;
+                    
                         if(stack->dir_entry->state == cache_block_invalid && stack->uncacheable){
                             new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
                                     EV_MOD_NMOESI_NC_STORE_MISS, stack);
@@ -1252,6 +1267,9 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			stack->addr, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_miss\"\n",
 			stack->id, target_mod->name);
+                
+                if(target_mod->level == 1)
+                        target_mod->compute_unit->accesses_L1_to_l2--;
 
 		/* Error on read request. Unlock block and retry nc store. */
 		if (stack->err)
