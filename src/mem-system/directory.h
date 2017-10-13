@@ -26,6 +26,7 @@
 
 enum extra_dir_structure_t{
     extra_dir_per_cache_line = 0,
+    extra_dir_per_cache_line_set,
     extra_dir_per_cache
 };
 
@@ -82,6 +83,8 @@ struct dir_t
         int dir_entry_sharers_size;
         
         int extra_dir_used;
+        int extra_dir_sets;
+        int *sets_extra_dir_used;
         int extra_dir_max;
         
         int extra_dir_structure_type;

@@ -74,6 +74,7 @@ struct dir_t *dir_create(char *name, int xsize, int ysize, int zsize, int num_no
         dir->mod = mod;
         dir->dir_entry_sharers_size = sharer_size;
         dir->extra_dir_structure_type = mod->cache->extra_dir_structure_type;
+        dir->sets_extra_dir_used = xcalloc(dir->extra_dir_sets,sizeof(int));
         //dir->extra_dir_max = 512;
         
         if(dir->extra_dir_structure_type == extra_dir_per_cache_line)
@@ -398,6 +399,8 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
         if(dir_entry->is_extra){
             dir_entry->is_extra = false;
             dir_lock->dir->extra_dir_used--;
+            int conversion_sets_dir_to_cache = dir_lock->dir->mod->cache->num_sets/ dir_lock->dir->mod->dir->extra_dir_sets;
+            dir_lock->dir->mod->dir->sets_extra_dir_used[dir_lock->stack->set /conversion_sets_dir_to_cache]--;
         }
         
 	/* Wake up first waiter */

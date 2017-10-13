@@ -77,6 +77,7 @@ struct cache_t
 	unsigned int block_mask;
 	int log_block_size;
         int dir_entry_per_line;
+        int extra_dir_sets;
         int dir_entry_per_line_max;
         int extra_dir_structure_type;
 

@@ -722,7 +722,7 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
 
 	/* Create cache */
         int dir_entry_per_block_max = config_read_int(config, buf, "dir_entry_per_line_max", 1);
-        
+        int extra_dir_sets = config_read_int(config, buf, "extra_dir_sets", 1);
         dir_entry_per_block = config_read_int(config, buf, "dir_entry_per_line", 1);
         if (dir_entry_per_block < 1)
 		fatal("%s: cache %s: invalid value for variable 'dir_entry_per_line'.\n%s",
@@ -735,12 +735,20 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
         }else if(!strcmp(extra_dir_structure_type_str,"per_cache")){
             extra_dir_structure_type = extra_dir_per_cache;
         }else{
-		fatal("%s: cache %s: invalid value for variable 'extra_dir_structure_type'. (valid values: per_line, per_cache)\n%s",
+		fatal("%s: cache %s: invalid value for variable 'extra_dir_structure_type' = %s. (valid values: per_line, per_cache)\n%s",extra_dir_structure_type_str,
 			mem_config_file_name, mod_name, mem_err_config_note);
 	}
         
         mod->cache = cache_create(mod->name, num_sets, block_size, assoc,
 		policy, dir_entry_per_block, extra_dir_structure_type);
+        /*if(extra_dir_structure_type == extra_dir_per_cache_line_set)
+        {
+            for(int i = 0;i < num_sets;i++)
+            {
+                mod->cache->sets[i].extra_dir_max = dir_entry_per_block_max;
+            }
+        }*/
+        mod->cache->extra_dir_sets = extra_dir_sets;
         mod->cache->dir_entry_per_line_max = dir_entry_per_block_max;
         mod->cache->mod = mod;
 
@@ -1543,7 +1551,12 @@ static void mem_config_calculate_sub_block_sizes(void)
 		/* Create directory */
 		mod->num_sub_blocks = mod->block_size / mod->sub_block_size;
 		mod->dir = dir_create(mod->name, mod->dir_num_sets, mod->dir_assoc, mod->num_sub_blocks, num_nodes, mod);
-                mod->dir->extra_dir_max = mod->cache->dir_entry_per_line_max;
+                if(mod->cache->extra_dir_sets)
+                    mod->dir->extra_dir_max = mod->cache->dir_entry_per_line_max / mod->cache->extra_dir_sets;
+                else
+                    mod->dir->extra_dir_max = mod->cache->dir_entry_per_line_max;
+                mod->dir->extra_dir_sets = mod->cache->extra_dir_sets;
+                mod->dir->sets_extra_dir_used = xcalloc(mod->dir->extra_dir_sets,sizeof(int));
 		mem_debug("\t%s - %dx%dx%d (%dx%dx%d effective) - %d entries, %d sub-blocks\n",
 			mod->name, mod->dir_num_sets, mod->dir_assoc, num_nodes,
 			mod->dir_num_sets, mod->dir_assoc, linked_list_count(mod->high_mod_list),
