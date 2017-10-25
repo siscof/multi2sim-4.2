@@ -75,6 +75,7 @@ struct si_compute_unit_t
 	/* Statistics */
         struct si_gpu_unit_stats *interval_statistics;
         long long accesses_L1_to_l2;
+        long long accesses_L2_to_MM;
 	long long cycle;
 	long long mapped_work_groups;
 	long long wavefront_count;
@@ -95,6 +96,7 @@ struct si_compute_unit_t
 	/* List of currently mapped work-groups */
 	int work_group_count;
 	struct si_work_group_t **work_groups;
+        
 
 	/* Compute Unit capacity state  (for concurrent command queue)*/
 	/* Spatial profiling statistics */

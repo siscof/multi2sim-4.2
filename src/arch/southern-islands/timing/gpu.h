@@ -264,6 +264,9 @@ CLASS_BEGIN(SIGpu, Timing)
 	long long op;
 	long long cycles;
 	float opc;
+        
+        long long accesses_L1_to_l2;
+        long long accesses_L2_to_MM;
 
 	long long int idle;
 	long long int last_complete_cycle;

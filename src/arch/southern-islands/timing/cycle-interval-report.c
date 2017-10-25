@@ -178,7 +178,7 @@ void si_device_spatial_report_init(SIGpu *device)
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 
 	fprintf(device_spatial_report_file, "mshr_wavefront_inflight,wait_for_mem_time,wait_for_mem_counter,gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
-	fprintf(device_spatial_report_file, "mem_trans_L1->L2,mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,uop_load_end,uop_load_lat,uop_load_vmb_lat,uop_load_mm_lat,write_start,write_end,write_lat,");
+	fprintf(device_spatial_report_file, "accesses_L1_to_L2,accesses_L2_to_MM,mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,uop_load_end,uop_load_lat,uop_load_vmb_lat,uop_load_mm_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
@@ -454,6 +454,13 @@ void si_device_interval_update(SIGpu *device)
 	if (si_device_spatial_report_active)
 	{
 		device->interval_statistics->interval_cycles++;
+                
+                for(int j = 0; j < si_gpu_num_compute_units; j++)
+                {
+                        device->accesses_L1_to_l2 += device->compute_units[j]->accesses_L1_to_l2;
+                        device->accesses_L2_to_MM += device->compute_units[j]->accesses_L2_to_MM;
+                }
+                
 
 		if(device->interval_statistics->interval_cycles >= spatial_profiling_interval)
 		{
@@ -604,14 +611,10 @@ void si_device_spatial_report_dump(SIGpu *device)
         else
             fprintf(f, "%d,", device->compute_units[0]->vector_cache->mshr->size);
 
-	// memory mem_acc_start mem_acc_end mem_acc_lat load_start load_end load_lat write_start write_end write_lat
-        long long accesses_L1_to_l2 = 0;
-        for(int j = 0; j < si_gpu_num_compute_units; j++)
-	{
-		accesses_L1_to_l2 += device->compute_units[j]->accesses_L1_to_l2;
-        }
-        fprintf(f, "%lld,", accesses_L1_to_l2);
-        
+        fprintf(f, "%lld,", device->accesses_L1_to_l2);
+        device->accesses_L1_to_l2 = 0;
+        fprintf(f, "%lld,", device->accesses_L2_to_MM);
+        device->accesses_L2_to_MM = 0;
 	fprintf(f, "%lld,", device->interval_statistics->memory.accesses_started);
 	fprintf(f, "%lld,", device->interval_statistics->memory.accesses_finished);
 	fprintf(f, "%lld,", device->interval_statistics->memory.accesses_latency);

@@ -252,7 +252,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 			esim_schedule_event(EV_MOD_NMOESI_LOAD_FINISH, stack, 0);
     }
-		else
+    else
     {
       fatal("Invalid request_dir in EV_MOD_NMOESI_LOAD_RECEIVE");
     }
@@ -2925,6 +2925,10 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		new_stack->retry = 0;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
+                
+                if(target_mod->level == 3 && stack->wavefront)
+                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
+                
 		stack->read = 1;
                 if(stack->ret_stack->uncacheable)
                 {   
@@ -3658,6 +3662,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
 
+                if(target_mod->level == 3 && stack->wavefront)
+                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
 		/* Return */
 		mod_stack_return(stack);
 		return;
@@ -3754,6 +3760,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		new_stack->write = 1;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
+                if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
+                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
 
 		stack->write = 1;
 		stack->blocking = stack->request_dir == mod_request_down_up;
@@ -4200,6 +4208,9 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		{
 			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
 		}
+                
+                if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
+                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
 
 
 		/* Return */
