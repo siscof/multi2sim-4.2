@@ -1893,7 +1893,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                         target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]++;
                                         dir_entry_aux->is_extra = true;
                                         dir_entry = dir_entry_aux;
-                                        printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
+                                        //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
                                         break;
                                     }
                                 }
@@ -1915,7 +1915,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                         target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]++;
                                         dir_entry_aux->is_extra = true;
                                         dir_entry = dir_entry_aux;
-                                        printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
+                                        //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
                                         break;
                                     }
                                 }
