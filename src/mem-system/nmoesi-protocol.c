@@ -1057,6 +1057,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		stack->nc_write = 1;
                 stack->eviction = 0;
                 stack->uncacheable = false;
+                stack->request_dir = mod_request_up_down;
                 stack->allow_cache_by_passing = false;
 		stack->err = 0;
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
@@ -1829,8 +1830,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 			{
 				stack->way = cache_replace_block(target_mod->cache, stack->set);
 			}
-			if(flag_mshr_enabled && stack->request_dir != mod_request_down_up && stack->read && stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
-			{
+			//if(flag_mshr_enabled && stack->request_dir != mod_request_down_up && stack->read && stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
+			if(flag_mshr_enabled && stack->request_dir != mod_request_down_up && /*stack->read && */stack->mshr_locked == 0 && target_mod->kind != mod_kind_main_memory)
+                        {
 				if(!mshr_lock(target_mod->mshr, stack))
 				{
                                     mem_debug("  %lld %lld 0x%x %s find and lock port mshr full(blocking=%d)\n",
