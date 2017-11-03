@@ -128,6 +128,15 @@ struct esta_t
 	long long coalesceHits;
 	long long coalesceMisses;
 
+        
+        long long dist0_99;
+        long long dist100_199;
+        long long dist200_299;
+        long long dist300_399;
+        long long dist400_499;
+        long long dist500_599;
+        long long dist600_9999;
+        
 	long long accesses_started;
 	long long accesses_finished;
 	long long accesses_latency;
