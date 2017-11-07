@@ -50,6 +50,7 @@ static char *wf_spatial_report_filename = "report-wavefront-spatial";
 static char *wg_spatial_report_filename = "report-wavefront-spatial";
 
 static FILE *cu_spatial_report_file;
+static FILE *device_mem_latency;
 static FILE *device_spatial_report_file;
 //static FILE *device_spatial_report_file_wg;
 static FILE *wf_spatial_report_file;
@@ -183,6 +184,9 @@ void si_device_spatial_report_init(SIGpu *device)
 	fprintf(device_spatial_report_file, "active_wavefronts,wavefronts_waiting_mem,");
 	fprintf(device_spatial_report_file, "total_i,simd_i,simd_op,scalar_i,v_mem_i,v_mem_op,s_mem_i,lds_i,lds_op,branch_i,");
 	fprintf(device_spatial_report_file, "mappedWG,unmappedWG,cycles,esim_time\n");
+        
+        device_mem_latency = file_open_for_write("mem_latency");
+        fprintf(device_mem_latency, "accesos,latencia,cycle,esim_time\n");
 }
 
 void si_spatial_report_done()
@@ -408,7 +412,11 @@ void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct
             compute_unit->compute_device->interval_statistics->memory.dist500_599++;
         }else{
             compute_unit->compute_device->interval_statistics->memory.dist600_9999++;
+            fprintf(device_mem_latency,"%lld,%lld,%lld,%lld\n", uop->active_work_items,(asTiming(si_gpu)->cycle - uop->send_cycle), asTiming(si_gpu)->cycle, esim_time);
+            fflush(device_mem_latency);
         }
+        
+        
 
 }
 
