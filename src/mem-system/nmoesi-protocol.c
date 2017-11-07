@@ -398,7 +398,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->event = EV_MOD_NMOESI_LOAD_UNLOCK;
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_LOAD_UNLOCK, stack, 0);
-			estadisticas(1, 0);
+			//estadisticas(1, 0);
 			target_mod->hits_aux++;
 			/* The prefetcher may have prefetched this earlier and hence
 			 * this is a hit now. Let the prefetcher know of this hit
@@ -413,7 +413,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                 if(target_mod->level == 1)
                         target_mod->compute_unit->accesses_L1_to_l2++;
                 
-		estadisticas(0, 0);
+		//estadisticas(0, 0);
                 if(super_stack_enabled == 1){
                     //cuantos accesos debo generar?
                     struct mod_stack_t *super_stack = mod_stack_create_super_stack(mod_get_low_mod(target_mod, stack->tag), EV_MOD_NMOESI_LOAD_MISS, stack);
@@ -1734,10 +1734,10 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		if (stack->hit){
 			target_mod->hits++;
 			//sumamos acceso y hit
-			estadisticas(1, target_mod->level);
+			//estadisticas(1, target_mod->level);
 		}else{
 			//sumamos acceso
-			estadisticas(0, target_mod->level);
+			//estadisticas(0, target_mod->level);
 		}
 		if (stack->read)
 		{

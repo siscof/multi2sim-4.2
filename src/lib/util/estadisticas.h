@@ -303,7 +303,6 @@ void estadisticas_por_intervalos(long long intervalo);
 
 void mem_load_finish(long long lat);
 void hrl2(int hit , struct mod_t *mod, int from_load);
-void estadisticas(int hit, int lvl);
 void ini_estadisticas();
 void add_coalesce(int level);
 void add_access(int level);

@@ -370,7 +370,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		if (stack->hit && (stack->glc == 0))
 		{
 			esim_schedule_event(EV_MOD_VI_LOAD_UNLOCK, stack, 0);
-			estadisticas(1, 0);
+			//estadisticas(1, 0);
 
 			//add_hit(mod->level);
 			mod->hits_aux++;
@@ -383,7 +383,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 		stack->dir_entry->state = 0;
 
 		//add_miss(mod->level);
-		estadisticas(0, 0);
+		//estadisticas(0, 0);
 
 		new_stack = mod_stack_create(stack->id, mod_get_low_mod(mod, stack->addr), stack->addr, EV_MOD_VI_LOAD_SEND, stack);
 		new_stack->reply_size = 8;
@@ -456,7 +456,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 					return;
 				}
 
-				estadisticas(1, 0);
+				//estadisticas(1, 0);
 				stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
 				//add_hit(mod->level);
 				mod->hits_aux++;
@@ -475,7 +475,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 				return;
 			}
 
-			estadisticas(1, 0);
+			//estadisticas(1, 0);
  			stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
  			//add_hit(mod->level);
  			mod->hits_aux++;
@@ -488,7 +488,7 @@ if (event == EV_MOD_VI_LOAD_ACTION)
 
 		/* MISS */
 		//add_miss(mod->level);
-		estadisticas(0, 0);
+		//estadisticas(0, 0);
 
 		if(stack->eviction)
 		{
@@ -1064,7 +1064,7 @@ void mod_handler_vi_store(int event, void *data)
 					return;
 				}
 
-				estadisticas(1, 0);
+				//estadisticas(1, 0);
 				//stack->ret_stack->valid_mask = mod_get_valid_mask(mod, stack->set, stack->way);
 				//add_hit(mod->level);
 				mod->hits_aux++;
@@ -1302,10 +1302,10 @@ void mod_handler_vi_find_and_lock(int event, void *data)
 		if (stack->hit){
 			mod->hits++;
 			//sumamos acceso y hit
-			estadisticas(1, mod->level);
+			//estadisticas(1, mod->level);
 		}else{
 			//sumamos acceso
-			estadisticas(0, mod->level);
+			//estadisticas(0, mod->level);
 		}
 		if (stack->read)
 		{

@@ -158,22 +158,15 @@ void hrl2(int hit , struct mod_t *mod, int from_load){
         if((mod->level == 2) && from_load)
         {
                 mod->loads++;
-                if(hit)
+                /*if(hit)
                 {
-                        estadisticas(1, 5);
+                        //estadisticas(1, 5);
                 }
                 else
                 {
                         estadisticas(0, 5);
-                }
+                }*/
         }
-}
-
-void estadisticas(int hit, int lvl){
-
-        estadis[lvl].accesses++;
-
-        estadis[lvl].hits += hit;
 }
 
 void statistics_event_init(int interval)
@@ -234,25 +227,6 @@ fran_debug_ipc(" wavefront_access_load_miss queue_load_miss lock_mshr_load_miss 
 fran_debug_ipc(" wavefront_access_load_critical_hit queue_load_critical_hit lock_mshr_load_critical_hit lock_dir_load_critical_hit eviction_load_critical_hit retry_load_critical_hit miss_load_critical_hit finish_load_critical_hit access_load_critical_hit");
 fran_debug_ipc(" wavefront_access_load_critical_miss queue_load_critical_miss lock_mshr_load_critical_miss lock_dir_load_critical_miss eviction_load_critical_miss retry_load_critical_miss miss_load_critical_miss finish_load_critical_miss access_load_critical_miss");
 fran_debug_ipc(" wavefront_access_nc_write queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 load_invalidation_L1 load_invalidation_L2 load_invalidation_MM store_invalidation_L1 store_invalidation_L2 store_invalidation_MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem ciclos_intervalo ciclos_totales esim_time\n");
-
-        for(int i = 0; i < 10; i++){
-                estadis[i].coalesce = 0;
-                estadis[i].accesses = 0;
-                estadis[i].hits= 0;
-                estadis[i].misses = 0;
-		estadis[i].busy_cicles_in = 0;
-                estadis[i].busy_cicles_in = 0;
-                estadis[i].invalidations = 0;
-                estadis[i].delayed_read_hit= 0;
-                estadis[i].esim_cycle_anterior= 0;
-                estadis[i].media_latencia = 0;
-                estadis[i].tiempo_acceso_latencia = 0;
-                estadis[i].latencia_red_acc = 0;
-                estadis[i].latencia_red_cont = 0;
-                estadis[i].blk_compartidos = 0;
-                estadis[i].replicas_en_l1 = 0;
-		estadis[i].coalesceHits = 0;
-        }
 }
 
 void add_load_invalidation(int level)

@@ -412,10 +412,10 @@ void si_report_global_mem_finish( struct si_compute_unit_t *compute_unit, struct
             compute_unit->compute_device->interval_statistics->memory.dist500_599++;
         }else{
             compute_unit->compute_device->interval_statistics->memory.dist600_9999++;
-            fprintf(device_mem_latency,"%lld,%lld,%lld,%lld\n", uop->active_work_items,(asTiming(si_gpu)->cycle - uop->send_cycle), asTiming(si_gpu)->cycle, esim_time);
-            fflush(device_mem_latency);
         }
         
+        fprintf(device_mem_latency,"%lld,%lld,%lld,%lld\n", uop->active_work_items,(asTiming(si_gpu)->cycle - uop->send_cycle), asTiming(si_gpu)->cycle, esim_time);
+        fflush(device_mem_latency);
         
 
 }
