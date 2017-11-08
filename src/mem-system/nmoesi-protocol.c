@@ -910,8 +910,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 			add_coalesce_store(target_mod->level);
 			return;
 		}
-
-		add_access(target_mod->level);
+                
+                add_access(target_mod->level);
 
 		/* Next event */
 		stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
@@ -2909,7 +2909,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		if (stack->request_dir == mod_request_up_down)
 		{
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
-			add_access(target_mod->level);
+			if(stack->retry != 0)
+                            add_access(target_mod->level);
 		}else{
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 		}
@@ -3745,7 +3746,11 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
+                {
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+                        if(stack->retry != 0)
+                            add_access(target_mod->level);
+                }
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 
