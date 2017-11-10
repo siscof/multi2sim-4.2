@@ -441,6 +441,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                     new_stack->retry = stack->retry;
                     new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
                     new_stack->allow_cache_by_passing = true;
+                    new_stack->request_cycle = asTiming(si_gpu)->cycle;
                     new_stack->stack_size = 8;
                     esim_schedule_mod_stack_event(new_stack, 0);
                     //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
@@ -1235,6 +1236,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
                             new_stack->nc_write = 1;
                             new_stack->return_mod = target_mod;
                             new_stack->request_dir = mod_request_up_down;
+                            new_stack->request_cycle = asTiming(si_gpu)->cycle;
                             new_stack->stack_size = 72;
                             new_stack->event = EV_MOD_NMOESI_NC_STORE_SEND;
                             esim_schedule_mod_stack_event(new_stack, 0);
@@ -1248,7 +1250,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
                             //new_stack->peer = mod_stack_set_peer(target_mod, stack->state);
                             new_stack->nc_write = 1;
                             new_stack->return_mod = target_mod;
-                            new_stack->request_dir = mod_request_up_down;
+                            new_stack->request_dir = mod_request_up_down;+
+                            new_stack->request_cycle = asTiming(si_gpu)->cycle;
                             new_stack->stack_size = 8;
                             new_stack->event = EV_MOD_NMOESI_READ_REQUEST;
                             esim_schedule_mod_stack_event(new_stack, 0);
@@ -2909,8 +2912,6 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		if (stack->request_dir == mod_request_up_down)
 		{
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
-			if(stack->retry != 0)
-                            add_access(target_mod->level);
 		}else{
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 		}
@@ -2972,6 +2973,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
 			return;
 		}
+                
 		stack->event = stack->request_dir == mod_request_up_down ?
 			EV_MOD_NMOESI_READ_REQUEST_UPDOWN : EV_MOD_NMOESI_READ_REQUEST_DOWNUP;
 		esim_schedule_mod_stack_event(stack, 0);
@@ -3085,6 +3087,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 		{
 			/* State = I */
+                        if(stack->retry != 0)
+                            add_access(target_mod->level);
 
                         if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
                         {
@@ -3100,6 +3104,13 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			new_stack->retry = stack->retry;
 			new_stack->uop = stack->uop;
                         new_stack->allow_cache_by_passing = stack->allow_cache_by_passing;
+                        
+                        //imprimir tiempo que ha tardado en llegar hasta aqui
+                        if(stack->ret_stack && stack->ret_stack->request_cycle != 0)
+                        {
+                            add_request_cycles(asTiming(si_gpu)->cycle - stack->ret_stack->request_cycle, target_mod->level);
+                            new_stack->request_cycle = asTiming(si_gpu)->cycle;
+                        }
 			/* Peer is NULL since we keep going up-down */
 			new_stack->request_dir = mod_request_up_down;
                         new_stack->stack_size = 8;
@@ -3748,8 +3759,6 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		if (stack->request_dir == mod_request_up_down)
                 {
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
-                        if(stack->retry != 0)
-                            add_access(target_mod->level);
                 }
 		else
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
@@ -3806,6 +3815,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 
                 if(stack->dir_entry->state == cache_block_invalid && stack->uncacheable)
                 {
+                    if(stack->retry != 0)
+                        add_access(target_mod->level);
                     stack->event = EV_MOD_NMOESI_WRITE_REQUEST_EXCLUSIVE;
                     esim_schedule_mod_stack_event(stack, 0);
                 }else{

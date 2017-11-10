@@ -97,6 +97,9 @@ struct esta_t
   long long store_invalidation;
   long long evictions;
   long long bytes_served;
+  
+  long long request_cycles;
+  long long request_cycles_count;
 
   long long uop_load_finish;
 	long long uop_load_latency;

@@ -91,6 +91,8 @@ struct mod_stack_t
 	long long coalesced_count;
 	long long invalided_address;
 	struct mod_stack_t *stack_superior;
+        long long request_cycle;
+        
 	int stack_size;
 	unsigned int dirty_mask;
 	unsigned int valid_mask;
