@@ -1250,7 +1250,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
                             //new_stack->peer = mod_stack_set_peer(target_mod, stack->state);
                             new_stack->nc_write = 1;
                             new_stack->return_mod = target_mod;
-                            new_stack->request_dir = mod_request_up_down;+
+                            new_stack->request_dir = mod_request_up_down;
                             new_stack->request_cycle = asTiming(si_gpu)->cycle;
                             new_stack->stack_size = 8;
                             new_stack->event = EV_MOD_NMOESI_READ_REQUEST;

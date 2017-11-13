@@ -351,6 +351,7 @@ void copy_latencies_to_wavefront(struct latenciometro *latencias, struct si_wave
 void add_cache_states(int state, int level);
 void add_load_invalidation(int level);
 void add_store_invalidation(int level);
+void add_request_cycles(long long cycles, int target_mod_level);
 
 
 #endif
