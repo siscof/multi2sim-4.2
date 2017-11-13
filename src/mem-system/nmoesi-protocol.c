@@ -3106,9 +3106,9 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                         new_stack->allow_cache_by_passing = stack->allow_cache_by_passing;
                         
                         //imprimir tiempo que ha tardado en llegar hasta aqui
-                        if(stack->ret_stack && stack->ret_stack->request_cycle != 0)
+                        if(stack->ret_stack && stack->request_cycle != 0)
                         {
-                            add_request_cycles(asTiming(si_gpu)->cycle - stack->ret_stack->request_cycle, target_mod->level);
+                            add_request_cycles(asTiming(si_gpu)->cycle - stack->request_cycle, target_mod->level);
                             new_stack->request_cycle = asTiming(si_gpu)->cycle;
                         }
 			/* Peer is NULL since we keep going up-down */
@@ -3184,6 +3184,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		stack->pending--;
 		if (stack->pending)
 			return;
+                //imprimir tiempo que ha tardado en llegar hasta aqui
+                if(stack->ret_stack && target_mod->kind == mod_kind_main_memory && stack->request_cycle != 0)
+                {
+                    add_request_cycles(asTiming(si_gpu)->cycle - stack->request_cycle, target_mod->level);
+                }
 
 		/* Trace */
 		mem_debug("  %lld %lld 0x%x %s read request updown finish\n", esim_time, stack->id,
