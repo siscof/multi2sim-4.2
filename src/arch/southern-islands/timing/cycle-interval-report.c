@@ -482,7 +482,7 @@ void si_device_interval_update(SIGpu *device)
                 
                 for(int j = 0; j < si_gpu_num_compute_units; j++)
                 {
-                        device->accesses_L1_to_l2 += device->compute_units[j]->accesses_L1_to_l2;
+                        device->accesses_L1_to_l2 += device->compute_units[j]->accesses_L1_to_L2;
                         device->accesses_L2_to_MM += device->compute_units[j]->accesses_L2_to_MM;
                 }
                 

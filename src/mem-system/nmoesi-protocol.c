@@ -411,8 +411,10 @@ void mod_handler_nmoesi_load(int event, void *data)
 		/* Miss */
                 //añadir_acceso L1 -> L2
                 if(target_mod->level == 1)
-                        target_mod->compute_unit->accesses_L1_to_l2++;
-                
+                {
+                        target_mod->compute_unit->accesses_L1_to_L2++;
+                        
+                }
 		//estadisticas(0, 0);
                 if(super_stack_enabled == 1){
                     //cuantos accesos debo generar?
@@ -462,8 +464,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 			stack->id, target_mod->name);
                 
                 //resta accesos L1 -> L2
-                if(target_mod->level == 1)
-                        target_mod->compute_unit->accesses_L1_to_l2--;
+                //if(target_mod->level == 1)
+                //        target_mod->compute_unit->accesses_L1_to_L2--;
                 
                 
 		/* Error on read request. Unlock block and retry load. */
@@ -1203,8 +1205,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* E state must tell the lower-level module to remove this module as an owner */
 		else if (stack->dir_entry->state == cache_block_exclusive)
 		{
-                        if(target_mod->level == 1)
-                            target_mod->compute_unit->accesses_L1_to_l2++;
+                        //if(target_mod->level == 1)
+                        //    target_mod->compute_unit->accesses_L1_to_L2++;
                     
 			new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
 				EV_MOD_NMOESI_NC_STORE_MISS, stack);
@@ -1223,8 +1225,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		 * before it becomes non-coherent */
 		else
 		{
-                        if(target_mod->level == 1)
-                            target_mod->compute_unit->accesses_L1_to_l2++;
+                        //if(target_mod->level == 1)
+                        //    target_mod->compute_unit->accesses_L1_to_L2++;
                     
                         if(stack->dir_entry->state == cache_block_invalid && stack->uncacheable){
                             new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
@@ -1241,6 +1243,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
                             new_stack->event = EV_MOD_NMOESI_NC_STORE_SEND;
                             esim_schedule_mod_stack_event(new_stack, 0);
                         }else{
+                            if(target_mod->level == 1)
+                                target_mod->compute_unit->accesses_L1_to_L2++;
                             new_stack = mod_stack_create(stack->id, mod_get_low_mod(target_mod, stack->tag), stack->tag,
                                     EV_MOD_NMOESI_NC_STORE_MISS, stack);
                             new_stack->wavefront = stack->wavefront;
@@ -1271,8 +1275,8 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:nc_store_miss\"\n",
 			stack->id, target_mod->name);
                 
-                if(target_mod->level == 1)
-                        target_mod->compute_unit->accesses_L1_to_l2--;
+                //if(target_mod->level == 1)
+                //        target_mod->compute_unit->accesses_L1_to_L2--;
 
 		/* Error on read request. Unlock block and retry nc store. */
 		if (stack->err)
@@ -2928,8 +2932,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
                 
-                if(target_mod->level == 3 && stack->wavefront)
-                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
+                //if(target_mod->level == 3 && stack->wavefront)
+                //    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
                 
 		stack->read = 1;
                 if(stack->ret_stack->uncacheable)
@@ -2965,6 +2969,14 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				mshr_unlock(target_mod, stack);
 				stack->mshr_locked = 0;
 			}
+                        
+                        if(stack->request_cycle != 0)
+                        {
+                            if(target_mod->level == 3)
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
+                            if(target_mod->level == 2)
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L1_to_L2--;
+                        }
 
 			mod_stack_set_reply(ret, reply_ack_error);
 			stack->reply_size = 8;
@@ -2996,6 +3008,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		 * a transfer occur between peers. */
 		stack->reply_size = return_mod->block_size + 8;
 		mod_stack_set_reply(stack, reply_ack_data);
+                
+                if(stack->request_cycle != 0 && target_mod->level == 2)
+                {
+                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L1_to_L2--;
+                }
 
 		if (stack->dir_entry->state)
 		{
@@ -3110,6 +3127,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                         {
                             add_request_cycles(asTiming(si_gpu)->cycle - stack->request_cycle, target_mod->level);
                             new_stack->request_cycle = asTiming(si_gpu)->cycle;
+                            if(target_mod->level == 2)
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
                         }
 			/* Peer is NULL since we keep going up-down */
 			new_stack->request_dir = mod_request_up_down;
@@ -3187,6 +3206,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                 //imprimir tiempo que ha tardado en llegar hasta aqui
                 if(stack->ret_stack && target_mod->kind == mod_kind_main_memory && stack->request_cycle != 0)
                 {
+                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--; 
                     add_request_cycles(asTiming(si_gpu)->cycle - stack->request_cycle, target_mod->level);
                 }
 
@@ -3679,8 +3699,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		else
 			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
 
-                if(target_mod->level == 3 && stack->wavefront)
-                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
+                //if(target_mod->level == 3 && stack->wavefront)
+                //    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
 		/* Return */
 		mod_stack_return(stack);
 		return;
@@ -3779,8 +3799,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		new_stack->write = 1;
 		new_stack->event = EV_MOD_NMOESI_FIND_AND_LOCK;
 		*/
-                if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
-                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
+                //if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
+                //    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
 
 		stack->write = 1;
 		stack->blocking = stack->request_dir == mod_request_down_up;
@@ -4230,8 +4250,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
 		}
                 
-                if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
-                    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
+                //if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
+                //    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
 
 
 		/* Return */
