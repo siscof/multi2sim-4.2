@@ -280,8 +280,8 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 	cache->sets[set].blocks[way].valid_mask = 0;
         
         //hacer evict!!! de dir_entry_selected
-        if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry 
-               ) //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
+        if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry) 
+        //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
         {
             if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
             {
