@@ -267,7 +267,13 @@ CLASS_BEGIN(SIGpu, Timing)
         
         long long accesses_L1_to_l2;
         long long accesses_L2_to_MM;
-
+        long long accesses_L1_to_l2_hit;
+        long long accesses_L1_to_l2_miss;
+        long long accesses_L1_to_l2_retries;
+        long long accesses_L1_to_l2_hit_count;
+        long long accesses_L1_to_l2_miss_count;
+        long long accesses_L1_to_l2_retries_count;
+        
 	long long int idle;
 	long long int last_complete_cycle;
 

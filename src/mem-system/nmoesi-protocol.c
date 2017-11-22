@@ -2975,9 +2975,12 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             if(target_mod->level == 3)
                                 stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
                             if(target_mod->level == 2)
+                            {
                                 stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L1_to_L2--;
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->compute_device->accesses_L1_to_l2_retries_count++;
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->compute_device->accesses_L1_to_l2_retries += asTiming(si_gpu)->cycle - stack->request_cycle;
+                            }
                         }
-
 			mod_stack_set_reply(ret, reply_ack_error);
 			stack->reply_size = 8;
 			stack->event = EV_MOD_NMOESI_READ_REQUEST_REPLY;
@@ -3016,6 +3019,11 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 
 		if (stack->dir_entry->state)
 		{
+                        if(stack->request_cycle != 0 && target_mod->level == 2)
+                        {
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->compute_device->accesses_L1_to_l2_hit += asTiming(si_gpu)->cycle - stack->request_cycle;
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->compute_device->accesses_L1_to_l2_hit_count++;
+                        }
 			/*estadisticas*/
                         if(stack->ret_event == EV_MOD_NMOESI_LOAD_MISS)
                         {
@@ -3091,6 +3099,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                                     //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
                             }
                         }
+                        
 			stack->event = EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH;
 			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH, stack, 0);
@@ -3103,6 +3112,12 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		}
 		else
 		{
+                        if(stack->request_cycle != 0 && target_mod->level == 2)
+                        {
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->compute_device->accesses_L1_to_l2_miss += asTiming(si_gpu)->cycle - stack->request_cycle;
+                                stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->compute_device->accesses_L1_to_l2_miss_count++;
+                        }
+                        
 			/* State = I */
                         if(stack->retry != 0)
                             add_access(target_mod->level);
