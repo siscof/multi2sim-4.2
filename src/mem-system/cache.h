@@ -22,6 +22,8 @@
 
 #include "mod-stack.h"
 #include "directory.h"
+#include "arch/southern-islands/timing/gpu.h"
+#include "arch/southern-islands/timing/cycle-interval-report.h"
 
 extern struct str_map_t cache_policy_map;
 extern struct str_map_t cache_block_state_map;
