@@ -52,6 +52,7 @@ struct cache_block_t
         struct dir_entry_t *dir_entries;
         //struct dir_entry_t *extra_dir_entry;
         int dir_entry_size;
+        long long life_cycles;
 
 	//enum cache_block_state_t state;
 };

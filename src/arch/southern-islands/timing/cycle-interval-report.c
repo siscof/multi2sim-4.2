@@ -178,6 +178,7 @@ void si_device_spatial_report_init(SIGpu *device)
 
 	device->interval_statistics = calloc(1, sizeof(struct si_gpu_unit_stats));
 
+        fprintf(device_spatial_report_file, "blocks_life_cycles_lvl0,blocks_life_count_lvl0,blocks_life_cycles_lvl1,blocks_life_count_lvl1,blocks_life_cycles_lvl2,blocks_life_count_lvl2,blocks_life_cycles_lvl3,blocks_life_count_lvl3,blocks_life_cycles_lvl4,blocks_life_count_lvl4,");
 	fprintf(device_spatial_report_file, "mshr_wavefront_inflight,wait_for_mem_time,wait_for_mem_counter,gpu_idle,predicted_opc_op,predicted_opc_cyckes,MSHR_size,");
 	fprintf(device_spatial_report_file, "accesses_L1_to_L2,accesses_L2_to_MM,accesses_L1_to_L2_hit,accesses_L1_to_L2_hit_count,accesses_L1_to_L2_miss,accesses_L1_to_L2_miss_count,accesses_L1_to_L2_retries,accesses_L1_to_L2_retries_count,dist0_99,dist100_199,dist200_299,dist300_399,dist400_499,dist500_599,dist600_9999,mem_acc_start,mem_acc_end,mem_acc_lat,load_start,load_end,load_lat,uop_load_end,uop_load_lat,uop_load_vmb_lat,uop_load_mm_lat,write_start,write_end,write_lat,");
 	fprintf(device_spatial_report_file, "vcache_load_start,vcache_load_finish,scache_start,scache_finish,vcache_write_start,vcache_write_finish,cache_retry_lat,cache_retry_cont,");
@@ -188,6 +189,13 @@ void si_device_spatial_report_init(SIGpu *device)
         device_mem_latency = file_open_for_write("mem_latency");
         fprintf(device_mem_latency, "accesos,latencia,cycle,esim_time\n");
 }
+
+void si_add_block_life_cycles(int level, long long cycles)
+{
+    assert(cycles > 0);
+    si_gpu->blocks_life_cycles[level] += cycles;
+    si_gpu->blocks_life_count[level]++;
+}    
 
 void si_spatial_report_done()
 {
@@ -620,6 +628,11 @@ void si_device_spatial_report_dump(SIGpu *device)
 		return;
 
 	FILE *f = device_spatial_report_file;
+        
+        for(int i = 0; i<5;i++){
+            fprintf(f, "%lld,",si_gpu->blocks_life_cycles[i]);
+            fprintf(f, "%lld,",si_gpu->blocks_life_count[i]);
+        }
 
 	analizar_wavefront(device);
 	fprintf(f, "%lld,", device->interval_statistics->wavefronts_inflight);

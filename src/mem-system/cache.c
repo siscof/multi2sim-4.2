@@ -244,6 +244,21 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
         int set = stack->dir_entry->set;
         int way = stack->dir_entry->way;
         int tag = stack->addr & ~cache->block_mask;
+        
+        if(stack->dir_entry->tag != tag || state == cache_block_invalid)
+        {
+            assert(state == cache_block_invalid && stack->dir_entry->life_cycles != 0);
+            if(stack->dir_entry->life_cycles != 0)
+            {
+                add_block_life_cycles(cache->mod->level, asTiming(si_gpu)->cycle - stack->dir_entry->life_cycles);
+                stack->dir_entry->life_cycles = 0;
+            }
+        }
+        
+        if(stack->dir_entry->tag != tag)
+            stack->dir_entry->life_cycles = asTiming(si_gpu)->cycle;
+            
+        
     
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);

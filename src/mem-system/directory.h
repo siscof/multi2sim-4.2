@@ -64,6 +64,7 @@ struct dir_entry_t
         unsigned char *sharer;
         struct dir_lock_t *dir_lock;
         struct cache_block_t *cache_block;
+        long long life_cycles;
 };
 
 struct dir_t

@@ -274,6 +274,9 @@ CLASS_BEGIN(SIGpu, Timing)
         long long accesses_L1_to_l2_miss_count;
         long long accesses_L1_to_l2_retries_count;
         
+        long long blocks_life_cycles[5];
+        long long blocks_life_count[5];
+        
 	long long int idle;
 	long long int last_complete_cycle;
 
