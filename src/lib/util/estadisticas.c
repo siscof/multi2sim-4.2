@@ -567,7 +567,7 @@ void print_cache_states(long long *results)
 
 void add_hit_ics(int level,bool auxiliary_hit)
 {
-        if(auxiliary_hit)
+        if(!auxiliary_hit)
             mem_stats.mod_level[level].ics_normal_hit++;
         else
             mem_stats.mod_level[level].ics_aux_hit++;
