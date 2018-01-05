@@ -391,8 +391,8 @@ void mod_handler_nmoesi_load(int event, void *data)
 			return;
 		}
 		assert(stack->mshr_entry || stack->dir_entry->state);
-
-		/* Hit */
+		
+                /* Hit */
 		if (stack->dir_entry->state)
 		{
 			stack->event = EV_MOD_NMOESI_LOAD_UNLOCK;
@@ -404,7 +404,24 @@ void mod_handler_nmoesi_load(int event, void *data)
 			 * this is a hit now. Let the prefetcher know of this hit
 			 * since without the prefetcher, this may have been a miss. */
 			//prefetcher_access_hit(stack, mod);
-
+                        
+                        struct mod_t *L2_mod = mod_get_low_mod(target_mod, stack->tag);
+                        struct mod_stack_t *aux_stack = mod_stack_create(11,L2_mod,stack->addr,NULL,NULL);
+                        mod_find_block_new(L2_mod, aux_stack);
+                        bool auxiliary_hit = false;
+                        aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
+                        struct dir_entry_t *dir_entry = stack->cache_block->dir_entry_selected;
+                        for(int w = 0;w<L2_mod->dir->wsize;w++)
+                        {
+                            struct dir_entry_t *dir_entry_aux = dir_entry_get(L2_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                            if(dir_entry_aux->dir_lock->lock && aux_stack->tag != dir_entry_aux->tag )
+                            {
+                                auxiliary_hit = true;
+                                break;
+                            } 
+                        }
+                        add_hit_ics(target_mod->level,auxiliary_hit);
+                        free(aux_stack);
 			return;
 		}
 
@@ -531,6 +548,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:load_unlock\"\n",
 			stack->id, target_mod->name);
 
+                
 		if (stack->mshr_locked != 0)
 		{
 			mshr_unlock(target_mod,stack);
@@ -1198,6 +1216,24 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		/* N/S are hit */
 		if (stack->dir_entry->state == cache_block_shared || stack->dir_entry->state == cache_block_noncoherent)
 		{
+                        struct mod_t *L2_mod = mod_get_low_mod(target_mod, stack->tag);
+                        struct mod_stack_t *aux_stack = mod_stack_create(11,L2_mod,stack->addr,NULL,NULL);
+                        mod_find_block_new(L2_mod, aux_stack);
+                        bool auxiliary_hit = false;
+                        aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
+                        struct dir_entry_t *dir_entry = stack->cache_block->dir_entry_selected;
+                        for(int w = 0;w<L2_mod->dir->wsize;w++)
+                        {
+                            struct dir_entry_t *dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                            if(dir_entry_aux->dir_lock->lock && aux_stack->tag != dir_entry_aux->tag )
+                            {
+                                auxiliary_hit = true;
+                                break;
+                            } 
+                        }
+                        add_hit_ics(target_mod->level,auxiliary_hit);
+                        free(aux_stack);
+                    
 			stack->event = EV_MOD_NMOESI_NC_STORE_UNLOCK;
  			esim_schedule_mod_stack_event(stack, 0);
 			//esim_schedule_event(EV_MOD_NMOESI_NC_STORE_UNLOCK, stack, 0);
@@ -3099,6 +3135,26 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                                     //esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST, new_stack, 0);
                             }
                         }
+                        
+                        if(target_mod->level == 2)
+                        {
+                        //struct mod_stack_t *aux_stack = mod_stack_create(11,target_mod,stack->addr,NULL,NULL);
+                        //mod_find_block_new(target, aux_stack);
+                        bool auxiliary_hit = false;
+                        //aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
+                        struct dir_entry_t *dir_entry = stack->cache_block->dir_entry_selected;
+                        for(int w = 0;w<target_mod->dir->wsize;w++)
+                        {
+                            struct dir_entry_t *dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                            if(dir_entry_aux->dir_lock->lock && stack->tag != dir_entry_aux->tag )
+                            {
+                                auxiliary_hit = true;
+                                break;
+                            } 
+                        }
+                        add_hit_ics(target_mod->level,auxiliary_hit);
+                        }
+                        
                         
 			stack->event = EV_MOD_NMOESI_READ_REQUEST_UPDOWN_FINISH;
 			esim_schedule_mod_stack_event(stack, 0);
