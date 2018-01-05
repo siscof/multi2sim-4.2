@@ -194,6 +194,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 		if(stack->client_info && stack->client_info->arch)
 			stack->latencias.start = stack->client_info->arch->timing->cycle;
 
+                add_access_ics(target_mod->level);
 		add_access(target_mod->level);
 	 	target_mod->loads++;
 		if(target_mod == target_mod->compute_unit->vector_cache)
@@ -3042,6 +3043,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->id, target_mod->name);
 
 		stack->pending = 1;
+                if(target_mod->level == 2)
+                    add_access_ics(target_mod->level);
 
 		/* Set the initial reply message and size.  This will be adjusted later if
 		 * a transfer occur between peers. */
