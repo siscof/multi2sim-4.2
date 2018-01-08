@@ -459,7 +459,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
         if(dir_entry->cache_block->dir_entry_selected == dir_entry)
         {
             assert(dir_entry->lock_cycle);
-            add_ics_dir_lock_cycles(stack->target_mod->level,asTiming(si_gpu)->cycle - dir_entry->lock_cycle);
+            add_ics_dir_lock_cycles(dir_entry->dir_lock->stack->target_mod->level,asTiming(si_gpu)->cycle - dir_entry->lock_cycle);
         }
         dir_entry->lock_cycle = 0;
 	dir_lock->stack->dir_lock = NULL;
