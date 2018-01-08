@@ -63,6 +63,7 @@ struct dir_entry_t
 	//unsigned char sharer[0];   /* Bitmap of sharers (must be last field) */
         unsigned char *sharer;
         struct dir_lock_t *dir_lock;
+        long long lock_cycle;
         struct cache_block_t *cache_block;
         long long life_cycles;
 };

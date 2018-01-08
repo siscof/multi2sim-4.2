@@ -377,6 +377,7 @@ int dir_entry_lock(struct dir_entry_t *dir_entry, int event, struct mod_stack_t 
 
 	/* Lock entry */
 	dir_lock->lock = 1;
+        dir_entry->lock_cycle = asTiming(si_gpu)->cycle;
 	//dir_lock->stack_id = stack->id;
 	//dir_lock->stack = stack->ret_stack;
 	//stack->ret_stack->dir_lock = dir_lock;
@@ -455,6 +456,12 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
 	dir_lock->lock = 0;
 	//dir_lock->stack_id = 0;
 	//if(dir_lock->stack)
+        if(dir_entry->cache_block->dir_entry_selected == dir_entry)
+        {
+            assert(dir_entry->lock_cycle);
+            add_ics_dir_lock_cycles(stack->target_mod->level,asTiming(si_gpu)->cycle - dir_entry->lock_cycle);
+        }
+        dir_entry->lock_cycle = 0;
 	dir_lock->stack->dir_lock = NULL;
 	dir_lock->stack = NULL;
 }

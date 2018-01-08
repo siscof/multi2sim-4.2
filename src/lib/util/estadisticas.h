@@ -92,6 +92,8 @@ struct esta_t
   long long ics_accesses;
   long long ics_normal_hit;
   long long ics_aux_hit;
+  long long ics_cycles_dir_locked;
+  long long ics_cycles_dir_locked_count;
   long long hits;
   long long misses;
   long long loads;
@@ -357,6 +359,7 @@ void add_store_invalidation(int level);
 void add_request_cycles(long long cycles, int target_mod_level);
 void add_hit_ics(int level,bool auxiliary_hit);
 void add_access_ics(int level);
+void add_ics_dir_lock_cycles(int level,long long cycles);
 
 
 #endif
