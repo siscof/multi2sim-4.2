@@ -3043,7 +3043,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->id, target_mod->name);
 
 		stack->pending = 1;
-                if(target_mod->level == 2)
+                if(target_mod->level == 2 && stack->ret_stack &&  stack->ret_stack->target_mod->level == 1 && !(stack->ret_stack->retry))
                     add_access_ics(target_mod->level);
 
 		/* Set the initial reply message and size.  This will be adjusted later if
