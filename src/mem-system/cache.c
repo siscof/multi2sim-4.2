@@ -247,7 +247,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
         
         if(stack->dir_entry->tag != tag || state == cache_block_invalid)
         {
-            assert(state == cache_block_invalid && stack->dir_entry->life_cycles != 0);
+            //assert(state == cache_block_invalid && stack->dir_entry->life_cycles != 0);
             if(stack->dir_entry->life_cycles != 0)
             {
                 si_add_block_life_cycles(cache->mod->level, asTiming(si_gpu)->cycle - stack->dir_entry->life_cycles);

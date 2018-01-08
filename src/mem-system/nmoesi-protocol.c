@@ -422,7 +422,7 @@ void mod_handler_nmoesi_load(int event, void *data)
                             } 
                         }
                         add_hit_ics(target_mod->level,auxiliary_hit);
-                        free(aux_stack);
+                        //free(aux_stack);
 			return;
 		}
 
@@ -2088,6 +2088,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                 stack->mshr_locked = 0;
                         }*/ 
                         // enviar mensaje para abortar el acceso anterior
+                        if(target_mod->level == 2)
+                        {
+                            add_L2_dir_collision();
+                        }   
+                        
                         bool allow_abort_accesses = false;
                         if(allow_abort_accesses && stack->request_dir == mod_request_down_up)
                         {

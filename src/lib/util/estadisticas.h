@@ -89,6 +89,7 @@ struct esta_t
   long long coalesce_load;
   long long coalesce_store;
   long long accesses;
+  long long ics_dir_collision;
   long long ics_accesses;
   long long ics_normal_hit;
   long long ics_aux_hit;
@@ -360,6 +361,7 @@ void add_request_cycles(long long cycles, int target_mod_level);
 void add_hit_ics(int level,bool auxiliary_hit);
 void add_access_ics(int level);
 void add_ics_dir_lock_cycles(int level,long long cycles);
+void add_L2_dir_collision();
 
 
 #endif
