@@ -1225,7 +1225,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
                         struct dir_entry_t *dir_entry = stack->cache_block->dir_entry_selected;
                         for(int w = 0;w<L2_mod->dir->wsize;w++)
                         {
-                            struct dir_entry_t *dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                            struct dir_entry_t *dir_entry_aux = dir_entry_get(L2_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
                             if(dir_entry_aux->dir_lock->lock && aux_stack->tag != dir_entry_aux->tag )
                             {
                                 auxiliary_hit = true;
