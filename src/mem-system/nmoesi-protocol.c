@@ -934,6 +934,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		}
                 
                 add_access(target_mod->level);
+                add_access_ics(target_mod->level);
 
 		/* Next event */
 		stack->event = EV_MOD_NMOESI_NC_STORE_LOCK;
