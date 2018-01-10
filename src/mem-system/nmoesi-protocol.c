@@ -411,11 +411,11 @@ void mod_handler_nmoesi_load(int event, void *data)
                         mod_find_block_new(L2_mod, aux_stack);
                         bool auxiliary_hit = false;
                         aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
-                        struct dir_entry_t *dir_entry = stack->cache_block->dir_entry_selected;
+                        struct dir_entry_t *dir_entry = aux_stack->cache_block->dir_entry_selected;
                         for(int w = 0;w<L2_mod->dir->wsize;w++)
                         {
                             struct dir_entry_t *dir_entry_aux = dir_entry_get(L2_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                            if(dir_entry_aux->dir_lock->lock && aux_stack->tag != dir_entry_aux->tag )
+                            if(dir_entry_aux->dir_lock->lock && dir_entry_aux->is_extra /*aux_stack->tag != dir_entry_aux->tag */)
                             {
                                 auxiliary_hit = true;
                                 break;
@@ -1223,18 +1223,18 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
                         mod_find_block_new(L2_mod, aux_stack);
                         bool auxiliary_hit = false;
                         aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
-                        struct dir_entry_t *dir_entry = stack->cache_block->dir_entry_selected;
+                        struct dir_entry_t *dir_entry = aux_stack->cache_block->dir_entry_selected;
                         for(int w = 0;w<L2_mod->dir->wsize;w++)
                         {
                             struct dir_entry_t *dir_entry_aux = dir_entry_get(L2_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                            if(dir_entry_aux->dir_lock->lock && aux_stack->tag != dir_entry_aux->tag )
+                            if(dir_entry_aux->dir_lock->lock && dir_entry_aux->is_extra /*aux_stack->tag != dir_entry_aux->tag*/ )
                             {
                                 auxiliary_hit = true;
                                 break;
                             } 
                         }
                         add_hit_ics(target_mod->level,auxiliary_hit);
-                        free(aux_stack);
+                        //free(aux_stack);
                     
 			stack->event = EV_MOD_NMOESI_NC_STORE_UNLOCK;
  			esim_schedule_mod_stack_event(stack, 0);
@@ -3155,7 +3155,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                         for(int w = 0;w<target_mod->dir->wsize;w++)
                         {
                             struct dir_entry_t *dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                            if(dir_entry_aux->dir_lock->lock && stack->tag != dir_entry_aux->tag )
+                            if(dir_entry_aux->dir_lock->lock && dir_entry_aux->is_extra /*stack->tag != dir_entry_aux->tag*/ )
                             {
                                 auxiliary_hit = true;
                                 break;
