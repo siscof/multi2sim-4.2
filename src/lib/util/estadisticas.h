@@ -104,6 +104,10 @@ struct esta_t
   long long evictions;
   long long bytes_served;
   
+  long long invalidation_time;
+  long long evict_time;
+  long long evict_count;
+  
   long long request_cycles;
   long long request_cycles_count;
 
@@ -362,6 +366,7 @@ void add_hit_ics(int level,bool auxiliary_hit);
 void add_access_ics(int level);
 void add_ics_dir_lock_cycles(int level,long long cycles);
 void add_L2_dir_collision();
+void add_evict_time_l2(long long invalidation_time, long long evict_time);
 
 
 #endif

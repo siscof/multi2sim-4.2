@@ -2120,14 +2120,11 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         }
                         return;
                 }
-                
-                
                 //lock directory entries for all the stacks belonging to stack->uop
 
 		/* Miss */
 		if (!stack->hit)
 		{
-                    
 			/* Find victim */
 			//cache_get_block(target_mod->cache, stack->set, stack->way, NULL, &stack->state);
                         if(stack->dir_entry->state)
@@ -2170,9 +2167,8 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 		stack->event = EV_MOD_NMOESI_FIND_AND_LOCK_ACTION;
 		esim_schedule_mod_stack_event(stack, target_mod->dir_latency);
                 stack->dir_lock = dir_lock;
-                 //stack->uop->accesses_in_dir--;
+                //stack->uop->accesses_in_dir--;
 		//esim_schedule_event(EV_MOD_NMOESI_FIND_AND_LOCK_ACTION, stack, mod->dir_latency);
-		
             //}
             return;
 	}
@@ -2213,7 +2209,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         new_stack->dir_entry = stack->dir_entry;
 			new_stack->return_mod = target_mod;
 			esim_schedule_mod_stack_event(new_stack, 0);
-			//esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);
+			//esim_schedule_event(EV_MOD_NMOESI_EVICT, new_stack, 0);      
 			return;
 		}
 
@@ -2373,6 +2369,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 	{
 		/* Default return value */
 		ret->err = 0;
+                
+                stack->ret_stack->evict_start_cycle = asTiming(si_gpu)->cycle;
 
 		/* Get block info */
 		//cache_get_block(return_mod->cache, stack->set, stack->way, &stack->tag, &stack->dir_entry->state);
@@ -2415,6 +2413,8 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->tag, return_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:evict_invalid\"\n",
 			stack->id, return_mod->name);
+                
+                stack->ret_stack->invalidation_time = asTiming(si_gpu)->cycle - stack->ret_stack->evict_start_cycle;
 
 		/* If module is main memory, we just need to set the block as invalid,
 		 * and finish. */
@@ -2881,6 +2881,7 @@ void mod_handler_nmoesi_evict(int event, void *data)
 			stack->id, return_mod->name);
                 mod_stack_return(stack->src_stack);
                 stack->src_stack = NULL;
+                stack->ret_stack->evict_time = asTiming(si_gpu)->cycle - stack->ret_stack->evict_start_cycle - stack->ret_stack->invalidation_time;
 		mod_stack_return(stack);
 		return;
 	}
@@ -3208,7 +3209,10 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             add_request_cycles(asTiming(si_gpu)->cycle - stack->request_cycle, target_mod->level);
                             new_stack->request_cycle = asTiming(si_gpu)->cycle;
                             if(target_mod->level == 2)
+                            {
                                 stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
+                                add_evict_time_l2(stack->invalidation_time, stack->evict_time);
+                            }
                         }
 			/* Peer is NULL since we keep going up-down */
 			new_stack->request_dir = mod_request_up_down;
