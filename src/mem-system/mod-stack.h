@@ -70,6 +70,7 @@ struct mod_stack_t
         long long evict_start_cycle;
         long long invalidation_time;
         long long evict_time;
+        long long l2_to_mm_start_cycle;
 	long long retry_time_lost;
 	struct retry_stats_t retries_counter[num_retries_kinds];
 	struct mod_stack_t *find_and_lock_stack;

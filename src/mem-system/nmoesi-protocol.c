@@ -3000,7 +3000,16 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			stack->tag, target_mod->name);
 		mem_trace("mem.access name=\"A-%lld\" state=\"%s:read_request_action\"\n",
 			stack->id, target_mod->name);
-
+                
+                if(target_mod->level == 3 && stack->ret_stack->l2_to_mm_start_cycle != 0)
+                {
+                    if(stack->ret_stack->dir_entry->cache_block->dir_entry_selected == stack->ret_stack->dir_entry)
+                        add_evict_and_travel_time_l2_MM(stack->ret_stack->invalidation_time, stack->ret_stack->evict_time,asTiming(si_gpu)->cycle - stack->ret_stack->l2_to_mm_start_cycle);
+                    else
+                        add_evict_and_travel_time_l2_MM_extra(stack->ret_stack->invalidation_time, stack->ret_stack->evict_time,asTiming(si_gpu)->cycle - stack->ret_stack->l2_to_mm_start_cycle);
+       
+                }
+                
 		/* Check block locking error. If read request is down-up, there should not
 		 * have been any error while locking. */
 		if (stack->err)
@@ -3211,7 +3220,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             if(target_mod->level == 2)
                             {
                                 stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM++;
-                                add_evict_time_l2(stack->invalidation_time, stack->evict_time);
+                                stack->l2_to_mm_start_cycle = asTiming(si_gpu)->cycle;
+                                //add_evict_time_l2(stack->invalidation_time, stack->evict_time);
                             }
                         }
 			/* Peer is NULL since we keep going up-down */

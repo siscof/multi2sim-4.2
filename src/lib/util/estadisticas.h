@@ -107,6 +107,12 @@ struct esta_t
   long long invalidation_time;
   long long evict_time;
   long long evict_count;
+  long long l2_to_mm_cycles;
+  
+  long long invalidation_time_extra;
+  long long evict_time_extra;
+  long long evict_count_extra;
+  long long l2_to_mm_cycles_extra;
   
   long long request_cycles;
   long long request_cycles_count;
@@ -366,7 +372,9 @@ void add_hit_ics(int level,bool auxiliary_hit);
 void add_access_ics(int level);
 void add_ics_dir_lock_cycles(int level,long long cycles);
 void add_L2_dir_collision();
-void add_evict_time_l2(long long invalidation_time, long long evict_time);
+//void add_evict_time_l2(long long invalidation_time, long long evict_time);
+void add_evict_and_travel_time_l2_MM(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles);
+void add_evict_and_travel_time_l2_MM_extra(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles);
 
 
 #endif
