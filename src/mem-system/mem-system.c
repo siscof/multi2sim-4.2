@@ -140,10 +140,6 @@ void mem_system_init(void)
 {
 	int count;
 
-	//FRAN
-	ini_estadisticas();
-
-
 	/* If any file name was specific for a command-line option related with the
 	 * memory hierarchy, make sure that at least one architecture is running
 	 * timing simulation. */
@@ -428,6 +424,9 @@ void mem_system_init(void)
 			mem_domain_index, "mod_local_mem_find_and_lock_action");
 	EV_MOD_LOCAL_MEM_FIND_AND_LOCK_FINISH = esim_register_event_with_name(mod_handler_local_mem_find_and_lock,
 			mem_domain_index, "mod_local_mem_find_and_lock_finish");
+        
+        //FRAN
+	ini_estadisticas();
 }
 
 

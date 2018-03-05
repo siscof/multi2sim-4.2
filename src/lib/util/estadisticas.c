@@ -229,6 +229,16 @@ print_cache_states((long long *) NULL);
 
 fran_debug_general("lat_loads num_loads Coalesces_gpu accesos_gpu Coalesces_L1 accesos_L1 hits_L1 invalidations_L1 Coalesces_L2 accesos_L2 hits_L2 invalidations_L2 busy_in_L1-L2 busy_out_L1-L2 busy_in_L2-MM busy_out_L2-MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM blk_compartidos blk_replicas entradas_bloqueadas_L1 entradas_bloqueadas_L2 ciclos_intervalo ciclos_totales\n");
 
+for (int k = 0; k < list_count(mem_system->mod_list); k++)
+{
+    struct mod_t *mod = list_get(mem_system->mod_list, k);
+    if(mod->level == 2)
+    { 
+        for(int l = 0; l < mod->dir->extra_dir_sets; l++)
+        fran_debug_ipc("FRC_%s_set%d ",mod->name,l);
+    }
+}
+
 fran_debug_ipc("vmb_inst_counter ");
 
 for(int i = 0; i < 10; i++)
@@ -735,6 +745,12 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
         if(dir_lock->lock)
           locked[mod->level]++;
       }
+    }
+        
+    if(mod->level == 2){
+        
+        for(int l = 0; l < mod->dir->extra_dir_sets; l++)
+            fran_debug_ipc("%d ",mod->dir->sets_extra_dir_used[l]);
     }
 }
 
