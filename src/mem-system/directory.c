@@ -400,8 +400,8 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
         if(dir_entry->is_extra){
             dir_entry->is_extra = false;
             dir_lock->dir->extra_dir_used--;
-            int conversion_sets_dir_to_cache = dir_lock->dir->mod->cache->num_sets/ dir_lock->dir->mod->dir->extra_dir_sets;
-            dir_lock->dir->mod->dir->extra_dir_set_entries_used[dir_lock->stack->set /conversion_sets_dir_to_cache]--;
+            //int conversion_sets_dir_to_cache = dir_lock->dir->mod->cache->num_sets/ dir_lock->dir->mod->dir->extra_dir_sets;
+            dir_lock->dir->mod->dir->extra_dir_set_entries_used[dir_lock->stack->tag % dir_lock->dir->mod->dir->extra_dir_sets]--;
         }
         
 	/* Wake up first waiter */
