@@ -1556,7 +1556,7 @@ static void mem_config_calculate_sub_block_sizes(void)
                 else
                     mod->dir->extra_dir_max = mod->cache->dir_entry_per_line_max;
                 mod->dir->extra_dir_sets = mod->cache->extra_dir_sets;
-                mod->dir->sets_extra_dir_used = xcalloc(mod->dir->extra_dir_sets,sizeof(int));
+                mod->dir->extra_dir_set_entries_used = xcalloc(mod->dir->extra_dir_sets,sizeof(int));
 		mem_debug("\t%s - %dx%dx%d (%dx%dx%d effective) - %d entries, %d sub-blocks\n",
 			mod->name, mod->dir_num_sets, mod->dir_assoc, num_nodes,
 			mod->dir_num_sets, mod->dir_assoc, linked_list_count(mod->high_mod_list),

@@ -1925,8 +1925,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         {
                             if(target_mod->dir->extra_dir_sets != 0)
                             {
-                            int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
-                            if( target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache] < target_mod->dir->extra_dir_max)
+                            //int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
+                            int frc_set = (stack->addr >> target_mod->cache->log_block_size) % target_mod->dir->extra_dir_sets;
+                            if( target_mod->dir->extra_dir_set_entries_used[frc_set] < target_mod->dir->extra_dir_max)
                             {
                                 for(int i = 1; i < target_mod->dir->wsize ;i++)
                                 {
@@ -1935,7 +1936,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
                                     {
                                         target_mod->dir->extra_dir_used++;
-                                        target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]++;
+                                        target_mod->dir->extra_dir_set_entries_used[frc_set]++;
                                         dir_entry_aux->is_extra = true;
                                         dir_entry = dir_entry_aux;
                                         //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
@@ -1947,8 +1948,9 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                         }
                         else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line_set)
                         {
-                            int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
-                            if( target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache] < target_mod->dir->extra_dir_max)
+                            int frc_set = (stack->addr >> target_mod->cache->log_block_size) % target_mod->dir->extra_dir_sets;
+                            //int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
+                            if( target_mod->dir->extra_dir_set_entries_used[frc_set] < target_mod->dir->extra_dir_max)
                             {
                                 for(int i = 1; i < target_mod->dir->wsize ;i++)
                                 {
@@ -1957,7 +1959,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                     if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
                                     {
                                         target_mod->dir->extra_dir_used++;
-                                        target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]++;
+                                        target_mod->dir->extra_dir_set_entries_used[frc_set]++;
                                         dir_entry_aux->is_extra = true;
                                         dir_entry = dir_entry_aux;
                                         //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);

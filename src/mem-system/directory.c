@@ -401,7 +401,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
             dir_entry->is_extra = false;
             dir_lock->dir->extra_dir_used--;
             int conversion_sets_dir_to_cache = dir_lock->dir->mod->cache->num_sets/ dir_lock->dir->mod->dir->extra_dir_sets;
-            dir_lock->dir->mod->dir->sets_extra_dir_used[dir_lock->stack->set /conversion_sets_dir_to_cache]--;
+            dir_lock->dir->mod->dir->extra_dir_set_entries_used[dir_lock->stack->set /conversion_sets_dir_to_cache]--;
         }
         
 	/* Wake up first waiter */

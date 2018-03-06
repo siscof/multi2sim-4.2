@@ -750,7 +750,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     if(mod->level == 2){
         
         for(int l = 0; l < mod->dir->extra_dir_sets; l++)
-            fran_debug_ipc("%d ",mod->dir->sets_extra_dir_used[l]);
+            fran_debug_ipc("%d ",mod->dir->extra_dir_set_entries_used[l]);
     }
 }
 

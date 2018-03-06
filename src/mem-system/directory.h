@@ -86,7 +86,7 @@ struct dir_t
         
         int extra_dir_used;
         int extra_dir_sets;
-        int *sets_extra_dir_used;
+        int *extra_dir_set_entries_used;
         int extra_dir_max;
         
         int extra_dir_structure_type;
