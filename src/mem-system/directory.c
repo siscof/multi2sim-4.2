@@ -410,7 +410,7 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
             }else{
                 fatal("target_mod->range_kind invalid");
             }
-            int set = ((stack->tag >> dir_lock->dir->mod->cache->log_block_size) / mods) % dir_lock->dir->mod->dir->extra_dir_sets;
+            int set = ((dir_lock->stack->tag >> dir_lock->dir->mod->cache->log_block_size) / mods) % dir_lock->dir->mod->dir->extra_dir_sets;
             dir_lock->dir->mod->dir->extra_dir_set_entries_used[set]--;
         }
         
