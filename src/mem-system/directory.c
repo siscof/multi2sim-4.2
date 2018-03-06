@@ -401,7 +401,16 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
             dir_entry->is_extra = false;
             dir_lock->dir->extra_dir_used--;
             //int conversion_sets_dir_to_cache = dir_lock->dir->mod->cache->num_sets/ dir_lock->dir->mod->dir->extra_dir_sets;
-            int set = ((stack->tag >> dir_lock->dir->mod->cache->log_block_size) / dir_lock->dir->mod->range.interleaved.mod);
+            int mods;
+            if(dir_lock->dir->mod->range_kind == mod_range_bounds)
+                                {
+                                    mods = 1;
+                                }else if(dir_lock->dir->mod->range_kind == mod_range_interleaved){
+                                    mods = dir_lock->dir->mod->range.interleaved.mod;
+                                }else{
+                                    fatal("target_mod->range_kind invalid");
+                                }
+            int set = ((stack->tag >> dir_lock->dir->mod->cache->log_block_size) / mods);
             dir_lock->dir->mod->dir->extra_dir_set_entries_used[set]--;
         }
         

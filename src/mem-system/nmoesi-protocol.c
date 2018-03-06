@@ -1917,6 +1917,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                 {
                     dir_entry = stack->cache_block->dir_entry_selected;
                     //if(dir_entry->dir_lock->lock)
+                    int mods;
                     if(dir_entry->state)
                     {
                         int w;
@@ -1926,7 +1927,15 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             if(target_mod->dir->extra_dir_sets != 0)
                             {
                             //int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
-                            int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /target_mod->range.interleaved.mod) % target_mod->dir->extra_dir_sets;
+                                if(target_mod->range_kind == mod_range_bounds)
+                                {
+                                    mods = 1;
+                                }else if(target_mod->range_kind == mod_range_interleaved){
+                                    mods = target_mod->range.interleaved.mod;
+                                }else{
+                                    fatal("target_mod->range_kind invalid");
+                                }
+                            int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /mods) % target_mod->dir->extra_dir_sets;
                             if( target_mod->dir->extra_dir_set_entries_used[frc_set] < target_mod->dir->extra_dir_max)
                             {
                                 for(int i = 1; i < target_mod->dir->wsize ;i++)
