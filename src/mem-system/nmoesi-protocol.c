@@ -1935,12 +1935,17 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                 }else{
                                     fatal("target_mod->range_kind invalid");
                                 }
+                                
                                 int frc_set = (stack->tag >> target_mod->cache->log_block_size) % target_mod->dir->extra_dir_sets;
+                                // hacer quie la xor
+                                if( stack->tag & 0x00800000)
+                                    frc_set += 0x2;
+                                
                                 for(int k = 0;k <= target_mod->dir->frc_extended_set;k++)
                                 {
                                     int frc_set_aux = (frc_set + k) % target_mod->dir->extra_dir_sets;
-                                    if(target_mod->level == 2)
-                                        printf("%s: %d - %d - %d - %d - %d\n",target_mod->name,frc_set_aux,frc_set , stack->tag, target_mod->cache->log_block_size, mods);
+                                    //if(target_mod->level == 2)
+                                    //    printf("%s: %d - %d - %x - %d\n",target_mod->name,frc_set_aux,frc_set , stack->tag,target_mod->dir->frc_extended_set);
                                     
                                     if( target_mod->dir->extra_dir_set_entries_used[frc_set_aux] < target_mod->dir->extra_dir_max)
                                     {
