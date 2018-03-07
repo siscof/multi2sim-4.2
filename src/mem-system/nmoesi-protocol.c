@@ -1935,10 +1935,13 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                 }else{
                                     fatal("target_mod->range_kind invalid");
                                 }
-                                int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /mods) % target_mod->dir->extra_dir_sets;
+                                int frc_set = (stack->tag >> target_mod->cache->log_block_size) % target_mod->dir->extra_dir_sets;
                                 for(int k = 0;k <= target_mod->dir->frc_extended_set;k++)
                                 {
                                     int frc_set_aux = (frc_set + k) % target_mod->dir->extra_dir_sets;
+                                    if(target_mod->level == 2)
+                                        printf("%s: %d - %d - %d - %d - %d\n",target_mod->name,frc_set_aux,frc_set , stack->tag, target_mod->cache->log_block_size, mods);
+                                    
                                     if( target_mod->dir->extra_dir_set_entries_used[frc_set_aux] < target_mod->dir->extra_dir_max)
                                     {
                                         for(int i = 1; i < target_mod->dir->wsize ;i++)
@@ -1952,6 +1955,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                                 dir_entry_aux->is_extra = true;
                                                 dir_entry_aux->frc_set = frc_set_aux;
                                                 dir_entry = dir_entry_aux;
+                                                k = target_mod->dir->frc_extended_set + 1;
                                                 //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
                                                 break;
                                             }
