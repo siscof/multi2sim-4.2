@@ -66,6 +66,7 @@ struct dir_entry_t
         long long lock_cycle;
         struct cache_block_t *cache_block;
         long long life_cycles;
+        int frc_set;
 };
 
 struct dir_t
@@ -88,6 +89,7 @@ struct dir_t
         int extra_dir_sets;
         int *extra_dir_set_entries_used;
         int extra_dir_max;
+        int frc_extended_set;
         
         int extra_dir_structure_type;
         struct dir_entry_t *extra_dir_entries;

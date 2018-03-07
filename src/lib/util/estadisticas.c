@@ -234,6 +234,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     struct mod_t *mod = list_get(mem_system->mod_list, k);
     if(mod->level == 2)
     { 
+        fran_debug_ipc("frc_extended_set_%s ",mod->name);
         for(int l = 0; l < mod->dir->extra_dir_sets; l++)
         fran_debug_ipc("FRC_%s_set%d ",mod->name,l);
     }
@@ -748,7 +749,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     }
         
     if(mod->level == 2){
-        
+        fran_debug_ipc("%d ",mod->dir->frc_extended_set);
         for(int l = 0; l < mod->dir->extra_dir_sets; l++)
             fran_debug_ipc("%d ",mod->dir->extra_dir_set_entries_used[l]);
     }

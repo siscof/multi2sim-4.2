@@ -1935,29 +1935,44 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                 }else{
                                     fatal("target_mod->range_kind invalid");
                                 }
-                            int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /mods) % target_mod->dir->extra_dir_sets;
-                            if( target_mod->dir->extra_dir_set_entries_used[frc_set] < target_mod->dir->extra_dir_max)
-                            {
-                                for(int i = 1; i < target_mod->dir->wsize ;i++)
+                                int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /mods) % target_mod->dir->extra_dir_sets;
+                                for(int k = 0;k <= target_mod->dir->frc_extended_set;k++)
                                 {
-                                    w = (dir_entry->w + i) % target_mod->dir->wsize;
-                                    dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
-                                    if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                                    int frc_set_aux = (frc_set + k) % target_mod->dir->extra_dir_sets;
+                                    if( target_mod->dir->extra_dir_set_entries_used[frc_set_aux] < target_mod->dir->extra_dir_max)
                                     {
-                                        target_mod->dir->extra_dir_used++;
-                                        target_mod->dir->extra_dir_set_entries_used[frc_set]++;
-                                        dir_entry_aux->is_extra = true;
-                                        dir_entry = dir_entry_aux;
-                                        //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
-                                        break;
+                                        for(int i = 1; i < target_mod->dir->wsize ;i++)
+                                        {
+                                            w = (dir_entry->w + i) % target_mod->dir->wsize;
+                                            dir_entry_aux = dir_entry_get(target_mod->dir, dir_entry->x, dir_entry->y, dir_entry->z, w);
+                                            if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
+                                            {
+                                                target_mod->dir->extra_dir_used++;
+                                                target_mod->dir->extra_dir_set_entries_used[frc_set_aux]++;
+                                                dir_entry_aux->is_extra = true;
+                                                dir_entry_aux->frc_set = frc_set_aux;
+                                                dir_entry = dir_entry_aux;
+                                                //printf("%d %d\n",target_mod->dir->extra_dir_used,target_mod->dir->sets_extra_dir_used[stack->set /conversion_sets_dir_to_cache]);
+                                                break;
+                                            }
+                                        }
+                                    }else if(target_mod->dir->frc_extended_set < target_mod->dir->extra_dir_sets){
+                                        target_mod->dir->frc_extended_set++;
                                     }
                                 }
-                            }
                             }
                         }
                         else if(target_mod->dir->extra_dir_structure_type == extra_dir_per_cache_line_set)
                         {
-                            int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /target_mod->range.interleaved.mod) % target_mod->dir->extra_dir_sets;
+                            if(target_mod->range_kind == mod_range_bounds)
+                            {
+                                mods = 1;
+                            }else if(target_mod->range_kind == mod_range_interleaved){
+                                mods = target_mod->range.interleaved.mod;
+                            }else{
+                                fatal("target_mod->range_kind invalid");
+                            }
+                            int frc_set = ((stack->tag >> target_mod->cache->log_block_size) /mods) % target_mod->dir->extra_dir_sets;
                             //int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
                             if( target_mod->dir->extra_dir_set_entries_used[frc_set] < target_mod->dir->extra_dir_max)
                             {

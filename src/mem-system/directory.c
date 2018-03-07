@@ -400,8 +400,12 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
         if(dir_entry->is_extra){
             dir_entry->is_extra = false;
             dir_lock->dir->extra_dir_used--;
+            if(dir_lock->dir->frc_extended_set != 0 && dir_lock->dir->extra_dir_used == 0)
+            {
+                dir_lock->dir->frc_extended_set = 0;
+            }
             //int conversion_sets_dir_to_cache = dir_lock->dir->mod->cache->num_sets/ dir_lock->dir->mod->dir->extra_dir_sets;
-            int mods;
+            /*int mods;
             if(dir_lock->dir->mod->range_kind == mod_range_bounds)
             {
                 mods = 1;
@@ -410,8 +414,8 @@ void dir_entry_unlock(struct dir_entry_t *dir_entry)
             }else{
                 fatal("target_mod->range_kind invalid");
             }
-            int set = ((dir_lock->stack->tag >> dir_lock->dir->mod->cache->log_block_size) / mods) % dir_lock->dir->mod->dir->extra_dir_sets;
-            dir_lock->dir->mod->dir->extra_dir_set_entries_used[set]--;
+            int set = ((dir_lock->stack->tag >> dir_lock->dir->mod->cache->log_block_size) / mods) % dir_lock->dir->mod->dir->extra_dir_sets;*/
+            dir_lock->dir->mod->dir->extra_dir_set_entries_used[dir_entry->frc_set]--;
         }
         
 	/* Wake up first waiter */
