@@ -1927,23 +1927,20 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                             if(target_mod->dir->extra_dir_sets != 0)
                             {
                             //int conversion_sets_dir_to_cache = target_mod->cache->num_sets/ target_mod->dir->extra_dir_sets;
-                                if(target_mod->range_kind == mod_range_bounds)
+                                /*if(target_mod->range_kind == mod_range_bounds)
                                 {
                                     mods = 1;
                                 }else if(target_mod->range_kind == mod_range_interleaved){
                                     mods = target_mod->range.interleaved.mod;
                                 }else{
                                     fatal("target_mod->range_kind invalid");
-                                }
-                                int binary_aux1 = stack->tag >> 9;
+                                }*/
+                                //int binary_aux1 = stack->tag >> 9;
                                 //binary_aux1 = (binary_aux1 << 1) + ((stack->tag >> target_mod->cache->log_block_size) & 0x1) ;
                                 
                                 //int frc_set = (stack->tag >> target_mod->cache->log_block_size) % target_mod->dir->extra_dir_sets;
-                                int frc_set = binary_aux1 % target_mod->dir->extra_dir_sets;
-                                // hacer quie la xor
-                                
-                                //if( stack->tag & 0x00030000)
-                                //    frc_set ^= 0x2;
+                                //int frc_set = binary_aux1 % target_mod->dir->extra_dir_sets;
+                                int frc_set = stack->set % target_mod->dir->extra_dir_sets;
                                 
                                 for(int k = 0;k <= target_mod->dir->frc_extended_set;k++)
                                 {
@@ -1969,7 +1966,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                                 break;
                                             }
                                         }
-                                    }else if(target_mod->dir->frc_extended_set < target_mod->dir->extra_dir_sets){
+                                    }else if(target_mod->frc_extended_set_enabled == 1 && target_mod->dir->frc_extended_set < target_mod->dir->extra_dir_sets){
                                         target_mod->dir->frc_extended_set++;
                                     }
                                 }

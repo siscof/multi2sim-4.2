@@ -101,6 +101,7 @@ struct mod_t
 	int latency;
 	int dir_latency;
 	int mshr_size;
+        int frc_extended_set_enabled;
 	//FRAN
 
 	/* Main memory module */

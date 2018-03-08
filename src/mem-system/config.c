@@ -741,6 +741,7 @@ static struct mod_t *mem_config_read_cache(struct config_t *config,
         
         mod->cache = cache_create(mod->name, num_sets, block_size, assoc,
 		policy, dir_entry_per_block, extra_dir_structure_type);
+        mod->frc_extended_set_enabled = config_read_int(config, buf, "frc_extended_set", 0);
         /*if(extra_dir_structure_type == extra_dir_per_cache_line_set)
         {
             for(int i = 0;i < num_sets;i++)

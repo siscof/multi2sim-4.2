@@ -523,7 +523,10 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
 	if (mod->range_kind == mod_range_interleaved)
 	{
 		unsigned int num_mods = mod->range.interleaved.mod;
-		set = ((tag >> cache->log_block_size) / num_mods) % cache->num_sets;
+		//set = ((tag >> cache->log_block_size) / num_mods) % cache->num_sets;
+                int shift_blocks = log(mod->range.interleaved.div)/log(2);
+                int shift_mods_blocks = (shift_blocks + log(num_mods)/log(2));
+                set = ((((tag >> shift_mods_blocks) << shift_blocks) | (tag & (mod->range.interleaved.div - 1))) >> cache->log_block_size) % cache->num_sets;
 	}
 	else if (mod->range_kind == mod_range_bounds)
 	{
@@ -1001,7 +1004,7 @@ int mod_serves_address(struct mod_t *mod, unsigned int addr)
 		return (addr / mod->range.interleaved.div) %
 			mod->range.interleaved.mod ==
 			mod->range.interleaved.eq;
-
+        
 	/* Invalid */
 	panic("%s: invalid range kind", __FUNCTION__);
 	return 0;
