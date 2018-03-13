@@ -346,6 +346,11 @@ void add_CoalesceHit(int level)
 	mem_stats.mod_level[level].coalesceHits++;
 }
 
+add_frc_access(int level)
+{
+        mem_stats.mod_level[level].frc_access++;    
+}
+
 void add_CoalesceMiss(int level)
 {
         mem_stats.mod_level[level].coalesceMisses++;

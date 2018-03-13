@@ -546,7 +546,6 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
             {
                 dir_entry = dir_entry_get(mod->dir, set, way, 0, w);
                           
-            
                 if (dir_entry->tag == tag && dir_entry->state)
                 {
                     dir_entry_found = dir_entry;

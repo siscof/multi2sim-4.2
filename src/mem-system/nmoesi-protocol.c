@@ -1957,6 +1957,7 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
                                             if(!dir_entry_aux->dir_lock->lock && dir_entry_aux->state == cache_block_invalid)
                                             {
                                                 target_mod->dir->extra_dir_used++;
+                                                add_frc_access(target_mod->level);
                                                 target_mod->dir->extra_dir_set_entries_used[frc_set_aux]++;
                                                 dir_entry_aux->is_extra = true;
                                                 dir_entry_aux->frc_set = frc_set_aux;
