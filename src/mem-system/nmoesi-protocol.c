@@ -1778,11 +1778,12 @@ void mod_handler_nmoesi_find_and_lock(int event, void *data)
 
 		if (stack->hit){
 			target_mod->hits++;
-			//sumamos acceso y hit
-			//estadisticas(1, target_mod->level);
+                        //if(stack->dir_entry->is_extra == true)
+                        //{
+                        //    add_frc_access(target_mod->level);
+                        //}
 		}else{
-			//sumamos acceso
-			//estadisticas(0, target_mod->level);
+                        //add_frc_access(target_mod->level);
 		}
 		if (stack->read)
 		{

@@ -118,17 +118,19 @@ struct esta_t
   long long request_cycles_count;
 
   long long uop_load_finish;
-	long long uop_load_latency;
-	long long uop_load_vmb_latency;
-	long long uop_load_mm_latency;
+    long long uop_load_latency;
+    long long uop_load_vmb_latency;
+    long long uop_load_mm_latency;
+    
+    long long frc_access;
 
-	long long cache_state[cache_block_state_size];
+    long long cache_state[cache_block_state_size];
 
-	long long load_action_retry;
-	long long load_miss_retry;
-	long long nc_store_writeback_retry;
-	long long nc_store_action_retry;
-	long long nc_store_miss_retry;
+    long long load_action_retry;
+    long long load_miss_retry;
+    long long nc_store_writeback_retry;
+    long long nc_store_action_retry;
+    long long nc_store_miss_retry;
 
 	long long busy_cicles_in;
   long long busy_cicles_out;
@@ -375,6 +377,6 @@ void add_L2_dir_collision();
 //void add_evict_time_l2(long long invalidation_time, long long evict_time);
 void add_evict_and_travel_time_l2_MM(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles);
 void add_evict_and_travel_time_l2_MM_extra(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles);
-
+void add_frc_access(int level);
 
 #endif

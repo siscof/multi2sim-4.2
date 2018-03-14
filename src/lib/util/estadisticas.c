@@ -239,6 +239,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
         fran_debug_ipc("FRC_%s_set%d ",mod->name,l);
     }
 }
+fran_debug_ipc("frc_l2_accesses ");
 
 fran_debug_ipc("vmb_inst_counter ");
 
@@ -346,7 +347,7 @@ void add_CoalesceHit(int level)
 	mem_stats.mod_level[level].coalesceHits++;
 }
 
-add_frc_access(int level)
+void add_frc_access(int level)
 {
         mem_stats.mod_level[level].frc_access++;    
 }
@@ -754,12 +755,13 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     }
         
     if(mod->level == 2){
+        
         fran_debug_ipc("%d ",mod->dir->frc_extended_set);
         for(int l = 0; l < mod->dir->extra_dir_sets; l++)
             fran_debug_ipc("%d ",mod->dir->extra_dir_set_entries_used[l]);
     }
 }
-
+fran_debug_ipc("%lld ",mem_stats.mod_level[2].frc_access);
 //print_cache_states(mem_stats.mod_level[1].cache_state);
 
 fran_debug_ipc("%lld ",gpu_stats.vmb_inst_counter);
