@@ -123,6 +123,9 @@ struct esta_t
     long long uop_load_mm_latency;
     
     long long frc_access;
+    long long frc_hit;
+    long long frc_miss;
+    long long frc_swap;
 
     long long cache_state[cache_block_state_size];
 
@@ -378,5 +381,7 @@ void add_L2_dir_collision();
 void add_evict_and_travel_time_l2_MM(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles);
 void add_evict_and_travel_time_l2_MM_extra(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles);
 void add_frc_access(int level);
-
+void add_frc_hit(int level);
+void add_frc_miss(int level);
+void add_frc_swap(int level);
 #endif

@@ -239,7 +239,7 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
         fran_debug_ipc("FRC_%s_set%d ",mod->name,l);
     }
 }
-fran_debug_ipc("frc_l2_accesses ");
+fran_debug_ipc("frc_l2_accesses frc_l2_hit frc_l2_miss frc_l2_swap ");
 
 fran_debug_ipc("vmb_inst_counter ");
 
@@ -350,6 +350,21 @@ void add_CoalesceHit(int level)
 void add_frc_access(int level)
 {
         mem_stats.mod_level[level].frc_access++;    
+}
+
+void add_frc_hit(int level)
+{
+        mem_stats.mod_level[level].frc_hit++;    
+}
+
+void add_frc_miss(int level)
+{
+        mem_stats.mod_level[level].frc_miss++;    
+}
+
+void add_frc_swap(int level)
+{
+        mem_stats.mod_level[level].frc_swap++;    
 }
 
 void add_CoalesceMiss(int level)
@@ -762,7 +777,9 @@ for (int k = 0; k < list_count(mem_system->mod_list); k++)
     }
 }
 fran_debug_ipc("%lld ",mem_stats.mod_level[2].frc_access);
-//print_cache_states(mem_stats.mod_level[1].cache_state);
+fran_debug_ipc("%lld ",mem_stats.mod_level[2].frc_hit);
+fran_debug_ipc("%lld ",mem_stats.mod_level[2].frc_miss);
+fran_debug_ipc("%lld ",mem_stats.mod_level[2].frc_swap);
 
 fran_debug_ipc("%lld ",gpu_stats.vmb_inst_counter);
 gpu_stats.vmb_inst_counter = 0;

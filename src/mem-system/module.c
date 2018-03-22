@@ -509,6 +509,7 @@ int mod_find_block(struct mod_t *mod, unsigned int addr, int *set_ptr,
 	PTR_ASSIGN(state_ptr, cache->sets[set].blocks[way].dir_entry_selected->state);
 	return 1;
 }
+
 int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
 {
 	struct cache_t *cache = mod->cache;
@@ -561,8 +562,15 @@ int mod_find_block_new(struct mod_t *mod, struct mod_stack_t *stack)
                 break;
 	}
         if(dir_entry_found)
+        {    
             stack->dir_entry = dir_entry_found;
-        
+            if(dir_entry_found->is_extra)
+            { 
+                add_frc_hit(mod->level);
+            }
+        }else{
+            add_frc_miss(mod->level);
+        }
 	stack->set = set;
 	stack->tag = tag;
 
