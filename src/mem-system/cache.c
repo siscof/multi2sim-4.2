@@ -37,7 +37,7 @@ struct str_map_t cache_policy_map =
 {
 	5, {
 		{ "LRU", cache_policy_lru },
-                { "LRU_EXT", cache_policy_lru_ext }, 
+                { "LRU_EXT", cache_policy_lru_ext },
                 { "LRU_BASE", cache_policy_lru_base },
 		{ "FIFO", cache_policy_fifo },
 		{ "Random", cache_policy_random }
@@ -160,7 +160,7 @@ struct cache_t *cache_create(char *name, unsigned int num_sets, unsigned int blo
 		cache->sets[set].blocks = xcalloc(assoc, sizeof(struct cache_block_t));
 		cache->sets[set].way_head = &cache->sets[set].blocks[0];
 		cache->sets[set].way_tail = &cache->sets[set].blocks[assoc - 1];
-                
+
 		for (way = 0; way < assoc; way++)
 		{
 			block = &cache->sets[set].blocks[way];
@@ -244,7 +244,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
         int set = stack->dir_entry->set;
         int way = stack->dir_entry->way;
         int tag = stack->addr & ~cache->block_mask;
-        
+
         if(stack->dir_entry->tag != tag || state == cache_block_invalid)
         {
             //assert(state == cache_block_invalid && stack->dir_entry->life_cycles != 0);
@@ -254,19 +254,19 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                 stack->dir_entry->life_cycles = 0;
             }
         }
-        
+
         if(stack->dir_entry->tag != tag)
             stack->dir_entry->life_cycles = asTiming(si_gpu)->cycle;
-            
-        
-    
+
+
+
 	assert(set >= 0 && set < cache->num_sets);
 	assert(way >= 0 && way < cache->assoc);
         mem_debug("    %lld 0x%x %s hit: set=%d, way=%d, w=%d, state=%s replacing tag=0x%x, w=%d, state=%s\n", stack->id,
 				stack->tag, cache->name, stack->dir_entry->set, stack->dir_entry->way, stack->dir_entry->w,
 				str_map_value(&cache_block_state_map, stack->dir_entry->state), cache->sets[set].blocks[way].dir_entry_selected->tag, cache->sets[set].blocks[way].dir_entry_selected->w,
                                 str_map_value(&cache_block_state_map, cache->sets[set].blocks[way].dir_entry_selected->state));
-	
+
 	mem_trace("mem.set_block cache=\"%s\" set=%d way=%d tag=0x%x state=\"%s\"\n",
 			cache->name, set, way, tag,
 			str_map_value(&cache_block_state_map, state));
@@ -279,7 +279,7 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
 
 	if(tag == stack->dir_entry->transient_tag)
 		stack->dir_entry->transient_tag = -1;
-        
+
         //assert(stack->dir_entry->transient_tag == -1);
         //(stack->dir_entry->state == cache_block_invalid);
 
@@ -289,15 +289,19 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
         }
         else
             stack->dir_entry->tag = -1;
-        
+
 	stack->dir_entry->state = state;
 	cache->sets[set].blocks[way].dirty_mask = 0;
 	cache->sets[set].blocks[way].valid_mask = 0;
-        
+
         //hacer evict!!! de dir_entry_selected
-        if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry) 
+        if(state != cache_block_invalid && cache->sets[set].blocks[way].dir_entry_selected != stack->dir_entry)
         //&& cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
         {
+						if(!stack->dir_entry->is_extra)
+						{
+								add_frc_access(stack->target_mod->level);
+						}
             if(cache->sets[set].blocks[way].dir_entry_selected->state != cache_block_invalid)
             {
                 add_frc_swap(stack->target_mod->level);
@@ -306,9 +310,9 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                 //new_stack1->return_mod = target_mod;
                 //new_stack1->set = stack->set;
                 //new_stack1->way = stack->way;
-                new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;  
+                new_stack1->dir_entry = cache->sets[set].blocks[way].dir_entry_selected;
 
-                struct mod_stack_t *new_stack2 = mod_stack_create(stack->id, 
+                struct mod_stack_t *new_stack2 = mod_stack_create(stack->id,
                         mod_get_low_mod(stack->target_mod, addr), addr,
                         EV_MOD_NMOESI_EVICT_CHECK, new_stack1);
                 new_stack2->return_mod = stack->target_mod;
@@ -319,8 +323,8 @@ void cache_set_block_new(struct cache_t *cache, struct mod_stack_t *stack, int s
                 new_stack2->event = EV_MOD_NMOESI_EVICT_LOCK_DIR;
                 esim_schedule_mod_stack_event(new_stack2, 0);
             }
-            cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry; 
-        }     
+            cache->sets[set].blocks[way].dir_entry_selected = stack->dir_entry;
+        }
 }
 
 
@@ -419,26 +423,26 @@ int cache_replace_block(struct cache_t *cache, int set)
 
 		return way;
 	}
-        
+
         if(cache->policy == cache_policy_lru_base)
 	{
 		int way = cache->sets[set].way_tail->way;
 		return way;
 	}
-        
+
         if(cache->policy == cache_policy_lru_ext)
 	{
                 //struct dir_lock_t *dir_lock;
-                
+
                 block = cache->sets[set].way_tail;
                 for(; block != NULL; block = block->way_prev)
                 {
                     //dir_lock = dir_lock_get(cache->mod->dir, set, block->way);
                     if(!block->dir_entry_selected->dir_lock->lock)
-                        break; 
+                        break;
 		}
-                
-                
+
+
 		/*int way = cache->sets[set].way_tail->way;
                 for(; cache->sets[set].blocks[way]->way != null; way = cache->sets[set].blocks[way]->way)
                 {
@@ -446,13 +450,13 @@ int cache_replace_block(struct cache_t *cache, int set)
                     dir_lock = dir_lock_get(cache->mod->dir, set, way);
                     if(!dir_lock->lock)
                         break;
-                    
+
 		}*/
                 if(block == NULL)
                 {
                     block = cache->sets[set].way_tail;
                 }
-                
+
                 cache_update_waylist(&cache->sets[set], block,
 			cache_waylist_head);
 
