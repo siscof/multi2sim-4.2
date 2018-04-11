@@ -3413,12 +3413,6 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 				dram_system_add_read_trans(ds->handler, stack->addr, stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->id, stack->wavefront->id);
 			}
 			stack->dramsim_mm_start = asTiming(si_gpu)->cycle;
-
-      /* Ctx main memory stats */
-      //ctx->mm_read_accesses++;
-      //if (stack->prefetch)
-      //    ctx->mm_pref_accesses++;
-      return;
     }
 
                 if(stack->uncacheable)
@@ -3477,6 +3471,16 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                             }
                     }
                 }
+                
+                if (target_mod->kind == mod_kind_main_memory &&
+                    target_mod->dram_system &&
+                    stack->request_dir == mod_request_up_down &&
+                    !stack->main_memory_accessed &&
+                    stack->reply != reply_ack_data_sent_to_peer)
+                {
+                    return;
+                }
+                
 
 		if (stack->mshr_locked != 0)
 		{
@@ -4159,7 +4163,6 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 			assert(!stack->prefetch);
 			//ctx->mm_read_accesses++;
 
-			return;
 		 }
 
 		/* Check that addr is a multiple of mod.block_size.
@@ -4200,6 +4203,15 @@ void mod_handler_nmoesi_write_request(int event, void *data)
                     {
                             fatal("Invalid reply size: %d", stack->reply_size);
                     }
+                }
+                
+                if (target_mod->kind == mod_kind_main_memory &&
+		 	target_mod->dram_system &&
+			stack->request_dir == mod_request_up_down &&
+			!stack->main_memory_accessed &&
+			stack->reply != reply_ack_data_sent_to_peer)
+                {
+                    return;
                 }
                 
 		if (stack->mshr_locked != 0)
