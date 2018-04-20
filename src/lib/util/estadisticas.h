@@ -108,6 +108,7 @@ struct esta_t
   long long evict_time;
   long long evict_count;
   long long l2_to_mm_cycles;
+  long long accesses_MM_per_1kcycles;
   
   long long invalidation_time_extra;
   long long evict_time_extra;
@@ -384,4 +385,5 @@ void add_frc_access(int level);
 void add_frc_hit(int level);
 void add_frc_miss(int level);
 void add_frc_swap(int level);
+void add_accesses_MM_per_1kcycles();
 #endif

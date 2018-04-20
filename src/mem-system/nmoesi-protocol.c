@@ -3079,6 +3079,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
 			return;
 		}
+                if(target_mod->level == 3)
+                    add_accesses_MM_per_1kcycles();
                 
 		stack->event = stack->request_dir == mod_request_up_down ?
 			EV_MOD_NMOESI_READ_REQUEST_UPDOWN : EV_MOD_NMOESI_READ_REQUEST_DOWNUP;
