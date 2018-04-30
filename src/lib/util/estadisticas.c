@@ -176,9 +176,15 @@ void hrl2(int hit , struct mod_t *mod, int from_load){
     mem_stats.mod_level[2].evict_count++;
 }*/
 
-void add_accesses_MM_per_1kcycles()
+void add_accesses_MM_per_1kcycles(struct mod_stack_t *stack)
 {
     mem_stats.mod_level[3].accesses_MM_per_1kcycles++;
+    if(stack->read == 1)
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[stack->reply]++;
+    
+    if(stack->write == 1)
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[stack->reply]++;
+    
 }
 
 void add_evict_and_travel_time_l2_MM(long long invalidation_time, long long evict_time, long long l2_to_mm_cycles)
