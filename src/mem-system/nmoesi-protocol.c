@@ -407,7 +407,7 @@ void mod_handler_nmoesi_load(int event, void *data)
 			//prefetcher_access_hit(stack, mod);
                         
                         struct mod_t *L2_mod = mod_get_low_mod(target_mod, stack->tag);
-                        struct mod_stack_t *aux_stack = mod_stack_create(11,L2_mod,stack->addr,NULL,NULL);
+                        struct mod_stack_t *aux_stack = mod_stack_create(11,L2_mod,stack->addr,0,NULL);
                         mod_find_block_new(L2_mod, aux_stack);
                         bool auxiliary_hit = false;
                         aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
@@ -1219,7 +1219,7 @@ void mod_handler_nmoesi_nc_store(int event, void *data)
 		if (stack->dir_entry->state == cache_block_shared || stack->dir_entry->state == cache_block_noncoherent)
 		{
                         struct mod_t *L2_mod = mod_get_low_mod(target_mod, stack->tag);
-                        struct mod_stack_t *aux_stack = mod_stack_create(11,L2_mod,stack->addr,NULL,NULL);
+                        struct mod_stack_t *aux_stack = mod_stack_create(11,L2_mod,stack->addr,0,NULL);
                         mod_find_block_new(L2_mod, aux_stack);
                         bool auxiliary_hit = false;
                         aux_stack->cache_block = cache_get_block_new(L2_mod->cache, aux_stack->set, aux_stack->way);
@@ -3079,8 +3079,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 			//esim_schedule_event(EV_MOD_NMOESI_READ_REQUEST_REPLY, stack, 0);
 			return;
 		}
-                if(target_mod->level == 3)
-                    add_accesses_MM_per_1kcycles();
+                //if(target_mod->level == 3)
+                //    add_accesses_MM_per_1kcycles();
                 
 		stack->event = stack->request_dir == mod_request_up_down ?
 			EV_MOD_NMOESI_READ_REQUEST_UPDOWN : EV_MOD_NMOESI_READ_REQUEST_DOWNUP;
@@ -3474,6 +3474,8 @@ void mod_handler_nmoesi_read_request(int event, void *data)
                     }
                 }
                 
+                add_accesses_MM_per_1kcycles(stack);
+                
                 if (target_mod->kind == mod_kind_main_memory &&
                     target_mod->dram_system &&
                     stack->request_dir == mod_request_up_down &&
@@ -3773,6 +3775,7 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 
 		//int latency = stack->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
+                add_accesses_MM_per_1kcycles(stack);
 
 		stack->event = EV_MOD_NMOESI_READ_REQUEST_REPLY;
 		esim_schedule_mod_stack_event(stack, latency);
@@ -4207,6 +4210,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
                     }
                 }
                 
+                add_accesses_MM_per_1kcycles(stack);
+                
                 if (target_mod->kind == mod_kind_main_memory &&
 		 	target_mod->dram_system &&
 			stack->request_dir == mod_request_up_down &&
@@ -4325,6 +4330,8 @@ void mod_handler_nmoesi_write_request(int event, void *data)
                 else
                     assert(stack->uncacheable);
 
+                add_accesses_MM_per_1kcycles(stack);
+                
 		//int latency = ret->reply == reply_ack_data_sent_to_peer ? 0 : target_mod->latency;
 		int latency = target_mod->latency;
 		stack->event = EV_MOD_NMOESI_WRITE_REQUEST_REPLY;
