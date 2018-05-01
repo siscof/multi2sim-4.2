@@ -179,10 +179,10 @@ void hrl2(int hit , struct mod_t *mod, int from_load){
 void add_accesses_MM_per_1kcycles(struct mod_stack_t *stack)
 {
     mem_stats.mod_level[3].accesses_MM_per_1kcycles++;
-    if(stack->read == 1)
+    if(stack->read != 0)
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[stack->reply]++;
     
-    if(stack->write == 1)
+    if(stack->write != 0)
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[stack->reply]++;
     
 }
