@@ -179,10 +179,10 @@ void hrl2(int hit , struct mod_t *mod, int from_load){
 void add_accesses_MM_per_1kcycles(struct mod_stack_t *stack)
 {
     mem_stats.mod_level[3].accesses_MM_per_1kcycles++;
-    if(stack->read == 1)
+    if(stack->read != 0)
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[stack->reply]++;
     
-    if(stack->write == 1)
+    if(stack->write != 0)
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[stack->reply]++;
     
 }
@@ -279,7 +279,9 @@ fran_debug_ipc(" wavefront_access_load_miss queue_load_miss lock_mshr_load_miss 
 fran_debug_ipc(" wavefront_access_load_critical_hit queue_load_critical_hit lock_mshr_load_critical_hit lock_dir_load_critical_hit eviction_load_critical_hit retry_load_critical_hit miss_load_critical_hit finish_load_critical_hit access_load_critical_hit");
 fran_debug_ipc(" wavefront_access_load_critical_miss queue_load_critical_miss lock_mshr_load_critical_miss lock_dir_load_critical_miss eviction_load_critical_miss retry_load_critical_miss miss_load_critical_miss finish_load_critical_miss access_load_critical_miss");
 fran_debug_ipc(" wavefront_access_nc_write queue_nc_write lock_mshr_nc_write lock_dir_nc_write eviction_nc_write retry_nc_write miss_nc_write finish_nc_write access_nc_write");
-fran_debug_ipc(" evict_time invalidation_time l2_to_mm_cycles evict_count evict_time_extra invalidation_time_extra l2_to_mm_cycles_extra evict_count_extra accesses_MM_per_1kcycles ics_L2_dir_collision ics_L1_cycles_dir_locked ics_L1_cycles_dir_locked_count ics_L2_cycles_dir_locked ics_L2_cycles_dir_locked_count ics_L1_accesses ics_L1_nor_hit ics_L1_aux_hit ics_L2_accesses ics_L2_nor_hit ics_L2_aux_hit request_cycles_l2 request_cycles_count_l2 request_cycles_MM request_cycles_count_MM mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 load_invalidation_L1 load_invalidation_L2 load_invalidation_MM store_invalidation_L1 store_invalidation_L2 store_invalidation_MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem ciclos_intervalo ciclos_totales esim_time\n");
+fran_debug_ipc(" evict_time invalidation_time l2_to_mm_cycles evict_count evict_time_extra invalidation_time_extra l2_to_mm_cycles_extra evict_count_extra accesses_MM_per_1kcycles");
+fran_debug_ipc(" accesses_MM_per_1kcycles_read_reply_none accesses_MM_per_1kcycles_read_reply_ack accesses_MM_per_1kcycles_read_reply_ack_data accesses_MM_per_1kcycles_read_reply_ack_data_sent_to_peer accesses_MM_per_1kcycles_read_reply_ack_error accesses_MM_per_1kcycles_write_reply_none accesses_MM_per_1kcycles_write_reply_ack accesses_MM_per_1kcycles_write_reply_ack_data accesses_MM_per_1kcycles_write_reply_ack_data_sent_to_peer accesses_MM_per_1kcycles_write_reply_ack_error");
+fran_debug_ipc(" ics_L2_dir_collision ics_L1_cycles_dir_locked ics_L1_cycles_dir_locked_count ics_L2_cycles_dir_locked ics_L2_cycles_dir_locked_count ics_L1_accesses ics_L1_nor_hit ics_L1_aux_hit ics_L2_accesses ics_L2_nor_hit ics_L2_aux_hit request_cycles_l2 request_cycles_count_l2 request_cycles_MM request_cycles_count_MM mshr_size_L1 mshr_L1 mshr_L2 entradas_bloqueadas_L1 entradas_bloqueadas_L2 Coalesces_gpu Coalesces_L1 Coalesces_L2 accesos_gpu accesos_L1 accesos_L2 efectivos_L1 efectivos_L2 misses_L1 misses_L2 hits_L1 hits_L2 Cmisses_L1 Cmisses_L2 Chits_L1 Chits_L2 load_invalidation_L1 load_invalidation_L2 load_invalidation_MM store_invalidation_L1 store_invalidation_L2 store_invalidation_MM lat_L1-L2 paquetes_L1-L2 lat_L2-MM paquetes_L2-MM lat_loads_gpu num_loads_gpu lat_loads_mem num_loads_mem ciclos_intervalo ciclos_totales esim_time\n");
 }
 
 void add_load_invalidation(int level)
@@ -948,6 +950,28 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
         
         fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles);
         mem_stats.mod_level[3].accesses_MM_per_1kcycles = 0;
+        
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_none]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack_data]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack_data_sent_to_peer]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack_error]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_none]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data_sent_to_peer]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_error]);
+        
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_none] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack_data] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack_data_sent_to_peer] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack_error] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_none] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data_sent_to_peer] = 0;
+        mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_error] = 0;
         
         fran_debug_ipc("%lld ",mem_stats.mod_level[2].ics_dir_collision);
         fran_debug_ipc("%lld ",mem_stats.mod_level[1].ics_cycles_dir_locked);
