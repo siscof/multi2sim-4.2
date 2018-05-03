@@ -2998,8 +2998,16 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		if (stack->request_dir == mod_request_up_down)
 		{
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+                        if(target_mod->level == 3)
+                        {
+                            add_bytes_L2_to_MM(stack->msg->size);
+                        }
 		}else{
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
+                        if(target_mod->level == 2)
+                        {
+                            add_bytes_MM_to_L2(stack->msg->size);
+                        }
 		}
 		/* Find and lock */
 		/*
@@ -3833,10 +3841,20 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
+                {
 			net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
-		else
+                        if(target_mod->level == 3)
+                        {
+                            add_bytes_MM_to_L2(stack->msg->size);
+                        }
+                }else{
 			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
-
+                        if(target_mod->level == 2)
+                        {
+                            add_bytes_L2_to_MM(stack->msg->size);
+                        }
+                }
+                
                 //if(target_mod->level == 3 && stack->wavefront)
                 //    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
 		/* Return */
@@ -3922,10 +3940,20 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		if (stack->request_dir == mod_request_up_down)
                 {
 			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+                        if(target_mod->level == 3)
+                        {
+                            add_bytes_L2_to_MM(stack->msg->size);
+                        }
                 }
 		else
+                {
 			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
-
+                        if(target_mod->level == 2)
+                        {
+                            add_bytes_MM_to_L2(stack->msg->size);
+                        }
+                }
+                
 		/* Find and lock */
 		/*
 		new_stack = mod_stack_create(stack->id, target_mod, stack->addr,
@@ -4390,11 +4418,19 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		if (stack->request_dir == mod_request_up_down)
 		{
 			net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
+                        if(target_mod->level == 3)
+                        {
+                            add_bytes_L2_to_MM(stack->msg->size);
+                        }
 		}
 		else
 		{
 			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
-		}
+                        if(target_mod->level == 2)
+                        {
+                            add_bytes_MM_to_L2(stack->msg->size);
+                        }
+                }
                 
                 //if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)
                 //    stack->wavefront->wavefront_pool_entry->wavefront_pool->compute_unit->accesses_L2_to_MM--;
