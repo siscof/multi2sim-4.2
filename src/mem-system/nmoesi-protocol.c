@@ -26,6 +26,7 @@
 #include <lib/util/list.h>
 #include <lib/util/string.h>
 #include <network/network.h>
+#include <network/message.h>
 #include <network/node.h>
 #include <arch/common/arch.h>
 
@@ -2997,17 +2998,17 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
 		{
-			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
                         if(target_mod->level == 3)
                         {
                             add_bytes_L2_to_MM(stack->msg->size);
                         }
+                        net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
 		}else{
-			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
                         if(target_mod->level == 2)
                         {
                             add_bytes_MM_to_L2(stack->msg->size);
                         }
+                        net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
 		}
 		/* Find and lock */
 		/*
@@ -3845,17 +3846,19 @@ void mod_handler_nmoesi_read_request(int event, void *data)
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
                 {
-			net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
+			
                         if(target_mod->level == 3)
                         {
                             add_bytes_MM_to_L2(stack->msg->size);
                         }
+                        net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
                 }else{
-			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
+			
                         if(target_mod->level == 2)
                         {
                             add_bytes_L2_to_MM(stack->msg->size);
                         }
+                        net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
                 }
                 
                 //if(target_mod->level == 3 && stack->wavefront)
@@ -3941,20 +3944,20 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
-                {
-			net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
+                {	
                         if(target_mod->level == 3)
                         {
                             add_bytes_L2_to_MM(stack->msg->size);
                         }
+                        net_receive(target_mod->high_net, target_mod->high_net_node, stack->msg);
                 }
 		else
                 {
-			net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
                         if(target_mod->level == 2)
                         {
                             add_bytes_MM_to_L2(stack->msg->size);
                         }
+                        net_receive(target_mod->low_net, target_mod->low_net_node, stack->msg);
                 }
                 
 		/* Find and lock */
@@ -4424,19 +4427,19 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		/* Receive message */
 		if (stack->request_dir == mod_request_up_down)
 		{
-			net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
                         if(target_mod->level == 3)
                         {
                             add_bytes_L2_to_MM(stack->msg->size);
                         }
+                        net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
 		}
 		else
 		{
-			net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
                         if(target_mod->level == 2)
                         {
                             add_bytes_MM_to_L2(stack->msg->size);
                         }
+                        net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
                 }
                 
                 //if(target_mod->level == 3 && stack->wavefront && stack->wavefront->wavefront_pool_entry)

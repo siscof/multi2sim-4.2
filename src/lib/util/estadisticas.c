@@ -152,6 +152,15 @@ void mem_load_finish(long long lat)
 	mem_stats.load_latency += lat;
 	mem_stats.load_latency_count++;
 }
+void add_bytes_L2_to_MM(int size)
+{
+    mem_stats.mod_level[3].bytes_L2_to_MM += size;
+}
+
+void add_bytes_MM_to_L2(int size)
+{
+    mem_stats.mod_level[3].bytes_MM_to_L2 += size;
+}	
 
 void hrl2(int hit , struct mod_t *mod, int from_load){
 
@@ -961,6 +970,8 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
         fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data]);
         fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data_sent_to_peer]);
         fran_debug_ipc("%lld ",mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_error]);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].bytes_L2_to_MM);
+        fran_debug_ipc("%lld ",mem_stats.mod_level[3].bytes_MM_to_L2);
         
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_none] = 0;
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_read[reply_ack] = 0;
@@ -972,6 +983,8 @@ fran_debug_ipc("%lld ",mem_stats.mod_level[1].invalidations - instrucciones_mem_
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data] = 0;
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_data_sent_to_peer] = 0;
         mem_stats.mod_level[3].accesses_MM_per_1kcycles_write[reply_ack_error] = 0;
+        mem_stats.mod_level[3].bytes_L2_to_MM = 0;
+        mem_stats.mod_level[3].bytes_MM_to_L2 = 0;
         
         fran_debug_ipc("%lld ",mem_stats.mod_level[2].ics_dir_collision);
         fran_debug_ipc("%lld ",mem_stats.mod_level[1].ics_cycles_dir_locked);

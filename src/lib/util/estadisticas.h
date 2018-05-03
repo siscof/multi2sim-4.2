@@ -119,6 +119,8 @@ struct esta_t
   long long request_cycles_count;
   long long accesses_MM_per_1kcycles_read[6];
   long long accesses_MM_per_1kcycles_write[6];
+  long long bytes_MM_to_L2;
+  long long bytes_L2_to_MM;
   
   long long uop_load_finish;
     long long uop_load_latency;
@@ -388,4 +390,6 @@ void add_frc_hit(int level);
 void add_frc_miss(int level);
 void add_frc_swap(int level);
 void add_accesses_MM_per_1kcycles(struct mod_stack_t *stack);
+void add_bytes_L2_to_MM(int size);
+void add_bytes_MM_to_L2(int size);
 #endif
