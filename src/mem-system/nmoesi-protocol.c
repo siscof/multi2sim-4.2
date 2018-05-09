@@ -4429,7 +4429,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		{
                         if(target_mod->level == 3)
                         {
-                            add_bytes_L2_to_MM(stack->msg->size);
+                            add_bytes_MM_to_L2(stack->msg->size);
                         }
                         net_receive(return_mod->low_net, return_mod->low_net_node, stack->msg);
 		}
@@ -4437,7 +4437,7 @@ void mod_handler_nmoesi_write_request(int event, void *data)
 		{
                         if(target_mod->level == 2)
                         {
-                            add_bytes_MM_to_L2(stack->msg->size);
+                            add_bytes_L2_to_MM(stack->msg->size);
                         }
                         net_receive(return_mod->high_net, return_mod->high_net_node, stack->msg);
                 }
