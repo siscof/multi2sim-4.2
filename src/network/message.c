@@ -576,6 +576,7 @@ void net_event_handler(int event, void *data)
 			node->name,
 			buffer->name,
 			asTiming(si_gpu)->cycle);
+                        panic("%s: unknown event", __FUNCTION__);
                 }
 		assert(node->kind != net_node_end);
 		assert(node->bandwidth > 0);
