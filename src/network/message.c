@@ -569,11 +569,13 @@ void net_event_handler(int event, void *data)
 			"net=\"%s\" "
 			"msg=%lld "
 			"node=\"%s\" "
+                        "dest_node=\"%s\" "
 			"buf=\"%s\" "
 			"gpu_cycle=%lld\n",
 			net->name,
 			msg->id,
 			node->name,
+                        msg->dst_node,
 			buffer->name,
 			asTiming(si_gpu)->cycle);
                         panic("%s: unknown event", __FUNCTION__);
