@@ -37,6 +37,9 @@
 #include "loader.h"
 #include "regs.h"
 
+#include <unistd.h>
+#include <sys/types.h>
+
 
 void X86EmuLoadCheckpoint(X86Emu *self, char *file_name);
 void X86EmuSaveCheckpoint(X86Emu *self, char *file_name);
