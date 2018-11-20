@@ -575,7 +575,7 @@ void net_event_handler(int event, void *data)
 			net->name,
 			msg->id,
 			node->name,
-                        msg->dst_node,
+                        msg->dst_node->name,
 			buffer->name,
 			asTiming(si_gpu)->cycle);
                         panic("%s: unknown event", __FUNCTION__);
