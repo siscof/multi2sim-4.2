@@ -470,6 +470,20 @@ union si_reg_t
 	float as_float;
 };
 
+union si_reg64_t
+{
+	signed long as_int64;
+	//uint64_t as_uint64;
+
+	//uint32_t as_uint32[2];
+        unsigned int as_reg[2];
+
+	signed char as_byte[8];
+	unsigned char as_ubyte[8];
+
+	double as_double;
+};
+
 struct si_inst_t
 {
 	/* Basic instruction info */

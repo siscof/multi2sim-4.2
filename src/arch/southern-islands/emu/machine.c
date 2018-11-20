@@ -5636,6 +5636,56 @@ void si_isa_V_LSHR_B64_impl(struct si_work_item_t *work_item,
 }
 #undef INST
 
+//fracanma
+/* D = S0.i >> S1.u[4:0]. */
+#define INST SI_INST_VOP3a
+void si_isa_V_ASHR_I64_impl(struct si_work_item_t *work_item,
+	struct si_inst_t *inst)
+{
+	/*union
+	{
+		unsigned long long as_b64;
+		unsigned int as_reg[2];
+
+	} s0, value;
+*/
+        union si_reg64_t s0, value;
+	union si_reg_t s1;
+	union si_reg_t result_lo;
+	union si_reg_t result_hi;
+
+	assert(!INST.clamp);
+	assert(!INST.omod);
+	assert(!INST.neg);
+	assert(!INST.abs);
+
+	/* Load operands from registers. */
+	s0.as_reg[0] = si_isa_read_reg(work_item, INST.src0);
+	s0.as_reg[1] = si_isa_read_reg(work_item, INST.src0 + 1);
+	s1.as_uint = si_isa_read_reg(work_item, INST.src1);
+	s1.as_uint = s1.as_uint & 0x1F;
+
+	/* Shift s0. */
+	value.as_int64 = s0.as_int64 >> s1.as_uint;
+
+	/* Write the results. */
+	result_lo.as_uint = value.as_reg[0];
+	result_hi.as_uint = value.as_reg[1];
+	si_isa_write_vreg(work_item, INST.vdst, result_lo.as_uint);
+	si_isa_write_vreg(work_item, INST.vdst + 1, result_hi.as_uint);
+
+	/* Print isa debug information. */
+	if (debug_status(si_isa_debug_category))
+	{
+		si_isa_debug("t%d: S[%u]<=(0x%x) ",
+			work_item->id_in_wavefront, INST.vdst,
+			result_lo.as_uint);
+		si_isa_debug("S[%u]<=(0x%x) ", INST.vdst + 1,
+			result_hi.as_uint);
+	}
+}
+#undef INST
+
 /* D.d = S0.d + S1.d. */
 #define INST SI_INST_VOP3a
 void si_isa_V_ADD_F64_impl(struct si_work_item_t *work_item,
