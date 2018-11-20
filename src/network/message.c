@@ -562,6 +562,21 @@ void net_event_handler(int event, void *data)
 		}
 
 		/* Calculate latency and occupy resources */
+                if(node->kind == net_node_end)
+                {
+                    net_debug("a tomar por culo msg "
+			"a=\"ibuf\" "
+			"net=\"%s\" "
+			"msg=%lld "
+			"node=\"%s\" "
+			"buf=\"%s\" "
+			"gpu_cycle=%lld\n",
+			net->name,
+			msg->id,
+			node->name,
+			buffer->name,
+			asTiming(si_gpu)->cycle);
+                }
 		assert(node->kind != net_node_end);
 		assert(node->bandwidth > 0);
 		lat = (msg->size - 1) / node->bandwidth + 1;
