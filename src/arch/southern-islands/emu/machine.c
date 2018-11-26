@@ -2287,6 +2287,38 @@ void si_isa_V_TRUNC_F32_impl(struct si_work_item_t *work_item,
 }
 #undef INST
 
+/* D.f = trunc(S0); if ((S0 > 0.0) && (S0 != D)) D += 1.0. */
+#define INST SI_INST_VOP1
+void si_isa_V_CEIL_F32_impl(struct si_work_item_t *work_item,
+	struct si_inst_t *inst)
+{
+	union si_reg_t s0;
+	union si_reg_t value;
+
+	/* Load operand from register or as a literal constant. */
+	if (INST.src0 == 0xFF)
+		s0.as_uint = INST.lit_cnst;
+	else
+		s0.as_uint = si_isa_read_reg(work_item, INST.src0);
+
+	/* Truncate decimal portion */
+	value.as_float = (float)((int)s0.as_float);
+        
+        if((s0.as_float > 0.0) && (s0.as_float != value.as_float))
+            value.as_float = value.as_float + 1.0;
+
+	/* Write the results. */
+	si_isa_write_vreg(work_item, INST.vdst, value.as_uint);
+
+	/* Print isa debug information. */
+	if (debug_status(si_isa_debug_category))
+	{
+		si_isa_debug("t%d: V%u<=(%gf) ", work_item->id, INST.vdst,
+			value.as_float);
+	}
+}
+#undef INST
+
 /* D.f = trunc(S0); if ((S0 < 0.0) && (S0 != D)) D += -1.0. */
 #define INST SI_INST_VOP1
 void si_isa_V_FLOOR_F32_impl(struct si_work_item_t *work_item,
