@@ -1412,7 +1412,7 @@ int SIGpuRun(Timing *self)
 
 		list_enqueue(si_emu->running_work_groups,
 			(void *)work_group_id);
-
+              
 		si_compute_unit_map_work_group(
 			list_dequeue(gpu->available_compute_units),
 			work_group);

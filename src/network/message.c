@@ -562,24 +562,6 @@ void net_event_handler(int event, void *data)
 		}
 
 		/* Calculate latency and occupy resources */
-                if(node->kind == net_node_end)
-                {
-                    net_debug("a tomar por culo msg "
-			"a=\"ibuf\" "
-			"net=\"%s\" "
-			"msg=%lld "
-			"node=\"%s\" "
-                        "dest_node=\"%s\" "
-			"buf=\"%s\" "
-			"gpu_cycle=%lld\n",
-			net->name,
-			msg->id,
-			node->name,
-                        msg->dst_node->name,
-			buffer->name,
-			asTiming(si_gpu)->cycle);
-                        panic("%s: unknown event", __FUNCTION__);
-                }
 		assert(node->kind != net_node_end);
 		assert(node->bandwidth > 0);
 		lat = (msg->size - 1) / node->bandwidth + 1;

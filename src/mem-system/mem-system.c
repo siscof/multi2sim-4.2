@@ -752,6 +752,7 @@ void main_memory_tic_scheduler(struct dram_system_t *ds)
 {
 	//int cpu_freq = arch_x86->frequency; /* In MHz */
 	int dram_freq = dram_system_get_dram_freq(ds->handler) / 1000000; /* In MHz */
+        printf("register ds event witjh freq: %d = %lld / 1000000\n", dram_freq, dram_system_get_dram_freq(ds->handler));
 
 	//assert(cpu_freq >= dram_freq);
 
