@@ -1422,8 +1422,8 @@ void si_compute_unit_issue_first(struct si_compute_unit_t *compute_unit,
 					compute_unit->id,
 					uop->wavefront->id,
 					uop->id_in_wavefront);
-                                assert(uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle == 0);
-                                uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
+                                if(uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle == 0)
+                                    uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
 				list_index++;
 				continue;
 			}
