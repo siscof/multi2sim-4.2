@@ -1422,9 +1422,19 @@ void si_compute_unit_issue_first(struct si_compute_unit_t *compute_unit,
 					compute_unit->id,
 					uop->wavefront->id,
 					uop->id_in_wavefront);
+                                assert(uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle == 0);
+                                uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle = asTiming(si_gpu)->cycle;
 				list_index++;
 				continue;
 			}
+                        
+                        if(uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle != 0)
+                        {
+                            assert(uop->wavefront->wavefront_pool_entry->wait_for_mem == 0);
+                            add_wait_for_mem_latency(compute_unit, asTiming(si_gpu)->cycle -
+                                uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle);
+                            uop->wavefront->wavefront_pool_entry->wait_for_mem_cycle = 0;
+                        }
 
 			uop->issue_ready = asTiming(si_gpu)->cycle +
 				si_gpu_fe_issue_latency;
