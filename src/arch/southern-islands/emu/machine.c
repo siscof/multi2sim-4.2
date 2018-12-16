@@ -3528,7 +3528,29 @@ void si_isa_V_CMP_GT_F32_impl(struct si_work_item_t *work_item,
 void si_isa_V_CMP_GE_F32_impl(struct si_work_item_t *work_item,
 	struct si_inst_t *inst)
 {
-	NOT_IMPL();
+	union si_reg_t s0;
+	union si_reg_t s1;
+	union si_reg_t result;
+
+	/* Load operands from registers or as a literal constant. */
+	if (INST.src0 == 255)
+		s0.as_uint = INST.lit_cnst;
+	else
+		s0.as_uint = si_isa_read_reg(work_item, INST.src0);
+	s1.as_uint = si_isa_read_vreg(work_item, INST.vsrc1);
+
+	/* Compare the operands. */
+	result.as_uint = s0.as_float >= s1.as_float;
+
+	/* Write the results. */
+	si_isa_bitmask_sreg(work_item, SI_VCC, result.as_uint);
+
+	/* Print isa debug information. */
+	if (debug_status(si_isa_debug_category))
+	{
+		si_isa_debug("t%d: vcc<=(%u) ",
+			work_item->id_in_wavefront, result.as_uint);
+	}
 }
 #undef INST
 
@@ -6089,6 +6111,88 @@ void si_isa_DS_WRITE2_B32_impl(struct si_work_item_t *work_item,
 	addr0.as_uint += INST.offset0*4;
 	addr1.as_uint = si_isa_read_vreg(work_item, INST.addr);
 	addr1.as_uint += INST.offset1*4;
+	data0.as_uint = si_isa_read_vreg(work_item, INST.data0);
+	data1.as_uint = si_isa_read_vreg(work_item, INST.data1);
+
+	if (addr0.as_uint > MIN(work_item->work_group->ndrange->local_mem_top,
+		si_isa_read_sreg(work_item, SI_M0)))
+	{
+		fatal("%s: invalid address\n", __FUNCTION__);
+	}
+	if (addr1.as_uint > MIN(work_item->work_group->ndrange->local_mem_top,
+		si_isa_read_sreg(work_item, SI_M0)))
+	{
+		fatal("%s: invalid address\n", __FUNCTION__);
+	}
+
+	/* Write Dword. */
+	if (INST.gds)
+	{
+		assert(0);
+	}
+	else
+	{
+		mem_write(work_item->work_group->lds_module, addr0.as_uint, 4,
+			&data0.as_uint);
+		mem_write(work_item->work_group->lds_module, addr1.as_uint, 4,
+			&data1.as_uint);
+	}
+
+	/* Record last memory access for the detailed simulator. */
+	if (INST.gds)
+	{
+		assert(0);
+	}
+	else
+	{
+		/* If offset1 != 1, then the following is incorrect */
+		assert(INST.offset0 == 0);
+		assert(INST.offset1 == 1);
+		work_item->lds_access_count = 2;
+		work_item->lds_access_type[0] = 2;
+		work_item->lds_access_addr[0] = addr0.as_uint;
+		work_item->lds_access_size[0] = 4;
+		work_item->lds_access_type[1] = 2;
+		work_item->lds_access_addr[1] = addr0.as_uint + 4;
+		work_item->lds_access_size[1] = 4;
+	}
+
+	/* Print isa debug information. */
+	if (debug_status(si_isa_debug_category) && INST.gds)
+	{
+		si_isa_debug("t%d: GDS[%u]<=(%u,%f) ", work_item->id, 
+			addr0.as_uint, data0.as_uint, data0.as_float);
+		si_isa_debug("GDS[%u]<=(%u,%f) ", addr1.as_uint, data0.as_uint,
+			data0.as_float);
+	}
+	else
+	{
+		si_isa_debug("t%d: LDS[%u]<=(%u,%f) ", work_item->id, 
+			addr0.as_uint, data0.as_uint, data0.as_float);
+		si_isa_debug("LDS[%u]<=(%u,%f) ", addr1.as_uint, data1.as_uint, 
+			data1.as_float);
+	}
+}
+#undef INST
+
+/* DS[ADDR+offset0*4*64] = D0; 
+ * DS[ADDR+offset1*4*64] = D1; Write 2 Dwords */
+#define INST SI_INST_DS
+void si_isa_DS_WRITE2ST64_B32_impl(struct si_work_item_t *work_item,
+	struct si_inst_t *inst)
+{
+	union si_reg_t addr0;
+	union si_reg_t addr1;
+	union si_reg_t data0;
+	union si_reg_t data1;
+
+	assert(!INST.gds);
+
+	/* Load address and data from registers. */
+	addr0.as_uint = si_isa_read_vreg(work_item, INST.addr);
+	addr0.as_uint += INST.offset0*4*64;
+	addr1.as_uint = si_isa_read_vreg(work_item, INST.addr);
+	addr1.as_uint += INST.offset1*4*64;
 	data0.as_uint = si_isa_read_vreg(work_item, INST.data0);
 	data1.as_uint = si_isa_read_vreg(work_item, INST.data1);
 
