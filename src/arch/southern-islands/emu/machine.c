@@ -7116,6 +7116,69 @@ void si_isa_BUFFER_ATOMIC_ADD_impl(struct si_work_item_t *work_item,
 }
 #undef INST
 
+#define INST SI_INST_MUBUF
+void si_isa_BUFFER_ATOMIC_CMPSWAP_impl(struct si_work_item_t *work_item,
+	struct si_inst_t *inst)
+{
+        NOT_IMPL();
+	/*if (INST.lds)
+	{
+            assert(0);
+	}
+	else
+	{
+	src.as_uint = si_isa_read_vreg(work_item, INST.vaddr);
+	cmp.as_uint = si_isa_read_vreg(work_item, INST.vaddr+1);
+	dst.as_uint = si_isa_read_vreg(work_item, INST.vdata);
+        
+        dst.as_uint = (dst.as_uint == cmp.as_uint) ? src.as_uint : dst.as_uint;
+   
+	}
+
+	if (INST.gds)
+	{
+		assert(0);
+	}
+	else
+	{
+		work_item->lds_access_count = 1;
+		work_item->lds_access_type[0] = 2;
+		work_item->lds_access_addr[0] = addr.as_uint;
+		work_item->lds_access_size[0] = 4;
+	}*/
+     
+
+/* FIXME: uncomment when fetch shader is ready */
+	// union si_reg_t pc_lo;
+	// union si_reg_t s0_lo;
+	// union si_reg_t s0_hi;
+
+	// /* Load operands from registers */
+	// s0_lo.as_uint = si_isa_read_sreg(work_item, INST.ssrc0);
+	// s0_hi.as_uint = si_isa_read_sreg(work_item, INST.ssrc0 + 1);
+
+	// /* PC is implemented as 32-bit*/
+	// assert(s0_hi.as_uint == 0);
+
+	// /* Load the PC */
+	// pc_lo.as_uint = work_item->wavefront->pc + 4;  // XXX Next instruction?
+
+	// /* Write the results */
+	// si_isa_write_sreg(work_item, INST.sdst, pc_lo.as_uint);
+	// si_isa_write_sreg(work_item, INST.sdst + 1, 0);
+
+	// /* Set the new PC */
+	// work_item->wavefront->pc = s0_lo.as_uint;
+
+	// /* Print isa debug information. */
+	// if (debug_status(si_isa_debug_category))
+	// {
+	// 	si_isa_debug("S%u<=(0x%x) ", INST.sdst, pc_lo.as_uint);
+	// 	si_isa_debug("S%u<=(0x%x) ", INST.sdst + 1, s0_hi.as_uint);
+	// 	si_isa_debug("PC<=(0x%x)", s0_lo.as_uint);
+	// }
+}
+#undef INST
 /*
  * MTBUF 
  */
