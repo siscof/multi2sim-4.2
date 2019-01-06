@@ -538,6 +538,14 @@ DEFINST(V_MIN_U32,
 	4,
 	0
 )
+        
+DEFINST(V_MIN_I32,
+	" v_min_i32     %VDST, %SRC0, %VSRC1",
+	VOP2,
+	17,
+	4,
+	0
+)
 
 DEFINST(V_MAX_U32,
 	" v_max_u32     %VDST, %SRC0, %VSRC1",

@@ -2994,6 +2994,44 @@ void si_isa_V_MIN_U32_impl(struct si_work_item_t *work_item,
 }
 #undef INST
 
+/* D.u = min(S0.u, S1.u). */
+#define INST SI_INST_VOP2
+void si_isa_V_MIN_I32_impl(struct si_work_item_t *work_item,
+	struct si_inst_t *inst)
+{
+	union si_reg_t s0;
+	union si_reg_t s1;
+	union si_reg_t min;
+
+	/* Load operands from registers or as a literal constant. */
+	if (INST.src0 == 0xFF)
+		s0.as_int = INST.lit_cnst;
+	else
+		s0.as_int = si_isa_read_reg(work_item, INST.src0);
+	s1.as_int = si_isa_read_vreg(work_item, INST.vsrc1);
+
+	/* Calculate the minimum operand. */
+	if (s0.as_int < s1.as_int)
+	{
+		min.as_int = s0.as_int;
+	}
+	else
+	{
+		min.as_int = s1.as_int;
+	}
+
+	/* Write the results. */
+	si_isa_write_vreg(work_item, INST.vdst, min.as_int);
+
+	/* Print isa debug information. */
+	if (debug_status(si_isa_debug_category))
+	{
+		si_isa_debug("t%d: V%u<=(%u)", work_item->id, INST.vdst,
+			min.as_int);
+	}
+}
+#undef INST
+
 /* D.u = max(S0.u, S1.u). */
 #define INST SI_INST_VOP2
 void si_isa_V_MAX_U32_impl(struct si_work_item_t *work_item,
