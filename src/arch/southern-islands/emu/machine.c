@@ -6295,6 +6295,65 @@ void si_isa_DS_WRITE2ST64_B32_impl(struct si_work_item_t *work_item,
 }
 #undef INST
 
+/* DS[ADDR+offset0*4*64] = D0; 
+ * DS[ADDR+offset1*4*64] = D1; Write 2 Dwords */
+#define INST SI_INST_DS
+void si_isa_DS_READ2ST64_B32_impl(struct si_work_item_t *work_item,
+	struct si_inst_t *inst)
+{
+	union si_reg_t addr0;
+	union si_reg_t addr1;
+	union si_reg_t data0;
+	union si_reg_t data1;
+
+	assert(!INST.gds);
+        
+        	/* READ Dword. */
+        addr0.as_uint = si_isa_read_vreg(work_item, INST.addr);
+	addr0.as_uint += INST.offset0*4*64;
+	addr1.as_uint = si_isa_read_vreg(work_item, INST.addr);
+	addr1.as_uint += INST.offset1*4*64;
+
+        mem_read(work_item->work_group->lds_module, addr0.as_uint, 4,
+                &data0.as_uint);
+        mem_read(work_item->work_group->lds_module, addr1.as_uint, 4,
+                &data1.as_uint);
+	
+	si_isa_write_vreg(work_item, INST.data0, data0.as_uint);
+	si_isa_write_vreg(work_item, INST.data1, data1.as_uint);
+
+
+
+        /* If offset1 != 1, then the following is incorrect */
+        assert(INST.offset0 == 0);
+        assert(INST.offset1 == 1);
+        work_item->lds_access_count = 2;
+        work_item->lds_access_type[0] = 2;
+        work_item->lds_access_addr[0] = addr0.as_uint;
+        work_item->lds_access_size[0] = 4;
+        work_item->lds_access_type[1] = 2;
+        work_item->lds_access_addr[1] = addr0.as_uint + 4;
+        work_item->lds_access_size[1] = 4;
+	
+
+	/* Print isa debug information. */
+	if (debug_status(si_isa_debug_category) && INST.gds)
+	{
+		si_isa_debug("t%d: GDS[%u]<=(%u,%f) ", work_item->id, 
+			addr0.as_uint, data0.as_uint, data0.as_float);
+		si_isa_debug("GDS[%u]<=(%u,%f) ", addr1.as_uint, data0.as_uint,
+			data0.as_float);
+	}
+	else
+	{
+		si_isa_debug("t%d: LDS[%u]<=(%u,%f) ", work_item->id, 
+			addr0.as_uint, data0.as_uint, data0.as_float);
+		si_isa_debug("LDS[%u]<=(%u,%f) ", addr1.as_uint, data1.as_uint, 
+			data1.as_float);
+	}
+}
+#undef INST
+
 /* DS[A] = D0; write a Dword. */
 #define INST SI_INST_DS
 void si_isa_DS_WRITE_B32_impl(struct si_work_item_t *work_item,

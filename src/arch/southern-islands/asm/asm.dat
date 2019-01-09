@@ -1604,6 +1604,14 @@ DEFINST(DS_READ2_B32,
 	8,
 	0
 )
+        
+DEFINST(DS_READ2ST64_B32,
+        " ds_read2ST64_b32  %ADDR, %DATA0, %DATA1 %OFFSET0%OFFSET1",
+        DS,
+        56,
+        8,
+        0
+)
 
 DEFINST(DS_READ_I8,
 	" ds_read_i8    %DS_VDST, %ADDR",
