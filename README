@@ -974,6 +974,6 @@ each record:
   <ipc-int>
       IPC observed in the current interval. This value is equal to the number
       of instructions executed in the current interval divided by the number of
-      cycles of the interval.
+      cycles of the particular interval.
 
 
